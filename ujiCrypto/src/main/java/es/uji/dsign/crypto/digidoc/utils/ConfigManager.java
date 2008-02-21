@@ -135,23 +135,6 @@ public class ConfigManager {
     public static void init(Hashtable hProps) {
     	m_props = new Properties();
       	m_props.putAll(hProps);
-      	
-      	/* Here we must set some constant properties */
-      	m_props.put("DIGIDOC_NOTARY_IMPL",
-      			"es.uji.dsign.crypto.digidoc.factory.BouncyCastleNotaryFactory");
-      	m_props.put("DIGIDOC_FACTORY_IMPL", 
-      			    "es.uji.dsign.crypto.digidoc.factory.SAXDigiDocFactory");
-     	m_props.put("DIGIDOC_TIMESTAMP_IMPL", 
-     			    "es.uji.dsign.crypto.digidoc.factory.BouncyCastleSignatureTimestampFactory");
-        m_props.put("CANONICALIZATION_FACTORY_IMPL", 
-        		    "es.uji.dsign.crypto.digidoc.factory.DOMCanonicalizationFactory");
-      	m_props.put("CRL_FACTORY_IMPL", 
-      			    "es.uji.dsign.crypto.digidoc.factory.CRLCheckerFactory");
-		m_props.put("DIGIDOC_SECURITY_PROVIDER", 
-				    "org.bouncycastle.jce.provider.BouncyCastleProvider");
-      	m_props.put("DIGIDOC_SECURITY_PROVIDER_NAME",
-      			    "BC");
-      	/* */ 
     }
     
     /**
