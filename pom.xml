@@ -4,8 +4,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>es.uji.security</groupId>
-  <version>2.1.1</version>
+  <groupId>es.uji</groupId>
+  <version>2.0.1</version>
   <artifactId>CryptoApplet</artifactId>
   <packaging>pom</packaging>
   <name>CryptoApplet</name>
@@ -19,9 +19,17 @@
   <repositories>
     <repository>
       <id>proyectostic</id>
-      <url>http://maven.forja.uji.es/</url>
+      <url>http://proyectostic.uji.es/maven</url>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>proyectosticDeploy</id>
+      <name>proyectostic</name>
+      <url>scp://proyectostic.uji.es/.m2/repository</url>
+    </repository>
+  </distributionManagement>
 
   <build>
     <plugins>
@@ -36,38 +44,27 @@
   </build>
 
   <modules>
-    <module>xmlsec-backport-jdk6</module>
-    <module>uji-config</module>
-    <module>uji-utils</module>
-    <module>uji-crypto-core</module>
-    <module>uji-crypto-raw</module>
-    <module>uji-crypto-cms</module>
-    <module>uji-crypto-xmldsign</module>
-    <module>uji-crypto-openxades</module>
-    <module>uji-crypto-jxades</module>
-    <module>uji-crypto-mityc</module>
-    <module>uji-format-pdf</module>
-    <module>uji-format-odf</module>
-    <module>uji-format-facturae</module>
-    <module>uji-keystore</module>
-    <module>uji-ui-applet</module>
+    <module>ujiConfig</module>
+    <module>ujiUtils</module>
+    <module>ujiCrypto</module>
+    <module>ujiApplet</module>
   </modules>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>es.uji.security</groupId>
-        <artifactId>uji-utils</artifactId>
+        <groupId>es.uji</groupId>
+        <artifactId>ujiUtils</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>es.uji.security</groupId>
-        <artifactId>uji-crypto</artifactId>
+        <groupId>es.uji</groupId>
+        <artifactId>ujiCrypto</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>es.uji.security</groupId>
-        <artifactId>uji-ui-applet</artifactId>
+        <groupId>es.uji</groupId>
+        <artifactId>ujiApplet</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
@@ -83,8 +80,8 @@
   </licenses>
 
   <issueManagement>
-    <system>CryptoApplet Issue Tracking</system>
-    <url>http://forja.uji.es/tracker/?group_id=24</url>
+    <system>Nisu Issue Tracking</system>
+    <url>http://nisu.org/jira</url>
   </issueManagement>
 
   <mailingLists>
@@ -115,9 +112,9 @@
   </developers>
 
   <scm>
-    <connection>scm:svn:https://forja.uji.es/svn/cryptoapplet</connection>
-    <developerConnection>scm:svn:https://forja.uji.es/svn/cryptoapplet</developerConnection>
-    <url>http://forja.uji.es/plugins/scmsvn/viewcvs.php/?root=cryptoapplet</url>
+    <connection>scm:svn:https://mortadelo.act.uji.es/public/codebase/</connection>
+    <developerConnection>scm:svn:https://mortadelo.act.uji.es/public/codebase/</developerConnection>
+    <url>https://mortadelo.act.uji.es/public/codebase/</url>
   </scm>
 
 </project>

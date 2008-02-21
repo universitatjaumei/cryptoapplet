@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<SignedDoc format="DIGIDOC-XML" version="1.3" xmlns="http://www.sk.ee/DigiDoc/v1.3.0#">
-<DataFile xmlns="http://www.sk.ee/DigiDoc/v1.3.0#" ContentType="EMBEDDED_BASE64" Filename="data.xml" Id="D0" MimeType="text/xml" Size="7"></DataFile>
-<DataFile xmlns="http://www.sk.ee/DigiDoc/v1.3.0#" ContentType="DETATCHED" DigestType="sha1" DigestValue="lJXoRnR7x+sXnVaBiYG23GZpgEQ=" Filename="in-openxades-error-dettached.xml" Id="D1" MimeType="text/xml" Size="21"></DataFile>
-
-</SignedDoc>
