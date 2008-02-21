@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>es.uji</groupId>
+  <version>2.0.1</version>
+  <artifactId>CryptoApplet</artifactId>
+  <packaging>pom</packaging>
+  <name>CryptoApplet</name>
+  <url>http://proyectostic.uji.es/cryptoapplet/</url>
+
+  <organization>
+    <name>Universitat Jaume I</name>
+    <url>http://www.uji.es/</url>
+  </organization>
+
+  <repositories>
+    <repository>
+      <id>proyectostic</id>
+      <url>http://proyectostic.uji.es/maven</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>proyectosticDeploy</id>
+      <name>proyectostic</name>
+      <url>scp://proyectostic.uji.es/.m2/repository</url>
+    </repository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <modules>
+    <module>ujiConfig</module>
+    <module>ujiUtils</module>
+    <module>ujiCrypto</module>
+    <module>ujiApplet</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>es.uji</groupId>
+        <artifactId>ujiUtils</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>es.uji</groupId>
+        <artifactId>ujiCrypto</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>es.uji</groupId>
+        <artifactId>ujiApplet</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <licenses>
+    <license>
+      <name>XXX</name>
+      <url>LICENSE.txt</url>
+      <distribution>XXX</distribution>
+      <comments>XXX</comments>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <system>Nisu Issue Tracking</system>
+    <url>http://nisu.org/jira</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>CryptoApplet</name>
+      <subscribe>http://proyectostic.uji.es/</subscribe>
+      <unsubscribe> http://proyectostic.uji.es/</unsubscribe>
+      <post>cryptoapplet AT llistes.uji.es</post>
+      <archive>http://proyectostic.uji.es/</archive>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+    <developer>
+      <name>Paul Santapau</name>
+      <email>santapau AT uji.es</email>
+      <roles>
+        <role>commiter</role>
+      </roles>
+    </developer>
+    <developer>
+      <name>Ricardo Borillo</name>
+      <email>borillo AT uji.es</email>
+      <roles>
+        <role>commiter</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:svn:https://mortadelo.act.uji.es/public/codebase/</connection>
+    <developerConnection>scm:svn:https://mortadelo.act.uji.es/public/codebase/</developerConnection>
+    <url>https://mortadelo.act.uji.es/public/codebase/</url>
+  </scm>
+
+</project>
