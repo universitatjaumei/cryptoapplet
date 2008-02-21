@@ -80,6 +80,7 @@ public class SignatureApplet extends JApplet
 				window.getAppHandler().initKeyStoresTable();
 				window.reloadCertificateJTree();
 				window.getMainFrame().setVisible(true);
+				window.getShowSignatureCheckBox().setVisible(true);
 			}
 		}
 		catch (SignatureAppletException ex)
