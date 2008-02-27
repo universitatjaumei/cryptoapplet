@@ -63,6 +63,13 @@ public class SignatureApplet extends JApplet
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 			netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
 		}
+		
+		try{
+			netscape.javascript.JSObject.getWindow(this).call("onInitOk", new String[] {});	
+		}
+		catch (Exception ex){
+			ex.printStackTrace();
+		}
 	}
 	
 	
