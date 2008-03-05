@@ -401,7 +401,7 @@ public class MainWindow {
 	 * 	
 	 * @return javax.swing.JTree	
 	 */
-	private JTree getJTree()
+	protected JTree getJTree()
 	throws Exception {
 			
 		if (jTree == null) {

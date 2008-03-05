@@ -49,7 +49,7 @@ public class SignatureApplet extends JApplet
 	{
 		try
 		{
-			Logger.getRootLogger().setLevel(Level.INFO);
+			Logger.getRootLogger().setLevel(Level.OFF);
 			apph = AppHandler.getInstance(this);	
 		}
 		catch (SignatureAppletException ex)
@@ -81,6 +81,7 @@ public class SignatureApplet extends JApplet
 				window = new MainWindow(apph);
 			}
 			else{
+				window.getPasswordTextField().setText("");
 				window.getGlobalProgressBar().setValue(0);
 				window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
 				window.getAppHandler().flushKeyStoresTable();
@@ -485,11 +486,7 @@ public class SignatureApplet extends JApplet
 	
 	public void destroy()
 	{
-		window=null;
-		this.apph=null;
-		
 		super.destroy();
-		
 		Runtime.getRuntime().gc();
 	}
 	
@@ -500,7 +497,7 @@ public class SignatureApplet extends JApplet
 	
 	public String getAppletVersion()
 	{
-		return "2.0-rc";
+		return "2.0.1";
 	}
 
 	public String getJavaVersion()

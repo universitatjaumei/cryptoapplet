@@ -65,7 +65,7 @@ public class AppHandler
 	/* -- */
 	
 	/* Keystores */
-	Hashtable<String,IKeyStoreHelper> ksh= new Hashtable<String,IKeyStoreHelper> ();
+	static Hashtable<String,IKeyStoreHelper> ksh= new Hashtable<String,IKeyStoreHelper> ();
 	
 	/* JavaScript Functions */
 	private String jsSignOk      = "onSignOk";
@@ -158,7 +158,6 @@ public class AppHandler
 		
 		return singleton;
 	}
-	
 	
 	/**
 	 * 
@@ -478,7 +477,7 @@ public class AppHandler
      **/
 	protected void initKeyStoresTable() throws SignatureAppletException
 	{
-		System.out.println("navigator 1 : " + strNavigator);
+		System.out.println("navigator 1aaaa : " + strNavigator);
 		System.out.println("Iexplorer: " + BROWSER_IEXPLORER);
 		if (strNavigator.equals(BROWSER_IEXPLORER))
 		{			
