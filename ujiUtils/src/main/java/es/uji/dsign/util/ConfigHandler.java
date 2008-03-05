@@ -33,6 +33,7 @@ public class ConfigHandler {
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			prop=null;
 		}
 	}
 	
@@ -52,6 +53,8 @@ public class ConfigHandler {
 				    "org.bouncycastle.jce.provider.BouncyCastleProvider");
       	prop.put("DIGIDOC_SECURITY_PROVIDER_NAME",
       			    "BC");
+    	prop.put("DIGIDOC_VERIFY_ALGORITHM",
+			"RSA//");
       	/* */
 	}
 
@@ -65,6 +68,15 @@ public class ConfigHandler {
 			config= new ConfigHandler();
 		
 		return prop.getProperty(key);
+		
+	}
+	
+	public static Properties getProperties(){
+		
+		if ( config==null )
+			config= new ConfigHandler();
+		
+		return prop;
 		
 	}
 	
