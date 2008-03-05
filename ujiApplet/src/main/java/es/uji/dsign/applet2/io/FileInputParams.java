@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 import es.uji.dsign.applet2.SignatureApplet;
 import es.uji.dsign.util.OS;
 
-public class FileInputParams extends AbstractInputData implements InputParams
+public class FileInputParams extends AbstractData implements InputParams
 {
 	public byte[] getSignData(SignatureApplet base) throws Exception
 	{	

@@ -4,7 +4,7 @@ import es.uji.dsign.applet2.SignatureApplet;
 
 import java.util.Hashtable;
 
-public class ParamInputData extends AbstractInputData implements InputParams{
+public class ParamInputData extends AbstractData implements InputParams{
 
 	private String str_in; 
 	
