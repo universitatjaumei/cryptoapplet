@@ -12,14 +12,14 @@ import es.uji.dsign.applet2.SignatureApplet;
 
 import netscape.javascript.JSObject;
 
-public class URLOutputParams implements OutputParams
+public class URLOutputParams extends AbstractData implements OutputParams
 {
 	
 	private Logger log = Logger.getLogger(URLOutputParams.class);
 	
 	String url= null; 
 	boolean _initialized= false, signOkInvoked=false; 
-	int _count= 1, outputcount=0;
+	int _count= 1, outputcount=0, timeout= 5000;
 	String[] _inputs;
 	String postVariable; 
 	SignatureApplet _base= null;
@@ -28,12 +28,14 @@ public class URLOutputParams implements OutputParams
 		_base= sa;
 		this.postVariable= "content";
 		this.url= url;
+		super.UrlSetup();
 	}
 	
 	public URLOutputParams(SignatureApplet sa, String url, String postVariable){
 		_base= sa;
 		this.postVariable= this.postVariable;
 		this.url= url;
+		super.UrlSetup();
 	}
 	
 	public void setOutputCount(int oCount){
@@ -65,6 +67,10 @@ public class URLOutputParams implements OutputParams
 		StringTokenizer strTok= new StringTokenizer(strUrl.substring(strUrl.indexOf('?')+1),"&");
 		
 		HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+		
+		urlConn.setConnectTimeout(timeout);
+		urlConn.setReadTimeout(timeout);
+		
 		urlConn.setRequestMethod("POST");
 		urlConn.setRequestProperty("Content-type", "application/x-www-form-urlencoded");
 		urlConn.setRequestProperty("Cookie", "");

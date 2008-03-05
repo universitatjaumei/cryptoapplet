@@ -11,17 +11,19 @@ import es.uji.dsign.util.OS;
 
 import es.uji.dsign.applet2.SignatureApplet;
 
-public class URLInputParams extends AbstractInputData implements InputParams
+public class URLInputParams extends AbstractData implements InputParams
 {
 	boolean initialized= false; 
 	int count= 0, current=0;
 	String[] inputs; 
+	int timeout= 10000;
 		
 	public URLInputParams(String[] sources)
 	{
 		inputs= sources;
 		count= sources.length;
 		initialized= true;
+		super.UrlSetup();
 	}
 	
 	public int getInputCount() throws Exception
@@ -37,6 +39,10 @@ public class URLInputParams extends AbstractInputData implements InputParams
 		
 		URL url = new URL(inputs[current]);
 		URLConnection uc = url.openConnection();
+		
+		uc.setConnectTimeout(timeout);
+		uc.setReadTimeout(timeout);
+		
 		uc.connect();
 		InputStream in = uc.getInputStream();
 		
@@ -57,6 +63,10 @@ public class URLInputParams extends AbstractInputData implements InputParams
 		
 		URL url = new URL(inputs[item]);
 		URLConnection uc = url.openConnection();
+		
+		uc.setConnectTimeout(timeout);
+		uc.setReadTimeout(timeout);
+		
 		uc.connect();
 		InputStream in = uc.getInputStream();
 		
