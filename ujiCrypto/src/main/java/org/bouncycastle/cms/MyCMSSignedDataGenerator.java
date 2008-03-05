@@ -1,33 +1,10 @@
 package org.bouncycastle.cms;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
@@ -42,9 +19,26 @@ import org.bouncycastle.asn1.cms.SignerIdentifier;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
-import org.bouncycastle.asn1.x509.X509CertificateStructure;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * general class for generating a pkcs7-signature message.
@@ -61,15 +55,12 @@ import org.bouncycastle.asn1.x509.X509CertificateStructure;
  *      CMSSignedData           data = gen.generate(content, "BC");
  * </pre>
  */
-public class MyCMSSignedDataGenerator extends CMSSignedGenerator
+public class MyCMSSignedDataGenerator
+    extends CMSSignedGenerator
 {
-    CertStore                   certStore;
-    List                        certs = new ArrayList();
-    List                        crls = new ArrayList();
     List                        signerInfs = new ArrayList();
-    List                        signers = new ArrayList();
-    byte[] _myhash=null;
-
+    byte[] _myhash= null;
+    
     public void setHash(byte[] hash){
     	_myhash= hash;
     }
@@ -146,12 +137,13 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
 
     private class SignerInf
     {
-        PrivateKey      key;
-        X509Certificate cert;
-        String          digestOID;
-        String          encOID;
-        AttributeTable  sAttr;
-        AttributeTable  unsAttr;
+        PrivateKey                  key;
+        X509Certificate             cert;
+        String                      digestOID;
+        String                      encOID;
+        CMSAttributeTableGenerator  sAttr;
+        CMSAttributeTableGenerator  unsAttr;
+        AttributeTable              baseSignedTable;
 
         SignerInf(
             PrivateKey      key,
@@ -166,12 +158,13 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
         }
 
         SignerInf(
-            PrivateKey      key,
-            X509Certificate cert,
-            String          digestOID,
-            String          encOID,
-            AttributeTable  sAttr,
-            AttributeTable  unsAttr)
+            PrivateKey                 key,
+            X509Certificate            cert,
+            String                     digestOID,
+            String                     encOID,
+            CMSAttributeTableGenerator sAttr,
+            CMSAttributeTableGenerator unsAttr,
+            AttributeTable             baseSigneTable)
         {
             this.key = key;
             this.cert = cert;
@@ -179,6 +172,7 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
             this.encOID = encOID;
             this.sAttr = sAttr;
             this.unsAttr = unsAttr;
+            this.baseSignedTable = baseSigneTable;
         }
 
         PrivateKey getKey()
@@ -206,12 +200,12 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
             return encOID;
         }
 
-        AttributeTable getSignedAttributes()
+        CMSAttributeTableGenerator getSignedAttributes()
         {
             return sAttr;
         }
 
-        AttributeTable getUnsignedAttributes()
+        CMSAttributeTableGenerator getUnsignedAttributes()
         {
             return unsAttr;
         }
@@ -225,42 +219,42 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
         {
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(
                   new DERObjectIdentifier(this.getDigestAlgOID()), new DERNull());
-            AlgorithmIdentifier encAlgId;
-
-            if (this.getEncryptionAlgOID().equals(ENCRYPTION_DSA))
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()));
-            }
-            else
-            {
-                encAlgId = new AlgorithmIdentifier(
-                      new DERObjectIdentifier(this.getEncryptionAlgOID()), new DERNull());
-            }
-
-            String          digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
-            String          signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
-            Signature       sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+            AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
+            String              digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
+            String              signatureName = digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+            Signature           sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, sigProvider);
+            
 
             byte[]      hash = null;
-
+            
             if ( _myhash == null ){
-            	 MessageDigest   dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
-
-            	if (content != null )
+            	MessageDigest       dig = CMSSignedHelper.INSTANCE.getDigestInstance(digestName, sigProvider);
+            	if (content != null)
             	{
             		content.write(new DigOutputStream(dig));
 
             		hash = dig.digest();
+
+            		_digests.put(digestOID, hash.clone());
             	}
             }
             else{
             	hash= _myhash;
             }
 
-            //TODO: OJO!!!
-            ASN1Set signedAttr = null;// getSignedAttributeSet(contentType, hash, this.getSignedAttributes(), addDefaultAttributes);
-            ASN1Set unsignedAttr = null;//getUnsignedAttributeSet(this.getUnsignedAttributes());
+            AttributeTable signed;
+
+            if (addDefaultAttributes)
+            {
+                Map parameters = getBaseParameters(contentType, digAlgId, hash);
+                signed = (sAttr != null) ? sAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+            }
+            else
+            {
+                signed = baseSignedTable;
+            }
+
+            ASN1Set signedAttr = getAttributeSet(signed);
 
             //
             // sig must be composed from the DER encoding.
@@ -276,11 +270,20 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
             {
                 content.write(bOut);
             }
+
             sig.initSign(key);
 
             sig.update(bOut.toByteArray());
 
             ASN1OctetString         encDigest = new DEROctetString(sig.sign());
+
+            Map parameters = getBaseParameters(contentType, digAlgId, hash);
+            parameters.put(CMSAttributeTableGenerator.SIGNATURE, encDigest.getOctets().clone());
+
+            AttributeTable unsigned = (unsAttr != null) ? unsAttr.getAttributes(Collections.unmodifiableMap(parameters)) : null;
+
+            ASN1Set unsignedAttr = getAttributeSet(unsigned);
+
             X509Certificate         cert = this.getCertificate();
             ByteArrayInputStream    bIn = new ByteArrayInputStream(cert.getTBSCertificate());
             ASN1InputStream         aIn = new ASN1InputStream(bIn);
@@ -311,7 +314,7 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
     {
         String  encOID = getEncOID(key, digestOID);
 
-        signerInfs.add(new SignerInf(key, cert, digestOID, encOID));
+        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, new DefaultSignedAttributeTableGenerator(), null, null));
     }
 
     /**
@@ -327,80 +330,23 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
     {
         String  encOID = getEncOID(key, digestOID);
 
-        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttr, unsignedAttr));
+        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, new DefaultSignedAttributeTableGenerator(signedAttr), new SimpleAttributeTableGenerator(unsignedAttr), signedAttr));
     }
 
     /**
-     * Add a store of precalculated signers to the generator.
-     *
-     * @param signerStore
+     * add a signer with extra signed/unsigned attributes based on generators.
      */
-    public void addSigners(
-        SignerInformationStore    signerStore)
+    public void addSigner(
+        PrivateKey                  key,
+        X509Certificate             cert,
+        String                      digestOID,
+        CMSAttributeTableGenerator  signedAttrGen,
+        CMSAttributeTableGenerator  unsignedAttrGen)
+        throws IllegalArgumentException
     {
-        Iterator    it = signerStore.getSigners().iterator();
+        String  encOID = getEncOID(key, digestOID);
 
-        while (it.hasNext())
-        {
-            signers.add(it.next());
-        }
-    }
-
-    /**
-     * add the certificates and CRLs contained in the given CertStore
-     * to the pool that will be included in the encoded signature block.
-     * <p>
-     * Note: this assumes the CertStore will support null in the get
-     * methods.
-     */
-    public void addCertificatesAndCRLs(
-        CertStore               certStore)
-        throws CertStoreException, CMSException
-    {
-        //
-        // divide up the certs and crls.
-        //
-        try
-        {
-            Iterator  it = certStore.getCertificates(null).iterator();
-
-            while (it.hasNext())
-            {
-                X509Certificate         c = (X509Certificate)it.next();
-
-                certs.add(new X509CertificateStructure(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
-            }
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing certs", e);
-        }
-        catch (CertificateEncodingException e)
-        {
-            throw new CMSException("error encoding certs", e);
-        }
-
-        try
-        {
-            Iterator    it = certStore.getCRLs(null).iterator();
-
-            while (it.hasNext())
-            {
-                X509CRL                 c = (X509CRL)it.next();
-
-                crls.add(new CertificateList(
-                                        (ASN1Sequence)makeObj(c.getEncoded())));
-            }
-        }
-        catch (IOException e)
-        {
-            throw new CMSException("error processing crls", e);
-        }
-        catch (CRLException e)
-        {
-            throw new CMSException("error encoding crls", e);
-        }
+        signerInfs.add(new SignerInf(key, cert, digestOID, encOID, signedAttrGen, unsignedAttrGen, null));
     }
 
     private DERObject makeObj(
@@ -470,11 +416,11 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
      * attributes will get added at all.
      */
     public CMSSignedData generate(
-        String                    signedContentType,
+        String                  signedContentType,
         CMSProcessable          content,
-        boolean                     encapsulate,
+        boolean                 encapsulate,
         String                  sigProvider,
-        boolean                    addDefaultAttributes)
+        boolean                 addDefaultAttributes)
         throws NoSuchAlgorithmException, NoSuchProviderException, CMSException
     {
         ASN1EncodableVector  digestAlgs = new ASN1EncodableVector();
@@ -482,10 +428,12 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
 
         DERObjectIdentifier      contentTypeOID = new DERObjectIdentifier(signedContentType);
 
+        _digests.clear();  // clear the current preserved digest state
+
         //
         // add the precalculated SignerInfo objects.
         //
-        Iterator            it = signers.iterator();
+        Iterator            it = _signers.iterator();
 
         while (it.hasNext())
         {
@@ -546,32 +494,16 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
 
         ASN1Set certificates = null;
 
-        if (certs.size() != 0)
+        if (_certs.size() != 0)
         {
-            ASN1EncodableVector  v = new ASN1EncodableVector();
-
-            it = certs.iterator();
-            while (it.hasNext())
-            {
-                v.add((DEREncodable)it.next());
-            }
-
-            certificates = new DERSet(v);
+            certificates = CMSUtils.createBerSetFromList(_certs);
         }
 
         ASN1Set certrevlist = null;
 
-        if (crls.size() != 0)
+        if (_crls.size() != 0)
         {
-            ASN1EncodableVector  v = new ASN1EncodableVector();
-
-            it = crls.iterator();
-            while (it.hasNext())
-            {
-                v.add((DEREncodable)it.next());
-            }
-
-            certrevlist = new DERSet(v);
+            certrevlist = CMSUtils.createBerSetFromList(_crls);
         }
 
         ContentInfo    encInfo;

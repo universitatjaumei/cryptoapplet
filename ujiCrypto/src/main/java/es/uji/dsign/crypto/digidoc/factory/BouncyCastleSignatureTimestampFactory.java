@@ -1,10 +1,9 @@
-package es.uji.dsign.crypto.test.digidoc;
+package es.uji.dsign.crypto.digidoc.factory;
 
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 import es.uji.dsign.crypto.digidoc.Signature;
 import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.TimestampInfo;
-import es.uji.dsign.crypto.digidoc.factory.BouncyCastleTimestampFactory;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;

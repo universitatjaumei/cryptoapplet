@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -21,6 +22,7 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
+
 import es.uji.dsign.crypto.digidoc.CertValue;
 import es.uji.dsign.crypto.digidoc.DataFile;
 import es.uji.dsign.crypto.digidoc.DigiDocException;
@@ -29,6 +31,7 @@ import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.TimestampInfo;
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
 import es.uji.dsign.util.i18n.LabelManager;
+import es.uji.dsign.util.ConfigHandler;
 
 
 public class XAdESSignatureFactory extends AbstractSignatureFactory implements ISignFormatProvider
@@ -55,18 +58,15 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		
 		log.debug("Using XAdESSignatureFactory");
 		log.debug(pv.getName() + " provider found");
-		
-		// Leemos el fichero de configuracion
-		if ( ! ConfigManager.init("jar://jdigidoc.cfg") )
-			if ( ! ConfigManager.init("./jdigidoc.cfg") ){
-				_strerr= LabelManager.get("ERROR_DDOC_NOCONFIGFILE");
-				return null;
-			}
-			else
-				log.debug("JDigidoc configuration file loaded from file");
-		else
-			log.debug("JDigidoc configuration file loaded from jar://");
-		
+				
+		Properties prop= ConfigHandler.getProperties();
+		if ( prop != null ){
+			ConfigManager.init(prop);
+		}
+		else{
+			_strerr= LabelManager.get("ERROR_DDOC_NOCONFIGFILE");
+			return null;
+		}
 				
 		// Creamos un nuevo SignedDoc XAdES
 		SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);

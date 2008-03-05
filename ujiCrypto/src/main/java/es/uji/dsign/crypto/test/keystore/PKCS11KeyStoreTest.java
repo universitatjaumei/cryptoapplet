@@ -1,12 +1,9 @@
 package es.uji.dsign.crypto.test.keystore;
 
-import es.uji.dsign.crypto.keystore.ClauerKeyStore;
 import es.uji.dsign.crypto.keystore.PKCS11KeyStore;
 import es.uji.dsign.crypto.mozilla.Mozilla;
 
-import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
@@ -24,7 +21,6 @@ import java.io.FileOutputStream;
 
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.cms.MyCMSSignedDataGenerator;
 import org.bouncycastle.cms.SignerInformation;
