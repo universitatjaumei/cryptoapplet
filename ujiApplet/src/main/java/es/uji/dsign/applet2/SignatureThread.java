@@ -75,8 +75,15 @@ public class SignatureThread extends Thread
 			} 
 
 			iksh= selectedNode.getKeyStore();
-
 			if (iksh != null){
+				
+				if ( _mw.getPasswordTextField().getText().equals("")){
+					infoLabelField.setText(LabelManager.get("ERROR_INCORRECT_PWD"));
+					showSignatureOk=false;
+					guiFinalize(false);
+					throw new SignatureAppletException("Incorrect Password.");
+				}
+				
 				try
 				{
 					iksh.load(_mw.getPasswordTextField().getText().toCharArray());
@@ -93,8 +100,8 @@ public class SignatureThread extends Thread
 					String stk = new String(os.toByteArray()).toLowerCase();
 					if ( stk.indexOf("incorrect") > -1 ){
 						infoLabelField.setText(LabelManager.get("ERROR_INCORRECT_PWD"));
-						guiFinalize(false);
 						showSignatureOk=false;
+						guiFinalize(false);
 						throw new SignatureAppletException("Incorrect Password.");
 					}
 					else
@@ -243,7 +250,7 @@ public class SignatureThread extends Thread
 		}
 		catch(Exception e){
 			e.printStackTrace();
-			if (e.getMessage().indexOf("Incorrect Password") != -1 ){
+			if (e.getMessage() != null && e.getMessage().indexOf("Incorrect Password") != -1 ){
 				infoLabelField.setText(LabelManager.get("ERROR_INCORRECT_PASSWORD"));
 				showSignatureOk= false;
 				try {
@@ -254,11 +261,11 @@ public class SignatureThread extends Thread
 				}		
 			}
 			else{
-				infoLabelField.setText(LabelManager.get("ERROR_COMPUTING_SIGNATURE"));
+				infoLabelField.setText(LabelManager.get("ERROR_COMPUTING_SIGNATURE") +": " + e.getMessage());
 				showSignatureOk= false;
 				e.printStackTrace();
 				try {
-					guiFinalize(true);
+					guiFinalize(false);
 				} catch (Exception e1) {
 					infoLabelField.setText(LabelManager.get("ERROR_CANNOT_CLOSE_WINDOW"));
 					e1.printStackTrace();
@@ -302,6 +309,7 @@ public class SignatureThread extends Thread
 		this._end_percent= 100;
 		
 		if (showSignatureOk && hideWindow==false){
+			System.out.println("Invoking showSignatureOk ... ");
 			_mw.getAppHandler().getOutputParams().signOk();
 		}
 	} 
