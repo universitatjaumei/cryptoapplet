@@ -18,6 +18,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import java.util.Random;
 
 import es.uji.dsign.crypto.mozilla.Mozilla;
 import es.uji.dsign.util.OS;
@@ -93,7 +94,7 @@ public class MozillaKeyStore implements IKeyStoreHelper
 			 * spaces in the path.
 			 */
 			
-			fos.write(("name = NSS\n" + 
+			fos.write(("name = NSS-" + new Random().nextInt() +  "\n" + 
 					   "library = " + _pkcs11file + "\n" + 
 					   "attributes= compatibility" + "\n" +
 					   "slot=2\n" + 

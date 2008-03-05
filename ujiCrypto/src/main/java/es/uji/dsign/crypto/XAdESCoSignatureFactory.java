@@ -4,11 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 
 import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.factory.DigiDocFactory;
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
 import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
+import es.uji.dsign.util.ConfigHandler;
+import es.uji.dsign.util.i18n.LabelManager;
 
 
 public class XAdESCoSignatureFactory  extends AbstractSignatureFactory implements ISignFormatProvider {
@@ -26,8 +29,13 @@ public class XAdESCoSignatureFactory  extends AbstractSignatureFactory implement
 		
 		byte[] res;
 
-		String BASE = "jar://"; 
-		ConfigManager.init(BASE + "jdigidoc.cfg");
+		Properties prop= ConfigHandler.getProperties();
+		if ( prop != null ){
+			ConfigManager.init(prop);
+		}
+		else{
+			return null;
+		}
 
 		DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
 		SignedDoc sdoc = digFac.readSignedDoc(new ByteArrayInputStream(toSign));

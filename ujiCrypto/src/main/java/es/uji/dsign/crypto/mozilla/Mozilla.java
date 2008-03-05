@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Vector;
 
 import es.uji.dsign.util.OS;
@@ -207,7 +208,7 @@ public class Mozilla
 		
 		if (OS.isWindowsUpperEqualToNT())
 		{
-			bais= new ByteArrayInputStream(("name = NSS\r" + 
+			bais= new ByteArrayInputStream(("name = NSS\r" +
 					   "library = " + _pkcs11file + "\r" + 
 					   "attributes= compatibility" + "\r" +
 					   "slot=2\r" + 
@@ -225,7 +226,7 @@ public class Mozilla
 			 * spaces in the path.
 			 */
 			
-			bais= new ByteArrayInputStream(("name = NSS\n" + 
+			bais= new ByteArrayInputStream(("name = NSS\r" +
 					   "library = " + _pkcs11file + "\n" + 
 					   "attributes= compatibility" + "\n" +
 					   "slot=2\n" + 

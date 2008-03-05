@@ -102,21 +102,11 @@ public class PKCS11KeyStore implements IKeyStoreHelper{
 		}
 	}
 
-
-	
 	public void load(String in, char[] pin)
 	throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException, Exception
 	{
-		if ( pin != null && in != null ){
-			if (_pk11provider== null){
-				_pk11provider = new sun.security.pkcs11.SunPKCS11("~/.p11.cfg.1166440118");
-				System.out.println("Hola que tal estamos ");
-				Security.addProvider(_pk11provider);
-				_p11KeyStore = KeyStore.getInstance("PKCS11", _pk11provider);
-			}
-			_p11KeyStore.load(null, pin);
-			privateInitialize= true;
-		}
+		ByteArrayInputStream inStream= new ByteArrayInputStream(in.getBytes());
+		load(inStream, pin);
 	}
 	
 	public Enumeration aliases() throws KeyStoreException, Exception
@@ -128,7 +118,6 @@ public class PKCS11KeyStore implements IKeyStoreHelper{
 
 		return _p11KeyStore.aliases();
 	}
-
 
 	public Certificate getCertificate(String alias) 
 	throws KeyStoreException, Exception
