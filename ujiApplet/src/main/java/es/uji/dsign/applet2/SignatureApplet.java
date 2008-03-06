@@ -188,6 +188,24 @@ public class SignatureApplet extends JApplet
 	}	
 	
 	/**
+	 * Sets the input encoding, if the input is different that plain, the 
+	 * applet will decodify the input before computing the signature 
+	 * 
+	 * @param encoding Possible values PLAIN, HEX, BASE64
+	 */
+	
+	public void setSSLServerCertificateVerification(final String value)
+	{	
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run()
+			{
+				apph.setSSLCertificateVerfication(!(value.trim().equals("false")));
+				return null;
+			}
+		});
+	}	
+	
+	/**
 	 * JS interface to setting the XAdES signer role from Navigator's javascript
 	 *  
 	 * @param signerrole
@@ -257,7 +275,7 @@ public class SignatureApplet extends JApplet
 			{
 				ParamInputData input= new ParamInputData(toSign);
 				URLOutputParams output= new URLOutputParams(sa,outputURL);
-
+				
 				apph.setInput(input);
 				apph.setOutput(output);
 				
@@ -322,7 +340,7 @@ public class SignatureApplet extends JApplet
 				URLOutputParams output= new URLOutputParams(sa, outputURL);
 
 				output.setOutputCount(in.length);
-				
+		
 				System.out.println("LONGITUD: " + in.length);
 				
 				apph.setInput(input);
@@ -355,8 +373,9 @@ public class SignatureApplet extends JApplet
 				String[] in= inputURLs.split(_separator);
 				URLInputParams input= new URLInputParams(inputURLs.split(_separator));
 				URLOutputParams output= new URLOutputParams(sa, outputURL, postVariableName);
-
+			
 				output.setOutputCount(in.length);
+		
 				apph.setInput(input);
 				apph.setOutput(output);
 
