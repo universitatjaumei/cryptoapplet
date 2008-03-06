@@ -19,12 +19,12 @@ import org.bouncycastle.cms.MyCMSSignedDataGenerator;
 import es.uji.dsign.util.i18n.LabelManager;
 
 
-public class CMSSignatureFactory extends AbstractSignatureFactory implements ISignFormatProvider
+public class CMSHashSignatureFactory extends AbstractSignatureFactory implements ISignFormatProvider
 {
-    private Logger log = Logger.getLogger(CMSSignatureFactory.class);
+    private Logger log = Logger.getLogger(CMSHashSignatureFactory.class);
     private String _strerr= "";
     
-	public byte[] formatSignature(byte[] content, X509Certificate sCer, PrivateKey pk, Provider pv) throws KeyStoreException, Exception
+	public byte[] formatSignature(byte[] hash, X509Certificate sCer, PrivateKey pk, Provider pv) throws KeyStoreException, Exception
 	{
 		// Init the provider registry
 		super.initProviderList();
@@ -42,7 +42,7 @@ public class CMSSignatureFactory extends AbstractSignatureFactory implements ISi
 		}
 		
 		gen.addSigner(pk, (X509Certificate) sCer, CMSSignedGenerator.DIGEST_SHA1);
-		CMSProcessableByteArray cba = new CMSProcessableByteArray(content);
+		CMSProcessableByteArray cba = new CMSProcessableByteArray(hash);
 
 		List<Certificate> certList = new ArrayList<Certificate>();
 		
@@ -52,6 +52,8 @@ public class CMSSignatureFactory extends AbstractSignatureFactory implements ISi
 		CertStore certst = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certList), "BC");
 	
 		gen.addCertificatesAndCRLs(certst);
+		gen.setHash(hash);
+	
 			
 		CMSSignedData data = gen.generate(cba, pv.getName());
 		
