@@ -13,6 +13,11 @@ import java.util.Hashtable;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.swing.JOptionPane;
 
 import netscape.javascript.JSObject;
@@ -109,6 +114,8 @@ public class AppHandler
 	
 	/* Logging facilities */ 
 	Logger log= Logger.getLogger(AppHandler.class);
+
+	private SSLSocketFactory defaultSocketFactory;
 	
 	
 	/**
@@ -135,6 +142,9 @@ public class AppHandler
 		
 		formatImplMap= AbstractSignatureFactory.getFormatImplMapping();
 			
+		/* Keep a copy to restore its value */
+		defaultSocketFactory= HttpsURLConnection.getDefaultSSLSocketFactory();
+		
 		this.install();
 		initKeyStoresTable();
 	}	
@@ -833,5 +843,44 @@ public class AppHandler
 	
 	public SignatureApplet getSignatureApplet(){
 		return _parent;
+	}
+
+
+	/**
+	 * 
+	 * This method allow the user to disable the SSL server certificate validation 
+	 * when connecting throughout an https connection 
+	 * 
+	 * @param b
+	 */
+	public void setSSLCertificateVerfication(boolean validate) {
+		
+		if (validate){
+			HttpsURLConnection.setDefaultSSLSocketFactory(defaultSocketFactory);
+		}
+		else{
+			// Create a trust manager that does not validate certificate chains
+			TrustManager[] trustAllCerts = new TrustManager[]{
+					new X509TrustManager() {
+						public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+							return null;
+						}
+						public void checkClientTrusted(
+								java.security.cert.X509Certificate[] certs, String authType) {
+						}
+						public void checkServerTrusted(
+								java.security.cert.X509Certificate[] certs, String authType) {
+						}
+					}
+			};
+
+			// Install the all-trusting trust manager
+			try {
+				SSLContext sc = SSLContext.getInstance("SSL");
+				sc.init(null, trustAllCerts, new java.security.SecureRandom());
+				HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			} catch (Exception e) {
+			}	
+		}
 	}
 }

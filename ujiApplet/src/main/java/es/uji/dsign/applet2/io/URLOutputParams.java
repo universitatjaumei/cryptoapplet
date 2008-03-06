@@ -23,19 +23,17 @@ public class URLOutputParams extends AbstractData implements OutputParams
 	String[] _inputs;
 	String postVariable; 
 	SignatureApplet _base= null;
-	
+		
 	public URLOutputParams(SignatureApplet sa, String url){
 		_base= sa;
 		this.postVariable= "content";
 		this.url= url;
-		super.UrlSetup();
 	}
-	
+		
 	public URLOutputParams(SignatureApplet sa, String url, String postVariable){
 		_base= sa;
 		this.postVariable= this.postVariable;
 		this.url= url;
-		super.UrlSetup();
 	}
 	
 	public void setOutputCount(int oCount){

@@ -7,21 +7,21 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.security.PrivateKey;
 
+import javax.net.ssl.SSLHandshakeException;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
-
-import es.uji.dsign.util.HexEncoder;
 
 import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
 import es.uji.dsign.crypto.ISignFormatProvider;
 import es.uji.dsign.crypto.X509CertificateHandler;
 import es.uji.dsign.crypto.XAdESSignatureFactory;
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.dsign.applet2.io.InputParams;
 import es.uji.dsign.applet2.io.OutputParams;
 import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
 import es.uji.dsign.util.Base64;
+import es.uji.dsign.util.HexEncoder;
+import es.uji.dsign.util.i18n.LabelManager;
 
 
 public class SignatureThread extends Thread
@@ -217,8 +217,18 @@ public class SignatureThread extends Thread
 
 			callback.invoke(null, null);
 		}
+		catch (SSLHandshakeException e){
+			infoLabelField.setText(LabelManager.get("ERROR_SSL") +": " + e.getMessage());
+			showSignatureOk= false;
+			e.printStackTrace();
+			try {
+				guiFinalize(false);
+			} catch (Exception e1) {
+				infoLabelField.setText(LabelManager.get("ERROR_CANNOT_CLOSE_WINDOW"));
+				e1.printStackTrace();
+			}		
+		}
 		catch(ClassCastException e){
-
 			e.printStackTrace();
 			infoLabelField.setText(LabelManager.get("ERROR_CERTIFICATE_NOT_SELECTED"));
 			try {
@@ -249,7 +259,9 @@ public class SignatureThread extends Thread
 			}
 		}
 		catch(Exception e){
+			
 			e.printStackTrace();
+			
 			if (e.getMessage() != null && e.getMessage().indexOf("Incorrect Password") != -1 ){
 				infoLabelField.setText(LabelManager.get("ERROR_INCORRECT_PASSWORD"));
 				showSignatureOk= false;
@@ -309,7 +321,6 @@ public class SignatureThread extends Thread
 		this._end_percent= 100;
 		
 		if (showSignatureOk && hideWindow==false){
-			System.out.println("Invoking showSignatureOk ... ");
 			_mw.getAppHandler().getOutputParams().signOk();
 		}
 	} 

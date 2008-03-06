@@ -17,13 +17,12 @@ public class URLInputParams extends AbstractData implements InputParams
 	int count= 0, current=0;
 	String[] inputs; 
 	int timeout= 10000;
-		
+			
 	public URLInputParams(String[] sources)
 	{
 		inputs= sources;
 		count= sources.length;
 		initialized= true;
-		super.UrlSetup();
 	}
 	
 	public int getInputCount() throws Exception
@@ -81,7 +80,7 @@ public class URLInputParams extends AbstractData implements InputParams
 	{
 		return (base.getParameter("signFormat") != null) ? base.getParameter("signFormat") : "es.uji.dsign.crypto.CMSSignatureFactory";
 	}
-
+	
 	public void flush() {
 		current= 0;
 	}

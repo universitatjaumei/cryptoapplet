@@ -39,10 +39,11 @@ public class AbstractData {
 	
 	
 	/**
-	 * Allow to connect to a untrusted https sources in order to get the data to sign
 	 * 
-	 * TODO: That class should be modified to give the option to connect only to trusted 
-	 *       sources.
+	 * Allow to connect to a untrusted https sources in order to get the data to sign
+	 * This "empty" trustManager is not set when indicated through sslServerCertificate
+	 * Verification.
+	 *  
 	 **/
 	public void UrlSetup(){
 		// Create a trust manager that does not validate certificate chains
