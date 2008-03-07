@@ -105,7 +105,7 @@ public class PDFSignatureFactory extends AbstractSignatureFactory implements ISi
 
 		PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKMS, PdfName.ADBE_PKCS7_SHA1);
 		dic.setReason(prop.getProperty("PDFSIG_REASON"));
-		dic.setLocation(prop.getProperty("PDFSIG_REASON"));
+		dic.setLocation(prop.getProperty("PDFSIG_LOCATION"));
 		dic.setContact(prop.getProperty("PDFSIG_CONTACT"));
 		dic.setDate(new PdfDate(sap.getSignDate())); // time-stamp will over-rule this
 		sap.setCryptoDictionary(dic);
