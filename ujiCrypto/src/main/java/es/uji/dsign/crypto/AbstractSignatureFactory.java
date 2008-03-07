@@ -25,6 +25,7 @@ public abstract class AbstractSignatureFactory
 	public static String[] formats= new String[]{
 												 "RAW",
 												 "CMS",
+												 "CMS_HASH",
 												 "XADES",
 												 "XADES_COSIGN",
 												 "PDF",							 
@@ -38,6 +39,7 @@ public abstract class AbstractSignatureFactory
 	public static String[] impls= new String[] {
 												 "es.uji.dsign.crypto.RawSignatureFactory",
 												 "es.uji.dsign.crypto.CMSSignatureFactory",
+												 "es.uji.dsign.crypto.CMSHashSignatureFactory",
 												 "es.uji.dsign.crypto.XAdESSignatureFactory",
 												 "es.uji.dsign.crypto.XAdESCoSignatureFactory",
 												 "es.uji.dsign.crypto.PDFSignatureFactory",
