@@ -25,11 +25,15 @@ public class SignatureHandler {
 
 	public static void stop(){
 		start= 0;
-		aph.getInput().flush();
-		aph.getOutputParams().flush();
+		
+		if (aph != null){
+			aph.getInput().flush();
+			aph.getOutputParams().flush();
+		}
+		
 		mustStop=true;
 	}
-	
+
 	public  static void doSign(){
 		int aux_start, aux_end; 			
 		try{
