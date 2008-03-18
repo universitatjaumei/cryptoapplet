@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.security.KeyStoreException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -547,6 +548,10 @@ public class AppHandler
 					// Here do nothing because that mean
 					// that there is no clauer plugged on 
 					// the system.
+				}
+				catch(ConnectException cex){
+					// Nothing to do also, clauer is not 
+					// installed,go ahead! 
 				}
 			}
 			catch (Exception ex)
