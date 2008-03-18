@@ -74,7 +74,6 @@ public class ClauerKeyStore implements IKeyStoreHelper
 		if (device != null)
 		{
 			cl.open(device);
-			System.out.println("Came on with the aliases from the clauer!!!!");
 			String[] aliases = cl.getCertificateAliases();
 			for (int i = 0; i < aliases.length; i++)
 			{
