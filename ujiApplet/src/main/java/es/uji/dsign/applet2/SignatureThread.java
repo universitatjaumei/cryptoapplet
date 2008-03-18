@@ -16,12 +16,12 @@ import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
 import es.uji.dsign.crypto.ISignFormatProvider;
 import es.uji.dsign.crypto.X509CertificateHandler;
 import es.uji.dsign.crypto.XAdESSignatureFactory;
-import es.uji.dsign.applet2.io.InputParams;
-import es.uji.dsign.applet2.io.OutputParams;
 import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
 import es.uji.dsign.util.Base64;
 import es.uji.dsign.util.HexEncoder;
 import es.uji.dsign.util.i18n.LabelManager;
+import es.uji.dsign.applet2.io.InputParams;
+import es.uji.dsign.applet2.io.OutputParams;
 
 
 public class SignatureThread extends Thread
@@ -75,15 +75,7 @@ public class SignatureThread extends Thread
 			} 
 
 			iksh= selectedNode.getKeyStore();
-			if (iksh != null){
-				
-				if ( _mw.getPasswordTextField().getText().equals("")){
-					infoLabelField.setText(LabelManager.get("ERROR_INCORRECT_PWD"));
-					showSignatureOk=false;
-					guiFinalize(false);
-					throw new SignatureAppletException("Incorrect Password.");
-				}
-				
+			if (iksh != null){	
 				try
 				{
 					iksh.load(_mw.getPasswordTextField().getText().toCharArray());
@@ -110,8 +102,12 @@ public class SignatureThread extends Thread
 				}
 				System.out.println("Certificate Alias: " +  iksh.getAliasFromCertificate(selectedNode.getCertificate()));
 			}
-			else
-				System.out.println("Unable to guess keystore");
+			else{
+				infoLabelField.setText(LabelManager.get("ERR_GET_KEYSTORE"));
+				guiFinalize(false);
+				showSignatureOk=false;
+				throw new SignatureAppletException("Unable to guess the keystore.");
+			}
 
 			_mw.getGlobalProgressBar().setValue(_ini_percent + inc);
 
@@ -306,7 +302,6 @@ public class SignatureThread extends Thread
 		if (_mw != null){
 			if (showSignatureOk && hideWindow==true){ 
 				JOptionPane.showMessageDialog(_mw.getMainFrame(), LabelManager.get("SIGN_PROCESS_OK"), "", JOptionPane.INFORMATION_MESSAGE);
-				System.out.println("Invocando signOk");
 				_mw.getAppHandler().getOutputParams().signOk();
 			}
 			_mw.getGlobalProgressBar().setVisible(false);
