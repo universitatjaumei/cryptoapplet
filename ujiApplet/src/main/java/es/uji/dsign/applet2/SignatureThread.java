@@ -235,7 +235,8 @@ public class SignatureThread extends Thread
 			}
 		}
 		catch(NullPointerException e){
-			infoLabelField.setText(LabelManager.get("ERROR_COMPUTING_SIGNATURE"));
+			e.printStackTrace();
+			infoLabelField.setText(LabelManager.get("ERROR_COMPUTING_SIGNATURE") + ": "+ e.getMessage());
 			try {
 				showSignatureOk= false;
 				guiFinalize(false);
