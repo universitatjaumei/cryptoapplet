@@ -21,7 +21,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
 	boolean _initialized= false, signOkInvoked=false; 
 	int _count= 1, outputcount=0, timeout= 5000;
 	String[] _inputs;
-	String postVariable; 
+	String postVariable="content"; 
 	SignatureApplet _base= null;
 		
 	public URLOutputParams(SignatureApplet sa, String url){
