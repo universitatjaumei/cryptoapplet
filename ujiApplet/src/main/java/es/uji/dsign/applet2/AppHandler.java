@@ -99,7 +99,7 @@ public class AppHandler
 	private Hashtable<String,String> formatImplMap;
 	
 	/* Input data encoding format */
-	private String inputDataEncoding;
+	private String inputDataEncoding="PLAIN";
 
 	/* The data cames from an enconded source? */ 
 	public static String INPUT_DATA_PLAIN  = "PLAIN";
@@ -536,20 +536,21 @@ public class AppHandler
 			/* Clauer KeyStore */ 
 			try
 			{	
-				IKeyStoreHelper p11clauerks = (IKeyStoreHelper) new ClauerKeyStore(); 
-				
+
+				IKeyStoreHelper p11clauerks = (IKeyStoreHelper) new ClauerKeyStore(); 		
 				try{
 					p11clauerks.load(null);
 					ksh.put(KEYSTORE_CLAUER, p11clauerks);
+
 				}
-				catch(KeyStoreException kex){
+				catch(KeyStoreException  kex){
 					// Here do nothing because that mean
 					// that there is no clauer plugged on 
 					// the system.
 				}
 				catch(ConnectException cex){
-					// Nothing to do also, clauer is not 
-					// installed,go ahead! 
+					//Nothing to do also, clauer is not 
+					//installed,go ahead! 
 				}
 			}
 			catch (Exception ex)
