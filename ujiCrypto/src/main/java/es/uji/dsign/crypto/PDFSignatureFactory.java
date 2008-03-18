@@ -32,7 +32,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 
+import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
 import es.uji.dsign.util.Base64;
+import es.uji.dsign.util.ConfigHandler;
 import es.uji.dsign.util.OS;
 import es.uji.dsign.util.RegQuery;
 
@@ -109,7 +111,6 @@ public class PDFSignatureFactory extends AbstractSignatureFactory implements ISi
 		dic.setContact(prop.getProperty("PDFSIG_CONTACT"));
 		dic.setDate(new PdfDate(sap.getSignDate())); // time-stamp will over-rule this
 		sap.setCryptoDictionary(dic);
-
 
 		// Estimate signature size, creating a 'fake' one using fake data
 		// (SHA1 length does not depend upon the data length)
@@ -192,10 +193,12 @@ public class PDFSignatureFactory extends AbstractSignatureFactory implements ISi
 			// chain[0]= user_cert, chain[1]= level_n_cert,  
 			// chain[2]= level_n-1_cert, ...
 			ClassLoader cl = PDFSignatureFactory.class.getClassLoader();
-
-			prop = new Properties();
-			InputStream is = cl.getResourceAsStream("PDFSignature.conf");
-			prop.load(is);
+			
+			prop= ConfigHandler.getProperties();
+			if ( prop == null ){
+				_strerr= LabelManager.get("ERROR_DDOC_NOCONFIGFILE");
+				return null;
+			}
 
 			//Get the CA certificate list
 			Integer n= new Integer(prop.getProperty("PDFSIG_CA_CERTS"));
