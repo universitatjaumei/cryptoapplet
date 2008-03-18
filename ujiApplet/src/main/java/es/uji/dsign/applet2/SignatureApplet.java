@@ -50,7 +50,7 @@ public class SignatureApplet extends JApplet
 		try
 		{
 			Logger.getRootLogger().setLevel(Level.OFF);
-			apph = AppHandler.getInstance(this);	
+			apph = AppHandler.getInstance(this);		
 		}
 		catch (SignatureAppletException ex)
 		{	
@@ -340,8 +340,6 @@ public class SignatureApplet extends JApplet
 				URLOutputParams output= new URLOutputParams(sa, outputURL);
 
 				output.setOutputCount(in.length);
-		
-				System.out.println("LONGITUD: " + in.length);
 				
 				apph.setInput(input);
 				apph.setOutput(output);
@@ -516,7 +514,7 @@ public class SignatureApplet extends JApplet
 	
 	public String getAppletVersion()
 	{
-		return "2.0.1";
+		return "2.0.2";
 	}
 
 	public String getJavaVersion()
