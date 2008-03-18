@@ -184,7 +184,6 @@ public class Mozilla
 					String res;
 					try {
 						res = new File(dirs[i]).getCanonicalPath();
-						System.out.println("res: " + res);
 					} catch (IOException e) {
 						
 						e.printStackTrace();
