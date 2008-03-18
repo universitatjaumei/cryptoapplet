@@ -10,6 +10,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.JFormattedTextField;
 import java.awt.Rectangle;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.JLabel;
 
 import javax.swing.JCheckBox;
@@ -76,7 +79,15 @@ public class MainWindow {
 		if (mainFrame == null) {
 			//mainFrame = new JFrame();
 			mainFrame = new JFrame();
-			mainFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+			//mainFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+			mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			
+			mainFrame.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+			 mainFrame.setVisible(false);
+			 _aph.callJavaScriptCallbackFunction(_aph.getJsSignCancel(), null);
+			}
+			});
 			mainFrame.setResizable(false);
 			mainFrame.setSize(new Dimension(582, 518));
 			mainFrame.setTitle("CryptoApplet Signer");
