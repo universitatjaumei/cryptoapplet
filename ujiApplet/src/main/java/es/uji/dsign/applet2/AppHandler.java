@@ -488,8 +488,7 @@ public class AppHandler
      **/
 	protected void initKeyStoresTable() throws SignatureAppletException
 	{
-		System.out.println("navigator 1aaaa : " + strNavigator);
-		System.out.println("Iexplorer: " + BROWSER_IEXPLORER);
+		System.out.println("navigator: " + strNavigator);
 		if (strNavigator.equals(BROWSER_IEXPLORER))
 		{			
 		
@@ -515,7 +514,6 @@ public class AppHandler
 			{
 				if (isMozillaStoreInitialized()) 
 				{
-					System.out.println("Pasamos por el MozillaStoreInitialized");
 									
 					Mozilla mozilla = new Mozilla();
 					
