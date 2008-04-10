@@ -19,7 +19,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
 	
 	String url= null; 
 	boolean _initialized= false, signOkInvoked=false; 
-	int _count= 1, outputcount=0, timeout= 5000;
+	int _count= 1, outputcount=0, conn_timeout= 10000, read_timeout= 60000;
 	String[] _inputs;
 	String postVariable="content"; 
 	SignatureApplet _base= null;
@@ -49,7 +49,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
 	    
 	    // We must obtain the cookies:
 	    String cookie = (String)document.getMember("cookie");
-	    log.debug("COOKIES: " + cookie);
+	    //log.debug("COOKIES: " + cookie);
 	
 		String strUrl = url;
 		String urlOk;
@@ -66,8 +66,8 @@ public class URLOutputParams extends AbstractData implements OutputParams
 		
 		HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
 		
-		urlConn.setConnectTimeout(timeout);
-		urlConn.setReadTimeout(timeout);
+		urlConn.setConnectTimeout(conn_timeout);
+		urlConn.setReadTimeout(read_timeout);
 		
 		urlConn.setRequestMethod("POST");
 		urlConn.setRequestProperty("Content-type", "application/x-www-form-urlencoded");
