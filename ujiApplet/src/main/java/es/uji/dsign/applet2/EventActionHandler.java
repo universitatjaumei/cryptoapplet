@@ -172,6 +172,7 @@ public class EventActionHandler {
 					auxPwdField.requestFocus();
 
 					auxContentTextField.setText(selectedNode.getCertificate().toString());		
+					mw.getInformationLabelField().setText(LabelManager.get("INFO_SELECT_CERT"));
 				}
 				catch (Exception exc)
 				{
