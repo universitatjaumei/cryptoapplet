@@ -64,14 +64,19 @@ public class SignatureThread extends Thread
 		int inc= (this._end_percent - this._ini_percent)/10;
 
 		try{
-			X509CertificateHandler selectedNode = (X509CertificateHandler) ((DefaultMutableTreeNode) _mw.jTree.getLastSelectedPathComponent()).getUserObject();
-
+			X509CertificateHandler selectedNode;
+			try{
+				selectedNode= (X509CertificateHandler) ((DefaultMutableTreeNode) _mw.jTree.getLastSelectedPathComponent()).getUserObject();
+			}
+			catch(NullPointerException e){
+				throw new SignatureAppletException("ERROR_CERTIFICATE_NOT_SELECTED");
+			} 
+			
 			if (!selectedNode.isDigitalSignatureCertificate() && !selectedNode.isNonRepudiationCertificate())
 			{
-				infoLabelField.setText(LabelManager.get("ERROR_CERTIFICATE_USE"));
-				guiFinalize(false);
 				showSignatureOk=false;
-				throw new SignatureAppletException("Invalid Key usage.");
+				guiFinalize(false);
+				throw new SignatureAppletException("ERROR_CERTIFICATE_USE");
 			} 
 
 			iksh= selectedNode.getKeyStore();
@@ -91,10 +96,9 @@ public class SignatureThread extends Thread
 					e.printStackTrace(ps);
 					String stk = new String(os.toByteArray()).toLowerCase();
 					if ( stk.indexOf("incorrect") > -1 ){
-						infoLabelField.setText(LabelManager.get("ERROR_INCORRECT_PWD"));
 						showSignatureOk=false;
 						guiFinalize(false);
-						throw new SignatureAppletException("Incorrect Password.");
+						throw new SignatureAppletException("ERROR_INCORRECT_PWD");
 					}
 					else
 						infoLabelField.setText("Unexpected error!!!");
@@ -103,27 +107,22 @@ public class SignatureThread extends Thread
 				System.out.println("Certificate Alias: " +  iksh.getAliasFromCertificate(selectedNode.getCertificate()));
 			}
 			else{
-				infoLabelField.setText(LabelManager.get("ERR_GET_KEYSTORE"));
-				guiFinalize(false);
 				showSignatureOk=false;
-				throw new SignatureAppletException("Unable to guess the keystore.");
+				guiFinalize(false);
+				throw new SignatureAppletException("ERR_GET_KEYSTORE");
 			}
 
 			_mw.getGlobalProgressBar().setValue(_ini_percent + inc);
 
-			// Instanciamos el tipo de clase de gestión de parámetros de E/S:
-			// Applet, URL, etc
-			//Class sip = Class.forName(_mw._aph.getInputParams());
-
-			InputParams inputParams = (InputParams)_mw._aph.getInput(); //sip.newInstance();
-			//Class sop = Class.forName(_mw._aph.getOutputParams());
+			InputParams inputParams = (InputParams)_mw._aph.getInput(); 
 
 			_mw.getGlobalProgressBar().setValue(_ini_percent + 2*inc);
 
-			OutputParams outputParams = (OutputParams) _mw.getAppHandler().getOutputParams();//sop.newInstance();
+			OutputParams outputParams = (OutputParams) _mw.getAppHandler().getOutputParams();
 
 			_mw.getGlobalProgressBar().setValue(_ini_percent + 3*inc);
-			// Instanciamos el formateador de firma: CMS, XAdES, etc
+			
+			// Creating an instance of the signature formater: CMS, XAdES, etc
 			Class sf = Class.forName(_mw.getAppHandler().getSignFormat());
 			ISignFormatProvider signer = (ISignFormatProvider) sf.newInstance();
 
@@ -142,10 +141,9 @@ public class SignatureThread extends Thread
 					xcert = (X509CertificateHandler) ((DefaultMutableTreeNode) _mw.jTree.getLastSelectedPathComponent()).getUserObject();
 				}
 				catch (NullPointerException e){
-					infoLabelField.setText(LabelManager.get("ERROR_CERTIFICATE_NOT_SELECTED"));
 					showSignatureOk= false;
 					guiFinalize(false);
-					return;
+					throw new SignatureAppletException("ERROR_CERTIFICATE_NOT_SELECTED");
 
 				}
 				if (xcert.isDigitalSignatureCertificate() || 
@@ -169,7 +167,7 @@ public class SignatureThread extends Thread
 						in= Base64.decode(inputParams.getSignData());
 					}
 					else{
-						in= inputParams.getSignData(); //_mw._aph.inputData;	
+						in= inputParams.getSignData();
 					}
 
 					if (_mw.isShowSignatureEnabled()){
@@ -187,27 +185,37 @@ public class SignatureThread extends Thread
 					_mw.getGlobalProgressBar().setValue(_ini_percent + 6*inc);
 
 					IKeyStoreHelper kAux= xcert.getKeyStore();
-					sig= signer.formatSignature( in, xcert.getCertificate(), (PrivateKey) kAux.getKey(xcert.getAlias()),kAux.getProvider());
-
+					
+					try{ 
+						sig= signer.formatSignature( in, xcert.getCertificate(), (PrivateKey) kAux.getKey(xcert.getAlias()),kAux.getProvider());
+					}
+					catch(Exception e){
+						throw new SignatureAppletException("ERROR_COMPUTING_SIGNATURE");
+					}
+					
 					if ( sig == null )
 					{
 						infoLabelField.setText(LabelManager.get("ERROR_COMPUTING_SIGNATURE") +": " + signer.getError());
 						showSignatureOk= false;
 						guiFinalize(false);
 						_mw.getAppHandler().getInputParams().flush();
-						return;
+						throw new SignatureAppletException("ERROR_COMPUTING_SIGNATURE");
 					}
 
 					_mw.getGlobalProgressBar().setValue(_ini_percent + 7*inc);
 					if ( sig != null )	
-						outputParams.setSignData(sig);
+						try{
+							outputParams.setSignData(sig);
+						}
+						catch(Exception e){
+							throw new SignatureAppletException("ERROR_CANNOT_SET_OUTPUT_DATA");
+						}
 					else 	
 						System.out.println("ERROR!!! al calcular la firma");
 				}
 				_mw.getGlobalProgressBar().setValue(_ini_percent + 8*inc);
 			}
 			_mw.getGlobalProgressBar().setValue(_ini_percent + 10*inc);
-
 
 			guiFinalize(hideWindow);
 
@@ -249,38 +257,24 @@ public class SignatureThread extends Thread
 			showSignatureOk= false;
 			e.printStackTrace();
 			try {
-				guiFinalize(true);
+				guiFinalize(false);
 			} catch (Exception e1) {
 				infoLabelField.setText(LabelManager.get("ERROR_CANNOT_CLOSE_WINDOW"));
 				e1.printStackTrace();
 			}
 		}
 		catch(Exception e){
-			
+			System.out.println("4");
 			e.printStackTrace();
-			
-			if (e.getMessage() != null && e.getMessage().indexOf("Incorrect Password") != -1 ){
-				infoLabelField.setText(LabelManager.get("ERROR_INCORRECT_PASSWORD"));
-				showSignatureOk= false;
-				try {
-					guiFinalize(false);
-				} catch (Exception e1) {
-					infoLabelField.setText(LabelManager.get("ERROR_CANNOT_CLOSE_WINDOW"));
-					e1.printStackTrace();
-				}		
-			}
-			else{
-				infoLabelField.setText(LabelManager.get("ERROR_COMPUTING_SIGNATURE") +": " + e.getMessage());
-				showSignatureOk= false;
-				e.printStackTrace();
-				try {
-					guiFinalize(false);
-				} catch (Exception e1) {
-					infoLabelField.setText(LabelManager.get("ERROR_CANNOT_CLOSE_WINDOW"));
-					e1.printStackTrace();
-				}
-				_mw.getAppHandler().getInputParams().flush();
-			}
+			infoLabelField.setText(e.getMessage());
+			showSignatureOk= false;
+			try {
+				guiFinalize(false);
+			} catch (Exception e1) {
+				infoLabelField.setText(LabelManager.get("ERROR_CANNOT_CLOSE_WINDOW"));
+				e1.printStackTrace();
+			}		
+			_mw.getAppHandler().getInputParams().flush();
 		}
 	}
 
@@ -311,6 +305,8 @@ public class SignatureThread extends Thread
 
 			if (hideWindow)
 				_mw.mainFrame.setVisible(false);
+			else
+				_mw.getShowSignatureCheckBox().setVisible(true);
 
 		}
 		this._ini_percent= 0;
@@ -321,13 +317,11 @@ public class SignatureThread extends Thread
 		}
 	} 
 
-	public void setMainWindow(MainWindow mw)
-	{
+	public void setMainWindow(MainWindow mw){
 		_mw= mw;
 	}
 
 	public void setShowSignatureOk(boolean b) {
 		showSignatureOk = b;
-
 	}
 }
