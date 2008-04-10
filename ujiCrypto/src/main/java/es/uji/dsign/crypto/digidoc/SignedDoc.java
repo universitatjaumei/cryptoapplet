@@ -270,7 +270,7 @@ public class SignedDoc implements Serializable
             fos.close();
             //System.out.println("Write complete!");
         } catch(DigiDocException ex) {
-            throw ex; // allready handled
+            throw ex; // already handled
         } catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
         }
@@ -302,7 +302,7 @@ public class SignedDoc implements Serializable
             }
             os.write(xmlTrailer().getBytes());
         } catch(DigiDocException ex) {
-            throw ex; // allready handled
+            throw ex; // already handled
         } catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_WRITE_FILE);
         }
