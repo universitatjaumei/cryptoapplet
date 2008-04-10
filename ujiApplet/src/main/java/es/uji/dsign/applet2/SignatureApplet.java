@@ -514,7 +514,7 @@ public class SignatureApplet extends JApplet
 	
 	public String getAppletVersion()
 	{
-		return "2.0.2";
+		return "2.0.3";
 	}
 
 	public String getJavaVersion()
