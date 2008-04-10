@@ -179,7 +179,6 @@ public class PKCS11KeyStore implements IKeyStoreHelper{
 	public Key getKey(String alias)
 	throws KeyStoreException, Exception
 	{
-		System.out.println( alias + " pin: " + _pin );
 		return _p11KeyStore.getKey(alias,_pin);
 	}
 
