@@ -39,8 +39,10 @@ public class XMLDsigSignatureFactory extends AbstractSignatureFactory implements
 	public byte[] formatSignature(byte[] toSign, X509Certificate cer,
 			PrivateKey pk, Provider pv) throws Exception {
 		try{		
+			super.initProviderList();
+								
 			//We create DOM XMLSigantureFactory
-			XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+	        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
 			//Create the reference element
 			Reference ref = fac.newReference ("", fac.newDigestMethod(DigestMethod.SHA1, null),
@@ -71,10 +73,10 @@ public class XMLDsigSignatureFactory extends AbstractSignatureFactory implements
 			// Create a DOMSignContext and specify the RSA PrivateKey and
 			// location of the resulting XMLSignature's parent element.
 			DOMSignContext dsc = new DOMSignContext(pk, doc.getDocumentElement());
-
+			
 			// Create the XMLSignature, but don't sign it yet.
 			XMLSignature signature = fac.newXMLSignature(si, ki);
-
+			
 			// Marshal, generate, and sign the enveloped signature.
 			signature.sign(dsc);
 
