@@ -100,7 +100,7 @@ public class Clauer
 			throw new Exception("InvalidDeviceName:" + device);
 		}
 
-		if (clRunTime.startSession(device, password, clHandle))
+		if (password!=null && !password.equals("") && clRunTime.startSession(device, password, clHandle))
 		{
 			_isAuth = true;
 			_initialized = true;
