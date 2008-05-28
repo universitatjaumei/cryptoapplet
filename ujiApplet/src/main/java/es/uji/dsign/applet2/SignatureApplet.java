@@ -57,11 +57,13 @@ public class SignatureApplet extends JApplet
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 			netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
+			return;
 		}
 		catch (Exception ex){
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 			netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
+		    return;
 		}
 		
 		try{
@@ -95,10 +97,12 @@ public class SignatureApplet extends JApplet
 		{	
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+			netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(), new String[] { "" });
 		}
 		catch (Exception ex){
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+			netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(), new String[] { "" });
 		}
 		
 		try{
