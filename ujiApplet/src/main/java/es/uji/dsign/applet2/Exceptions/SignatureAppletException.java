@@ -5,10 +5,23 @@ import es.uji.dsign.util.i18n.LabelManager;
 //TODO: implement 
 public class SignatureAppletException extends Exception
 {
- 
+    String message;
+    
 	public SignatureAppletException(String messageTag)
 	{
-	  super(LabelManager.get(messageTag));	
+	  message= LabelManager.get(messageTag);
+	}
+	
+	public SignatureAppletException(String messageTag, boolean translate)
+	{
+	 if (translate)
+		 message= LabelManager.get(messageTag);
+	 else
+		 message= messageTag;
+	}
+	
+	public String getMessage(){
+		return message;
 	}
 	
 	public SignatureAppletException(String messageTag, String lineNumber)
