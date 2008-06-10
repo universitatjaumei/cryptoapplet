@@ -98,7 +98,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
 		
 	    if (urlConn.getResponseCode() != HttpURLConnection.HTTP_OK)
 	    {	
-	    	log.debug("Error en el post " + urlConn.getResponseCode());
+	    	System.out.println("Error en el post " + urlConn.getResponseCode());
 	    }
 	    /*else
 	    {

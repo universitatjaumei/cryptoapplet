@@ -118,7 +118,12 @@ public class AppHandler
 
 	/* XAdES signer role customization */
 	private String signerRole;
+	private String xadesFilename;
+	private String xadesFileMimeType;
+	private String xadesContentType;
+	private String allowedCertificate;
 
+	
 	/* Logging facilities */ 
 	Logger log= Logger.getLogger(AppHandler.class);
 
@@ -357,7 +362,7 @@ public class AppHandler
 			if (userAgent != null)
 			{
 				userAgent = userAgent.toLowerCase();	
-				System.out.println("USER AGENT: " + userAgent);
+				log.debug("USER AGENT: " + userAgent);
 				if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
 				{
 					navigator = BROWSER_IEXPLORER;
