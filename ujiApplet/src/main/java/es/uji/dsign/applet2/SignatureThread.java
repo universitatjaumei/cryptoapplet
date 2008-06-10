@@ -190,6 +190,7 @@ public class SignatureThread extends Thread
 						sig= signer.formatSignature( in, xcert.getCertificate(), (PrivateKey) kAux.getKey(xcert.getAlias()),kAux.getProvider());
 					}
 					catch(Exception e){
+						System.out.println("Message: " + e.getMessage());
 						throw new SignatureAppletException("ERROR_COMPUTING_SIGNATURE");
 					}
 					
@@ -199,7 +200,8 @@ public class SignatureThread extends Thread
 						showSignatureOk= false;
 						guiFinalize(false);
 						_mw.getAppHandler().getInputParams().flush();
-						throw new SignatureAppletException("ERROR_COMPUTING_SIGNATURE");
+						throw new SignatureAppletException(LabelManager.get("ERROR_COMPUTING_SIGNATURE")
+								                          + " :: " + signer.getError(),false);
 					}
 
 					_mw.getGlobalProgressBar().setValue(_ini_percent + 7*inc);

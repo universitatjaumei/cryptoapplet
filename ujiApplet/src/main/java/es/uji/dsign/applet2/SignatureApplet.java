@@ -49,7 +49,7 @@ public class SignatureApplet extends JApplet
 	{
 		try
 		{
-			Logger.getRootLogger().setLevel(Level.OFF);
+			Logger.getRootLogger().setLevel(Level.INFO/*Level.OFF*/);
 			apph = AppHandler.getInstance(this);		
 		}
 		catch (SignatureAppletException ex)
