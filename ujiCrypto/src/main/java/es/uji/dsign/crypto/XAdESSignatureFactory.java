@@ -72,7 +72,9 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
 		// Añadimos una nueva referencia de fichero en base64 ... aunque establecemos el body 
 		DataFile df = sdoc.addDataFile(new File("jar://data.xml"), "application/binary", DataFile.CONTENT_EMBEDDED_BASE64);		
-				
+		
+		//sdoc.getDataFile(0).setFileName(str);		
+		
 		df.setBody(toSign);
 		df.setSize(toSign.length);
 		
@@ -241,10 +243,14 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 				_strerr= LabelManager.get("ERROR_DDOC_CERTREVOKED");
 			}		
 			else if ( e.getCode() == e.ERR_CERT_EXPIRED ){
-				_strerr= LabelManager.get("ERROR_DDOC_CERTEXPIRED");			
+				_strerr= LabelManager.get("ERROR_DDOC_CERTEXPIRED");
 			}
 			else if ( e.getCode() == e.ERR_CA_CERT_READ ){ 
-				_strerr= LabelManager.get("ERROR_DDOC_CACERTREAD");			
+				_strerr= LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED");
+				//_strerr= LabelManager.get("ERROR_DDOC_CACERTREAD");
+			}
+			else if ( e.getCode() == e.ERR_OCSP_READ_FILE || e.getCode() == e.ERR_OCSP_ISSUER_CA_NOT_FOUND ){ 
+				_strerr= LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED");
 			}
 			else{ 
 				_strerr= LabelManager.get("ERROR_DDOC_CERTGENERIC");			

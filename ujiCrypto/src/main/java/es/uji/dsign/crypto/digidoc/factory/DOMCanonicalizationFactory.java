@@ -20,9 +20,12 @@
  */
 
 package es.uji.dsign.crypto.digidoc.factory;
+import org.apache.log4j.Logger;
+
 import es.uji.dsign.crypto.digidoc.factory.CanonicalizationFactory;
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 
+import org.apache.log4j.Level;
 import org.apache.xml.security.c14n.Canonicalizer;
 
 /**
@@ -66,6 +69,8 @@ public class DOMCanonicalizationFactory implements CanonicalizationFactory
     public byte[] canonicalize(byte[] data, String uri)
         throws DigiDocException
     {
+    	Level lvl= Logger.getRootLogger().getLevel();
+    	Logger.getRootLogger().setLevel(Level.OFF);
         byte[] result = null;
         try {
         	org.apache.xml.security.Init.init();
@@ -75,6 +80,7 @@ public class DOMCanonicalizationFactory implements CanonicalizationFactory
         } catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_CAN_ERROR);
         }
+        Logger.getRootLogger().setLevel(lvl);
         return result;
     }
 }

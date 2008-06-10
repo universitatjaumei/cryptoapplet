@@ -875,6 +875,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 		MessageDigest digest = MessageDigest.getInstance("1.3.14.3.2.26", "BC");
 		if(m_logger.isDebugEnabled())
         	m_logger.debug("CA cert: " + ((caCert != null) ? caCert.toString() : "NULL"));
+		
+		if (caCert==null)
+			throw new DigiDocException(DigiDocException.ERR_OCSP_ISSUER_CA_NOT_FOUND, "Issuer CA not Found", null);
+		
 		X509Principal issuerName = PrincipalUtil.getSubjectX509Principal(caCert);
 		if(m_logger.isDebugEnabled())
         	m_logger.debug("CA issuer: " + ((issuerName != null) ? issuerName.getName() : "NULL"));
@@ -967,7 +971,11 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 				req = ocspRequest.generate();
 			}
                 
-        } catch(Exception ex) {
+        }
+        catch (DigiDocException d_ex){
+        	throw d_ex;
+        }
+        catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_OCSP_REQ_CREATE);
         }
         return req;
@@ -1137,7 +1145,14 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             	} while(certFile != null);
             }
                      
-        } catch(Exception ex) {
+        } 
+        catch (DigiDocException d_ex){
+        	if (d_ex.getCode()== DigiDocException.ERR_READ_FILE)
+        		throw new DigiDocException(DigiDocException.ERR_OCSP_READ_FILE, "Reading OCSP config", d_ex);
+        	else
+        		throw d_ex;
+        }
+        catch(Exception ex) {
             DigiDocException.handleException(ex, DigiDocException.ERR_NOT_FAC_INIT);
         }
     }
