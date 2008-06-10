@@ -55,11 +55,22 @@ public class LabelManager
 
 	public static String get(String propName)
 	{
+		String translated;
+		
 		if (i18n == null)
 		{
 			i18n = new LabelManager();
 		}
-
-		return (i18n._prop != null) ? i18n._prop.getProperty(propName) : "";
+        
+		try{
+			translated= i18n._prop.getProperty(propName);
+		}
+		catch (Exception e){
+          //Untranslated message.
+		   translated= "ERROR: UNTRANSLATED MESSAGE: " + propName;
+		}
+		
+		
+		return translated;
 	}
 }
