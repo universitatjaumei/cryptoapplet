@@ -154,6 +154,10 @@ public class DigiDocException extends Exception
 	public static final int ERR_TIMESTAMP_RESP = 124;
     public static final int ERR_TIMESTAMP_FAC_INIT = 125;
     public static final int ERR_TIMESTAMP_VERIFY = 126;
+    
+    public static final int ERR_OCSP_ISSUER_CA_NOT_FOUND= 127;
+    public static final int ERR_OCSP_READ_FILE = 128;
+
 	
     /**
      * DigiDocException constructor

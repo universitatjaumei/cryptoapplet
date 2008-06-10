@@ -41,6 +41,8 @@ import java.security.cert.CertificateFactory;
 //import java.util.Date;
 import javax.crypto.Cipher;
 
+import org.apache.log4j.Logger;
+
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
 
 /**
@@ -90,6 +92,8 @@ public class SignedDoc implements Serializable
 	public static final String LIB_NAME = "JDigiDoc";
 	/** program & library version */
 	public static final String LIB_VERSION = "2.3.7";
+	
+	private static 	Logger log= Logger.getLogger(SignedDoc.class);
 	
     
     /** 
@@ -872,6 +876,7 @@ public class SignedDoc implements Serializable
       		cert = (X509Certificate)certificateFactory.generateCertificate(isCert);
       		isCert.close();
         } catch(Exception ex) {
+        	log.info("ERROR: Ca Certificate " + certLocation + " Not Found");
             DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
         }
         return cert;

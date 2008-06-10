@@ -604,8 +604,21 @@ public class Signature implements Serializable
     	NotaryFactory notFac = ConfigManager.
     	instance().getNotaryFactory(); 
     	X509Certificate cert = m_keyInfo.getSignersCertificate();
-    	DigiDocFactory ddocFac = ConfigManager.instance().getDigiDocFactory();
-    	X509Certificate caCert = ddocFac.findCAforCertificate(cert);                       
+    	
+    	X509Certificate caCert= null;
+    	DigiDocFactory ddocFac= null;
+    	
+    	try{
+    		ddocFac = ConfigManager.instance().getDigiDocFactory();
+      	    caCert = ddocFac.findCAforCertificate(cert);                       
+    	}
+    	catch (DigiDocException dex){
+    		m_logger.info("ERROR: Cannot find the CAs certificate for signer's certificate with DN: " + cert.getSubjectDN());
+    		m_logger.info("       and issuer DN: " + cert.getIssuerDN());
+    		
+    		throw dex;
+    	}
+    	
     	Notary not = notFac.getConfirmation(this, cert, caCert);
     	CompleteRevocationRefs rrefs = 
     		new CompleteRevocationRefs(not);    

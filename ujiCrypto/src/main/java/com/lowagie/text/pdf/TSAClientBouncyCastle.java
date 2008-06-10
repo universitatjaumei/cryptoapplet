@@ -51,6 +51,8 @@ public class TSAClientBouncyCastle implements TSAClient {
     public TSAClientBouncyCastle(String url) {
 
         this(url, null, null, 4096);
+        Integer counter = 1;        // boxing
+        int counter2 = counter;     // unboxing
 
     }
 

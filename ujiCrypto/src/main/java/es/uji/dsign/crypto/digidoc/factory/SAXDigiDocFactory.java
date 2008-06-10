@@ -151,7 +151,7 @@ public class SAXDigiDocFactory
 		try {
 			m_rootCerts = new Hashtable();
 			if (m_logger.isDebugEnabled())
-				m_logger.debug("Loading CA certs");
+				m_logger.info("Loading CA certs");
 			int nCerts =
 				ConfigManager.instance().getIntProperty("DIGIDOC_CA_CERTS", 0);
 			for (int i = 0; i < nCerts; i++) {
@@ -159,16 +159,17 @@ public class SAXDigiDocFactory
 					ConfigManager.instance().getProperty(
 						"DIGIDOC_CA_CERT" + (i + 1));
 				if (m_logger.isDebugEnabled())
-					m_logger.debug("CA: " + ("DIGIDOC_CA_CERT" + (i + 1)) + " file: " + certFile);
+					m_logger.info("CA: " + ("DIGIDOC_CA_CERT" + (i + 1)) + " file: " + certFile);
 				X509Certificate cert =
 					SignedDoc.readCertificate(certFile);
 				if (cert != null) {
 					if (m_logger.isDebugEnabled())
-						m_logger.debug("CA subject: " + cert.getSubjectDN() + " issuer: " + cert.getIssuerDN());
+						m_logger.info("CA subject: " + cert.getSubjectDN() + " issuer: " + cert.getIssuerDN());
 					m_rootCerts.put(cert.getSubjectDN().getName(), cert);
 				}
 			}
 		} catch (Exception e) {
+			m_logger.info("ERROR: Cannot load the CA certificate.");
 			DigiDocException.handleException(
 				e,
 				DigiDocException.ERR_CA_CERT_READ);
