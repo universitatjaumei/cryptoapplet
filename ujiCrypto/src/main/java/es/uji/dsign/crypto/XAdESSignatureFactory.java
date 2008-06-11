@@ -40,11 +40,23 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
     private String _strerr= "";
     private static int CONN_TIMEOUT= 5000;
     private String signerRole= "UNSET";
+    private String xadesFileName= "data.xml";
+	private String xadesFileMimeType="application/binary";
     
     public void setSignerRole(String srole)
     {
     	signerRole= srole;
     }
+    
+    public void setXadesFileName(String filename)
+    {
+    	xadesFileName= filename;
+    }
+    
+    public void setXadesFileMimeType(String fmimetype) {
+		xadesFileMimeType = fmimetype;
+		
+	}
     
 	public byte[] formatSignature(byte[] toSign, X509Certificate sCer, PrivateKey pk, Provider pv) throws Exception
 	{		
@@ -73,7 +85,8 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		// Añadimos una nueva referencia de fichero en base64 ... aunque establecemos el body 
 		DataFile df = sdoc.addDataFile(new File("jar://data.xml"), "application/binary", DataFile.CONTENT_EMBEDDED_BASE64);		
 		
-		//sdoc.getDataFile(0).setFileName(str);		
+		sdoc.getDataFile(0).setFileName(xadesFileName);		
+		sdoc.getDataFile(0).setMimeType(xadesFileMimeType);		
 		
 		df.setBody(toSign);
 		df.setSize(toSign.length);
