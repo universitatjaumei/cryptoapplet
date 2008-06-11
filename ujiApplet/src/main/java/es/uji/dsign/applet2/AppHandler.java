@@ -329,6 +329,25 @@ public class AppHandler
 	{
 		return signerRole;
 	}
+	
+	/**
+	 * A method for getting the selected file name from setXadesFileName JS function.
+	 * 
+	 * @return xadesFileName The selected file name for XAdES output format
+	 **/
+	public String getXadesFileName() {
+		return this.xadesFilename;
+	}
+
+	
+	/**
+	 * A method for getting the selected file Mime Type from setXadesFileName JS function.
+	 * 
+	 * @return xadesFileName The selected file Mime Type for XAdES output format
+	 **/
+	public String getXadesFileMimeType() {
+		return this.xadesFileMimeType;
+	}
 
 	/**
 	 * Obtains the encoding of the input data to be signed, the 
@@ -393,7 +412,25 @@ public class AppHandler
 		this.signerRole= signerrole;
 	}
 
+	/**
+	 * A method for setting the filename, that method is called from setXadesFileName JS function.
+	 * 
+	 *@param filename The file name to be set for XAdES output format
+	 */
+	public void setXadesFileName(String filename) {
+		this.xadesFilename= filename;	
+	}
+	
+	/**
+	 * A method for setting the selected file Mime Type from setXadesFileName JS function.
+	 * 
+	 * @param xadesFileName The selected file Mime Type for XAdES output format
+	 **/
+	public void setXadesFileMimeType(String xadesFileMimeType) {
+		this.xadesFileMimeType= xadesFileMimeType;
+	}
 
+	
 	/**
 	 * This method sets a reference to the MainWindow's object. 
 	 * 

@@ -226,6 +226,38 @@ public class SignatureApplet extends JApplet
 	}
 	
 	
+	/**
+	 * JS interface to setting the XAdES file name from Navigator's javascript
+	 *  
+	 * @param filename
+	 */
+	public void setXadesFileName(final String filename)
+	{
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run()
+			{
+				apph.setXadesFileName(filename);
+				return null;
+			}
+		});
+	}
+	
+	/**
+	 * JS interface to setting the XAdES file Mime type  from Navigator's javascript
+	 *  
+	 * @param filename
+	 */
+	public void setXadesFileMimeType(final String mimetype)
+	{
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run()
+			{
+				apph.setXadesFileMimeType(mimetype);
+				return null;
+			}
+		});
+	}
+	
 	/* SIGNATURE COMPUTATION FUNCTIONS */ 
 	
 	/**

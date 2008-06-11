@@ -129,8 +129,12 @@ public class SignatureThread extends Thread
 			if (_mw.getAppHandler().getSignFormat().equals("es.uji.dsign.crypto.XAdESSignatureFactory"))
 			{
 				String sr= (_mw.getAppHandler().getSignerRole() != null)? _mw.getAppHandler().getSignerRole(): "UNSET";
+				String fname= (_mw.getAppHandler().getXadesFileName() != null)? _mw.getAppHandler().getXadesFileName(): "UNSET";
+				String fmimetype= (_mw.getAppHandler().getXadesFileMimeType() != null)? _mw.getAppHandler().getXadesFileMimeType(): "application/binary";
 				XAdESSignatureFactory xs= (XAdESSignatureFactory) signer;
 				xs.setSignerRole(sr);
+				xs.setXadesFileName(fname);
+				xs.setXadesFileMimeType(fmimetype); 
 			}
 
 			_mw.getGlobalProgressBar().setValue(_ini_percent + 4*inc);
