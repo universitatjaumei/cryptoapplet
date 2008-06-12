@@ -5,6 +5,8 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.security.Signature;
+
+import es.uji.dsign.util.Base64;
 import es.uji.dsign.util.i18n.LabelManager;
 
 public class RawSignatureFactory  extends AbstractSignatureFactory implements ISignFormatProvider {
@@ -45,7 +47,9 @@ public class RawSignatureFactory  extends AbstractSignatureFactory implements IS
 			_strerr= LabelManager.get("ERROR_RAW_SIGNATURE");
 		}
 		
-		return res;
+		byte[] coded= Base64.encode(res,true);
+		
+		return coded;
 	}
 	
 	public String getError(){
