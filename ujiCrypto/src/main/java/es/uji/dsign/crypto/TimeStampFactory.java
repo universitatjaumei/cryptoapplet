@@ -74,7 +74,7 @@ public class TimeStampFactory {
 
 	
 	/**
-	 * Main for testing porpouses only ...
+	 * Main for testing purposes only ...
 	 * @param args
 	 */
 	public static void main(String[] args) {
