@@ -154,55 +154,22 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 			return null;	
 		}
 				
-		TimeStampRequest request = reqGen.generate(TSPAlgorithms.SHA1, hash);
-		byte[] enc_req = request.getEncoded();
-		TimeStampResponse resp= null;
 		
-		try{
-			String tsaUrl= ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
-			URL url = new URL(tsaUrl);
-
-			URLConnection urlConn = url.openConnection();
-			urlConn.setConnectTimeout(CONN_TIMEOUT);
-			urlConn.setReadTimeout(CONN_TIMEOUT);
-			urlConn.setDoInput(true);
-			urlConn.setDoOutput(true);
-			urlConn.setUseCaches(false);
-
-			urlConn.setRequestProperty("Content-Type", "application/timestamp-query");
-			urlConn.setRequestProperty("Content-Length", "" + enc_req.length);
-
-			OutputStream printout = urlConn.getOutputStream();
-			printout.write(enc_req);
-			printout.flush();
-			printout.close();
-
-			InputStream in = urlConn.getInputStream();				
-
-			resp = new TimeStampResponse(in);
-		} 
-		catch (SocketTimeoutException ex){
+		String tsaUrl= ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+		byte[] asn1Resp= TimeStampFactory.getTimeStamp(tsaUrl, hash);
+		
+		if ( asn1Resp == null ){
 			_strerr= LabelManager.get("ERROR_DDOC_TSATIMEOUT");
-			ex.printStackTrace();
-			return null;
+    	 	return null;
 		}
-		
-		try{
-			resp.validate(request);
-		}
-		catch (TSPException ex){
-			_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
-			ex.printStackTrace();
-			return null;
-		}
-		
-		log.debug("Timestamp validated");
+				
+		TimeStampResponse tsr= new TimeStampResponse(asn1Resp);
 		
      	TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
-		ts.setTimeStampResponse(resp);		
+		ts.setTimeStampResponse(tsr);		
 		ts.setSignature(sig);
 		
-		TimeStampToken ttk= resp.getTimeStampToken();
+		TimeStampToken ttk= tsr.getTimeStampToken();
 		if ( ttk == null ){
 			_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
 			return null;
