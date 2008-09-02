@@ -1,7 +1,7 @@
 package es.uji.dsign.applet2;
 
 import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
-import es.uji.dsign.crypto.XAdESSignatureVerifier;
+import es.uji.dsign.crypto.verifiers.XAdESSignatureVerifier;
 import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.dsign.applet2.io.FuncOutputParams;
 import es.uji.dsign.applet2.io.ParamInputData;
@@ -36,7 +36,7 @@ public class SignatureApplet extends JApplet
 	private static final long serialVersionUID = 1L;
 	private AppHandler apph;
 	private MainWindow window;
-	private String _separator= "\\|";
+	private String _separator= "\\|";	
 	
 	public String recvHash; //compatibility issues
 	
@@ -280,9 +280,12 @@ public class SignatureApplet extends JApplet
 				 * the applet handler for signature porpouses  
 				 * */
 				
-				ParamInputData input= new ParamInputData(toSign);
+				String[] arr= new String[] {toSign}; 
+				
+				ParamInputData input= new ParamInputData(arr);
 				FuncOutputParams output= new FuncOutputParams(sa, funcOut);
 			
+				
 				apph.setInput(input);
 				apph.setOutput(output);
 				
@@ -292,6 +295,42 @@ public class SignatureApplet extends JApplet
 			}
 		});
 	}
+	
+	
+	/**
+	 * Computes the signature with the given toSign input data, if everything
+	 * is correct, the applet invoke	s funcOut with the resulting signature object 
+	 * as the function parameter.
+	 * 
+	 * @param toSign     the data to be signed  
+	 * @param funcOut    the JavaScript function that must be called on success with the 
+	 *                   signature object as a result.
+	 * @param separator  The characters that must be matched in order to break the string.
+	 */
+	
+	public void signDataParamToFunc(final String toSign,final  String funcOut, final String separator)
+	{
+		final SignatureApplet sa= this;
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run()
+			{				
+	
+				String[] arr= toSign.split(separator);
+				
+				ParamInputData input= new ParamInputData(toSign.split(separator));
+				FuncOutputParams output= new FuncOutputParams(sa, funcOut);
+				output.setCount(arr.length);
+				
+				apph.setInput(input);
+				apph.setOutput(output);
+				
+				initializeWindow();	
+				
+				return null;
+			}
+		});
+	}
+	
 		
 	/**
 	 * Computes the signature with the given toSign input data, if everything
@@ -309,7 +348,10 @@ public class SignatureApplet extends JApplet
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run()
 			{
-				ParamInputData input= new ParamInputData(toSign);
+				
+				String[] arr= new String[] {toSign}; 
+				
+				ParamInputData input= new ParamInputData(arr);
 				URLOutputParams output= new URLOutputParams(sa,outputURL);
 				
 				apph.setInput(input);
@@ -339,7 +381,9 @@ public class SignatureApplet extends JApplet
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run()
 			{
-				ParamInputData input= new ParamInputData(toSign);
+				String[] arr= new String[] {toSign}; 
+								
+				ParamInputData input= new ParamInputData(arr);
 				URLOutputParams output= new URLOutputParams(sa, outputURL, postVariableName);
 
 				apph.setInput(input);
@@ -516,8 +560,26 @@ public class SignatureApplet extends JApplet
 			}
 		});
 	}
+		
+	/**
+	 * 
+	 * This function allow to set which certificate is allowed to sign. 
+	 * 
+	 * @param Issuer    In a ... format
+	 * @param SerialNo  In a ... format 
+	 */
 	
-	
+	public void setAllowedCertificate(final String Issuer,final String SerialNo)
+	{
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run()
+			{
+				//apph.setSignatureOutputFormat(format);
+				return null;
+			}
+		});
+	}
+		
 	/* VERIFICATION FUNCTIONS */
 	
 	/**
@@ -550,7 +612,7 @@ public class SignatureApplet extends JApplet
 	
 	public String getAppletVersion()
 	{
-		return "2.0.3";
+		return "2.1.0";
 	}
 
 	public String getJavaVersion()

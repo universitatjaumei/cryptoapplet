@@ -194,6 +194,7 @@ public class SignatureThread extends Thread
 						sig= signer.formatSignature( in, xcert.getCertificate(), (PrivateKey) kAux.getKey(xcert.getAlias()),kAux.getProvider());
 					}
 					catch(Exception e){
+						e.printStackTrace();
 						System.out.println("Message: " + e.getMessage());
 						throw new SignatureAppletException("ERROR_COMPUTING_SIGNATURE");
 					}

@@ -6,28 +6,30 @@ import java.util.Hashtable;
 
 public class ParamInputData extends AbstractData implements InputParams{
 
-	private String str_in; 
+	private String[] str_in; 
+	private int _current= 0;
+	private int _count= 0;
 	
-	public ParamInputData(String in){
+	public ParamInputData(String[] in){
 		this.str_in= in;
+		_count=this.str_in.length;
 	}
 	
-	public String getInput()
-	{
-		return this.str_in;
-	}
-		
+			
 	public int getInputCount() throws Exception {
-		// TODO Auto-generated method stub
-		return 1;
+		return _count;
 	}
 
 	public byte[] getSignData() throws Exception {
 		
-		if (mustHash)
-			return this.getMessageDigest(this.str_in.getBytes());
+		byte[] ret= this.str_in[_current].getBytes();
 		
-		return this.str_in.getBytes();
+		if (mustHash)
+			ret= AbstractData.getMessageDigest(ret);
+		
+		_current++;
+						
+		return ret;
 	}
 
 	public byte[] getSignData(int item) throws Exception {
