@@ -8,8 +8,10 @@ import es.uji.dsign.util.Base64;
 
 public class FuncOutputParams implements OutputParams {
     private String fun, onSignOk="onSignOk";
-    private byte[] bstrSig= null, bstrAux= null;
+    private byte[] bstrSig= null;
     private String strSig= null;
+    private int _count= 1; 
+    private int _current=0;
     SignatureApplet sap;
         
 	public FuncOutputParams(SignatureApplet sap, String onSignOk)
@@ -19,33 +21,21 @@ public class FuncOutputParams implements OutputParams {
 	}
 	
 	public void setSignData(byte[] data)
-			throws IOException {
-		String strAux = new String(Base64.encode(data));
-                System.out.println("coding to B64 ");
-		int i = 0;
-		int len= strAux.length();
-	        bstrAux= strAux.getBytes();
- 		int mod= len % 64; 
+	throws IOException {
 		
-		if (mod==0)
-                    bstrSig= new byte[(len + len/64)-1];
-		else
-		    bstrSig= new byte[len + len/64];
-
- 		int j=0;
-
-		for (i = 0; i < len; i++)
-		{
- 		   if (i%64 == 0 && i != 0){
-                      bstrSig[j++]= '\n';
-		   }
-                   bstrSig[j++]= bstrAux[i];
-		   
+		strSig= new String(data);
+		
+		if (_count>1 && (_current != (_count - 1))  ){
+			commit();
+			_current++;
 		}
-		strSig= new String(bstrSig);
-                System.out.println("coded to B64 ");
+	
 	}
 
+	public void setCount(int count){
+		this._count= count;
+	}
+	
 	public void setSignFormat(Hashtable<String, Object> params,
 			byte[] signFormat) throws IOException {
 		// TODO Auto-generated method stub
@@ -59,9 +49,14 @@ public class FuncOutputParams implements OutputParams {
 		
 	}
 
+	private void commit()
+	{
+		if ( strSig!="" )
+			netscape.javascript.JSObject.getWindow(sap).call(this.onSignOk, new String[] { strSig });
+	}
+	
 	public void signOk()
 	{
-		System.out.println("Invoking onSignOk: " + this.onSignOk );
 		if (strSig!="")
 			netscape.javascript.JSObject.getWindow(sap).call(this.onSignOk, new String[] { strSig });
 	}
