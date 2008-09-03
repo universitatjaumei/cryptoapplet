@@ -31,6 +31,7 @@ import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.TimestampInfo;
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
 import es.uji.dsign.util.i18n.LabelManager;
+import es.uji.dsign.util.Base64;
 import es.uji.dsign.util.ConfigHandler;
 
 
@@ -85,6 +86,7 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		// Añadimos una nueva referencia de fichero en base64 ... aunque establecemos el body 
 		DataFile df = sdoc.addDataFile(new File("jar://data.xml"), "application/binary", DataFile.CONTENT_EMBEDDED_BASE64);		
 		
+		System.out.println("Seleccionando nombre fichero a: " + xadesFileName);
 		sdoc.getDataFile(0).setFileName(xadesFileName);		
 		sdoc.getDataFile(0).setMimeType(xadesFileMimeType);		
 		
@@ -241,8 +243,8 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		}
 	
 		
-       	// Devolvemos el documento firmado
-		return sdoc.toXML().getBytes();
+       	// Devolvemos el documento firmado y codificado
+		return Base64.encode(sdoc.toXML().getBytes(),true);
 	}
 	
 	public String getError(){
