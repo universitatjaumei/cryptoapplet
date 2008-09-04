@@ -161,6 +161,42 @@ public final class Base64
 		System.arraycopy(decodedData, 0, out, 0, out.length);
 		return out;
 	}
+	
+	/**
+	 * Encodes hex octects into Base64 breaking the content in 
+	 * 
+	 * 
+	 * @param binaryData
+	 *            Array containing binaryData
+	 * @return Encoded Base64 array
+	 */
+	public static byte[] encode(byte[] binaryData, boolean splitColumns)
+	{
+		byte[] bstrSig= null, bstrAux= null;
+		String strAux = new String(Base64.encode(binaryData));
+		
+		int i = 0;
+		int len= strAux.length();
+		bstrAux= strAux.getBytes();
+		int mod= len % 64; 
+
+		if (mod==0)
+			bstrSig= new byte[(len + len/64)-1];
+		else
+			bstrSig= new byte[len + len/64];
+
+		int j=0;
+
+		for (i = 0; i < len; i++)
+		{
+			if (i%64 == 0 && i != 0){
+				bstrSig[j++]= '\n';
+			}
+			bstrSig[j++]= bstrAux[i];
+
+		}
+		return bstrSig;
+	}
 
 	/**
 	 * Encodes hex octects into Base64
