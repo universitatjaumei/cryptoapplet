@@ -17,11 +17,22 @@ import es.uji.dsign.util.i18n.LabelManager;
 public class XAdESCoSignatureFactory  extends AbstractSignatureFactory implements ISignFormatProvider {
 
 	private String signerRole= "UNSET";
+	private String xadesFileName= "data.xml";
+	private String xadesFileMimeType="application/binary";
 	private String _sterr= "";
 
 	public void setSignerRole(String srole)
 	{
 		signerRole= srole;
+	}
+	
+	public void setXadesFileName(String filename)
+	{
+		xadesFileName= filename;
+	}
+
+	public void setXadesFileMimeType(String fmimetype) {
+		xadesFileMimeType = fmimetype;	
 	}
 	
 	public byte[] formatSignature( byte[] toSign, X509Certificate sCer, PrivateKey pk, Provider pv )
@@ -42,6 +53,8 @@ public class XAdESCoSignatureFactory  extends AbstractSignatureFactory implement
 				
 		XAdESSignatureFactory xsf= new XAdESSignatureFactory();
 		xsf.setSignerRole(signerRole);
+		xsf.setXadesFileName(xadesFileName);
+		xsf.setXadesFileMimeType(xadesFileMimeType);
 		
 		res= xsf.signDoc(sdoc, toSign, sCer, pk, pv);
 		

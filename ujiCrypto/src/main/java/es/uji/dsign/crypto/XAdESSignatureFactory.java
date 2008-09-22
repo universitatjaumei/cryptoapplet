@@ -3,6 +3,7 @@ package es.uji.dsign.crypto;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -11,6 +12,7 @@ import java.net.URLConnection;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.net.SocketTimeoutException;
 
@@ -56,7 +58,6 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
     
     public void setXadesFileMimeType(String fmimetype) {
 		xadesFileMimeType = fmimetype;
-		
 	}
     
 	public byte[] formatSignature(byte[] toSign, X509Certificate sCer, PrivateKey pk, Provider pv) throws Exception
@@ -111,7 +112,6 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 			_strerr= LabelManager.get("ERROR_DDOC_NOKEY");
 			return null;
 		}
-		
 				
 		//Prepare the signature
 		//TODO: Role support in the signature
@@ -192,7 +192,6 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		ts.setHash(msgdig);
 		
 		sig.addTimestampInfo(ts);
-		
 		String tsa1_ca= ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
 		if ( tsa1_ca == null ){
 			_strerr= LabelManager.get("ERROR_DDOC_TSACA");
@@ -206,7 +205,17 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
         cval.setCert(xcaCert);
         cval.setId(sig.getId() + "-TSA_CERT");
         
-   
+        // Check the certificate validity against the timestamp: 
+        Date d= ts.getTime();
+        try{
+        	sCer.checkValidity(d);
+        }
+        catch(CertificateException cex){
+        	_strerr= LabelManager.get("ERROR_CERTIFICATE_EXPIRED");
+        	return null;
+        }
+        
+        
         try 
 		{
         	//Añadimos certificado TSA 
