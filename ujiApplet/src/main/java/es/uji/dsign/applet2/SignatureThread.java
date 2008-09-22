@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.security.PrivateKey;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateNotYetValidException;
+import java.util.Date;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.JLabel;
@@ -78,7 +82,23 @@ public class SignatureThread extends Thread
 				guiFinalize(false);
 				throw new SignatureAppletException("ERROR_CERTIFICATE_USE");
 			} 
-
+			try{
+			    selectedNode.getCertificate().checkValidity();
+			}
+			catch(CertificateException cex){
+				 int selection = JOptionPane.showOptionDialog(_mw.getMainFrame(),
+					   LabelManager.get("LABEL_CERTIFICATE_EXPIRED"),  
+					   LabelManager.get("LABEL_CERTIFICATE_EXPIRED_TITLE"),
+					   JOptionPane.YES_NO_OPTION,
+					   JOptionPane.QUESTION_MESSAGE, null, 
+					   new String[] {"Yes", "No"}, "No");
+				  	if (selection == JOptionPane.NO_OPTION) {
+				  		showSignatureOk= false;
+						guiFinalize(false);
+						throw new SignatureAppletException("ERROR_CERTIFICATE_EXPIRED");
+					}
+			} 
+			
 			iksh= selectedNode.getKeyStore();
 			if (iksh != null){	
 				try
@@ -126,7 +146,8 @@ public class SignatureThread extends Thread
 			Class sf = Class.forName(_mw.getAppHandler().getSignFormat());
 			ISignFormatProvider signer = (ISignFormatProvider) sf.newInstance();
 
-			if (_mw.getAppHandler().getSignFormat().equals("es.uji.dsign.crypto.XAdESSignatureFactory"))
+			if (_mw.getAppHandler().getSignFormat().equals("es.uji.dsign.crypto.XAdESSignatureFactory") || 
+					_mw.getAppHandler().getSignFormat().equals("es.uji.dsign.crypto.XAdESCoSignatureFactory"))
 			{
 				String sr= (_mw.getAppHandler().getSignerRole() != null)? _mw.getAppHandler().getSignerRole(): "UNSET";
 				String fname= (_mw.getAppHandler().getXadesFileName() != null)? _mw.getAppHandler().getXadesFileName(): "UNSET";
