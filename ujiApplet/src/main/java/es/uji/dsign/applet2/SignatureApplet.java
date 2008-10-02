@@ -219,7 +219,10 @@ public class SignatureApplet extends JApplet
 		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run()
 			{
-				apph.setSignerRole(signerrole);
+				
+				String[] sr_arr= signerrole.split(_separator);
+				
+				apph.setSignerRole(sr_arr);
 				return null;
 			}
 		});

@@ -117,7 +117,7 @@ public class AppHandler
 	private OutputParams output;
 
 	/* XAdES signer role customization */
-	private String signerRole;
+	private String[] signerRole;
 	private String xadesFilename;
 	private String xadesFileMimeType;
 	private String xadesContentType;
@@ -325,7 +325,7 @@ public class AppHandler
 	 * 
 	 * @return signerRole The selected signerrole for XAdES output format
 	 **/
-	public String getSignerRole()
+	public String[] getSignerRole()
 	{
 		return signerRole;
 	}
@@ -407,7 +407,7 @@ public class AppHandler
 	 * 
 	 *@param signerrole The signer role to be set for XAdES output format
 	 */
-	public void setSignerRole(String signerrole)
+	public void setSignerRole(String[] signerrole)
 	{
 		this.signerRole= signerrole;
 	}

@@ -45,7 +45,6 @@ public class SignatureHandler {
 				aux_start= (start) * (100/signatureCount);
 				aux_end= (start+1) * (100/signatureCount);
 				start= start+1;
-				
 			}
 			else
 			{
@@ -54,7 +53,7 @@ public class SignatureHandler {
 				start=1;
 			}
 		
-			sth.setPercentRange(aux_start, aux_end);
+			sth.setPercentRange(aux_start, aux_end, start-1);
 			sth.setCallbackMethod(SignatureHandler.class.getMethod("callback"));
 			
 			System.out.println("START: " + start + "SIGNATURECOUNT: " + signatureCount );

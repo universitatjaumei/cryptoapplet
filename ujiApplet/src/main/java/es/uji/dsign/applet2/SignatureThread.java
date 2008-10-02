@@ -19,6 +19,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
 import es.uji.dsign.crypto.ISignFormatProvider;
 import es.uji.dsign.crypto.X509CertificateHandler;
+import es.uji.dsign.crypto.XAdESCoSignatureFactory;
 import es.uji.dsign.crypto.XAdESSignatureFactory;
 import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
 import es.uji.dsign.util.Base64;
@@ -32,7 +33,7 @@ public class SignatureThread extends Thread
 {
 	private MainWindow _mw= null;
 	private int _end_percent= 0;
-	private int _ini_percent= 0;
+	private int _ini_percent= 0, _step= 0;
 	private boolean hideWindow;
 	private Method callback;
 	private boolean showSignatureOk;
@@ -42,7 +43,8 @@ public class SignatureThread extends Thread
 		super(str);
 	}
 
-	public void setPercentRange(int ini_percent, int end_percent){
+	public void setPercentRange(int ini_percent, int end_percent, int step){
+		this._step= step;
 		this._ini_percent= ini_percent;
 		this._end_percent= end_percent;
 	} 
@@ -149,13 +151,26 @@ public class SignatureThread extends Thread
 			if (_mw.getAppHandler().getSignFormat().equals("es.uji.dsign.crypto.XAdESSignatureFactory") || 
 					_mw.getAppHandler().getSignFormat().equals("es.uji.dsign.crypto.XAdESCoSignatureFactory"))
 			{
-				String sr= (_mw.getAppHandler().getSignerRole() != null)? _mw.getAppHandler().getSignerRole(): "UNSET";
+				String[] roles= _mw.getAppHandler().getSignerRole();
+				String sr= "UNSET"; 
+				if (this._step < roles.length){
+					sr=roles[this._step];
+				}
 				String fname= (_mw.getAppHandler().getXadesFileName() != null)? _mw.getAppHandler().getXadesFileName(): "UNSET";
 				String fmimetype= (_mw.getAppHandler().getXadesFileMimeType() != null)? _mw.getAppHandler().getXadesFileMimeType(): "application/binary";
-				XAdESSignatureFactory xs= (XAdESSignatureFactory) signer;
-				xs.setSignerRole(sr);
-				xs.setXadesFileName(fname);
-				xs.setXadesFileMimeType(fmimetype); 
+			
+				if (_mw.getAppHandler().getSignFormat().equals("es.uji.dsign.crypto.XAdESSignatureFactory")){
+					XAdESSignatureFactory xs= (XAdESSignatureFactory) signer;
+					xs.setSignerRole(sr);
+					xs.setXadesFileName(fname);
+					xs.setXadesFileMimeType(fmimetype); 
+				}
+				else{
+					XAdESCoSignatureFactory xs= (XAdESCoSignatureFactory) signer;
+					xs.setSignerRole(sr);
+					xs.setXadesFileName(fname);
+					xs.setXadesFileMimeType(fmimetype); 
+				}
 			}
 
 			_mw.getGlobalProgressBar().setValue(_ini_percent + 4*inc);
