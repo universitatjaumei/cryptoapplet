@@ -18,10 +18,10 @@ public class LabelManager
 	public static void setLang(String lang)
 	{
 		_lang= lang;
-		if (i18n == null)
-		{
+		//if (i18n == null)
+		//{
 			i18n = new LabelManager();
-		}
+		//}
 	}
 	
 	private LabelManager()
