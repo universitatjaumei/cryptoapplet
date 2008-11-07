@@ -37,6 +37,8 @@ public class SignatureApplet extends JApplet
 	private AppHandler apph;
 	private MainWindow window;
 	private String _separator= "\\|";	
+	private boolean _testInit= false;
+	private String appletTag;
 	
 	public String recvHash; //compatibility issues
 	
@@ -600,6 +602,31 @@ public class SignatureApplet extends JApplet
 				return sv.verifyUrl(input);	
 			}});
 		return res;
+	}
+	
+	
+	/**
+	 * Test the execution environment, is everything ok to do the signature.
+	 * 
+	 */
+	public void doTest(){
+		
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		  public Object run(){
+			if (!_testInit){
+				AppEnvironmentTester aen= new AppEnvironmentTester();
+				aen.setAppletHandler(apph);
+				aen.setAppletTag(appletTag);
+				aen.start();
+				_testInit= true;
+			}
+			return null;
+		  }
+		});
+	}
+	
+	public void testSetup(String appletTag){
+		this.appletTag= appletTag;
 	}
 	
 	public void destroy()
