@@ -307,7 +307,6 @@ public class SignatureThread extends Thread
 			}
 		}
 		catch(Exception e){
-			System.out.println("4");
 			e.printStackTrace();
 			infoLabelField.setText(e.getMessage());
 			showSignatureOk= false;

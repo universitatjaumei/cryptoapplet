@@ -954,6 +954,10 @@ public class AppHandler
 	public SignatureApplet getSignatureApplet(){
 		return _parent;
 	}
+	
+	public Hashtable<String, String> getformatImplMap(){
+		return formatImplMap;
+	}
 
 
 	/**
