@@ -44,31 +44,51 @@ public class AppEnvironmentTester extends Thread {
 	private AppHandler _apph;
 	private JScrollPane _jsp  = new JScrollPane();
 	private JTextArea _jta= new JTextArea();
-	private String appletTag, strerror="", strwarn="";
-	int nerror=0, ninfo=0, nwarn=0; 
+	private String appletTag, strerror="", strwarn="", inputUrl, outputUrl;
+	int nerror=0, ninfo=0, nwarn=0, delay=1000; 
 	private Properties prop;
  	
 	
 	
 	private void caption(String str){
-		_jta.append("\nTesting: " + str + "\n");	
+		_jta.append("\nTesting: " + str + "\n");
+		try {
+			Thread.sleep(delay);
+		} catch (InterruptedException e) {
+				e.printStackTrace();
+		}
 	}
 	
 	private void info(String str){
 		_jta.append("    [INFO]  " + str + "\n");	
 		ninfo++;
+		try {
+			Thread.sleep(delay);
+		} catch (InterruptedException e) {
+				e.printStackTrace();
+		}
 	}
 	
 	private void  warn(String str){
 		_jta.append("    [WARN]  " + str + "\n");
 		strwarn += "    " + str + "\n";
 		nwarn++;
+		try {
+			Thread.sleep(delay);
+		} catch (InterruptedException e) {
+				e.printStackTrace();
+		}
 	}
 	
 	private void  error(String str){
 		_jta.append("    [ERROR] " + str + "\n");
 		strerror += "    " + str + "\n";
 		nerror++;
+		try {
+			Thread.sleep(delay);
+		} catch (InterruptedException e) {
+				e.printStackTrace();
+		}
 	}
 	
 	private void printSummary(){
@@ -230,6 +250,9 @@ public class AppEnvironmentTester extends Thread {
 				
 			error("Java version must be >= 1.5");
 		}
+		else{
+			info("Java version compatible with the applet!");
+		}
 	}
 	
 	private void testAppletTag(){
@@ -354,12 +377,35 @@ public class AppEnvironmentTester extends Thread {
 
 	}
 
+	
+	private void testInputOutput() {
+		caption("Testing source input and source output");
+		if (inputUrl!=null && !inputUrl.equals("")){
+			try{
+				testConnect(new URL(inputUrl));
+			}
+			catch (Exception e){
+				error("Malformed URL: " + inputUrl);
+			}
+		}
+		if (outputUrl!=null && !outputUrl.equals("")){
+			try{
+				testConnect(new URL(outputUrl));
+			}
+			catch (Exception e){
+				error("Malformed URL: " + inputUrl);
+			}
+		}
+	}
+	
 	public void setAppletHandler(AppHandler apph){
 		this._apph= apph;
 	}
 	
-	public void setAppletTag(String appletTag){
+	public void setup(String appletTag,String inputUrl, String outputUrl){
 		this.appletTag= appletTag; 
+		this.inputUrl= inputUrl;
+		this.outputUrl= outputUrl;
 	} 
 	
 	public void run(){
@@ -398,6 +444,7 @@ public class AppEnvironmentTester extends Thread {
 		// Lets go with the tests
 		testJavaVersion();
 		testAppletTag();
+		testInputOutput();
 		testSignatureOutputFormat();
 		testCertificates();
 		testOCSP();
