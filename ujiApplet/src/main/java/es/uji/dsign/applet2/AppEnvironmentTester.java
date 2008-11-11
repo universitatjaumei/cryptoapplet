@@ -8,11 +8,35 @@ import java.awt.event.AdjustmentListener;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
+import org.bouncycastle.tsp.TimeStampResponse;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
+
+import es.uji.dsign.crypto.PDFSignatureFactory;
+import es.uji.dsign.crypto.SHA1Digest;
+import es.uji.dsign.crypto.TimeStampFactory;
+import es.uji.dsign.crypto.digidoc.CertValue;
+import es.uji.dsign.crypto.digidoc.SignedDoc;
+import es.uji.dsign.crypto.digidoc.TimestampInfo;
+import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
+import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
+import es.uji.dsign.util.ConfigHandler;
+import es.uji.dsign.util.i18n.LabelManager;
 
 public class AppEnvironmentTester extends Thread {
 	
@@ -20,7 +44,9 @@ public class AppEnvironmentTester extends Thread {
 	private AppHandler _apph;
 	private JScrollPane _jsp  = new JScrollPane();
 	private JTextArea _jta= new JTextArea();
-	private String appletTag;
+	private String appletTag, strerror="", strwarn="";
+	int nerror=0, ninfo=0, nwarn=0; 
+	private Properties prop;
  	
 	
 	
@@ -30,14 +56,146 @@ public class AppEnvironmentTester extends Thread {
 	
 	private void info(String str){
 		_jta.append("    [INFO]  " + str + "\n");	
+		ninfo++;
 	}
 	
 	private void  warn(String str){
-		_jta.append("    [WARN]  " + str + "\n");	
+		_jta.append("    [WARN]  " + str + "\n");
+		strwarn += "    " + str + "\n";
+		nwarn++;
 	}
 	
 	private void  error(String str){
-		_jta.append("    [ERROR] " + str + "\n");	
+		_jta.append("    [ERROR] " + str + "\n");
+		strerror += "    " + str + "\n";
+		nerror++;
+	}
+	
+	private void printSummary(){
+		_jta.append("\n\nSUMMARY: ( " + ninfo + " info massages, " + nwarn + " warning messages " + nerror + " error messages )\n");
+		
+		if ( nwarn != 0 ){
+			_jta.append("WARNING MESSAGES: \n");
+			_jta.append(strwarn);
+		}
+	
+		if ( nerror != 0 ){
+			_jta.append("ERROR MESSAGES: \n");
+			_jta.append(strerror);
+		}
+	}
+	
+	private void showAllowedCertificates(String property){
+		// Check certificates allowed to sign: 
+		try{
+			CertificateFactory cf = CertificateFactory.getInstance("X.509");
+			ClassLoader cl = AppEnvironmentTester.class.getClassLoader();
+
+			prop= ConfigHandler.getProperties();
+			if ( prop == null ){
+				error("DDOC config file not found.");
+				return; 
+			}
+
+			//Get the CA certificate list
+			String strinfo= "Certificates allowed to sign in this site: \n\n";
+			Integer n= new Integer(prop.getProperty(property+"S"));
+			Certificate CACert= null;
+
+			for (int i=1; i<= n; i++)
+			{	
+				try {
+					CACert= cf.generateCertificate(cl.getResourceAsStream(prop.getProperty(property+i).replaceFirst("jar://","")));
+					strinfo += "        Issuer: "  + ((X509Certificate)CACert).getIssuerDN().toString() +
+					   "\n        Subject:" + ((X509Certificate)CACert).getSubjectDN().toString() + "\n\n";  
+				} catch (CertificateException e) {
+					error("Cannot parse certificate file  " + property + i + "=" + prop.getProperty(property+i) + " Exception: " + e.getMessage());
+				}
+			}
+			info(strinfo);
+		}
+		catch (CertificateException e){
+			error("Unable to instantiate CertificateFactory Exception: " + e.getMessage());
+		}
+		
+	}
+	
+	public void testTSA(){
+		
+		String tst= new String("01234567890123456789");
+		
+		try{
+			caption(" TSA (Time Stamp Authority)");
+
+			TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+			reqGen.setCertReq(false);
+
+			byte[] hash = tst.getBytes();
+
+			prop= ConfigHandler.getProperties();
+			if ( prop == null ){
+				error("DDOC config file not found.");
+				return; 
+			}
+			String tsaUrl= prop.getProperty("DIGIDOC_TSA1_URL");
+			byte[] asn1Resp= TimeStampFactory.getTimeStamp(tsaUrl, hash);
+
+			if ( asn1Resp == null ){
+				error("Timeout getting the timestamp."); 
+			}
+
+			TimeStampResponse tsr= new TimeStampResponse(asn1Resp);
+			TimeStampToken ttk= tsr.getTimeStampToken();
+
+			if ( ttk == null ){
+				error("Cannot get TSARESPONSE");
+			}
+
+			TimeStampTokenInfo tstki= ttk.getTimeStampInfo();
+			if ( tstki == null ){
+				error("Cannot get TimeStampInfo");
+			}
+
+			byte[] msgdig= tstki.getMessageImprintDigest();
+			if ( msgdig == null ){
+				error("Cannot get MessageImprintDigest");
+			}
+			
+			String dig= new String(msgdig);
+			
+			if (new String(msgdig).equals(tst)){
+				info("Message digest got ok : " +  dig );
+				info("Timestamped time for the digest: " + tstki.getGenTime());
+			}
+			else{
+				error("Message digests does not match");
+			}
+		}
+		catch (Exception e){
+			error("Calculating timestamp, Exception: " +  e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	public void testOCSP(){
+		caption("OCSP");
+		prop= ConfigHandler.getProperties();
+		if ( prop == null ){
+			error("DDOC config file not found.");
+			return; 
+		}
+		
+		Integer n= new Integer(prop.getProperty("DIGIDOC_OCSP_RESPONDER_COUNT"));
+
+		for (int i=1; i<= n; i++)
+		{	
+			try {
+				testConnect(new URL(prop.getProperty("DIGIDOC_OCSP_RESPONDER_URL" + i)));
+			}
+			catch (Exception e){
+				error("In OCSP test Exception: " + e.getMessage());
+			}
+		}
 	}
 	
 	private void testConnect(URL url){
@@ -143,12 +301,13 @@ public class AppEnvironmentTester extends Thread {
 		
 		
 		//Check dependencies. 
-		//First the generic ones: 
-		//bcprov.jar, jakarta-log4j.jar
-		if ( lowerTag.indexOf("bcprov") == -1 ){
-			warn("bcprov.* not found and it is needed by all signature formats, make sure you have included it with another name.");
+		String gendeps[] = {"bcprov", "jakarta", "ujiutils", "ujiapplet", "ujicrypto", "ujiconfig"};		
+		for (String aux: gendeps){
+			if ( lowerTag.indexOf(aux) == -1 ){
+				warn(aux + ".*  not found and it is needed by all signature formats, make sure you have included it with another name.");
+			}
 		}
-		
+
 		if ( lowerTag.indexOf("jakarta") == -1 ){
 			warn("jakarta.* not found and it is needed by all signature formats, make sure you have included it with another name.");
 		}
@@ -159,29 +318,42 @@ public class AppEnvironmentTester extends Thread {
 			}
 		}
 		else if (format.equals("XADES") | format.equals("XADES_COSIGN")){
-			//String deps[]= {};
+			String deps[]= {"bcmail","bctsp","xalan","xmlsec","myxmlsec"};
+			for (String aux:deps){
+				if ( lowerTag.indexOf(aux) == -1 ){
+					warn(aux + ".* not found and it is needed by " + format + " singature format");
+				}
+			}
+			showAllowedCertificates("DIGIDOC_CA_CERT");
+			testTSA();
 		}
 		else if (format.equals("PDF")){
 			if ( lowerTag.indexOf("itext") == -1 ){
 				warn("itext.* not found and it is needed by " + format + " singature format");
 			}
+			
+			showAllowedCertificates("PDFSIG_CA_CERT");
 		}
 	}
-	
+
 	private void testCertificates(){
-		
-		
+		try{
+			caption("User Certificates, you must check that the Issuer of your certificate is like any\nof the Subjects in allowed certificates section");
+			String strinfo="User Certificates detected: \n\n";
+			for (IKeyStoreHelper ikh: _apph.getKeyStoreTable().values()){
+				for (Certificate c: ikh.getUserCertificates()){
+					strinfo += "        Issuer:" + ((X509Certificate)c).getIssuerDN().toString() +
+							   "\n        Subject:" + ((X509Certificate)c).getSubjectDN() + "\n\n";
+				}
+			}
+			info(strinfo);
+		}
+		catch(Exception e){
+			error("Cannot get user certificates. Exception: " + e.getMessage());
+		}
+
 	}
-	
-	private void testClauer(){
-		
-	}
-	
-	private void testKeyStores(){
-		
-			
-	}
-	
+
 	public void setAppletHandler(AppHandler apph){
 		this._apph= apph;
 	}
@@ -204,7 +376,13 @@ public class AppEnvironmentTester extends Thread {
 		
 		_jsp.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener(){
 			public void adjustmentValueChanged(AdjustmentEvent e){
-			_jta.select(_jta.getHeight()+1000,0);
+			_jta.select(_jta.getHeight()+10000,0);
+			_jsp.updateUI();
+		}});
+		
+		_jsp.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener(){
+			public void adjustmentValueChanged(AdjustmentEvent e){
+			_jsp.updateUI();
 		}});
 		
 		_jf.setLocation(_width / 2 - 582 / 2, _height / 2 - 518 / 2);
@@ -221,6 +399,9 @@ public class AppEnvironmentTester extends Thread {
 		testJavaVersion();
 		testAppletTag();
 		testSignatureOutputFormat();
+		testCertificates();
+		testOCSP();
+		printSummary();
 		
 	}
 }
