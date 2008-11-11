@@ -37,7 +37,7 @@ public class SignatureApplet extends JApplet
 	private AppHandler apph;
 	private MainWindow window;
 	private String _separator= "\\|";	
-	private String appletTag;
+	private String appletTag, appletInput, appletOutput;
 	
 	public String recvHash; //compatibility issues
 	
@@ -615,15 +615,17 @@ public class SignatureApplet extends JApplet
 
 				AppEnvironmentTester aen= new AppEnvironmentTester();
 				aen.setAppletHandler(apph);
-				aen.setAppletTag(appletTag);
+				aen.setup(appletTag,appletInput, appletOutput);
 				aen.start();
 				return null;
 			}
 		});
 	}
 
-	public void testSetup(String appletTag){
+	public void testSetup(String appletTag, String input, String output){
 		this.appletTag= appletTag;
+		this.appletInput= input;
+		this.appletOutput= output;
 	}
 	
 	public void destroy()
