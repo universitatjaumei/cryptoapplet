@@ -81,10 +81,15 @@ public class OS
 	{
 		return (getOS().indexOf("nt") > -1);
 	}
+	
+	public static boolean isMac()
+	{
+		return (getOS().indexOf("mac") > -1);
+	}
 
 	public static boolean isLinux()
 	{
-		return (getOS().toLowerCase().equals("linux"));
+		return (getOS().indexOf("linux") > -1);
 	}
 
 	public static boolean isWindowsUpperEqualToNT()
