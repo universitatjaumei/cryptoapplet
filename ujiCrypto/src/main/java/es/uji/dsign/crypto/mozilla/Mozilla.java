@@ -26,7 +26,7 @@ public class Mozilla
 	private String _userHome;
 	private String _profileDir, _userAppDataDir;
 	private String _lockFile, _execName;
-	boolean _linux = false, _windows = false;
+	boolean _linux = false, _windows = false, _mac= false;
 
 	/**
 	 * Base constructor.
@@ -51,6 +51,13 @@ public class Mozilla
 			_lockFile = "parent.lock";
 			_windows = true;
 			_execName = "firefox.exe";
+		}
+		else if (OS.isMac())
+		{
+			_profileDir = _userHome + "/.mozilla/firefox/";
+			_lockFile = ".parentlock";
+			_mac = true;
+			_execName = "firefox";
 		}
 	}
 
@@ -184,14 +191,28 @@ public class Mozilla
 					String res;
 					try {
 						res = new File(dirs[i]).getCanonicalPath();
-					} catch (IOException e) {
-						
+					} catch (IOException e) {	
 						e.printStackTrace();
 						res=null;
 					}
 					return res;
 				}
 			}
+		}
+		else if (_mac)
+		{
+			String res=null;
+			try {
+				File f= new File("/Applications/Firefox.app/Contents/MacOS/libsoftokn3.dylib");
+				if (f.exists()){
+					res= f.getCanonicalPath();
+				}
+			} catch (IOException e) {
+				res=null;
+				e.printStackTrace();
+			}
+			return res;
+			
 		}
 		
 		return null;
@@ -212,13 +233,13 @@ public class Mozilla
 					   "attributes= compatibility" + "\r" +
 					   "slot=2\r" + 
 					   "nssArgs=\"" + 
-					   "configdir='" + _currentprofile.replace("\\", "/").replace(" ", "\\ ") + "' " +
+					   "configdir='" + _currentprofile.replace("\\", "/") + "' " +
 					   "certPrefix='' " + 
 					   "keyPrefix='' " + 
 					   "secmod=' secmod.db' " + 
-					   "flags=readOnly\"\r").getBytes());
+					   "flags=readOnly\"\r").getBytes());	
 		}
-		else if (OS.isLinux())
+		else if ( OS.isLinux() || OS.isMac() )
 		{
 			/*
 			 * TODO:With Linux is pending to test what's up with the white
@@ -240,9 +261,9 @@ public class Mozilla
 		return bais;
 	}
 	
-	public String getPkcs11InitArgsString(){
+	public String getPkcs11InitArgsString(){		
 		return  "configdir='" 
-				+ getCurrentProfiledir() 
-				+ "' certPrefix='' keyPrefix='' secmod=' secmod.db' flags=";
+				+ getCurrentProfiledir().replace("\\", "/") 
+				+ "' certPrefix='' keyPrefix='' secmod='secmod.db' flags=";
 	}
 }
