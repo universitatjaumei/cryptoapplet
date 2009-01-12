@@ -52,7 +52,7 @@ import org.apache.log4j.Logger;
  *
  * Handles all the applet singularities such as applet parameters,
  * applet installation, host navigator and keystore list  
- *  
+ *  l
  */
 public class AppHandler 
 {	
@@ -141,6 +141,8 @@ public class AppHandler
 	 **/
 	public AppHandler(SignatureApplet parent) throws SignatureAppletException
 	{
+		
+		System.out.println("Creando handler clander ... ");
 		BasicConfigurator.configure();
 
 		_parent = parent;
@@ -370,13 +372,18 @@ public class AppHandler
 	 **/
 	public String getNavigator()
 	{
-		String navigator = BROWSER_OTHERS;
-
+		//String navigator = BROWSER_OTHERS;
+		//Better to assume that it is firefox so we can try to do 
+		// our best
+		String navigator= BROWSER_MOZILLA;
+				
 		try
 		{
 			JSObject win = (JSObject) netscape.javascript.JSObject.getWindow(_parent);
 			JSObject doc = (JSObject) win.getMember("navigator");
 			String userAgent = (String) doc.getMember("userAgent");
+			
+			System.out.println("User Agent: " + userAgent);
 
 			if (userAgent != null)
 			{
