@@ -142,7 +142,6 @@ public class AppHandler
 	public AppHandler(SignatureApplet parent) throws SignatureAppletException
 	{
 		
-		System.out.println("Creando handler clander ... ");
 		BasicConfigurator.configure();
 
 		_parent = parent;
