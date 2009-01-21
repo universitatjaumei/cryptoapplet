@@ -116,8 +116,9 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		//Prepare the signature
 		//TODO: Role support in the signature
 		Signature sig = sdoc.prepareSignature((X509Certificate) sCer, new String[] { signerRole }, null);
-				
-		//Do the signature
+	  CertValue cval=null;	
+		
+    //Do the signature
 		byte[] sidigest= sig.getSignedContent();
 		if ( sidigest == null ){
 			_strerr= LabelManager.get("ERROR_DDOC_NODIGEST");
@@ -141,85 +142,90 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		sig.setSignatureValue(res);
 		 
 		//Get the timestamp and add it  
-		TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
 
-		// Request TSA to return certificate
-		reqGen.setCertReq(false);
+		int tsaCount= ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT",0);
+		if (tsaCount!=0){
+		    TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
+
+		  // Request TSA to return certificate
+		  reqGen.setCertReq(false);
 		
-		SHA1Digest sha = new SHA1Digest();
-		sha.engineUpdate(sig.getSignatureValue().toString().getBytes(),0,
+		  SHA1Digest sha = new SHA1Digest();
+		  sha.engineUpdate(sig.getSignatureValue().toString().getBytes(),0,
 						 sig.getSignatureValue().toString().length());
 		
-		byte[] hash = sha.engineDigest();
-		if ( hash == null ){
-			_strerr= LabelManager.get("ERROR_DDOC_TSDIGEST");
-			return null;	
-		}
+		  byte[] hash = sha.engineDigest();
+		  if ( hash == null ){
+		  	_strerr= LabelManager.get("ERROR_DDOC_TSDIGEST");
+		  	return null;	
+		  }
 				
 		
-		String tsaUrl= ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
-		byte[] asn1Resp= TimeStampFactory.getTimeStamp(tsaUrl, hash);
+		  String tsaUrl= ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+		  byte[] asn1Resp= TimeStampFactory.getTimeStamp(tsaUrl, hash);
 		
-		if ( asn1Resp == null ){
-			_strerr= LabelManager.get("ERROR_DDOC_TSATIMEOUT");
-    	 	return null;
-		}
+		  if ( asn1Resp == null ){
+		  	_strerr= LabelManager.get("ERROR_DDOC_TSATIMEOUT");
+    	   	return null;
+	  	}
 				
-		TimeStampResponse tsr= new TimeStampResponse(asn1Resp);
+		  TimeStampResponse tsr= new TimeStampResponse(asn1Resp);
 		
-     	TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
-		ts.setTimeStampResponse(tsr);		
-		ts.setSignature(sig);
+      TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
+		  ts.setTimeStampResponse(tsr);		
+		  ts.setSignature(sig);
 		
-		TimeStampToken ttk= tsr.getTimeStampToken();
-		if ( ttk == null ){
-			_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
-			return null;
-		}
+		  TimeStampToken ttk= tsr.getTimeStampToken();
+		  if ( ttk == null ){
+		  	_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
+		  	return null;
+		  }
 		
-		TimeStampTokenInfo tstki= ttk.getTimeStampInfo();
-		if ( tstki == null ){
-			_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
-			return null;
-		}
+		  TimeStampTokenInfo tstki= ttk.getTimeStampInfo();
+		  if ( tstki == null ){
+		  	_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
+		  	return null;
+		  }
 		
-		byte[] msgdig= tstki.getMessageImprintDigest();
-		if ( msgdig == null ){
-			_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
-			return null;
-		}
+		  byte[] msgdig= tstki.getMessageImprintDigest();
+		  if ( msgdig == null ){
+		  	_strerr= LabelManager.get("ERROR_DDOC_TSARESPONSE");
+		  	return null;
+		  }
 		
-		ts.setHash(msgdig);
+		  ts.setHash(msgdig);
 		
-		sig.addTimestampInfo(ts);
-		String tsa1_ca= ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
-		if ( tsa1_ca == null ){
-			_strerr= LabelManager.get("ERROR_DDOC_TSACA");
-			return null;
-		}
+	  	sig.addTimestampInfo(ts);
+		  String tsa1_ca= ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
+		  if ( tsa1_ca == null ){
+		  	_strerr= LabelManager.get("ERROR_DDOC_TSACA");
+		  	return null;
+	  	}
 		
-		X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
+		  X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
 		
-		CertValue cval = new CertValue();
-        cval.setType(CertValue.CERTVAL_TYPE_TSA);
-        cval.setCert(xcaCert);
-        cval.setId(sig.getId() + "-TSA_CERT");
+		  cval = new CertValue();
+          cval.setType(CertValue.CERTVAL_TYPE_TSA);
+          cval.setCert(xcaCert);
+          cval.setId(sig.getId() + "-TSA_CERT");
         
-        // Check the certificate validity against the timestamp: 
-        Date d= ts.getTime();
-        try{
-        	sCer.checkValidity(d);
-        }
-        catch(CertificateException cex){
-        	_strerr= LabelManager.get("ERROR_CERTIFICATE_EXPIRED");
-        	return null;
-        }
+          // Check the certificate validity against the timestamp: 
+          Date d= ts.getTime();
+          try{
+          	sCer.checkValidity(d);
+          }
+          catch(CertificateException cex){
+          	_strerr= LabelManager.get("ERROR_CERTIFICATE_EXPIRED");
+          	return null;
+          }
         
-        
-        try 
+    }   
+    try 
 		{
         	//Añadimos certificado TSA 
-	        sig.addCertValue(cval);        
+	        if (tsaCount!=0){ 
+              sig.addCertValue(cval);
+          }
 	        
 	        // Verificación OCSP
 	        if (ConfigManager.instance().getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP")){
