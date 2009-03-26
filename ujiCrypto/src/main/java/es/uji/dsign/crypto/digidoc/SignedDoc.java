@@ -603,7 +603,7 @@ public class SignedDoc implements Serializable
         for(int i = 0; i < countDataFiles(); i++) {
             DataFile df = getDataFile(i);
             String str = df.toString();
-            //System.out.println("DF: " + df.getId() + " size: " + str.length());
+            //System.out.println("DF String: " + df.toString() + "DF: " + df.getId() + " size: " + str.length());
             sb.append(str);
             sb.append("\n");
         }
