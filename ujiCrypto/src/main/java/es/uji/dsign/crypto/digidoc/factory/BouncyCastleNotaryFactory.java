@@ -96,6 +96,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     private Logger m_logger = null;
     private Hashtable m_ocspCerts;
     private Hashtable m_ocspCACerts;
+    private boolean m_useNonce= true;
     
     /** Creates new BouncyCastleNotaryFactory */
     public BouncyCastleNotaryFactory() {
@@ -105,6 +106,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         m_ocspCACerts = new Hashtable();
         m_bSignRequests = false;
         m_logger = Logger.getLogger(BouncyCastleNotaryFactory.class);
+
+	String aux= ConfigManager.instance().getProperty("DIGIDOC_USE_NONCE");
+	if (aux != null)
+		m_useNonce = aux.toLowerCase().equals("true");
     }
     
     /**
@@ -425,10 +430,13 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             // now read the info from the response
             BasicOCSPResp basResp = 
                 (BasicOCSPResp)resp.getResponseObject();
-            byte[] nonce2 = getNonce(basResp);
-            if(!SignedDoc.compareDigests(nonce1, nonce2)) 
-            	throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
+            
+ 	    if ( m_useNonce ){
+	      byte[] nonce2 = getNonce(basResp);
+              if(!SignedDoc.compareDigests(nonce1, nonce2)) 
+              	  throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
                     "Invalid nonce value! Possible replay attack!", null); 
+	    }
             // verify the response
             try {
             	String respId = responderIDtoString(basResp);
@@ -494,10 +502,12 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             // now read the info from the response
             BasicOCSPResp basResp = 
                 (BasicOCSPResp)resp.getResponseObject();
-            byte[] nonce2 = getNonce(basResp);
-            if(!SignedDoc.compareDigests(nonce1, nonce2)) 
+            if ( m_useNonce ){
+	      byte[] nonce2 = getNonce(basResp);
+              if(!SignedDoc.compareDigests(nonce1, nonce2)) 
             	throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
                     "Invalid nonce value! Possible replay attack!", null); 
+            }
             // verify the response
             try {
             	String respId = responderIDtoString(basResp);
@@ -595,17 +605,19 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             // done't care about SingleResponses because we have
             // only one response and the whole response was successfull
             // but we should verify that the nonce hasn't changed
-            byte[] nonce2 = getNonce(basResp);
-            boolean ok = true;
-            if(nonce1.length != nonce2.length)
-                ok = false;
-            for(int i = 0; i < nonce1.length; i++)
-                if(nonce1[i] != nonce2[i])
-                    ok = false;
-            if(!ok /*&& !sig.getSignedDoc().getVersion().equals(SignedDoc.VERSION_1_4)*/) {
+            if ( m_useNonce ){
+	      byte[] nonce2 = getNonce(basResp);
+              boolean ok = true;
+              if(nonce1.length != nonce2.length)
+                  ok = false;
+              for(int i = 0; i < nonce1.length; i++)
+                  if(nonce1[i] != nonce2[i])
+                      ok = false;
+              if(!ok /*&& !sig.getSignedDoc().getVersion().equals(SignedDoc.VERSION_1_4)*/) {
                           throw new DigiDocException(DigiDocException.ERR_OCSP_NONCE,
                     "OCSP response's nonce doesn't match the requests nonce!", null);
-            }
+              }
+	    }  
             // check the response on our cert
             checkCertStatus(signersCert, basResp);
             // create notary            
@@ -774,19 +786,21 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             // but we should verify that the nonce hasn't changed
             // calculate the nonce
             byte[] nonce1 = SignedDoc.digest(sig.getSignatureValue().getValue());
-            byte[] nonce2 = getNonce(basResp);
-            boolean ok = true;
-            if(nonce1.length != nonce2.length)
-                ok = false;
-            for(int i = 0; i < nonce1.length; i++)
-                if(nonce1[i] != nonce2[i])
-                    ok = false;
-            if(!ok && !sig.getSignedDoc().getVersion().equals(SignedDoc.VERSION_1_4)) {
-            	//System.out.println("Real nonce:\n" + Base64Util.encode(nonce2, 0));
-            	//System.out.println("My nonce:\n" + Base64Util.encode(nonce1, 0));
-                throw new DigiDocException(DigiDocException.ERR_OCSP_NONCE,
-                    "OCSP response's nonce doesn't match the requests nonce!", null);
-            }
+            if ( m_useNonce ){ 
+		byte[] nonce2 = getNonce(basResp);
+            	boolean ok = true;
+            	if(nonce1.length != nonce2.length)
+                	ok = false;
+            	for(int i = 0; i < nonce1.length; i++)
+                	if(nonce1[i] != nonce2[i])
+                    		ok = false;
+            		if(!ok && !sig.getSignedDoc().getVersion().equals(SignedDoc.VERSION_1_4)) {
+            		  //System.out.println("Real nonce:\n" + Base64Util.encode(nonce2, 0));
+            		  //System.out.println("My nonce:\n" + Base64Util.encode(nonce1, 0));
+                	  throw new DigiDocException(DigiDocException.ERR_OCSP_NONCE,
+                    	  "OCSP response's nonce doesn't match the requests nonce!", null);
+            		}
+	    }
             // check the response on our cert
             checkCertStatus(sig, basResp);
             not.setProducedAt(basResp.getResponseData().getProducedAt());
