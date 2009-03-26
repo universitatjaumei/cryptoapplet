@@ -35,10 +35,15 @@ public class XAdESCoSignatureFactory  extends AbstractSignatureFactory implement
 		xadesFileMimeType = fmimetype;	
 	}
 	
-	public byte[] formatSignature( byte[] toSign, X509Certificate sCer, PrivateKey pk, Provider pv )
+	public byte[] formatSignature(SignatureOptions sigOpt)
 	throws Exception {
 		
 		byte[] res;
+		
+		byte[] toSign= sigOpt.getToSignByteArray();
+		X509Certificate sCer= sigOpt.getCertificate();
+		PrivateKey pk= sigOpt.getPrivateKey();
+		Provider pv= sigOpt.getProvider();
 
 		Properties prop= ConfigHandler.getProperties();
 		if ( prop != null ){

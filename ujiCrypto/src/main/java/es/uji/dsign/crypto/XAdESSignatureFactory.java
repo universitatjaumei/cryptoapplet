@@ -60,7 +60,7 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		xadesFileMimeType = fmimetype;
 	}
     
-	public byte[] formatSignature(byte[] toSign, X509Certificate sCer, PrivateKey pk, Provider pv) throws Exception
+	public byte[] formatSignature(SignatureOptions sigOpt) throws Exception
 	{		
 		// Inicializamos el registro de proveedores
 		
@@ -69,6 +69,11 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		/*for ( Enumeration enu= ksh.aliases();  enu.hasMoreElements(); ){
 			System.out.println("Next elem: " + enu.nextElement());	
 		}*/
+		
+		byte[] toSign= sigOpt.getToSignByteArray();
+		X509Certificate sCer= sigOpt.getCertificate();
+		PrivateKey pk= sigOpt.getPrivateKey();
+		Provider pv= sigOpt.getProvider();
 		
 		log.debug("Using XAdESSignatureFactory");
 		log.debug(pv.getName() + " provider found");
@@ -116,9 +121,9 @@ public class XAdESSignatureFactory extends AbstractSignatureFactory implements I
 		//Prepare the signature
 		//TODO: Role support in the signature
 		Signature sig = sdoc.prepareSignature((X509Certificate) sCer, new String[] { signerRole }, null);
-	  CertValue cval=null;	
+	    CertValue cval=null;	
 		
-    //Do the signature
+        //Do the signature
 		byte[] sidigest= sig.getSignedContent();
 		if ( sidigest == null ){
 			_strerr= LabelManager.get("ERROR_DDOC_NODIGEST");

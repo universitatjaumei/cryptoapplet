@@ -12,14 +12,16 @@ import es.uji.dsign.util.i18n.LabelManager;
 public class RawSignatureFactory  extends AbstractSignatureFactory implements ISignFormatProvider {
 	private String _strerr= "";
 		
-	public byte[] formatSignature(byte[] datos, X509Certificate sCer, PrivateKey pk, Provider pv) throws KeyStoreException, Exception
+	public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
 	{
 		
-		System.out.println("Entro!");
+		byte[] datos= sigOpt.getToSignByteArray();
+		X509Certificate sCer= sigOpt.getCertificate();
+		PrivateKey pk= sigOpt.getPrivateKey();
+		Provider pv= sigOpt.getProvider();
 		
 		Signature rsa = Signature.getInstance( "SHA1withRSA", pv );
 		
-
 		if ( sCer == null ){
 			_strerr= LabelManager.get("ERR_RAW_NOCERT");
 			return null;

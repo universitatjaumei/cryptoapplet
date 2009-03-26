@@ -36,10 +36,14 @@ import org.w3c.dom.Document;
 
 public class XMLDsigSignatureFactory extends AbstractSignatureFactory implements ISignFormatProvider{
 
-	public byte[] formatSignature(byte[] toSign, X509Certificate cer,
-			PrivateKey pk, Provider pv) throws Exception {
+	public byte[] formatSignature(SignatureOptions sigOpt) throws Exception {
 		try{		
 			super.initProviderList();
+			
+			byte[] toSign= sigOpt.getToSignByteArray();
+			X509Certificate cer= sigOpt.getCertificate();
+			PrivateKey pk= sigOpt.getPrivateKey();
+			Provider pv= sigOpt.getProvider();
 								
 			//We create DOM XMLSigantureFactory
 	        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");

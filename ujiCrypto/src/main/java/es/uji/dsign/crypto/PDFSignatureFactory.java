@@ -170,15 +170,17 @@ public class PDFSignatureFactory extends AbstractSignatureFactory implements ISi
 
 
 
-	public byte[] formatSignature(byte[] datos, X509Certificate sCer, PrivateKey pk, Provider pv) throws KeyStoreException, Exception
+	public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
 	{
 		try{
 			
 			// Initialize the provider list 
 			super.initProviderList();
 
-			this.pk= pk;
-			this.pv=pv;
+			byte[] datos= sigOpt.getToSignByteArray(); 
+			X509Certificate sCer= sigOpt.getCertificate();
+			this.pk= sigOpt.getPrivateKey();
+			this.pv= sigOpt.getProvider();
 
 			if (OS.isWindowsUpperEqualToNT())
 			{
