@@ -18,6 +18,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
 import es.uji.dsign.crypto.ISignFormatProvider;
+import es.uji.dsign.crypto.SignatureOptions;
 import es.uji.dsign.crypto.X509CertificateHandler;
 import es.uji.dsign.crypto.XAdESCoSignatureFactory;
 import es.uji.dsign.crypto.XAdESSignatureFactory;
@@ -227,7 +228,14 @@ public class SignatureThread extends Thread
 					IKeyStoreHelper kAux= xcert.getKeyStore();
 					
 					try{ 
-						sig= signer.formatSignature( in, xcert.getCertificate(), (PrivateKey) kAux.getKey(xcert.getAlias()),kAux.getProvider());
+						//Set up the data for the signature handling.
+						SignatureOptions sigOpt= new SignatureOptions();
+						sigOpt.setToSignByteArray(in);
+						sigOpt.setCertificate(xcert.getCertificate());
+						sigOpt.setPrivateKey((PrivateKey)kAux.getKey(xcert.getAlias()));
+						sigOpt.setProvider(kAux.getProvider());
+						
+						sig= signer.formatSignature(sigOpt);
 					}
 					catch(Exception e){
 						e.printStackTrace();
@@ -246,11 +254,14 @@ public class SignatureThread extends Thread
 					}
 
 					_mw.getGlobalProgressBar().setValue(_ini_percent + 7*inc);
+					//System.out.println("Setting input data ... ");
+					
 					if ( sig != null )	
 						try{
 							outputParams.setSignData(sig);
 						}
 						catch(Exception e){
+							System.out.println("Exception launch");
 							throw new SignatureAppletException("ERROR_CANNOT_SET_OUTPUT_DATA");
 						}
 					else 	
