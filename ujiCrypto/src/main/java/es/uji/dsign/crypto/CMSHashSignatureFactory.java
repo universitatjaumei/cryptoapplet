@@ -28,11 +28,16 @@ public class CMSHashSignatureFactory extends AbstractSignatureFactory implements
 	private Logger log = Logger.getLogger(CMSHashSignatureFactory.class);
 	private String _strerr= "";
 
-	public byte[] formatSignature(byte[] hash, X509Certificate sCer, PrivateKey pk, Provider pv) throws KeyStoreException, Exception
+	public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
 	{
 		// Init the provider registry
 		super.initProviderList();
 
+		byte[] hash= sigOpt.getToSignByteArray();
+		X509Certificate sCer= sigOpt.getCertificate();
+		PrivateKey pk= sigOpt.getPrivateKey();
+		Provider pv= sigOpt.getProvider();
+		
 		MyCMSSignedDataGenerator gen = new MyCMSSignedDataGenerator();
 
 		if ( sCer == null ){

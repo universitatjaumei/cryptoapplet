@@ -28,8 +28,13 @@ public class CMSSignatureFactory extends AbstractSignatureFactory implements ISi
     private Logger log = Logger.getLogger(CMSSignatureFactory.class);
     private String _strerr= "";
     
-	public byte[] formatSignature(byte[] content, X509Certificate sCer, PrivateKey pk, Provider pv) throws KeyStoreException, Exception
+	public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
 	{
+		byte[] content= sigOpt.getToSignByteArray();
+		X509Certificate sCer= sigOpt.getCertificate();
+		PrivateKey pk= sigOpt.getPrivateKey();
+		Provider pv= sigOpt.getProvider();
+		
 		// Init the provider registry
 		super.initProviderList();
 		
