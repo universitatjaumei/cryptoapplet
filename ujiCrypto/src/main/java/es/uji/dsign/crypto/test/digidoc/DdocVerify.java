@@ -42,7 +42,7 @@ public class DdocVerify {
 				
 				System.out.println("  Firmado por: " + sig.getKeyInfo().getSubjectDN());
 				System.out.println("  Información de timestamp: ");
-				System.out.println("    Fecha: " + sig.getTimestampInfo(0).getTime());
+				System.out.println("  Fecha: " + sig.getTimestampInfo(0).getTime());
 		
 				System.out.print("  Resultado de la verificación: ");
 				

@@ -24,7 +24,8 @@ import es.uji.dsign.util.RegQuery;
 public class Mozilla
 {
 	private String _userHome;
-	private String _profileDir, _userAppDataDir;
+	private String[] _profileDir;
+        private String _userAppDataDir;
 	private String _lockFile, _execName;
 	boolean _linux = false, _windows = false, _mac= false;
 
@@ -37,7 +38,8 @@ public class Mozilla
 
 		if (OS.isLinux())
 		{
-			_profileDir = _userHome + "/.mozilla/firefox/";
+                        _profileDir= new String[1];
+			_profileDir[0] = _userHome + "/.mozilla/firefox/";
 			_lockFile = ".parentlock";
 			_linux = true;
 			_execName = "firefox";
@@ -47,14 +49,17 @@ public class Mozilla
 			RegQuery rq = new RegQuery();
 
 			_userAppDataDir = rq.getCurrentUserPersonalFolderPath();
-			_profileDir = _userAppDataDir + "\\Mozilla\\Firefox\\Profiles\\";
+			_profileDir= new String[1];
+			_profileDir[0] = _userAppDataDir + "\\Mozilla\\Firefox\\Profiles\\";
 			_lockFile = "parent.lock";
 			_windows = true;
 			_execName = "firefox.exe";
 		}
 		else if (OS.isMac())
 		{
-			_profileDir = _userHome + "/.mozilla/firefox/";
+                        _profileDir= new String[2]; 
+			_profileDir[0] = _userHome + "/.mozilla/firefox/";
+			_profileDir[1] = _userHome + "/Library/Application Support/Firefox/Profiles/";
 			_lockFile = ".parentlock";
 			_mac = true;
 			_execName = "firefox";
@@ -92,23 +97,26 @@ public class Mozilla
 	 */
 	public Vector<String> getProfiledirs()
 	{
-		File dir = new File(_profileDir);
+	     Vector<String> profiles = new Vector<String>();
+             
+	     for (int i = 0; i < _profileDir.length; i++){
+		File dir = new File(_profileDir[i]);
 		String aux[] = dir.list();
-		Vector<String> profiles = new Vector<String>();
 
 		if (aux != null)
 		{
-			for (int i=0; i<aux.length; i++)
+			for (int j=0; j<aux.length; j++)
 			{
-				dir = new File(_profileDir + aux[i]);
+				dir = new File(_profileDir[i] + aux[j]);
 				if (dir.isDirectory())
 				{
-					profiles.add(_profileDir + aux[i]);
+					profiles.add(_profileDir[i] + aux[j]);
 				}
 			}
 		}
+             }
 
-		return profiles;
+	     return profiles;
 	}
 
 	/**

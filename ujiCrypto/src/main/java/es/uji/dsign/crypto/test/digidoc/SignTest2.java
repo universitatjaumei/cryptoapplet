@@ -47,23 +47,19 @@ public class SignTest2 {
 
 			//XFact.formatSignature(mks, alias, "Hola como lo llevamos".getBytes(), null);
 
-
-
-
 			//log.debug("Using XAdESSignatureFactory");
 			//log.debug(ksh.getProvider().getName() + " provider found");
 
 			// Leemos el fichero de configuracion
-			ConfigManager.init("etc/jdigidoc.cfg");
+			ConfigManager.init("/tmp/jdigidoc.cfg");
 			//log.debug("JDigidoc configuration file loaded");
 
 			// Creamos un nuevo SignedDoc XAdES
 			SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
 
 			// Añadimos una nueva referencia de fichero en base64 ... aunque establecemos el body 
-			DataFile df = sdoc.addDataFile(new File("/tmp/data.xml"), "application/binary", DataFile.CONTENT_EMBEDDED_BASE64);		
-
-			df.setBody(ConvertUtils.str2data("hola como estamos"), "UTF8");
+			DataFile df = sdoc.addDataFile(new File("/tmp/f"), "application/binary", DataFile.CONTENT_DETATCHED /*.CONTENT_EMBEDDED_BASE64*/);		
+			//df.setBody(ConvertUtils.str2data("hola como estamos"), "UTF8");
 
 			Certificate cert = null;
 
@@ -80,21 +76,22 @@ public class SignTest2 {
 			Signature sig = sdoc.prepareSignature((X509Certificate) cert, new String[] { "PDI" }, null);
 
 			// Firmamos
+			System.out.println("\n\n\nSignedContent: " + new String(sig.getSignedContent()) + "\n\n\n");
 			byte[] sidigest= sig.getSignedContent();
 			java.security.Signature rsa = java.security.Signature.getInstance("SHA1withRSA", mks.getProvider());
 			rsa.initSign(privKey);
 			rsa.update(sidigest);
 			byte[] res = rsa.sign();
 
-			//log.debug("Signing XAdES info. XAdES signature length " + res.length);
+			// log.debug("Signing XAdES info. XAdES signature length " + res.length);
 
 			// Añadimos la firma al SignedDoc
 			sig.setSignatureValue(res);
 
 			// Verificación OCSP
-			sig.getConfirmation();
+			// sig.getConfirmation();
 
-
+			/*
 			// Obtenemos el timestamp y lo añadimos 
 			TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
 
@@ -149,14 +146,16 @@ public class SignTest2 {
 			cval.setType(CertValue.CERTVAL_TYPE_TSA);
 			cval.setCert(xcaCert);
 			cval.setId(sig.getId() + "-TSA_CERT");
-
+			*/
 
 			System.out.println("SIGNED DOC: " + sdoc.toXML());
+			sdoc.writeToFile(new File("/tmp/sig.xml"));
 
+			
 			//log.debug("OSCP: Verify certificates");
 
 			//TODO: Eliminar, solo desarrollo
-			{
+			/*{
 				String xadesFile = System.getProperty("user.home") + System.getProperty("file.separator") + "data.ddoc";			
 				sdoc.writeToFile(new File(xadesFile));
 
@@ -167,13 +166,13 @@ public class SignTest2 {
 				for (int i=0 ; i<sdoc.countSignatures() ; i++) 
 				{
 					sig = sdoc.getSignature(i);
-					/*log.debug("Signature: " + sig.getId() + " - " +
-							  sig.getKeyInfo().getSubjectLastName() + "," +
-							  sig.getKeyInfo().getSubjectFirstName() + "," +
-							  sig.getKeyInfo().getSubjectPersonalCode());
+					//log.debug("Signature: " + sig.getId() + " - " +
+					//		  sig.getKeyInfo().getSubjectLastName() + "," +
+					//		  sig.getKeyInfo().getSubjectFirstName() + "," +
+					//		  sig.getKeyInfo().getSubjectPersonalCode());
 
-					log.debug("SigInfo: " + sig.getSignedInfo().toString());
-					 */
+					//log.debug("SigInfo: " + sig.getSignedInfo().toString());
+					 
 					ArrayList errs = sig.verify(sdoc, false, false);
 
 					if(errs.size() == 0)
@@ -188,7 +187,7 @@ public class SignTest2 {
 						}
 					}
 				}
-			}
+			}*/
 			
 	}catch (Exception e){
 		e.printStackTrace();
