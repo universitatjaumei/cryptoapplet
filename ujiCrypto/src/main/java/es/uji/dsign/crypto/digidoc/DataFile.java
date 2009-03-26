@@ -761,7 +761,7 @@ public class DataFile implements Serializable
             FileInputStream is = null;
             if(m_body == null && !m_contentType.equals(CONTENT_DETATCHED)) {
                 is = new FileInputStream(m_fileName);
-                int fSize = (int)new File(m_fileName).length();
+                long fSize = new File(m_fileName).length();
                 setSize(fSize);
                
             }
@@ -897,9 +897,11 @@ public class DataFile implements Serializable
             while((fRead = is.read(buf)) == block_size) {
                 sha.update(buf);
             }
-            byte[] buf2 = new byte[fRead];
-            System.arraycopy(buf, 0, buf2, 0, fRead);
-            sha.update(buf2);
+            if ( fRead > 0 ){
+            	byte[] buf2 = new byte[fRead];
+            	System.arraycopy(buf, 0, buf2, 0, fRead);
+            	sha.update(buf2);
+            }
             is.close();
             digest = sha.digest();
             //System.out.println("DataFile: \'" + getId() + 
