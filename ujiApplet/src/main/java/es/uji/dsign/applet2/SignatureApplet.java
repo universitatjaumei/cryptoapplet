@@ -68,7 +68,21 @@ public class SignatureApplet extends JApplet
 		}
 		
 		try{
+			System.out.println("Invoking netscape.javascript.JSObject onInintOk");
 			netscape.javascript.JSObject.getWindow(this).call("onInitOk", new String[] {});	
+			
+			 
+			System.out.println("onInitOk should be invoked, we pass netscape.javascript.JSObject.getWindow(this).call(\"onInitOk\", new String[] {}); with no exception.");
+			
+			/*TODO: Testing purposes, take this out
+			setInputDataEncoding("PLAIN");
+			setSignatureOutputFormat("XADES");
+			setXadesSignerRole("R1|R2");
+			setXadesFileName("fichero.pdf");
+			setXadesFileMimeType("application/pdf");
+			signDataUrlToUrl("http://www.uji.es","http://lab9083.act.uji.es/~paul/test/write.php");
+		 	... END This OUT ... */
+			
 		}
 		catch (Exception ex){
 			ex.printStackTrace();
@@ -427,8 +441,10 @@ public class SignatureApplet extends JApplet
 				
 				apph.setInput(input);
 				apph.setOutput(output);
-
+				System.out.println("Initializing Window ... ");
 				initializeWindow();	
+				System.out.println("Window  initialized");
+				
 				return null;
 			}
 		});
