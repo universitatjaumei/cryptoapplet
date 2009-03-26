@@ -58,6 +58,7 @@ public class XAdESSignatureVerifier {
 			boolean isvalid= true;
 			Vector<String> outErrs= new Vector<String>();
 
+			System.out.println("Let's go!");
 			for (int i=0 ; i<sdoc.countSignatures() ; i++) 
 			{
 				sig = sdoc.getSignature(i);
