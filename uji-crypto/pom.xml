@@ -4,23 +4,22 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>es.uji</groupId>
-  <artifactId>ujiCrypto</artifactId>
-  <version>2.0.5</version>
-  <name>ujiCrypto</name>
-  <url>http://proyectostic.uji.es/cryptoapplet/</url>
+  <groupId>es.uji.security</groupId>
+  <artifactId>uji-crypto</artifactId>
+  <version>2.1.0</version>
+  <name>uji-crypto</name>
 
   <parent>
-    <groupId>es.uji</groupId>
+    <groupId>es.uji.security</groupId>
     <artifactId>CryptoApplet</artifactId>
-    <version>2.0.5</version>
+    <version>2.1.0</version>
   </parent>
  
   <dependencies>
     <dependency>
-      <groupId>es.uji</groupId>
-      <artifactId>ujiUtils</artifactId>
-      <version>2.0.5</version>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-utils</artifactId>
+      <version>2.1.0</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
