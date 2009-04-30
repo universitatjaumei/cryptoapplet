@@ -8,35 +8,24 @@ import java.awt.event.AdjustmentListener;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
 
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 
-import es.uji.dsign.crypto.PDFSignatureFactory;
-import es.uji.dsign.crypto.SHA1Digest;
 import es.uji.dsign.crypto.TimeStampFactory;
-import es.uji.dsign.crypto.digidoc.CertValue;
-import es.uji.dsign.crypto.digidoc.SignedDoc;
-import es.uji.dsign.crypto.digidoc.TimestampInfo;
-import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
 import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
 import es.uji.dsign.util.ConfigHandler;
-import es.uji.dsign.util.i18n.LabelManager;
 
 public class AppEnvironmentTester extends Thread {
 	
