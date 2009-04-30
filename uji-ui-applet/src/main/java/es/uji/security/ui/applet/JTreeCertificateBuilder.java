@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2;
+package es.uji.security.ui.applet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 

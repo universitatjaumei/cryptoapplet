@@ -1,12 +1,11 @@
-package es.uji.dsign.applet2;
+package es.uji.security.ui.applet;
 
-import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
 import es.uji.dsign.util.i18n.LabelManager;
-import es.uji.dsign.applet2.io.FuncOutputParams;
-import es.uji.dsign.applet2.io.ParamInputData;
-import es.uji.dsign.applet2.io.URLInputParams;
-import es.uji.dsign.applet2.io.URLOutputParams;
 import es.uji.security.crypto.openxades.XAdESSignatureVerifier;
+import es.uji.security.ui.applet.io.FuncOutputParams;
+import es.uji.security.ui.applet.io.ParamInputData;
+import es.uji.security.ui.applet.io.URLInputParams;
+import es.uji.security.ui.applet.io.URLOutputParams;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;

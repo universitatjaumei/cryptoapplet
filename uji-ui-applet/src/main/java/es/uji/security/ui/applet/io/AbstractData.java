@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2.io;
+package es.uji.security.ui.applet.io;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

@@ -1,8 +1,9 @@
-package es.uji.dsign.applet2.io;
+package es.uji.security.ui.applet.io;
 
 import javax.swing.JApplet;
 
-import es.uji.dsign.applet2.SignatureApplet;
+import es.uji.security.ui.applet.SignatureApplet;
+
 import java.util.Hashtable;
 
 ;

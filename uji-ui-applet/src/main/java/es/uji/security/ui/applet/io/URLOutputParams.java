@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2.io;
+package es.uji.security.ui.applet.io;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -8,7 +8,8 @@ import java.net.URLEncoder;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
-import es.uji.dsign.applet2.SignatureApplet;
+
+import es.uji.security.ui.applet.SignatureApplet;
 
 import netscape.javascript.JSObject;
 

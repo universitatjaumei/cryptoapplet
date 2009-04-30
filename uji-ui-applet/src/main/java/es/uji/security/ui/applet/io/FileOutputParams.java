@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2.io;
+package es.uji.security.ui.applet.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,8 +8,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import es.uji.dsign.applet2.SignatureApplet;
 import es.uji.dsign.util.OS;
+import es.uji.security.ui.applet.SignatureApplet;
 
 public class FileOutputParams implements OutputParams
 {
