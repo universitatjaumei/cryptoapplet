@@ -1,6 +1,6 @@
 package es.uji.dsign.applet2.junit;
 
-import es.uji.dsign.applet2.*;
+import es.uji.security.ui.applet.*;
 
 public class DesktopApplicationTest
 {

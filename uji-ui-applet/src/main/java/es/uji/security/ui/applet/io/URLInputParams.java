@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2.io;
+package es.uji.security.ui.applet.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import javax.swing.JApplet;
 
 import es.uji.dsign.util.OS;
 
-import es.uji.dsign.applet2.SignatureApplet;
+import es.uji.security.ui.applet.SignatureApplet;
 
 public class URLInputParams extends AbstractData implements InputParams
 {

@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2;
+package es.uji.security.ui.applet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -28,11 +28,6 @@ import netscape.javascript.JSObject;
 import es.uji.dsign.util.HexDump;
 import es.uji.dsign.util.OS;
 import es.uji.dsign.util.i18n.LabelManager;
-import es.uji.dsign.applet2.io.FileInputParams;
-import es.uji.dsign.applet2.io.FileOutputParams;
-import es.uji.dsign.applet2.io.InputParams;
-import es.uji.dsign.applet2.io.OutputParams;
-import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.dnie.Dnie;
@@ -40,6 +35,10 @@ import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.mozilla.MozillaKeyStore;
 import es.uji.security.keystore.mscapi.MsCapiKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.security.ui.applet.io.FileInputParams;
+import es.uji.security.ui.applet.io.FileOutputParams;
+import es.uji.security.ui.applet.io.InputParams;
+import es.uji.security.ui.applet.io.OutputParams;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;

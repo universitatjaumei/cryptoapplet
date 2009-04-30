@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2;
+package es.uji.security.ui.applet;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;

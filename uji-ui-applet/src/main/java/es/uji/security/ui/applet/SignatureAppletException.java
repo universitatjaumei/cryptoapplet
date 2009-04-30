@@ -1,4 +1,4 @@
-package es.uji.dsign.applet2.Exceptions;
+package es.uji.security.ui.applet;
 
 import es.uji.dsign.util.i18n.LabelManager;
 

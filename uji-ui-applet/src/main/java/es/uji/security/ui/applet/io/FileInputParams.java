@@ -1,12 +1,12 @@
-package es.uji.dsign.applet2.io;
+package es.uji.security.ui.applet.io;
 
 import java.io.File;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import es.uji.dsign.applet2.SignatureApplet;
 import es.uji.dsign.util.OS;
+import es.uji.security.ui.applet.SignatureApplet;
 
 public class FileInputParams extends AbstractData implements InputParams
 {
