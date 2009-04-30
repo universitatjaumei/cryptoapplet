@@ -15,9 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import es.uji.dsign.util.Base64;
-import es.uji.dsign.util.HexEncoder;
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.openxades.XAdESCoSignatureFactory;
@@ -26,6 +23,9 @@ import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
+import es.uji.security.util.Base64;
+import es.uji.security.util.HexEncoder;
+import es.uji.security.util.i18n.LabelManager;
 
 public class SignatureThread extends Thread
 {

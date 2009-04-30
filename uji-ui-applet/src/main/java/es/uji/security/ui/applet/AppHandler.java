@@ -25,9 +25,6 @@ import javax.swing.JOptionPane;
 
 import netscape.javascript.JSObject;
 
-import es.uji.dsign.util.HexDump;
-import es.uji.dsign.util.OS;
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.dnie.Dnie;
@@ -39,6 +36,9 @@ import es.uji.security.ui.applet.io.FileInputParams;
 import es.uji.security.ui.applet.io.FileOutputParams;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
+import es.uji.security.util.HexDump;
+import es.uji.security.util.OS;
+import es.uji.security.util.i18n.LabelManager;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;

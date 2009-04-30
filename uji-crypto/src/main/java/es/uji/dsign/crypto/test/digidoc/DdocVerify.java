@@ -8,7 +8,7 @@ import es.uji.dsign.crypto.digidoc.Signature;
 import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.factory.DigiDocFactory;
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
-import es.uji.dsign.util.Base64;
+import es.uji.security.util.Base64;
 
 
 public class DdocVerify {

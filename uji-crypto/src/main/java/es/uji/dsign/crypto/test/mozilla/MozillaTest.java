@@ -5,8 +5,8 @@ import java.io.ByteArrayOutputStream;
 import org.bouncycastle.util.encoders.HexEncoder;
 
 import es.uji.dsign.crypto.mozilla.Mozilla;
-import es.uji.dsign.util.Base64;
-import es.uji.dsign.util.RegQuery;
+import es.uji.security.util.Base64;
+import es.uji.security.util.RegQuery;
 
 
 public class MozillaTest

@@ -1,4 +1,4 @@
-package es.uji.dsign.util.i18n;
+package es.uji.security.util.i18n;
 
 import java.util.Enumeration;
 import java.util.Properties;

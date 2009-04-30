@@ -3,8 +3,8 @@ package es.uji.security.ui.applet.io;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import es.uji.dsign.util.Base64;
 import es.uji.security.ui.applet.SignatureApplet;
+import es.uji.security.util.Base64;
 
 public class FuncOutputParams implements OutputParams
 {

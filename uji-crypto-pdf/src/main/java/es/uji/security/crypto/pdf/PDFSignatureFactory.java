@@ -17,10 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 
-import es.uji.dsign.util.Base64;
-import es.uji.dsign.util.ConfigHandler;
-import es.uji.dsign.util.OS;
-import es.uji.dsign.util.RegQuery;
 
 import java.lang.ClassLoader;
 
@@ -36,9 +32,13 @@ import com.lowagie.text.pdf.PdfString;
 import com.lowagie.text.pdf.TSAClient;
 import com.lowagie.text.pdf.TSAClientBouncyCastle;
 
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.util.Base64;
+import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.OS;
+import es.uji.security.util.RegQuery;
+import es.uji.security.util.i18n.LabelManager;
 
 public class PDFSignatureFactory implements ISignFormatProvider
 {

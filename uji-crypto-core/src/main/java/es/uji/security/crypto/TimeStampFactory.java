@@ -12,7 +12,7 @@ import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
 
-import es.uji.dsign.util.Base64;
+import es.uji.security.util.Base64;
 
 public class TimeStampFactory
 {

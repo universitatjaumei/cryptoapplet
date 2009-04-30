@@ -9,9 +9,9 @@ import java.util.Properties;
 import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.factory.DigiDocFactory;
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
-import es.uji.dsign.util.ConfigHandler;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.util.ConfigHandler;
 
 public class XAdESCoSignatureFactory implements ISignFormatProvider
 {

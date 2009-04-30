@@ -31,7 +31,7 @@
 
 /* $Id: Base64.java,v 1.4 2006/06/21 19:10:07 cara Exp $ */
 
-package es.uji.dsign.util;
+package es.uji.security.util;
 
 /**
  * This class provides encode/decode for RFC 2045 Base64 as defined by RFC 2045, N. Freed and N.

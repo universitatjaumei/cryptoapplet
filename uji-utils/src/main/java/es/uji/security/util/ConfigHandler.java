@@ -1,4 +1,4 @@
-package es.uji.dsign.util;
+package es.uji.security.util;
 
 import java.io.FileInputStream;
 import java.io.InputStream;

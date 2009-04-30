@@ -8,8 +8,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import es.uji.dsign.util.OS;
 import es.uji.security.ui.applet.SignatureApplet;
+import es.uji.security.util.OS;
 
 public class FileOutputParams implements OutputParams
 {

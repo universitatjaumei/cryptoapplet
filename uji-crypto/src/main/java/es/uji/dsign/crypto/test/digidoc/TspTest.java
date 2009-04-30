@@ -12,7 +12,8 @@ import java.security.cert.CertificateFactory;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.jce.provider.*;
-import es.uji.dsign.util.HexDump;
+
+import es.uji.security.util.HexDump;
 
 public class TspTest {
 

@@ -7,9 +7,9 @@ import java.net.URLConnection;
 
 import javax.swing.JApplet;
 
-import es.uji.dsign.util.OS;
 
 import es.uji.security.ui.applet.SignatureApplet;
+import es.uji.security.util.OS;
 
 public class URLInputParams extends AbstractData implements InputParams
 {

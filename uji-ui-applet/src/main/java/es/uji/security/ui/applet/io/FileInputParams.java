@@ -5,8 +5,8 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import es.uji.dsign.util.OS;
 import es.uji.security.ui.applet.SignatureApplet;
+import es.uji.security.util.OS;
 
 public class FileInputParams extends AbstractData implements InputParams
 {

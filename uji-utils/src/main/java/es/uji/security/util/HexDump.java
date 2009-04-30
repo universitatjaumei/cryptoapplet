@@ -31,7 +31,7 @@
 
 /* $Id: HexDump.java,v 1.3 2006/04/17 21:08:26 cara Exp $ */
 
-package es.uji.dsign.util;
+package es.uji.security.util;
 
 /**
  * This class implements hex output functionality

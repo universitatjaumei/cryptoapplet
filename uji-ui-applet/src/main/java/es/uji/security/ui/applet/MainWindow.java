@@ -26,7 +26,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import es.uji.dsign.util.i18n.LabelManager;
+import es.uji.security.util.i18n.LabelManager;
 
 public class MainWindow
 {

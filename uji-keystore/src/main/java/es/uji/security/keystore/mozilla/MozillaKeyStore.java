@@ -20,9 +20,9 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Random;
 
-import es.uji.dsign.util.OS;
-import es.uji.dsign.util.RegQuery;
 import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.util.OS;
+import es.uji.security.util.RegQuery;
 
 public class MozillaKeyStore implements IKeyStoreHelper
 {
