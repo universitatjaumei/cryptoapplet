@@ -1,14 +1,28 @@
 package es.uji.security.crypto.cms;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Security;
-import java.security.cert.*;
 import java.security.MessageDigest;
-import java.security.interfaces.*;
 import java.security.Signature;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
@@ -17,11 +31,16 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Vector;
 
-import org.bouncycastle.cms.*;
-import org.bouncycastle.jce.provider.*;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.SignerId;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SignerInformationStore;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class CMSSignatureVerifier
 {
@@ -74,35 +93,23 @@ public class CMSSignatureVerifier
         }
     }
 
-    // Inicializa proveedor de funcionalidades criptográficas BouncyCastle.
-    private void providerInit()
-    {
-        if (Security.getProvider("BC") == null)
-        {
-            BouncyCastleProvider bcp = new BouncyCastleProvider();
-            Security.insertProviderAt(bcp, 2);
-        }
-    }
-
     private boolean verifyAgainstCA(CertStore certs)
     {
         boolean result = false;
 
         try
         {
-            List certChain = new ArrayList();
+            List<Certificate> certChain = new ArrayList<Certificate>();
             X509Certificate rootCert = _IntCert[0];
-            Collection certCollection = certs.getCertificates(null);
+            Collection<? extends Certificate> certCollection = certs.getCertificates(null);
             certChain.add(rootCert);
 
             for (int i = 1; i < _IntCert.length; i++)
                 certChain.add(_IntCert[i]);
 
-            Iterator certIt = certCollection.iterator();
-
-            for (int i = 0; i < certCollection.size(); i++)
+            for (Certificate c : certCollection)
             {
-                certChain.add((X509Certificate) certIt.next());
+                certChain.add(c);
             }
 
             CollectionCertStoreParameters ccsp = new CollectionCertStoreParameters(certChain);
@@ -194,22 +201,20 @@ public class CMSSignatureVerifier
     // datos en texto plano y que además, la cadena de certificación
     // ofrecida como primer argumento del constructor, valida la
     // .
+    @SuppressWarnings("unchecked")
     private boolean verifyCMS(CMSSignedData aSignedData) throws CMSException,
             NoSuchProviderException, NoSuchAlgorithmException, CertStoreException,
             CertificateNotYetValidException, CertificateExpiredException
     {
-
-        providerInit();
         CertStore certs = aSignedData.getCertificatesAndCRLs("Collection", "BC");
 
         SignerInformationStore signers = aSignedData.getSignerInfos();
-        Collection c = signers.getSigners();
-        Iterator it = c.iterator();
+        Collection<SignerInformation> c = signers.getSigners();
 
         boolean verificationResult = false;
-        while (it.hasNext())
+
+        for (SignerInformation signer : c)
         {
-            SignerInformation signer = (SignerInformation) it.next();
             SignerId signerId = signer.getSID();
             Collection certCollection = certs.getCertificates(signerId);
 
@@ -222,9 +227,8 @@ public class CMSSignatureVerifier
             _signature = signer.getSignature();
             _pk = (RSAPublicKey) cert.getPublicKey();
 
-            AttributeTable signedAttrTable = signer.getSignedAttributes();
-
             Signature sig = Signature.getInstance("Sha1withRSAEncryption");
+            
             try
             {
                 sig.initVerify(_pk);
@@ -242,9 +246,6 @@ public class CMSSignatureVerifier
             NoSuchProviderException, NoSuchAlgorithmException, CertStoreException,
             CertificateNotYetValidException, CertificateExpiredException
     {
-
-        providerInit();
-
         CMSProcessableByteArray cmsByteArray = new CMSProcessableByteArray(aDataBytes);
 
         CMSSignedData cmsSd = new CMSSignedData(cmsByteArray, aSignature);

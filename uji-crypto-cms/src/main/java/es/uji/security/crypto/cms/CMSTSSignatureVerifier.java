@@ -7,7 +7,6 @@ import java.util.Vector;
 
 public class CMSTSSignatureVerifier
 {
-
     // TODO: Implement this ...
     public static boolean verifyTS(String[] tsaPaths, InputStream bsig, InputStream bts)
     {
