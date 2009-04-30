@@ -9,7 +9,6 @@ import java.security.Security;
 import java.security.interfaces.RSAPublicKey;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
-import org.bouncycastle.cms.*;
 import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.jce.provider.*;
 

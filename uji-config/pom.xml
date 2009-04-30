@@ -17,9 +17,9 @@
 
   <dependencies>
   	<dependency>
-  		<groupId>log4j</groupId>
-  		<artifactId>log4j</artifactId>
-  		<version>1.2.14</version>
+  	  <groupId>log4j</groupId>
+  	  <artifactId>log4j</artifactId>
+  	  <version>1.2.14</version>
   	</dependency>
   </dependencies>
   
@@ -32,6 +32,24 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <keystore>${uji.keytool.keystore}</keystore>
+          <alias>${uji.keytool.alias}</alias>
+          <storepass>${uji.keytool.password}</storepass>
+          <signedjar>target/${project.build.finalName}-signed.jar</signedjar>
+          <verify>true</verify>
+        </configuration>
+      </plugin>
     </plugins>
-  </build>  
+  </build>
 </project>
