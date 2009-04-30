@@ -38,12 +38,13 @@
   <modules>
     <module>uji-config</module>
     <module>uji-utils</module>
-    <module>uji-crypto</module>
-    <module>uji-crypto-hash</module>
+    <module>uji-crypto-core</module>
+    <module>uji-crypto-raw</module>
     <module>uji-crypto-cms</module>
     <module>uji-crypto-xmldsign</module>
     <module>uji-crypto-openxades</module>
     <module>uji-crypto-pdf</module>
+    <module>uji-keystore</module>
     <module>uji-ui-applet</module>
   </modules>
 

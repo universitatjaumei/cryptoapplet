@@ -41,7 +41,7 @@
           <target>1.5</target>
         </configuration>
       </plugin>
-      
+
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
@@ -52,13 +52,13 @@
           </execution>
         </executions>
         <configuration>
-          <keystore>${ujiApplet.keytool.keystore}</keystore>
-          <alias>${ujiApplet.keytool.alias}</alias>
-          <storepass>${ujiApplet.keytool.password}</storepass>
+          <keystore>${uji.keytool.keystore}</keystore>
+          <alias>${uji.keytool.alias}</alias>
+          <storepass>${uji.keytool.password}</storepass>
           <signedjar>target/${project.build.finalName}-signed.jar</signedjar>
           <verify>true</verify>
         </configuration>
       </plugin>
     </plugins>
-  </build>  
+  </build>
 </project>
