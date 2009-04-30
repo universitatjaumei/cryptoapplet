@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Vector;
 
-import es.uji.dsign.crypto.digidoc.DigiDocException;
-import es.uji.dsign.crypto.digidoc.Signature;
-import es.uji.dsign.crypto.digidoc.SignedDoc;
-import es.uji.dsign.crypto.digidoc.factory.DigiDocFactory;
-import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
+import es.uji.security.crypto.openxades.digidoc.Signature;
+import es.uji.security.crypto.openxades.digidoc.SignedDoc;
+import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
+import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
