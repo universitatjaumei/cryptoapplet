@@ -5,7 +5,7 @@
       <activeByDefault>true</activeByDefault>
     </activation>
     <properties>
-      <uji.keytool.keystore>uji.keystore</uji.keytool.keystore>
+      <uji.keytool.keystore>../uji.keystore</uji.keytool.keystore>
       <uji.keytool.alias>uji</uji.keytool.alias>
       <uji.keytool.password>cryptoapplet</uji.keytool.password>
     </properties>
