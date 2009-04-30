@@ -3,7 +3,6 @@ package es.uji.dsign.applet2;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +10,6 @@ import java.io.PrintStream;
 
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.net.ConnectException;
@@ -27,23 +25,21 @@ import javax.swing.JOptionPane;
 
 import netscape.javascript.JSObject;
 
-import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
 import es.uji.dsign.util.HexDump;
-import es.uji.dsign.util.HexEncoder;
 import es.uji.dsign.util.OS;
 import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.dsign.applet2.io.FileInputParams;
 import es.uji.dsign.applet2.io.FileOutputParams;
 import es.uji.dsign.applet2.io.InputParams;
 import es.uji.dsign.applet2.io.OutputParams;
-import es.uji.dsign.crypto.keystore.ClauerKeyStore;
-import es.uji.dsign.crypto.keystore.MsCapiKeyStore;
-import es.uji.dsign.crypto.keystore.MozillaKeyStore;
-import es.uji.dsign.crypto.keystore.PKCS11KeyStore;
-import es.uji.dsign.crypto.mozilla.Mozilla;
 import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
-import es.uji.dsign.crypto.AbstractSignatureFactory;
-import es.uji.dsign.crypto.dnie.Dnie;
+import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.clauer.ClauerKeyStore;
+import es.uji.security.keystore.dnie.Dnie;
+import es.uji.security.keystore.mozilla.Mozilla;
+import es.uji.security.keystore.mozilla.MozillaKeyStore;
+import es.uji.security.keystore.mscapi.MsCapiKeyStore;
+import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -120,8 +116,6 @@ public class AppHandler
 	private String[] signerRole;
 	private String xadesFilename;
 	private String xadesFileMimeType;
-	private String xadesContentType;
-	private String allowedCertificate;
 
 	
 	/* Logging facilities */ 
@@ -129,6 +123,36 @@ public class AppHandler
 
 	private SSLSocketFactory defaultSocketFactory;
 
+    public String[] formats= new String[]{
+        "RAW",
+        "CMS",
+        "CMS_HASH",
+        "XADES",
+        "XADES_COSIGN",
+        "PDF",                          
+        "XMLDSIG"
+        };
+	
+    public String[] impls= new String[] {
+        "es.uji.dsign.crypto.RawSignatureFactory",
+        "es.uji.dsign.crypto.CMSSignatureFactory",
+        "es.uji.dsign.crypto.CMSHashSignatureFactory",
+        "es.uji.dsign.crypto.XAdESSignatureFactory",
+        "es.uji.dsign.crypto.XAdESCoSignatureFactory",
+        "es.uji.dsign.crypto.PDFSignatureFactory",
+        "es.uji.dsign.crypto.XMLDsigSignatureFactory"
+       };                                 
+
+
+    public Hashtable<String,String> getFormatImplMapping(){
+        if (formatImplMap==null){
+            formatImplMap= new Hashtable<String,String>();
+            for (int i=0; i< formats.length; i++)
+                formatImplMap.put(formats[i], impls[i]);
+            
+        }
+        return formatImplMap;
+    }
 
 	/**
 	 * Base constructor, instantiates an AppHandler object, setting up the 
@@ -153,7 +177,7 @@ public class AppHandler
 		else
 			strNavigator = getNavigator();
 
-		formatImplMap= AbstractSignatureFactory.getFormatImplMapping();
+		formatImplMap = getFormatImplMapping();
 
 		/* Keep a copy to restore its value */
 		defaultSocketFactory= HttpsURLConnection.getDefaultSSLSocketFactory();
@@ -857,7 +881,8 @@ public class AppHandler
 	 * 
 	 * @param signOutputFormat The signature output format description
 	 */
-	public void setSignatureOutputFormat(String signOutputFormat)
+	@SuppressWarnings("unchecked")
+    public void setSignatureOutputFormat(String signOutputFormat)
 	{
 		log.debug("Received signOutputFormat= " + signOutputFormat);
 
