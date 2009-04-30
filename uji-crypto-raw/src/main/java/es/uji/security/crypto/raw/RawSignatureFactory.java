@@ -6,10 +6,10 @@ import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.security.Signature;
 
-import es.uji.dsign.util.Base64;
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.util.Base64;
+import es.uji.security.util.i18n.LabelManager;
 
 public class RawSignatureFactory implements ISignFormatProvider
 {

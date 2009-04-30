@@ -8,9 +8,9 @@ import java.security.cert.Certificate;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.X509CertificateHandler;
+import es.uji.security.util.i18n.LabelManager;
 
 public class JTreeCertificateBuilder
 {

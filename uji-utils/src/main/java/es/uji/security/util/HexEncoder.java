@@ -19,7 +19,7 @@
  *
  **/
 
-package es.uji.dsign.util;
+package es.uji.security.util;
 
 import java.io.IOException;
 import java.io.OutputStream;

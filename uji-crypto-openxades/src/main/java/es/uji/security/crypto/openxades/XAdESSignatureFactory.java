@@ -32,13 +32,13 @@ import es.uji.dsign.crypto.digidoc.Signature;
 import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.TimestampInfo;
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
-import es.uji.dsign.util.i18n.LabelManager;
-import es.uji.dsign.util.Base64;
-import es.uji.dsign.util.ConfigHandler;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SHA1Digest;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.TimeStampFactory;
+import es.uji.security.util.Base64;
+import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.i18n.LabelManager;
 
 public class XAdESSignatureFactory implements ISignFormatProvider
 {

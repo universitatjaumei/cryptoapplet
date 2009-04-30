@@ -11,7 +11,8 @@ import javax.swing.JPasswordField;
 import java.awt.Rectangle;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import es.uji.dsign.util.i18n.LabelManager;
+
+import es.uji.security.util.i18n.LabelManager;
 
 public class PasswordPrompt extends JDialog
 {

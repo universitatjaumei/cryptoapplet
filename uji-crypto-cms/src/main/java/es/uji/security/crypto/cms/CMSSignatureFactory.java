@@ -18,12 +18,12 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedGenerator;
 import org.bouncycastle.cms.MyCMSSignedDataGenerator;
 
-import es.uji.dsign.util.Base64;
-import es.uji.dsign.util.ConfigHandler;
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.TimeStampFactory;
+import es.uji.security.util.Base64;
+import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.i18n.LabelManager;
 
 public class CMSSignatureFactory implements ISignFormatProvider
 {

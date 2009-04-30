@@ -9,8 +9,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
-import es.uji.dsign.util.OS;
-import es.uji.dsign.util.RegQuery;
+import es.uji.security.util.OS;
+import es.uji.security.util.RegQuery;
 
 /**
  * 

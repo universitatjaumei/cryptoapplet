@@ -83,6 +83,6 @@ public class AbstractData
     // Test
     public static void main(String[] args)
     {
-        System.out.println(es.uji.dsign.util.HexDump.xdump(getMessageDigest("a".getBytes())));
+        System.out.println(es.uji.security.util.HexDump.xdump(getMessageDigest("a".getBytes())));
     }
 }

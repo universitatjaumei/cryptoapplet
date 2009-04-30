@@ -1,4 +1,4 @@
-package es.uji.dsign.util.net;
+package es.uji.security.util.net;
 
 import java.io.DataInputStream;
 import java.io.IOException;

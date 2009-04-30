@@ -1,4 +1,4 @@
-package es.uji.dsign.util;
+package es.uji.security.util;
 
 import java.io.InputStream;
 import java.io.StringWriter;

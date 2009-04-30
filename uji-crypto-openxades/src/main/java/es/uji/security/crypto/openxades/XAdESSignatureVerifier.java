@@ -12,8 +12,8 @@ import es.uji.dsign.crypto.digidoc.Signature;
 import es.uji.dsign.crypto.digidoc.SignedDoc;
 import es.uji.dsign.crypto.digidoc.factory.DigiDocFactory;
 import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
-import es.uji.dsign.util.ConfigHandler;
-import es.uji.dsign.util.i18n.LabelManager;
+import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.i18n.LabelManager;
 
 public class XAdESSignatureVerifier
 {

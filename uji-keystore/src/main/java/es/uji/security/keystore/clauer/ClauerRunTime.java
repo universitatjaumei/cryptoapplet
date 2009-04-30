@@ -1,7 +1,7 @@
 package es.uji.security.keystore.clauer;
 
-import es.uji.dsign.util.net.SocketDataInputStreamReader;
 import es.uji.security.keystore.clauer.ClauerHandle;
+import es.uji.security.util.net.SocketDataInputStreamReader;
 
 import java.net.Socket;
 import java.io.IOException;

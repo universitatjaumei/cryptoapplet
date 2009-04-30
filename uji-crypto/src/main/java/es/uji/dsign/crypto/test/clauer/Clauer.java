@@ -3,7 +3,7 @@ package es.uji.dsign.crypto.test.clauer;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
-import es.uji.dsign.util.OS;
+import es.uji.security.util.OS;
 
 public class Clauer {
 

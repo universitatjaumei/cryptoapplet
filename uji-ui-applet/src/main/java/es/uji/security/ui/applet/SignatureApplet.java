@@ -1,11 +1,11 @@
 package es.uji.security.ui.applet;
 
-import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.security.crypto.openxades.XAdESSignatureVerifier;
 import es.uji.security.ui.applet.io.FuncOutputParams;
 import es.uji.security.ui.applet.io.ParamInputData;
 import es.uji.security.ui.applet.io.URLInputParams;
 import es.uji.security.ui.applet.io.URLOutputParams;
+import es.uji.security.util.i18n.LabelManager;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;

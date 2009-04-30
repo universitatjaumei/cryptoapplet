@@ -8,7 +8,8 @@ import java.security.Signature;
 import java.security.interfaces.RSAPublicKey;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
-import es.uji.dsign.util.HexDump;
+
+import es.uji.security.util.HexDump;
 
 public class RawSignatureTest {
 	public static void Mydecrypt(byte[] data, RSAPublicKey key) throws Exception

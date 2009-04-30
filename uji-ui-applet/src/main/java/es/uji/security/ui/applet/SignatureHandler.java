@@ -1,6 +1,6 @@
 package es.uji.security.ui.applet;
 
-import es.uji.dsign.util.i18n.LabelManager;
+import es.uji.security.util.i18n.LabelManager;
 
 public class SignatureHandler
 {
