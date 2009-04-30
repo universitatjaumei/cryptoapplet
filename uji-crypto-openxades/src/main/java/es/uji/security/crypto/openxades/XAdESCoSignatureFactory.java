@@ -6,11 +6,11 @@ import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import es.uji.dsign.crypto.digidoc.SignedDoc;
-import es.uji.dsign.crypto.digidoc.factory.DigiDocFactory;
-import es.uji.dsign.crypto.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.openxades.digidoc.SignedDoc;
+import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
+import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.util.ConfigHandler;
 
 public class XAdESCoSignatureFactory implements ISignFormatProvider
