@@ -12,6 +12,26 @@
     <version>2.1.0</version>
   </parent>
 
+  
+  <dependencies>
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-keystore</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-openxades</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>plugin</groupId>
+      <artifactId>plugin</artifactId>
+      <version>1.5</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  
   <build>
     <plugins>
       <plugin>
@@ -21,6 +41,7 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+      
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <executions>
@@ -39,28 +60,5 @@
         </configuration>
       </plugin>
     </plugins>
-  </build>
-  <dependencies>
-    <dependency>
-      <groupId>es.uji.security</groupId>
-      <artifactId>uji-utils</artifactId>
-      <version>2.1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>es.uji.security</groupId>
-      <artifactId>uji-crypto</artifactId>
-      <version>2.1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>plugin</groupId>
-      <artifactId>plugin</artifactId>
-      <version>1.5</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.9</version>
-    </dependency>
-  </dependencies>
+  </build>  
 </project>

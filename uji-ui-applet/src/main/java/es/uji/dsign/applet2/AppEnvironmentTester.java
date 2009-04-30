@@ -23,9 +23,9 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 
-import es.uji.dsign.crypto.TimeStampFactory;
-import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
 import es.uji.dsign.util.ConfigHandler;
+import es.uji.security.crypto.TimeStampFactory;
+import es.uji.security.keystore.IKeyStoreHelper;
 
 public class AppEnvironmentTester extends Thread {
 	

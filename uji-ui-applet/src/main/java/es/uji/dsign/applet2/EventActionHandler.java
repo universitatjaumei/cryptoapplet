@@ -14,10 +14,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import es.uji.dsign.crypto.X509CertificateHandler;
 import es.uji.dsign.util.i18n.LabelManager;
-import es.uji.dsign.crypto.keystore.PKCS11KeyStore;
-import es.uji.dsign.crypto.keystore.PKCS12KeyStore;
+import es.uji.security.keystore.X509CertificateHandler;
+import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.security.keystore.pkcs12.PKCS12KeyStore;
 
 /**
  *  @author Paul

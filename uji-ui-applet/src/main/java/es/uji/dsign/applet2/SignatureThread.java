@@ -17,17 +17,17 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
-import es.uji.dsign.crypto.ISignFormatProvider;
-import es.uji.dsign.crypto.SignatureOptions;
-import es.uji.dsign.crypto.X509CertificateHandler;
-import es.uji.dsign.crypto.XAdESCoSignatureFactory;
-import es.uji.dsign.crypto.XAdESSignatureFactory;
-import es.uji.dsign.crypto.keystore.IKeyStoreHelper;
 import es.uji.dsign.util.Base64;
 import es.uji.dsign.util.HexEncoder;
 import es.uji.dsign.util.i18n.LabelManager;
 import es.uji.dsign.applet2.io.InputParams;
 import es.uji.dsign.applet2.io.OutputParams;
+import es.uji.security.crypto.ISignFormatProvider;
+import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.openxades.XAdESCoSignatureFactory;
+import es.uji.security.crypto.openxades.XAdESSignatureFactory;
+import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.X509CertificateHandler;
 
 
 public class SignatureThread extends Thread
