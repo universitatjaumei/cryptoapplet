@@ -20,6 +20,7 @@
  */
 
 package es.uji.dsign.crypto.digidoc.xmlenc.factory;
+
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 import es.uji.dsign.crypto.digidoc.xmlenc.EncryptedData;
 
@@ -27,32 +28,33 @@ import java.io.InputStream;
 
 /**
  * Interface for reading encrypted files
- * @author  Veiko Sinivee
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
-public interface EncryptedDataParser 
+public interface EncryptedDataParser
 {
-	/** 
-	 * initializes the implementation class 
-	 */
-	public void init()
-		throws DigiDocException;
+    /**
+     * initializes the implementation class
+     */
+    public void init() throws DigiDocException;
 
-	/**
-	 * Reads in a EncryptedData file
-	 * @param fileName file name
-	 * @return EncryptedData document object if successfully parsed
-	 */
-	public EncryptedData readEncryptedData(String fileName) 
-		throws DigiDocException;
+    /**
+     * Reads in a EncryptedData file
+     * 
+     * @param fileName
+     *            file name
+     * @return EncryptedData document object if successfully parsed
+     */
+    public EncryptedData readEncryptedData(String fileName) throws DigiDocException;
 
-	/**
-	 * Reads in a EncryptedData file (.cdoc)
-	 * @param dencStream opened stream with EncrypyedData data
-	 * The user must open and close it. 
-	 * @return EncryptedData object if successfully parsed
-	 */
-	public EncryptedData readEncryptedData(InputStream dencStream) 
-		throws DigiDocException;
+    /**
+     * Reads in a EncryptedData file (.cdoc)
+     * 
+     * @param dencStream
+     *            opened stream with EncrypyedData data The user must open and close it.
+     * @return EncryptedData object if successfully parsed
+     */
+    public EncryptedData readEncryptedData(InputStream dencStream) throws DigiDocException;
 
 }

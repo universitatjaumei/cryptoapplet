@@ -20,30 +20,31 @@
  */
 
 package es.uji.dsign.crypto.digidoc;
+
 //import java.io.StringWriter;
 //import java.io.PrintWriter;
 import org.apache.log4j.Logger;
 
-
 /**
  * JDigiDoc specific exception
- * @author  Veiko Sinivee
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
-public class DigiDocException extends Exception 
+public class DigiDocException extends Exception
 {
     /** numeric exception code */
     private int m_code;
     /** nested exception */
     private Throwable m_detail;
-    
+
     public static final int ERR_OK = 0;
     public static final int ERR_READ_FILE = 10;
     public static final int ERR_WRITE_FILE = 11;
     public static final int ERR_DIGIDOC_FORMAT = 12;
     public static final int ERR_DIGIDOC_VERSION = 13;
     public static final int ERR_SIGATURES_EXIST = 14;
-        
+
     public static final int ERR_DIGEST_ALGORITHM = 20;
     public static final int ERR_DIGEST_LENGTH = 21;
     public static final int ERR_REFERENCE_URI = 22;
@@ -124,151 +125,168 @@ public class DigiDocException extends Exception
     public static final int ERR_INIT_CRL = 96;
     public static final int ERR_SAVE_CRL = 97;
     public static final int ERR_NOT_SIGNED = 98;
-    
+
     public static final int ERR_XMLENC_ENCPROP_NAME = 99;
     public static final int ERR_XMLENC_ENCPROP_CONTENT = 100;
     public static final int ERR_XMLENC_ENCKEY_CERT = 101;
     public static final int ERR_XMLENC_ENCKEY_ENCRYPTION_METHOD = 102;
     public static final int ERR_XMLENC_ENCDATA_ENCRYPTION_METHOD = 103;
     public static final int ERR_XMLENC_ENCDATA_XMLNS = 104;
-	public static final int ERR_XMLENC_NO_ENCRYPTED_DATA = 105;
-	public static final int ERR_XMLENC_NO_ENCRYPTED_KEY = 106;
-	public static final int ERR_XMLENC_KEY_GEN = 107;
-	public static final int ERR_XMLENC_KEY_DECRYPT = 108;
-	public static final int ERR_XMLENC_KEY_ENCRYPT = 109;
-	public static final int ERR_XMLENC_KEY_STATUS = 110;
-	public static final int ERR_XMLENC_DECRYPT = 111;
-	public static final int ERR_XMLENC_ENCRYPT = 112;
-	public static final int ERR_XMLENC_COMPRESS = 113;
-	public static final int ERR_XMLENC_DECOMPRESS = 114;
-	public static final int ERR_XMLENC_DATA_STATUS = 115;
-	public static final int ERR_NO_PROVIDER = 116;
-	public static final int ERR_OCSP_RECPONDER_NOT_TRUSTED = 117;
+    public static final int ERR_XMLENC_NO_ENCRYPTED_DATA = 105;
+    public static final int ERR_XMLENC_NO_ENCRYPTED_KEY = 106;
+    public static final int ERR_XMLENC_KEY_GEN = 107;
+    public static final int ERR_XMLENC_KEY_DECRYPT = 108;
+    public static final int ERR_XMLENC_KEY_ENCRYPT = 109;
+    public static final int ERR_XMLENC_KEY_STATUS = 110;
+    public static final int ERR_XMLENC_DECRYPT = 111;
+    public static final int ERR_XMLENC_ENCRYPT = 112;
+    public static final int ERR_XMLENC_COMPRESS = 113;
+    public static final int ERR_XMLENC_DECOMPRESS = 114;
+    public static final int ERR_XMLENC_DATA_STATUS = 115;
+    public static final int ERR_NO_PROVIDER = 116;
+    public static final int ERR_OCSP_RECPONDER_NOT_TRUSTED = 117;
 
-	public static final int ERR_CREF_ISSUER = 118;
-	public static final int ERR_CERTID_TYPE = 119;
-	public static final int ERR_CERTVAL_TYPE = 120;
-	public static final int ERR_INCLUDE_URI = 121;
-	public static final int ERR_TIMESTAMP_ID = 122;
-	public static final int ERR_TIMESTAMP_TYPE = 123;
-	public static final int ERR_TIMESTAMP_RESP = 124;
+    public static final int ERR_CREF_ISSUER = 118;
+    public static final int ERR_CERTID_TYPE = 119;
+    public static final int ERR_CERTVAL_TYPE = 120;
+    public static final int ERR_INCLUDE_URI = 121;
+    public static final int ERR_TIMESTAMP_ID = 122;
+    public static final int ERR_TIMESTAMP_TYPE = 123;
+    public static final int ERR_TIMESTAMP_RESP = 124;
     public static final int ERR_TIMESTAMP_FAC_INIT = 125;
     public static final int ERR_TIMESTAMP_VERIFY = 126;
-    
-    public static final int ERR_OCSP_ISSUER_CA_NOT_FOUND= 127;
+
+    public static final int ERR_OCSP_ISSUER_CA_NOT_FOUND = 127;
     public static final int ERR_OCSP_READ_FILE = 128;
 
-	
     /**
      * DigiDocException constructor
-     * @param code unique error code. Resources bundle
-     * contains localized error messages in form ERR_<code>=<message>
-     * @param msg english language error description.
-     * @param trace stack trace
+     * 
+     * @param code
+     *            unique error code. Resources bundle contains localized error messages in form
+     *            ERR_<code>=<message>
+     * @param msg
+     *            english language error description.
+     * @param trace
+     *            stack trace
      */
-    public DigiDocException(int code, String msg, Throwable detail) {
+    public DigiDocException(int code, String msg, Throwable detail)
+    {
         super(msg);
         m_code = code;
         m_detail = detail;
     }
-    
+
     /**
      * Accessor for error code
+     * 
      * @return error code
      */
-    public int getCode() {
+    public int getCode()
+    {
         return m_code;
     }
-    
+
     /**
      * Determines if this is a signature error
+     * 
      * @return true if signature is bad
      */
-    public boolean isBadSignature() {
-        return (m_code == ERR_VERIFY ||
-                m_code == ERR_OCSP_VERIFY || 
-                m_code == ERR_DIGEST_COMPARE || 
-                m_code == ERR_CERT_EXPIRED ||
-                m_code == ERR_NOTARY_STATUS ||
-                m_code == ERR_DATA_FILE_NOT_SIGNED ||
-                m_code == ERR_SIG_PROP_NOT_SIGNED || 
-                m_code == ERR_RESPONDERS_CERT ||
-                m_code == ERR_NOTARY_DIGEST ||
-                m_code == ERR_OCSP_PARSE ||
-                m_code == ERR_OCSP_NONCE ||
-                m_code == ERR_UNKNOWN_CA_CERT);
+    public boolean isBadSignature()
+    {
+        return (m_code == ERR_VERIFY || m_code == ERR_OCSP_VERIFY || m_code == ERR_DIGEST_COMPARE
+                || m_code == ERR_CERT_EXPIRED || m_code == ERR_NOTARY_STATUS
+                || m_code == ERR_DATA_FILE_NOT_SIGNED || m_code == ERR_SIG_PROP_NOT_SIGNED
+                || m_code == ERR_RESPONDERS_CERT || m_code == ERR_NOTARY_DIGEST
+                || m_code == ERR_OCSP_PARSE || m_code == ERR_OCSP_NONCE || m_code == ERR_UNKNOWN_CA_CERT);
     }
-    
+
     /**
      * Accessor for stack trace
+     * 
      * @return stack trace
      */
-    public Throwable getNestedException() {
+    public Throwable getNestedException()
+    {
         return m_detail;
     }
-    
+
     /**
      * String converstion
+     * 
      * @return stringified exception data
      */
     public String toString()
     {
         StringBuffer sb = new StringBuffer("ERROR: ");
         sb.append(new Integer(m_code).toString());
-        if(getMessage() != null) {
+        if (getMessage() != null)
+        {
             sb.append(" - ");
             sb.append(getMessage());
         }
         return sb.toString();
-    }   
-    
-    public String getMessage() {
+    }
+
+    public String getMessage()
+    {
         if (m_detail == null)
             return super.getMessage();
         else
-            return "ERROR: " + m_code +
-            super.getMessage() +
-            "; nested exception is: \n\t" +
-            m_detail.toString();
+            return "ERROR: " + m_code + super.getMessage() + "; nested exception is: \n\t"
+                    + m_detail.toString();
     }
-    
-    public void printStackTrace(java.io.PrintStream ps){
-        if (m_detail == null) {
+
+    public void printStackTrace(java.io.PrintStream ps)
+    {
+        if (m_detail == null)
+        {
             super.printStackTrace(ps);
-        } else {
-            synchronized(ps) {
+        }
+        else
+        {
+            synchronized (ps)
+            {
                 ps.println(this);
                 m_detail.printStackTrace(ps);
             }
         }
     }
-    
-    public void printStackTrace(){
+
+    public void printStackTrace()
+    {
         printStackTrace(System.err);
     }
-    
-    public void printStackTrace(java.io.PrintWriter pw){
-        if (m_detail == null) {
+
+    public void printStackTrace(java.io.PrintWriter pw)
+    {
+        if (m_detail == null)
+        {
             super.printStackTrace(pw);
-        } else {
-            synchronized(pw) {
+        }
+        else
+        {
+            synchronized (pw)
+            {
                 pw.println(this);
                 m_detail.printStackTrace(pw);
             }
         }
     }
-    
+
     /**
      * Factory method to handle excetions
-     * @param ex Exception object to use
-     * @param code error code
+     * 
+     * @param ex
+     *            Exception object to use
+     * @param code
+     *            error code
      */
-    public static void handleException(Exception ex, int code)
-        throws DigiDocException 
+    public static void handleException(Exception ex, int code) throws DigiDocException
     {
-    	Logger logger = Logger.getLogger(DigiDocException.class);
-    	logger.error(ex.toString(), ex);
+        Logger logger = Logger.getLogger(DigiDocException.class);
+        logger.error(ex.toString(), ex);
         throw new DigiDocException(code, ex.getClass().getName(), ex);
     }
-    
+
 }

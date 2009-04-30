@@ -16,12 +16,10 @@ public final class EntityParser
     public EntityParser_Handler Resolver;
     private String _text;
 
-
     public EntityParser()
     {
         this.Resolver = new EntityParser_DefaultHandler();
     }
-
 
     public String get_DataString()
     {
@@ -35,7 +33,8 @@ public final class EntityParser
         EntityParser_Entity u;
         String r;
 
-        f = EntityParser_Fragment.Of(this.Data, this.Offset, new FragmentBase_Bounds(this.Offset, this.Length));
+        f = EntityParser_Fragment.Of(this.Data, this.Offset, new FragmentBase_Bounds(this.Offset,
+                this.Length));
 
         if ((f == null))
         {
@@ -76,7 +75,6 @@ public final class EntityParser
 
             }
 
-
             if (!(this.Resolver == null))
             {
                 b.append(this.Resolver.ResolveText(f.get_DataString()));
@@ -98,7 +96,6 @@ public final class EntityParser
         {
             return "";
         }
-
 
         if ((this._text == null))
         {

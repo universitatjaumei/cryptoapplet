@@ -9,10 +9,6 @@ import es.uji.dsign.crypto.digidoc.c14n.common.StringImplementation;
 public final class Helper
 {
 
-
-
-
-
     public static Date get_BuildDate()
     {
         SimpleDateFormat sdf;
@@ -70,7 +66,7 @@ public final class Helper
         b0 = !(p < 48);
         a9 = !(p > 57);
         uN = (b0 && a9);
-        x = ("\'\"=[]()<>+-;:.?\u0040/".indexOf(((char)p)) > -1);
+        x = ("\'\"=[]()<>+-;:.?\u0040/".indexOf(((char) p)) > -1);
         isAlpha = (lA || (uA || (uN || x)));
         return isAlpha;
     }
@@ -82,12 +78,15 @@ public final class Helper
 
     public static String get_UsedMemoryPercentage()
     {
-        return new Integer(Convert.ToInt16(((Helper.get_UsedMemory() * ((long)100)) / Helper.get_CurrentRuntime().totalMemory())))+ "%";
+        return new Integer(Convert.ToInt16(((Helper.get_UsedMemory() * ((long) 100)) / Helper
+                .get_CurrentRuntime().totalMemory())))
+                + "%";
     }
 
     public static long get_UsedMemory()
     {
-        return (Helper.get_CurrentRuntime().totalMemory() - Helper.get_CurrentRuntime().freeMemory());
+        return (Helper.get_CurrentRuntime().totalMemory() - Helper.get_CurrentRuntime()
+                .freeMemory());
     }
 
     public static String get_TotalMemoryString()
@@ -99,15 +98,9 @@ public final class Helper
     {
         Object[] objectArray1;
 
-        objectArray1 = new Object[]
-            {
-                Helper.get_UsedMemoryPercentage(),
-                " of ",
-                Helper.get_TotalMemoryString(),
-                " (",
-                new Long(Helper.get_CurrentRuntime().totalMemory()),
-                " bytes)"
-            };
+        objectArray1 = new Object[] { Helper.get_UsedMemoryPercentage(), " of ",
+                Helper.get_TotalMemoryString(), " (",
+                new Long(Helper.get_CurrentRuntime().totalMemory()), " bytes)" };
         return StringImplementation.Concat(objectArray1);
     }
 

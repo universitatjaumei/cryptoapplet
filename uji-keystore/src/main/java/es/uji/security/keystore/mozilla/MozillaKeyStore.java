@@ -26,218 +26,204 @@ import es.uji.security.keystore.IKeyStoreHelper;
 
 public class MozillaKeyStore implements IKeyStoreHelper
 {
-	private Mozilla _mozilla;
-	private String _pkcs11file;
-	private String _currentprofile;
-	private String _configName;
-	private Provider _pk11provider;
-	private KeyStore _mozillaKeyStore;
-	private RegQuery rq = new RegQuery();
-	boolean _initialized;
+    private Mozilla _mozilla;
+    private String _pkcs11file;
+    private String _currentprofile;
+    private String _configName;
+    private Provider _pk11provider;
+    private KeyStore _mozillaKeyStore;
+    private RegQuery rq = new RegQuery();
+    boolean _initialized;
 
-	public MozillaKeyStore() throws IOException
-	{
-		_mozilla = new Mozilla();
-		_pkcs11file = _mozilla.getPkcs11FilePath();
-		_currentprofile = _mozilla.getCurrentProfiledir();
+    public MozillaKeyStore() throws IOException
+    {
+        _mozilla = new Mozilla();
+        _pkcs11file = _mozilla.getPkcs11FilePath();
+        _currentprofile = _mozilla.getCurrentProfiledir();
 
-		/*
-		 * We create that file on a temporary way because we need it to
-		 * initialize SunPKCS11 provider.
-		 */
-		
-		if (OS.isWindowsUpperEqualToNT())
-		{
-			_configName = rq.getCurrentUserPersonalFolderPath() + File.separator + "p11.cfg";
-		}
-		else
-		{
-			_configName = "./.p11.cfg.1166440118";
-		}
+        /*
+         * We create that file on a temporary way because we need it to initialize SunPKCS11
+         * provider.
+         */
 
-		
-		File f = new File(_configName);
+        if (OS.isWindowsUpperEqualToNT())
+        {
+            _configName = rq.getCurrentUserPersonalFolderPath() + File.separator + "p11.cfg";
+        }
+        else
+        {
+            _configName = "./.p11.cfg.1166440118";
+        }
 
-		/*while (f.exists())
-		{
-			_configName = _configName + System.currentTimeMillis();
-			f = new File(_configName);
-		}*/
+        File f = new File(_configName);
 
-		
-		FileOutputStream fos = new FileOutputStream(f);
-		
-		
-		/*
-		 * Replaces are for windows, NSS will read the path with / file
-		 * separator instead of Microsoft standar \ and spaces must be scaped
-		 * too.
-		 */
-		
-		if (OS.isWindowsUpperEqualToNT())
-		{
-			fos.write(("name = NSS\r" + 
-					   "library = " + _pkcs11file + "\r" + 
-					   "attributes= compatibility" + "\r" +
-					   "slot=2\r" + 
-					   "nssArgs=\"" + 
-					   "configdir='" + _currentprofile.replace("\\", "/").replace(" ", "\\ ") + "' " +
-					   "certPrefix='' " + 
-					   "keyPrefix='' " + 
-					   "secmod=' secmod.db' " + 
-					   "flags=readOnly\"\r").getBytes());
-		}
-		else if (OS.isLinux())
-		{
-			/*
-			 * TODO:With Linux is pending to test what's up with the white
-			 * spaces in the path.
-			 */
-			
-			fos.write(("name = NSS-" + new Random().nextInt() +  "\n" + 
-					   "library = " + _pkcs11file + "\n" + 
-					   "attributes= compatibility" + "\n" +
-					   "slot=2\n" + 
-					   "nssArgs=\"" + 
-					   "configdir='" + _currentprofile + "' " + 
-					   "certPrefix='' " + 
-					   "keyPrefix='' " +
-					   "secmod=' secmod.db' " + 
-					   "flags=readOnly\"\n").getBytes());
-		}
-		fos.close();
-	}
+        /*
+         * while (f.exists()) { _configName = _configName + System.currentTimeMillis(); f = new
+         * File(_configName); }
+         */
 
-	public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException
-	{
+        FileOutputStream fos = new FileOutputStream(f);
 
-		ByteArrayInputStream bais= new ByteArrayInputStream(("name = NSS\n" + 
-				   "library = " + _pkcs11file + "\n" + 
-				   "attributes= compatibility" + "\n" +
-				   "slot=2\n" + 
-				   "nssArgs=\"" + 
-				   "configdir='" + _currentprofile + "' " + 
-				   "certPrefix='' " + 
-				   "keyPrefix='' " +
-				   "secmod=' secmod.db' " + 
-				   "flags=readOnly\"\n").getBytes());
-	    
-		
-		_pk11provider = new sun.security.pkcs11.SunPKCS11(bais);
-		Security.addProvider(_pk11provider);
-		_mozillaKeyStore = KeyStore.getInstance("PKCS11", _pk11provider);
-	
-		try{
-			_mozillaKeyStore.load(null, pin);
-			_initialized = true;
-		} 
-		catch(IOException e){
-			// We should remove the provider on failure and 
-			// re-throw the exception to be handled 
-			Security.removeProvider(_pk11provider.getName());
-			throw (e);
-		}
-	}
-	
-	public Enumeration aliases() throws KeyStoreException, Exception
-	{
-		if (!_initialized)
-		{
-			throw (new Exception("UninitializedKeyStore"));
-		}
+        /*
+         * Replaces are for windows, NSS will read the path with / file separator instead of
+         * Microsoft standar \ and spaces must be scaped too.
+         */
 
-		Enumeration e= _mozillaKeyStore.aliases();
-		while (e.hasMoreElements()){
-			System.out.println("Alias: " + e.nextElement());
-		}
-		return _mozillaKeyStore.aliases();
-	}
+        if (OS.isWindowsUpperEqualToNT())
+        {
+            fos
+                    .write(("name = NSS\r" + "library = " + _pkcs11file + "\r"
+                            + "attributes= compatibility" + "\r" + "slot=2\r" + "nssArgs=\""
+                            + "configdir='"
+                            + _currentprofile.replace("\\", "/").replace(" ", "\\ ") + "' "
+                            + "certPrefix='' " + "keyPrefix='' " + "secmod=' secmod.db' " + "flags=readOnly\"\r")
+                            .getBytes());
+        }
+        else if (OS.isLinux())
+        {
+            /*
+             * TODO:With Linux is pending to test what's up with the white spaces in the path.
+             */
 
-	
-	public String getAliasFromCertificate(Certificate cer)
-	throws Exception{
-		
-		if (!_initialized)
-		{
-			throw (new Exception("UninitializedKeyStore"));
-		}
+            fos.write(("name = NSS-" + new Random().nextInt() + "\n" + "library = " + _pkcs11file
+                    + "\n" + "attributes= compatibility" + "\n" + "slot=2\n" + "nssArgs=\""
+                    + "configdir='" + _currentprofile + "' " + "certPrefix='' " + "keyPrefix='' "
+                    + "secmod=' secmod.db' " + "flags=readOnly\"\n").getBytes());
+        }
+        fos.close();
+    }
 
-		X509Certificate xcer= (X509Certificate)cer, auxCer= null;
-		String auxAlias= null;
-		Enumeration e; 
+    public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
+            CertificateException
+    {
 
-		e= _mozillaKeyStore.aliases();
-		while (e.hasMoreElements()){
-			auxAlias= (String)e.nextElement();
-			auxCer= (X509Certificate)_mozillaKeyStore.getCertificate(auxAlias);
-			if ( (auxCer.getIssuerDN().equals(xcer.getIssuerDN())) 
-					&& (auxCer.getSerialNumber().equals(xcer.getSerialNumber()))){
-				return auxAlias;
-			}
-		}
-		return null;
-	}
-	
-	public Certificate getCertificate(String alias) throws KeyStoreException, Exception
-	{
-		if (!_initialized)
-		{
-			throw (new Exception("UninitializedKeyStore"));
-		}
+        ByteArrayInputStream bais = new ByteArrayInputStream(("name = NSS\n" + "library = "
+                + _pkcs11file + "\n" + "attributes= compatibility" + "\n" + "slot=2\n"
+                + "nssArgs=\"" + "configdir='" + _currentprofile + "' " + "certPrefix='' "
+                + "keyPrefix='' " + "secmod=' secmod.db' " + "flags=readOnly\"\n").getBytes());
 
-		return _mozillaKeyStore.getCertificate(alias);
-	}
-	
-	public Certificate[] getUserCertificates() throws KeyStoreException, Exception{
-		return null;
-	}
+        _pk11provider = new sun.security.pkcs11.SunPKCS11(bais);
+        Security.addProvider(_pk11provider);
+        _mozillaKeyStore = KeyStore.getInstance("PKCS11", _pk11provider);
 
-	public Key getKey(String alias) throws KeyStoreException, Exception
-	{
-		if (!_initialized)
-		{
-			throw (new Exception("UninitializedKeyStore"));
-		}
-		
-		return _mozillaKeyStore.getKey(alias, null);
-	}
+        try
+        {
+            _mozillaKeyStore.load(null, pin);
+            _initialized = true;
+        }
+        catch (IOException e)
+        {
+            // We should remove the provider on failure and
+            // re-throw the exception to be handled
+            Security.removeProvider(_pk11provider.getName());
+            throw (e);
+        }
+    }
 
-	public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException, Exception
-	{
-		byte[] res = null;
-		PrivateKey privKey = (PrivateKey) _mozillaKeyStore.getKey(alias, null);
+    public Enumeration aliases() throws KeyStoreException, Exception
+    {
+        if (!_initialized)
+        {
+            throw (new Exception("UninitializedKeyStore"));
+        }
 
-		if (privKey == null)
-		{
-			return null;
-		}
+        Enumeration e = _mozillaKeyStore.aliases();
+        while (e.hasMoreElements())
+        {
+            System.out.println("Alias: " + e.nextElement());
+        }
+        return _mozillaKeyStore.aliases();
+    }
 
-		Signature rsa = Signature.getInstance("SHA1withRSA", getProvider());
-		rsa.initSign(privKey);
-		rsa.update(toSign);
-		res = rsa.sign();
+    public String getAliasFromCertificate(Certificate cer) throws Exception
+    {
 
-		return res;
-	}
-	
-	public String getName(){
-		return IKeyStoreHelper.MOZILLA_KEY_STORE;
-	}
-	
-	public String getTokenName()
-	{
-		return "Firefox";
-	}
+        if (!_initialized)
+        {
+            throw (new Exception("UninitializedKeyStore"));
+        }
 
-	public Provider getProvider()
-	{
-		return _mozillaKeyStore.getProvider(); 	//_pk11provider;
-	}
+        X509Certificate xcer = (X509Certificate) cer, auxCer = null;
+        String auxAlias = null;
+        Enumeration e;
 
-	public void cleanUp()
-	{
-		File f = new File(_configName);
-		f.delete();
-		Security.removeProvider(_pk11provider.getName());
-	}
+        e = _mozillaKeyStore.aliases();
+        while (e.hasMoreElements())
+        {
+            auxAlias = (String) e.nextElement();
+            auxCer = (X509Certificate) _mozillaKeyStore.getCertificate(auxAlias);
+            if ((auxCer.getIssuerDN().equals(xcer.getIssuerDN()))
+                    && (auxCer.getSerialNumber().equals(xcer.getSerialNumber())))
+            {
+                return auxAlias;
+            }
+        }
+        return null;
+    }
+
+    public Certificate getCertificate(String alias) throws KeyStoreException, Exception
+    {
+        if (!_initialized)
+        {
+            throw (new Exception("UninitializedKeyStore"));
+        }
+
+        return _mozillaKeyStore.getCertificate(alias);
+    }
+
+    public Certificate[] getUserCertificates() throws KeyStoreException, Exception
+    {
+        return null;
+    }
+
+    public Key getKey(String alias) throws KeyStoreException, Exception
+    {
+        if (!_initialized)
+        {
+            throw (new Exception("UninitializedKeyStore"));
+        }
+
+        return _mozillaKeyStore.getKey(alias, null);
+    }
+
+    public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,
+            Exception
+    {
+        byte[] res = null;
+        PrivateKey privKey = (PrivateKey) _mozillaKeyStore.getKey(alias, null);
+
+        if (privKey == null)
+        {
+            return null;
+        }
+
+        Signature rsa = Signature.getInstance("SHA1withRSA", getProvider());
+        rsa.initSign(privKey);
+        rsa.update(toSign);
+        res = rsa.sign();
+
+        return res;
+    }
+
+    public String getName()
+    {
+        return IKeyStoreHelper.MOZILLA_KEY_STORE;
+    }
+
+    public String getTokenName()
+    {
+        return "Firefox";
+    }
+
+    public Provider getProvider()
+    {
+        return _mozillaKeyStore.getProvider(); // _pk11provider;
+    }
+
+    public void cleanUp()
+    {
+        File f = new File(_configName);
+        f.delete();
+        Security.removeProvider(_pk11provider.getName());
+    }
 }

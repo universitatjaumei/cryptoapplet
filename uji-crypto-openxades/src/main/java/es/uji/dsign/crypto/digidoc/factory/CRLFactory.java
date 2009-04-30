@@ -19,47 +19,47 @@
  */
 
 package es.uji.dsign.crypto.digidoc.factory;
+
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
 /**
- * Interface for handling CRL-s
- * DigiDoc files
- * @author  Veiko Sinivee
+ * Interface for handling CRL-s DigiDoc files
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
-public interface CRLFactory 
+public interface CRLFactory
 {
-    /** 
-     * initializes the implementation class 
+    /**
+     * initializes the implementation class
      */
-    public void init()
-        throws DigiDocException;
+    public void init() throws DigiDocException;
 
-   /**
-    * Checks the cert
-    * @return void
-    * @param cert cert to be verified
-    * @param checkDate java.util.Date
-    * @throws DigiDocException for all errors
-    */
-  public void checkCertificate(X509Certificate cert, Date checkDate) 
-        throws DigiDocException;
-        
-   /**
-    * Checks the cert
-    * @return void
-    * @param b64cert Certificate in base64 form
-    * @param checkDate java.util.Date
-    */
-  //public void checkCertificateBase64(String b64cert, Date checkDate) 
-   //     throws DigiDocException;
-        
-        
+    /**
+     * Checks the cert
+     * 
+     * @return void
+     * @param cert
+     *            cert to be verified
+     * @param checkDate
+     *            java.util.Date
+     * @throws DigiDocException
+     *             for all errors
+     */
+    public void checkCertificate(X509Certificate cert, Date checkDate) throws DigiDocException;
+
+    /**
+     * Checks the cert
+     * 
+     * @return void
+     * @param b64cert
+     *            Certificate in base64 form
+     * @param checkDate
+     *            java.util.Date
+     */
+    // public void checkCertificateBase64(String b64cert, Date checkDate)
+    // throws DigiDocException;
 }
-
-
-
-

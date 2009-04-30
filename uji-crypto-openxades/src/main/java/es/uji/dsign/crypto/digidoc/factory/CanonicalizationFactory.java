@@ -20,30 +20,34 @@
  */
 
 package es.uji.dsign.crypto.digidoc.factory;
+
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 
 /**
  * Interface for canonicalization functions
- * @author  Veiko Sinivee
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
-public interface CanonicalizationFactory {
+public interface CanonicalizationFactory
+{
 
-    /** 
-     * initializes the implementation class 
-     */
-    public void init()
-        throws DigiDocException;
-    
     /**
-     * Canonicalizes XML fragment using the
-     * xml-c14n-20010315 algorithm
-     * @param data input data
-     * @param uri canonicalization algorithm
-     * @returns canonicalized XML
-     * @throws DigiDocException for all errors
+     * initializes the implementation class
      */
-    byte[] canonicalize(byte[] data, String uri)
-        throws DigiDocException;
+    public void init() throws DigiDocException;
+
+    /**
+     * Canonicalizes XML fragment using the xml-c14n-20010315 algorithm
+     * 
+     * @param data
+     *            input data
+     * @param uri
+     *            canonicalization algorithm
+     * @returns canonicalized XML
+     * @throws DigiDocException
+     *             for all errors
+     */
+    byte[] canonicalize(byte[] data, String uri) throws DigiDocException;
 
 }

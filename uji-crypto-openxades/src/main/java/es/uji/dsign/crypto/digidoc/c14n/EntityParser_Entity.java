@@ -11,11 +11,9 @@ public class EntityParser_Entity
     public EntityParser_Fragment Name;
     public EntityParser_Fragment End;
 
-
     public EntityParser_Entity()
     {
     }
-
 
     public boolean get_Item(String ds)
     {
@@ -29,7 +27,8 @@ public class EntityParser_Entity
 
     public String get_OriginalString()
     {
-        return Convert.ToString(this.Begin.Data, this.Begin.Offset, this.get_OriginalStringLength());
+        return Convert
+                .ToString(this.Begin.Data, this.Begin.Offset, this.get_OriginalStringLength());
     }
 
     public boolean get_IsNumeric()
@@ -47,7 +46,7 @@ public class EntityParser_Entity
 
         if (this.get_IsHexNumber())
         {
-            return Convert.ToInt32(this.get_HexNumberBytes(), (int)0);
+            return Convert.ToInt32(this.get_HexNumberBytes(), (int) 0);
         }
 
         return Convert.ToInt32(this.get_Text());
@@ -70,25 +69,22 @@ public class EntityParser_Entity
 
     public byte[] get_HexNumberBytes()
     {
-        return Convert.FromHexString(this.get_Text().substring((int)1));
+        return Convert.FromHexString(this.get_Text().substring((int) 1));
     }
 
     public static EntityParser_Entity Of(EntityParser_Fragment f)
     {
         EntityParser_Entity n;
 
-
         if ((f == null))
         {
             return null;
         }
 
-
         if ((f.get_Next() == null))
         {
             return null;
         }
-
 
         if (!f.get_Item("&"))
         {
@@ -114,12 +110,10 @@ public class EntityParser_Entity
             n.Name = f.get_Next();
         }
 
-
         if ((n.Name.get_Next() == null))
         {
             return null;
         }
-
 
         if (!n.Name.get_Next().get_Item(";"))
         {

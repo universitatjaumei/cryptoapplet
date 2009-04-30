@@ -4,52 +4,59 @@ import es.uji.dsign.applet2.SignatureApplet;
 
 import java.util.Hashtable;
 
-public class ParamInputData extends AbstractData implements InputParams{
+public class ParamInputData extends AbstractData implements InputParams
+{
 
-	private String[] str_in; 
-	private int _current= 0;
-	private int _count= 0;
-	
-	public ParamInputData(String[] in){
-		this.str_in= in;
-		_count=this.str_in.length;
-	}
-	
-			
-	public int getInputCount() throws Exception {
-		return _count;
-	}
+    private String[] str_in;
+    private int _current = 0;
+    private int _count = 0;
 
-	public byte[] getSignData() throws Exception {
-		
-		byte[] ret= this.str_in[_current].getBytes();
-		
-		if (mustHash)
-			ret= AbstractData.getMessageDigest(ret);
-		
-		_current++;
-						
-		return ret;
-	}
+    public ParamInputData(String[] in)
+    {
+        this.str_in = in;
+        _count = this.str_in.length;
+    }
 
-	public byte[] getSignData(int item) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public int getInputCount() throws Exception
+    {
+        return _count;
+    }
 
-	public String getSignFormat(SignatureApplet base) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public byte[] getSignData() throws Exception
+    {
 
-	public void initialize(Hashtable<String, Object> props) {
-		// TODO Auto-generated method stub
-		
-	}
+        byte[] ret = this.str_in[_current].getBytes();
 
-	public void flush() {
-		// TODO Auto-generated method stub
-		
-	}
+        if (mustHash)
+            ret = AbstractData.getMessageDigest(ret);
+
+        _current++;
+
+        return ret;
+    }
+
+    public byte[] getSignData(int item) throws Exception
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getSignFormat(SignatureApplet base)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void initialize(Hashtable<String, Object> props)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void flush()
+    {
+        // TODO Auto-generated method stub
+
+    }
 
 }

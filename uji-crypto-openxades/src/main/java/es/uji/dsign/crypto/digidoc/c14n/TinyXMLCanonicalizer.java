@@ -10,11 +10,9 @@ import java.io.RandomAccessFile;
 public class TinyXMLCanonicalizer implements CanonicalizationFactory
 {
 
-
     public TinyXMLCanonicalizer()
     {
     }
-
 
     public void init() throws es.uji.dsign.crypto.digidoc.DigiDocException
     {
@@ -23,12 +21,13 @@ public class TinyXMLCanonicalizer implements CanonicalizationFactory
         }
         catch (java.lang.Throwable exc)
         {
-            throw new es.uji.dsign.crypto.digidoc.DigiDocException((int)0, "unknown", exc);
+            throw new es.uji.dsign.crypto.digidoc.DigiDocException((int) 0, "unknown", exc);
         }
 
     }
 
-    public byte[] canonicalize(String filename, String uri) throws es.uji.dsign.crypto.digidoc.DigiDocException
+    public byte[] canonicalize(String filename, String uri)
+            throws es.uji.dsign.crypto.digidoc.DigiDocException
     {
         RandomAccessFile f;
         byte[] data;
@@ -37,14 +36,14 @@ public class TinyXMLCanonicalizer implements CanonicalizationFactory
         try
         {
             f = new RandomAccessFile(filename, "r");
-            data = new byte[((int)f.length())];
+            data = new byte[((int) f.length())];
             f.read(data);
             f.close();
             byteArray3 = this.canonicalize(data, uri);
         }
         catch (java.lang.Throwable exc)
         {
-            throw new es.uji.dsign.crypto.digidoc.DigiDocException((int)0, "unknown", exc);
+            throw new es.uji.dsign.crypto.digidoc.DigiDocException((int) 0, "unknown", exc);
         }
 
         return byteArray3;
@@ -53,7 +52,8 @@ public class TinyXMLCanonicalizer implements CanonicalizationFactory
     /**
      * will parse the xml document and return its canonicalized version
      */
-    public byte[] canonicalize(byte[] data, String uri) throws es.uji.dsign.crypto.digidoc.DigiDocException
+    public byte[] canonicalize(byte[] data, String uri)
+            throws es.uji.dsign.crypto.digidoc.DigiDocException
     {
         TinyXMLParser p;
         TinyXMLCanonicalizerHandler h;
@@ -68,7 +68,7 @@ public class TinyXMLCanonicalizer implements CanonicalizationFactory
         }
         catch (java.lang.Throwable exc)
         {
-            throw new es.uji.dsign.crypto.digidoc.DigiDocException((int)0, "unknown", exc);
+            throw new es.uji.dsign.crypto.digidoc.DigiDocException((int) 0, "unknown", exc);
         }
 
         return byteArray3;
@@ -83,12 +83,9 @@ public class TinyXMLCanonicalizer implements CanonicalizationFactory
         byte c;
         boolean skip;
 
-        len = ((int)data.length);
+        len = ((int) data.length);
         o = new ByteArrayOutputStream(len);
-        n = new byte[]
-            {
-                10
-            };
+        n = new byte[] { 10 };
 
         for (i = 0; (i < len); i++)
         {
@@ -109,16 +106,15 @@ public class TinyXMLCanonicalizer implements CanonicalizationFactory
 
                 }
 
-
                 if (!skip)
                 {
-                    o.write(n, (int)0, (int)1);
+                    o.write(n, (int) 0, (int) 1);
                 }
 
             }
             else
             {
-                o.write(data, i, (int)1);
+                o.write(data, i, (int) 1);
             }
 
         }

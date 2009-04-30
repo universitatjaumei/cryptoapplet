@@ -12,12 +12,10 @@ public final class TinyXMLParser_Element extends TinyXMLParser_Node
     public TinyXMLParser_Tag Begin;
     public TinyXMLParser_Tag End;
 
-
     public TinyXMLParser_Element()
     {
         super();
     }
-
 
     public ArrayList get_Attributes()
     {
@@ -47,7 +45,6 @@ public final class TinyXMLParser_Element extends TinyXMLParser_Node
             return false;
         }
 
-
         if (this.Begin.End.get_Item("/>"))
         {
 
@@ -65,14 +62,13 @@ public final class TinyXMLParser_Element extends TinyXMLParser_Node
                 return false;
             }
 
-
             if (!this.End.Begin.get_Next().get_IsLiteral())
             {
                 return false;
             }
 
-
-            if (!this.get_NameOfEndTagFragment().get_DataString().equals(this.get_NameOfBeginTagFragment().get_DataString()))
+            if (!this.get_NameOfEndTagFragment().get_DataString().equals(
+                    this.get_NameOfBeginTagFragment().get_DataString()))
             {
                 return false;
             }
@@ -92,7 +88,7 @@ public final class TinyXMLParser_Element extends TinyXMLParser_Node
 
         for (i = 0; (i < this.get_Attributes().size()); i++)
         {
-            a = ((TinyXMLParser_Attribute)this.get_Attributes().get(i));
+            a = ((TinyXMLParser_Attribute) this.get_Attributes().get(i));
 
             if (a.get_NameString().equals(p))
             {
@@ -128,7 +124,6 @@ public final class TinyXMLParser_Element extends TinyXMLParser_Node
                 }
 
             }
-
 
             if (seek)
             {

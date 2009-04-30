@@ -22,31 +22,33 @@ import java.util.Enumeration;
 
 public interface IKeyStoreHelper
 {
-	public static final String MOZILLA_KEY_STORE = "MozillaKeyStore";
-	public static final String CLAUER_KEY_STORE  = "ClauerKeyStore";
-	public static final String MSCAPI_KEY_STORE  = "MSCapiKeyStore";
-	public static final String PKCS12_KEY_STORE  = "PKCS12KeyStore";
-	public static final String PKCS11_KEY_STORE  = "PKCS11KeyStore";
-	
-	public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException, Exception;
-	
-	public Enumeration aliases() throws KeyStoreException, Exception;
+    public static final String MOZILLA_KEY_STORE = "MozillaKeyStore";
+    public static final String CLAUER_KEY_STORE = "ClauerKeyStore";
+    public static final String MSCAPI_KEY_STORE = "MSCapiKeyStore";
+    public static final String PKCS12_KEY_STORE = "PKCS12KeyStore";
+    public static final String PKCS11_KEY_STORE = "PKCS11KeyStore";
 
-	public Certificate getCertificate(String alias) throws KeyStoreException, Exception;
-	
-	public Certificate[] getUserCertificates() throws KeyStoreException, Exception;
+    public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
+            CertificateException, Exception;
 
-	public Key getKey(String alias) throws KeyStoreException, Exception;
+    public Enumeration aliases() throws KeyStoreException, Exception;
 
-	public String getAliasFromCertificate(Certificate cer)	throws Exception;
-	
-	public Provider getProvider();
+    public Certificate getCertificate(String alias) throws KeyStoreException, Exception;
 
-	public String getName();
-	
-	public String getTokenName();
-	
-	public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException, Exception;
+    public Certificate[] getUserCertificates() throws KeyStoreException, Exception;
 
-	public void cleanUp();
+    public Key getKey(String alias) throws KeyStoreException, Exception;
+
+    public String getAliasFromCertificate(Certificate cer) throws Exception;
+
+    public Provider getProvider();
+
+    public String getName();
+
+    public String getTokenName();
+
+    public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,
+            Exception;
+
+    public void cleanUp();
 }

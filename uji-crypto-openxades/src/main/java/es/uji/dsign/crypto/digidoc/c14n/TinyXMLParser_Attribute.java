@@ -12,11 +12,9 @@ public class TinyXMLParser_Attribute
     public TinyXMLParser_Fragment ValueBegin;
     public TinyXMLParser_Fragment ValueEnd;
 
-
     public TinyXMLParser_Attribute()
     {
     }
-
 
     public String get_NamePrefix()
     {
@@ -26,7 +24,7 @@ public class TinyXMLParser_Attribute
 
         if ((i > -1))
         {
-            return StringImplementation.Substring(this.get_NameString(), (int)0, i);
+            return StringImplementation.Substring(this.get_NameString(), (int) 0, i);
         }
 
         return null;
@@ -95,7 +93,6 @@ public class TinyXMLParser_Attribute
 
         }
 
-
         if ((b.get_NamePrefix() == null))
         {
 
@@ -105,7 +102,6 @@ public class TinyXMLParser_Attribute
             }
 
         }
-
 
         if (this.get_IsXMLNS())
         {
@@ -118,12 +114,10 @@ public class TinyXMLParser_Attribute
             return -1;
         }
 
-
         if (b.get_IsXMLNS())
         {
             return 1;
         }
-
 
         if ((this.get_NamePrefix() == null))
         {
@@ -135,7 +129,6 @@ public class TinyXMLParser_Attribute
 
             return -1;
         }
-
 
         if ((b.get_NamePrefix() == null))
         {
@@ -182,13 +175,13 @@ public class TinyXMLParser_Attribute
             else
             {
 
-                if (!(!n.ValueEnd.get_IsQuote() || !n.ValueEnd.get_DataString().equals(n.ValueBegin.get_DataString())))
+                if (!(!n.ValueEnd.get_IsQuote() || !n.ValueEnd.get_DataString().equals(
+                        n.ValueBegin.get_DataString())))
                 {
                     seek = false;
                 }
 
             }
-
 
             if (seek)
             {

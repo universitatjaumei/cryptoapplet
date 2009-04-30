@@ -20,6 +20,7 @@
  */
 
 package es.uji.dsign.crypto.digidoc.factory;
+
 import org.apache.log4j.Logger;
 
 import es.uji.dsign.crypto.digidoc.factory.CanonicalizationFactory;
@@ -30,54 +31,63 @@ import org.apache.xml.security.c14n.Canonicalizer;
 
 /**
  * Canonicalizes XML using DOM and XPath
- * @author  Veiko Sinivee
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
 public class DOMCanonicalizationFactory implements CanonicalizationFactory
 {
-   private static Canonicalizer m_c14n;
+    private static Canonicalizer m_c14n;
 
-    /** 
-     * Creates new DOMCanonicalizationFactory 
+    /**
+     * Creates new DOMCanonicalizationFactory
      */
-    public DOMCanonicalizationFactory() {
+    public DOMCanonicalizationFactory()
+    {
     }
-    
+
     /**
      * initializes the implementation class
      */
-    public void init()
-        throws DigiDocException 
+    public void init() throws DigiDocException
     {
-        try {
-        org.apache.xml.security.Init.init();
-        //Canonicalizer.register(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS,
-        // "org.apache.xml.security.c14n.implementations.Canonicalizer20010315OmitComments");
-        } catch(Exception ex) {
+        try
+        {
+            org.apache.xml.security.Init.init();
+            // Canonicalizer.register(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS,
+            // "org.apache.xml.security.c14n.implementations.Canonicalizer20010315OmitComments");
+        }
+        catch (Exception ex)
+        {
             DigiDocException.handleException(ex, DigiDocException.ERR_CAN_FAC_INIT);
         }
     }
 
     /**
-     * Canonicalizes XML fragment using the
-     * xml-c14n-20010315 algorithm
-     * @param data input data
-     * @param uri canonicalization algorithm
+     * Canonicalizes XML fragment using the xml-c14n-20010315 algorithm
+     * 
+     * @param data
+     *            input data
+     * @param uri
+     *            canonicalization algorithm
      * @returns canonicalized XML
-     * @throws DigiDocException for all errors
+     * @throws DigiDocException
+     *             for all errors
      */
-    public byte[] canonicalize(byte[] data, String uri)
-        throws DigiDocException
+    public byte[] canonicalize(byte[] data, String uri) throws DigiDocException
     {
-    	Level lvl= Logger.getRootLogger().getLevel();
-    	Logger.getRootLogger().setLevel(Level.OFF);
+        Level lvl = Logger.getRootLogger().getLevel();
+        Logger.getRootLogger().setLevel(Level.OFF);
         byte[] result = null;
-        try {
-        	org.apache.xml.security.Init.init();
-            Canonicalizer c14n = Canonicalizer.
-                getInstance("http://www.w3.org/TR/2001/REC-xml-c14n-20010315"); 
-            result = c14n.canonicalize(data);            
-        } catch(Exception ex) {
+        try
+        {
+            org.apache.xml.security.Init.init();
+            Canonicalizer c14n = Canonicalizer
+                    .getInstance("http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
+            result = c14n.canonicalize(data);
+        }
+        catch (Exception ex)
+        {
             DigiDocException.handleException(ex, DigiDocException.ERR_CAN_ERROR);
         }
         Logger.getRootLogger().setLevel(lvl);

@@ -18,6 +18,7 @@
  *==================================================
  */
 package es.uji.dsign.crypto.digidoc.factory;
+
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 import es.uji.dsign.crypto.digidoc.Signature;
 import es.uji.dsign.crypto.digidoc.TimestampInfo;
@@ -27,34 +28,39 @@ import java.util.ArrayList;
 
 /**
  * Interface for timestamp functions
- * @author  Veiko Sinivee
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
-public interface TimestampFactory {
+public interface TimestampFactory
+{
 
-	/** 
-     * initializes the implementation class 
+    /**
+     * initializes the implementation class
      */
-    public void init()
-        throws DigiDocException;
+    public void init() throws DigiDocException;
 
     /**
      * Verifies this one timestamp
-     * @param ts TimestampInfo object
-     * @param tsaCert TSA certificate
+     * 
+     * @param ts
+     *            TimestampInfo object
+     * @param tsaCert
+     *            TSA certificate
      * @returns result of verification
      */
     public boolean verifyTimestamp(TimestampInfo ts, X509Certificate tsaCert)
-        throws DigiDocException;
-    
+            throws DigiDocException;
+
     /**
-     * Verifies all timestamps in this signature and
-     * return a list of errors.
-     * @param sig signature to verify timestamps
+     * Verifies all timestamps in this signature and return a list of errors.
+     * 
+     * @param sig
+     *            signature to verify timestamps
      * @return list of errors. Empty if no errors.
      * @throws DigiDocException
      */
     public ArrayList verifySignaturesTimestamps(Signature sig);
-    //	throws DigiDocException;
-    
+    // throws DigiDocException;
+
 }

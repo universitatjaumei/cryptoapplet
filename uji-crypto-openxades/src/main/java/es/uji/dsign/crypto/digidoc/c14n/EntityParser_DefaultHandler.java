@@ -6,11 +6,9 @@ import es.uji.dsign.crypto.digidoc.c14n.EntityParser_Handler;
 public class EntityParser_DefaultHandler implements EntityParser_Handler
 {
 
-
     public EntityParser_DefaultHandler()
     {
     }
-
 
     public String ResolveEntity(EntityParser_Entity e)
     {
@@ -23,24 +21,20 @@ public class EntityParser_DefaultHandler implements EntityParser_Handler
                 return "<";
             }
 
-
             if (e.get_Item("gt"))
             {
                 return ">";
             }
-
 
             if (e.get_Item("amp"))
             {
                 return "&";
             }
 
-
             if (e.get_Item("apos"))
             {
                 return "\'";
             }
-
 
             if (e.get_Item("quot"))
             {

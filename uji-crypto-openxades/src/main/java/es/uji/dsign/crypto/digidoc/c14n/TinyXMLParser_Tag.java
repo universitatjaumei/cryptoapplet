@@ -13,11 +13,9 @@ public final class TinyXMLParser_Tag
     public TinyXMLParser_Fragment End;
     public ArrayList Attributes;
 
-
     public TinyXMLParser_Tag()
     {
     }
-
 
     public String get_Name()
     {
@@ -41,7 +39,6 @@ public final class TinyXMLParser_Tag
         {
             return true;
         }
-
 
         if (this.Begin.get_Item("<?"))
         {
@@ -112,7 +109,6 @@ public final class TinyXMLParser_Tag
 
                     }
 
-
                     if (seek)
                     {
                         n.End = n.End.get_Next();
@@ -169,7 +165,6 @@ public final class TinyXMLParser_Tag
                                 }
 
                             }
-
 
                             if (n.End.get_Item("?>"))
                             {

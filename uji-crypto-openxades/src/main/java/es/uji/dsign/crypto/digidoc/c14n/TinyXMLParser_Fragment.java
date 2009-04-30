@@ -9,12 +9,10 @@ public final class TinyXMLParser_Fragment extends FragmentBase
     public TinyXMLParser_Document OwnerDocument;
     private TinyXMLParser_Fragment _next;
 
-
     public TinyXMLParser_Fragment()
     {
         super();
     }
-
 
     private boolean GetMarkupChar(int o)
     {
@@ -39,12 +37,10 @@ public final class TinyXMLParser_Fragment extends FragmentBase
             return false;
         }
 
-
         if (this.GetSpaceChar(o))
         {
             return false;
         }
-
 
         if (this.GetQuoteChar(o))
         {
@@ -56,22 +52,22 @@ public final class TinyXMLParser_Fragment extends FragmentBase
 
     public boolean get_IsMarkup()
     {
-        return this.GetMarkupChar((int)0);
+        return this.GetMarkupChar((int) 0);
     }
 
     public boolean get_IsSpace()
     {
-        return this.GetSpaceChar((int)0);
+        return this.GetSpaceChar((int) 0);
     }
 
     public boolean get_IsQuote()
     {
-        return this.GetQuoteChar((int)0);
+        return this.GetQuoteChar((int) 0);
     }
 
     public boolean get_IsLiteral()
     {
-        return this.GetLiteralChar((int)0);
+        return this.GetLiteralChar((int) 0);
     }
 
     private void SpawnAtOffset(int p)
@@ -79,43 +75,44 @@ public final class TinyXMLParser_Fragment extends FragmentBase
         this.Offset = p;
         this.Length = -1;
 
-        if (this.GetMarkupChar((int)0))
+        if (this.GetMarkupChar((int) 0))
         {
 
-            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this.GetMarkupChar(this.Length)); this.Length = (this.Length + 1))
+            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this
+                    .GetMarkupChar(this.Length)); this.Length = (this.Length + 1))
             {
             }
 
             return;
         }
 
-
-        if (this.GetSpaceChar((int)0))
+        if (this.GetSpaceChar((int) 0))
         {
 
-            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this.GetSpaceChar(this.Length)); this.Length = (this.Length + 1))
+            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this
+                    .GetSpaceChar(this.Length)); this.Length = (this.Length + 1))
             {
             }
 
             return;
         }
 
-
-        if (this.GetQuoteChar((int)0))
+        if (this.GetQuoteChar((int) 0))
         {
 
-            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this.GetQuoteChar(this.Length)); this.Length = (this.Length + 1))
+            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this
+                    .GetQuoteChar(this.Length)); this.Length = (this.Length + 1))
             {
             }
 
             return;
         }
 
-
-        if (this.GetLiteralChar((int)0))
+        if (this.GetLiteralChar((int) 0))
         {
 
-            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this.GetLiteralChar(this.Length)); this.Length = (this.Length + 1))
+            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this
+                    .GetLiteralChar(this.Length)); this.Length = (this.Length + 1))
             {
             }
 
@@ -184,7 +181,6 @@ public final class TinyXMLParser_Fragment extends FragmentBase
 
             }
 
-
             if (seek)
             {
                 f = f.get_Next();
@@ -198,43 +194,22 @@ public final class TinyXMLParser_Fragment extends FragmentBase
     {
         String[] stringArray1;
 
-
         if (this.get_IsMarkup())
         {
-            stringArray1 = new String[]
-                {
-                    "<!--",
-                    "-->",
-                    "<?",
-                    "?>",
-                    "<![",
-                    "]]>",
-                    "[",
-                    "]",
-                    "<!",
-                    "/>",
-                    "</",
-                    ">",
-                    "<",
-                    "="
-                };
+            stringArray1 = new String[] { "<!--", "-->", "<?", "?>", "<![", "]]>", "[", "]", "<!",
+                    "/>", "</", ">", "<", "=" };
 
             if (!this.SplitBy(stringArray1))
             {
-                this.SplitBy((int)1);
+                this.SplitBy((int) 1);
             }
 
             return;
         }
 
-
         if (this.get_IsQuote())
         {
-            stringArray1 = new String[]
-                {
-                    "\'",
-                    "\""
-                };
+            stringArray1 = new String[] { "\'", "\"" };
             this.SplitBy(stringArray1);
         }
 
@@ -258,15 +233,7 @@ public final class TinyXMLParser_Fragment extends FragmentBase
 
                 if (this.get_InternalNext().get_IsMarkup())
                 {
-                    stringArray2 = new String[]
-                        {
-                            "<![",
-                            "<!--",
-                            "<?",
-                            "<",
-                            "</",
-                            "<!"
-                        };
+                    stringArray2 = new String[] { "<![", "<!--", "<?", "<", "</", "<!" };
 
                     if (this.get_Next().get_Item(stringArray2))
                     {
@@ -276,7 +243,6 @@ public final class TinyXMLParser_Fragment extends FragmentBase
                 }
 
             }
-
 
             if (seek)
             {
@@ -297,7 +263,6 @@ public final class TinyXMLParser_Fragment extends FragmentBase
         TinyXMLParser_Fragment n2;
         TinyXMLParser_Fragment n1;
 
-
         if ((len < this.Length))
         {
             n2 = this.get_InternalNext();
@@ -313,7 +278,6 @@ public final class TinyXMLParser_Fragment extends FragmentBase
     {
         TinyXMLParser_Fragment n2;
         TinyXMLParser_Fragment n1;
-
 
         if (this.StartsWith(e))
         {

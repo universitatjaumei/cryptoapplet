@@ -10,60 +10,68 @@ import es.uji.dsign.util.OS;
 
 public class FileInputParams extends AbstractData implements InputParams
 {
-	public byte[] getSignData(SignatureApplet base) throws Exception
-	{	
-		JFileChooser chooser = new JFileChooser();
-		int returnVal = chooser.showOpenDialog(base);
-	
+    public byte[] getSignData(SignatureApplet base) throws Exception
+    {
+        JFileChooser chooser = new JFileChooser();
+        int returnVal = chooser.showOpenDialog(base);
 
-		if( returnVal == JFileChooser.APPROVE_OPTION ) {
-			System.out.println("You chose to open this file: " +
-					chooser.getSelectedFile().getAbsolutePath());
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+            System.out.println("You chose to open this file: "
+                    + chooser.getSelectedFile().getAbsolutePath());
 
-			File pkFile= chooser.getSelectedFile().getAbsoluteFile();
+            File pkFile = chooser.getSelectedFile().getAbsoluteFile();
 
-			if ( ! pkFile.exists() ){
-				JOptionPane.showMessageDialog(base, "No se encontró fichero", "", JOptionPane.ERROR_MESSAGE); 
-				return null;
-			}
-			else{
+            if (!pkFile.exists())
+            {
+                JOptionPane.showMessageDialog(base, "No se encontró fichero", "",
+                        JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+            else
+            {
 
-				if (mustHash)
-					return this.getMessageDigest(OS.getBytesFromFile(pkFile));
-				
-				return OS.getBytesFromFile(pkFile);
-			}
-		}
-		return null;
-	}
+                if (mustHash)
+                    return this.getMessageDigest(OS.getBytesFromFile(pkFile));
 
-	public String getSignFormat(SignatureApplet base)
-	{
-		return null;
-	}
+                return OS.getBytesFromFile(pkFile);
+            }
+        }
+        return null;
+    }
 
-	public int getInputCount() throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    public String getSignFormat(SignatureApplet base)
+    {
+        return null;
+    }
 
-	public byte[] getSignData() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public int getInputCount() throws Exception
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-	public byte[] getSignData(int item) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public byte[] getSignData() throws Exception
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public void initialize(SignatureApplet base) {
-		// TODO Auto-generated method stub
-		
-	}
+    public byte[] getSignData(int item) throws Exception
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	public void flush() {
-		// TODO Auto-generated method stub
-		
-	}
+    public void initialize(SignatureApplet base)
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void flush()
+    {
+        // TODO Auto-generated method stub
+
+    }
 }

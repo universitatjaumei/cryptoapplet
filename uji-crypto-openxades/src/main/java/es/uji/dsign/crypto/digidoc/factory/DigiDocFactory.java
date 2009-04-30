@@ -20,6 +20,7 @@
  */
 
 package es.uji.dsign.crypto.digidoc.factory;
+
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 import es.uji.dsign.crypto.digidoc.SignedDoc;
 
@@ -27,50 +28,50 @@ import java.io.InputStream;
 import java.security.cert.X509Certificate;
 
 /**
- * Interface for reading and writing
- * DigiDoc files
- * @author  Veiko Sinivee
+ * Interface for reading and writing DigiDoc files
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
-public interface DigiDocFactory 
+public interface DigiDocFactory
 {
-    /** 
-     * initializes the implementation class 
+    /**
+     * initializes the implementation class
      */
-    public void init()
-        throws DigiDocException;
+    public void init() throws DigiDocException;
 
     /**
      * Reads in a DigiDoc file
-     * @param fileName file name
+     * 
+     * @param fileName
+     *            file name
      * @return signed document object if successfully parsed
      */
-    public SignedDoc readSignedDoc(String fileName) 
-        throws DigiDocException;
+    public SignedDoc readSignedDoc(String fileName) throws DigiDocException;
 
     /**
      * Reads in a DigiDoc file
-     * @param digiDocStream opened stream with DigiDoc data
-     * The use must open and close it. 
+     * 
+     * @param digiDocStream
+     *            opened stream with DigiDoc data The use must open and close it.
      * @return signed document object if successfully parsed
      */
-    public SignedDoc readSignedDoc(InputStream digiDocStream) 
-        throws DigiDocException;
-        
+    public SignedDoc readSignedDoc(InputStream digiDocStream) throws DigiDocException;
+
     /**
-     * Verifies that the signers cert
-     * has been signed by at least one
-     * of the known root certs
-     * @param cert certificate to check
+     * Verifies that the signers cert has been signed by at least one of the known root certs
+     * 
+     * @param cert
+     *            certificate to check
      */
-    public boolean verifyCertificate(X509Certificate cert)
-    	throws DigiDocException;       
-    	
+    public boolean verifyCertificate(X509Certificate cert) throws DigiDocException;
+
     /**
-     * Finds the CA for this certificate
-     * if the root-certs table is not empty
-     * @param cert certificate to search CA for
+     * Finds the CA for this certificate if the root-certs table is not empty
+     * 
+     * @param cert
+     *            certificate to search CA for
      * @return CA certificate
      */
-    public X509Certificate findCAforCertificate(X509Certificate cert); 
+    public X509Certificate findCAforCertificate(X509Certificate cert);
 }
