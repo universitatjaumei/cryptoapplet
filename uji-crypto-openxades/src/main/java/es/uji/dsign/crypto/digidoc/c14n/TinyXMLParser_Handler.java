@@ -10,9 +10,6 @@ import es.uji.dsign.crypto.digidoc.c14n.TinyXMLParser_TextNode;
 public abstract interface TinyXMLParser_Handler
 {
 
-
-
-
     abstract public void startDocument();
 
     abstract public void endDocument();

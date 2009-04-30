@@ -15,25 +15,16 @@ import es.uji.dsign.crypto.digidoc.c14n.common.StringImplementation;
 public class TinyXMLParser
 {
 
-
     public TinyXMLParser()
     {
     }
-
 
     public void Fail(TinyXMLParser_Fragment f, String reason) throws java.lang.RuntimeException
     {
         Object[] objectArray0;
 
-        objectArray0 = new Object[]
-            {
-                "Error line ",
-                new Integer(f.get_TextPosition().get_Line()),
-                ", column ",
-                new Integer(f.get_TextPosition().get_Column()),
-                " - ",
-                reason
-            };
+        objectArray0 = new Object[] { "Error line ", new Integer(f.get_TextPosition().get_Line()),
+                ", column ", new Integer(f.get_TextPosition().get_Column()), " - ", reason };
         throw new java.lang.RuntimeException(StringImplementation.Concat(objectArray0));
     }
 
@@ -56,7 +47,7 @@ public class TinyXMLParser
             doc.ParseHandler = h;
             a = new Stack();
             h.startDocument();
-            f = TinyXMLParser_Fragment.Of(data, (int)0);
+            f = TinyXMLParser_Fragment.Of(data, (int) 0);
             f.OwnerDocument = doc;
             f.SplitMarkup();
             current = null;
@@ -89,7 +80,6 @@ public class TinyXMLParser
                             continue;
                         }
 
-
                         if (f.get_Item("<!--"))
                         {
                             comment = new TinyXMLParser_Comment();
@@ -99,7 +89,6 @@ public class TinyXMLParser
                             f = comment.ValueTag.End.get_Next();
                             continue;
                         }
-
 
                         if (f.get_Item("<"))
                         {
@@ -135,7 +124,6 @@ public class TinyXMLParser
                             continue;
                         }
 
-
                         if (f.get_Item("</"))
                         {
 
@@ -148,7 +136,10 @@ public class TinyXMLParser
 
                             if (!current.get_IsValid())
                             {
-                                this.Fail(f, "tags dont match : "+ current.get_NameOfBeginTagFragment().get_DataString()+ " vs "+ current.get_NameOfEndTagFragment().get_DataString());
+                                this.Fail(f, "tags dont match : "
+                                        + current.get_NameOfBeginTagFragment().get_DataString()
+                                        + " vs "
+                                        + current.get_NameOfEndTagFragment().get_DataString());
                             }
 
                             f = current.End.End.get_Next();
@@ -160,12 +151,11 @@ public class TinyXMLParser
                             }
                             else
                             {
-                                current = ((TinyXMLParser_Element)a.pop());
+                                current = ((TinyXMLParser_Element) a.pop());
                             }
 
                             continue;
                         }
-
 
                         if (f.get_Item("<!["))
                         {

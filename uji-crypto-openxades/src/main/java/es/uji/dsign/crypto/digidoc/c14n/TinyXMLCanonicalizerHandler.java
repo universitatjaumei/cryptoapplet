@@ -23,14 +23,12 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
     public boolean AppendNewlineAfterDocumentElement;
     public boolean IsWithComments;
 
-
     public TinyXMLCanonicalizerHandler()
     {
         this.BaseStream = new ByteArrayOutputStream();
         this.AppendNewlineAfterDocumentElement = false;
         this.IsWithComments = false;
     }
-
 
     public byte[] get_Bytes()
     {
@@ -42,14 +40,14 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
         byte[] u;
 
         u = Convert.ToByteArray(e, "UTF-8");
-        this.BaseStream.write(u, (int)0, ((int)u.length));
+        this.BaseStream.write(u, (int) 0, ((int) u.length));
     }
 
     public void startElement(TinyXMLParser_Element e)
     {
         ArrayList x;
 
-        this.Write("<"+ e.get_TagName());
+        this.Write("<" + e.get_TagName());
         x = e.get_Attributes();
         this.WriteAttributes(x, e);
         this.Write(">");
@@ -81,12 +79,10 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
         String _a;
         String _u;
 
-
         if ((owner == null))
         {
             return false;
         }
-
 
         if ((owner.Parent == null))
         {
@@ -122,7 +118,7 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
         TinyXMLParser_Attribute a;
         String[] stringArray2;
 
-        a = ((TinyXMLParser_Attribute)x.get(i));
+        a = ((TinyXMLParser_Attribute) x.get(i));
 
         if (a.get_IsXMLNS())
         {
@@ -134,14 +130,8 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
 
         }
 
-        stringArray2 = new String[]
-            {
-                " ",
-                a.NameFragment.get_DataString(),
-                "=\"",
-                this.GetAttributeNormalizedValue(a),
-                "\""
-            };
+        stringArray2 = new String[] { " ", a.NameFragment.get_DataString(), "=\"",
+                this.GetAttributeNormalizedValue(a), "\"" };
         this.Write(StringImplementation.Concat(stringArray2));
     }
 
@@ -159,7 +149,7 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
 
     public void endElement(TinyXMLParser_Element e)
     {
-        this.Write("</"+ e.get_TagName()+ ">");
+        this.Write("</" + e.get_TagName() + ">");
 
         if (this.AppendNewlineAfterDocumentElement)
         {
@@ -181,7 +171,6 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
     public void PI(TinyXMLParser_Tag e)
     {
         ArrayList x;
-
 
         if (e.get_Name().equals("xml"))
         {
@@ -208,7 +197,6 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
     {
         EntityParser p;
 
-
         if (!(str.Parent == null))
         {
             p = EntityParser.Of(str.ValueFragment);
@@ -220,7 +208,8 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
 
     public void cdata(TinyXMLParser_CData str)
     {
-        this.Write(TinyXMLCanonicalizerHandler_TextStringNormalizer.StaticResolveTextCData(str.get_DataString()));
+        this.Write(TinyXMLCanonicalizerHandler_TextStringNormalizer.StaticResolveTextCData(str
+                .get_DataString()));
     }
 
     public void comment(TinyXMLParser_Comment str)
@@ -245,7 +234,8 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
     {
     }
 
-    private static TinyXMLParser_Attribute GetAnyParentXMLNS(TinyXMLParser_Attribute a, TinyXMLParser_Element e)
+    private static TinyXMLParser_Attribute GetAnyParentXMLNS(TinyXMLParser_Attribute a,
+            TinyXMLParser_Element e)
     {
         TinyXMLParser_Element p;
         TinyXMLParser_Attribute x;
@@ -273,7 +263,7 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
 
         stringArray1 = enc;
 
-        for (num2 = 0; (num2 < ((int)stringArray1.length)); num2++)
+        for (num2 = 0; (num2 < ((int) stringArray1.length)); num2++)
         {
             var = stringArray1[num2];
             TinyXMLCanonicalizerHandler.DumpBytes(j, var);

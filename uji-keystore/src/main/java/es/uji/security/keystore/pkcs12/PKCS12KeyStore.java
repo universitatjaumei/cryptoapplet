@@ -17,95 +17,103 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.keystore.IKeyStoreHelper;
 
-public class PKCS12KeyStore implements IKeyStoreHelper{
-	private KeyStore ks= null;
-	char[] _pin= null;
-	
-	public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException, Exception
-	{
-		// Error, we need the path or the input stream of the pkcs12
-	}
-	
-	public void load(InputStream in, char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException, Exception
-	{
-		 ks = KeyStore.getInstance("pkcs12");
-		 ks.load(in, pin);
-		 _pin= pin;
-	}
+public class PKCS12KeyStore implements IKeyStoreHelper
+{
+    private KeyStore ks = null;
+    char[] _pin = null;
 
-	public Enumeration aliases() throws KeyStoreException, Exception
-	{
-		return ks.aliases();
-	}
+    public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
+            CertificateException, Exception
+    {
+        // Error, we need the path or the input stream of the pkcs12
+    }
 
-	public Certificate getCertificate(String alias) throws KeyStoreException, Exception
-	{
-		return ks.getCertificate(alias);
-	}
-	
-	public Certificate[] getUserCertificates() throws KeyStoreException, Exception{
-		Vector<Certificate> certs= new Vector<Certificate>();
-		Certificate tmp_cert;
+    public void load(InputStream in, char[] pin) throws KeyStoreException,
+            NoSuchAlgorithmException, IOException, CertificateException, Exception
+    {
+        ks = KeyStore.getInstance("pkcs12");
+        ks.load(in, pin);
+        _pin = pin;
+    }
 
-		for (Enumeration e= this.aliases(); e.hasMoreElements();){
-			tmp_cert=this.getCertificate((String)e.nextElement());
-			certs.add(tmp_cert);
-		}
+    public Enumeration aliases() throws KeyStoreException, Exception
+    {
+        return ks.aliases();
+    }
 
-		Certificate[] res= new Certificate[certs.size()];
-		certs.toArray(res);
+    public Certificate getCertificate(String alias) throws KeyStoreException, Exception
+    {
+        return ks.getCertificate(alias);
+    }
 
-		return res;
-	}
+    public Certificate[] getUserCertificates() throws KeyStoreException, Exception
+    {
+        Vector<Certificate> certs = new Vector<Certificate>();
+        Certificate tmp_cert;
 
-	public Key getKey(String alias) throws KeyStoreException, Exception
-	{
-		return ks.getKey(alias,_pin);
-	}
+        for (Enumeration e = this.aliases(); e.hasMoreElements();)
+        {
+            tmp_cert = this.getCertificate((String) e.nextElement());
+            certs.add(tmp_cert);
+        }
 
-	public Provider getProvider()
-	{
-		return new BouncyCastleProvider();
-	}
+        Certificate[] res = new Certificate[certs.size()];
+        certs.toArray(res);
 
-	public String getName()
-	{
-		return IKeyStoreHelper.PKCS12_KEY_STORE;
-	}
-	
-	public String getTokenName()
-	{
-		return "File";
-	}
-	
-	public String getAliasFromCertificate(Certificate cer)
-	throws KeyStoreException{
+        return res;
+    }
 
-		X509Certificate xcer= (X509Certificate)cer, auxCer= null;
-		String auxAlias= null;
-		Enumeration e; 
+    public Key getKey(String alias) throws KeyStoreException, Exception
+    {
+        return ks.getKey(alias, _pin);
+    }
 
-		e= ks.aliases();
-		while (e.hasMoreElements()){
-			auxAlias= (String)e.nextElement();
-			auxCer= (X509Certificate)ks.getCertificate(auxAlias);
-			if ( (auxCer.getIssuerDN().equals(xcer.getIssuerDN())) 
-					&& (auxCer.getSerialNumber().equals(xcer.getSerialNumber()))){
-				return auxAlias;
-			}
-		}
+    public Provider getProvider()
+    {
+        return new BouncyCastleProvider();
+    }
 
-		return null;
-	}
+    public String getName()
+    {
+        return IKeyStoreHelper.PKCS12_KEY_STORE;
+    }
 
-	public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException, Exception
-	{
-		byte[] b = null;
-		return b;
-	}
+    public String getTokenName()
+    {
+        return "File";
+    }
 
-	public void cleanUp()
-	{
-		_pin= null;
-	}
+    public String getAliasFromCertificate(Certificate cer) throws KeyStoreException
+    {
+
+        X509Certificate xcer = (X509Certificate) cer, auxCer = null;
+        String auxAlias = null;
+        Enumeration e;
+
+        e = ks.aliases();
+        while (e.hasMoreElements())
+        {
+            auxAlias = (String) e.nextElement();
+            auxCer = (X509Certificate) ks.getCertificate(auxAlias);
+            if ((auxCer.getIssuerDN().equals(xcer.getIssuerDN()))
+                    && (auxCer.getSerialNumber().equals(xcer.getSerialNumber())))
+            {
+                return auxAlias;
+            }
+        }
+
+        return null;
+    }
+
+    public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,
+            Exception
+    {
+        byte[] b = null;
+        return b;
+    }
+
+    public void cleanUp()
+    {
+        _pin = null;
+    }
 }

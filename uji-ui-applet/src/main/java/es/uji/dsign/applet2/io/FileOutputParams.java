@@ -13,51 +13,51 @@ import es.uji.dsign.util.OS;
 
 public class FileOutputParams implements OutputParams
 {
-	private SignatureApplet sap;
-	
-	public void setSignData(SignatureApplet base, byte[] data) throws IOException
-	{
-		sap=base;
-	
-		JFileChooser chooser = new JFileChooser();
-		FileOutputStream fos= null;
-		
-		int returnVal = chooser.showSaveDialog(base);
-	
+    private SignatureApplet sap;
 
-		if( returnVal == JFileChooser.APPROVE_OPTION ) {
-			File pkFile= chooser.getSelectedFile().getAbsoluteFile();
-			fos= new FileOutputStream(pkFile);
-			fos.write(data);
-			fos.close();
-		}
-	}
+    public void setSignData(SignatureApplet base, byte[] data) throws IOException
+    {
+        sap = base;
 
-	
-	public void setSignFormat(SignatureApplet base, byte[] signFormat)
-	{	
-		// TODO Auto-generated method stub
-	}
+        JFileChooser chooser = new JFileChooser();
+        FileOutputStream fos = null;
 
+        int returnVal = chooser.showSaveDialog(base);
 
-	public void setSignData(byte[] data) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
+        if (returnVal == JFileChooser.APPROVE_OPTION)
+        {
+            File pkFile = chooser.getSelectedFile().getAbsoluteFile();
+            fos = new FileOutputStream(pkFile);
+            fos.write(data);
+            fos.close();
+        }
+    }
 
+    public void setSignFormat(SignatureApplet base, byte[] signFormat)
+    {
+        // TODO Auto-generated method stub
+    }
 
-	public void setSignFormat(byte[] signFormat) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setSignData(byte[] data) throws IOException
+    {
+        // TODO Auto-generated method stub
 
-	public void signOk()
-	{
-		netscape.javascript.JSObject.getWindow(sap).call("onSignOk", new String[] { "" });
-	}
+    }
 
-	public void flush() {
-		// TODO Auto-generated method stub
-		
-	}
+    public void setSignFormat(byte[] signFormat) throws IOException
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void signOk()
+    {
+        netscape.javascript.JSObject.getWindow(sap).call("onSignOk", new String[] { "" });
+    }
+
+    public void flush()
+    {
+        // TODO Auto-generated method stub
+
+    }
 }

@@ -21,6 +21,7 @@
  */
 
 package es.uji.dsign.crypto.digidoc.xmlenc.factory;
+
 import es.uji.dsign.crypto.digidoc.DigiDocException;
 
 import java.io.InputStream;
@@ -28,32 +29,36 @@ import java.io.OutputStream;
 
 /**
  * Interface for parsing large encrypted files
- * @author  Veiko Sinivee
+ * 
+ * @author Veiko Sinivee
  * @version 1.0
  */
-public interface EncryptedStreamParser 
+public interface EncryptedStreamParser
 {
-	/** 
-	 * initializes the implementation class 
-	 */
-	public void init()
-		throws DigiDocException;
+    /**
+     * initializes the implementation class
+     */
+    public void init() throws DigiDocException;
 
-	/**
-	 * Reads in a EncryptedData file (.cdoc)
-	 * @param dencStream opened stream with EncrypyedData data
-	 * The user must open and close it. 
-	 * @param outs output stream for decrypted data
-	 * @param token index of PKCS#11 token used
-	 * @param pin pin code to decrypt transport key using PKCS#11
-	 * @param recipientName Recipient atribute value of <EncryptedKey>
-	 * used to locate the correct transport key to decrypt with
-	 * @return number of bytes successfully decrypted
-	 * @throws DigiDocException for decryption errors
-	 */
-	public int decryptStreamUsingRecipientName(InputStream dencStream, 
-			OutputStream outs, int token, String pin, String recipientName) 
-		throws DigiDocException;
+    /**
+     * Reads in a EncryptedData file (.cdoc)
+     * 
+     * @param dencStream
+     *            opened stream with EncrypyedData data The user must open and close it.
+     * @param outs
+     *            output stream for decrypted data
+     * @param token
+     *            index of PKCS#11 token used
+     * @param pin
+     *            pin code to decrypt transport key using PKCS#11
+     * @param recipientName
+     *            Recipient atribute value of <EncryptedKey> used to locate the correct transport
+     *            key to decrypt with
+     * @return number of bytes successfully decrypted
+     * @throws DigiDocException
+     *             for decryption errors
+     */
+    public int decryptStreamUsingRecipientName(InputStream dencStream, OutputStream outs,
+            int token, String pin, String recipientName) throws DigiDocException;
 
 }
-

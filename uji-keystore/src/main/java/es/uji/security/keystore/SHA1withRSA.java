@@ -17,8 +17,7 @@ import es.uji.security.keystore.mscapi.MSCAPIPrivateKey;
 import es.uji.security.keystore.mscapi.MsCapiKeyStore;
 
 /**
- * Signature creation service provider interface for our security provider that
- * deals with cryptApi.
+ * Signature creation service provider interface for our security provider that deals with cryptApi.
  * 
  * @author PSN
  * 
@@ -26,94 +25,95 @@ import es.uji.security.keystore.mscapi.MsCapiKeyStore;
 
 public class SHA1withRSA extends SignatureSpi
 {
-	private MsCapiKeyStore _mks = new MsCapiKeyStore();
-	private ByteArrayOutputStream buffer;
-	private String _alias;
+    private MsCapiKeyStore _mks = new MsCapiKeyStore();
+    private ByteArrayOutputStream buffer;
+    private String _alias;
 
-	public SHA1withRSA() throws KeyStoreException, NoSuchAlgorithmException, IOException, CertificateException
-	{
-		_alias = null;
-		buffer = new ByteArrayOutputStream();
+    public SHA1withRSA() throws KeyStoreException, NoSuchAlgorithmException, IOException,
+            CertificateException
+    {
+        _alias = null;
+        buffer = new ByteArrayOutputStream();
 
-		_mks.load("".toCharArray());
-	}
+        _mks.load("".toCharArray());
+    }
 
-	public SHA1withRSA(Provider provider, String algorithm)
-	{
-		super();
-	}
+    public SHA1withRSA(Provider provider, String algorithm)
+    {
+        super();
+    }
 
-	public AlgorithmParameters engineGetParameters()
-	{
-		return null;
-	}
+    public AlgorithmParameters engineGetParameters()
+    {
+        return null;
+    }
 
-	public void engineInitSign(PrivateKey privateKey)
-	{
-		_alias = ((MSCAPIPrivateKey) privateKey).getAlias();
-	}
+    public void engineInitSign(PrivateKey privateKey)
+    {
+        _alias = ((MSCAPIPrivateKey) privateKey).getAlias();
+    }
 
-	public void engineInitSign(PrivateKey privateKey, SecureRandom random)
-	{
-		// Not Implemented yet. Not necessary.
-	}
+    public void engineInitSign(PrivateKey privateKey, SecureRandom random)
+    {
+        // Not Implemented yet. Not necessary.
+    }
 
-	public void engineInitVerify(PublicKey publicKey)
-	{
-		// Not Implemented yet. Not necessary.
-	}
+    public void engineInitVerify(PublicKey publicKey)
+    {
+        // Not Implemented yet. Not necessary.
+    }
 
-	public void engineSetParameter(AlgorithmParameterSpec params)
-	{
-		// Not Implemented yet. Not necessary.
-	}
+    public void engineSetParameter(AlgorithmParameterSpec params)
+    {
+        // Not Implemented yet. Not necessary.
+    }
 
-	public byte[] engineSign()
-	{
-		byte[] res = null;
+    public byte[] engineSign()
+    {
+        byte[] res = null;
 
-		try
-		{
-			res = _mks.signMessage(buffer.toByteArray(), _alias);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+        try
+        {
+            res = _mks.signMessage(buffer.toByteArray(), _alias);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
 
-		return res;
-	}
+        return res;
+    }
 
-	public int engineSign(byte[] outbuf, int offset, int len)
-	{
-		// Not Implemented yet. Not necessary.
-		return -1;
-	}
+    public int engineSign(byte[] outbuf, int offset, int len)
+    {
+        // Not Implemented yet. Not necessary.
+        return -1;
+    }
 
-	public void engineUpdate(byte b)
-	{
-		// Not Implemented yet. Not necessary.
-	}
+    public void engineUpdate(byte b)
+    {
+        // Not Implemented yet. Not necessary.
+    }
 
-	public void engineUpdate(byte[] b, int off, int len)
-	{
-		buffer.write(b, off, len);
-	}
+    public void engineUpdate(byte[] b, int off, int len)
+    {
+        buffer.write(b, off, len);
+    }
 
-	public Object engineGetParameter(String param)
-	{
-		// Not Implemented yet. Not necessary.
-		return null;
-	}
+    public Object engineGetParameter(String param)
+    {
+        // Not Implemented yet. Not necessary.
+        return null;
+    }
 
-	public boolean engineVerify(byte[] sigBytes)
-	{
-		// Not Implemented yet. Not necessary.
-		return false;
-	}
+    public boolean engineVerify(byte[] sigBytes)
+    {
+        // Not Implemented yet. Not necessary.
+        return false;
+    }
 
-	public void engineSetParameter(String param, Object value)
-	{
-		// Not Implemented yet. Not necessary.
-	}
+    public void engineSetParameter(String param, Object value)
+    {
+        // Not Implemented yet. Not necessary.
+    }
 }

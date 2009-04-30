@@ -7,19 +7,18 @@ public final class EntityParser_Fragment extends FragmentBase
 {
     private EntityParser_Fragment _next;
 
-
     public EntityParser_Fragment()
     {
         super();
     }
-
 
     public EntityParser_Fragment get_InternalNext()
     {
 
         if ((this._next == null))
         {
-            this._next = EntityParser_Fragment.Of(this.Data, this.get_LastOffset(), this.ExplicitBounds);
+            this._next = EntityParser_Fragment.Of(this.Data, this.get_LastOffset(),
+                    this.ExplicitBounds);
         }
 
         return this._next;
@@ -34,15 +33,9 @@ public final class EntityParser_Fragment extends FragmentBase
     {
         String[] stringArray1;
 
-
         if (this.get_IsMarkup())
         {
-            stringArray1 = new String[]
-                {
-                    "&",
-                    ";",
-                    "#"
-                };
+            stringArray1 = new String[] { "&", ";", "#" };
             this.SplitBy(stringArray1);
         }
 
@@ -63,7 +56,6 @@ public final class EntityParser_Fragment extends FragmentBase
     {
         EntityParser_Fragment n2;
         EntityParser_Fragment n1;
-
 
         if (this.StartsWith(e))
         {
@@ -101,12 +93,12 @@ public final class EntityParser_Fragment extends FragmentBase
 
     public boolean get_IsMarkup()
     {
-        return this.GetMarkupChar((int)0);
+        return this.GetMarkupChar((int) 0);
     }
 
     public boolean get_IsLiteral()
     {
-        return this.GetLiteralChar((int)0);
+        return this.GetLiteralChar((int) 0);
     }
 
     private void SpawnAtOffset(int p)
@@ -114,21 +106,22 @@ public final class EntityParser_Fragment extends FragmentBase
         this.Offset = p;
         this.Length = -1;
 
-        if (this.GetMarkupChar((int)0))
+        if (this.GetMarkupChar((int) 0))
         {
 
-            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this.GetMarkupChar(this.Length)); this.Length = (this.Length + 1))
+            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this
+                    .GetMarkupChar(this.Length)); this.Length = (this.Length + 1))
             {
             }
 
             return;
         }
 
-
-        if (this.GetLiteralChar((int)0))
+        if (this.GetLiteralChar((int) 0))
         {
 
-            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this.GetLiteralChar(this.Length)); this.Length = (this.Length + 1))
+            for (this.Length = 0; (this.InBounds(this.get_LastOffset()) && this
+                    .GetLiteralChar(this.Length)); this.Length = (this.Length + 1))
             {
             }
 

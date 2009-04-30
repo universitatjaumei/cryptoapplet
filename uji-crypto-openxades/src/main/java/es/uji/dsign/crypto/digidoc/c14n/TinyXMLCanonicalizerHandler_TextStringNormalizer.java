@@ -11,11 +11,9 @@ class TinyXMLCanonicalizerHandler_TextStringNormalizer implements EntityParser_H
 {
     public boolean IsAttribute;
 
-
     public TinyXMLCanonicalizerHandler_TextStringNormalizer()
     {
     }
-
 
     public String ResolveEntity(EntityParser_Entity e)
     {
@@ -33,21 +31,18 @@ class TinyXMLCanonicalizerHandler_TextStringNormalizer implements EntityParser_H
 
             }
 
-
             if ((e.get_IntegerValue() == 32))
             {
                 return " ";
             }
 
-
             if (Helper.IsVisibleChar(e.get_IntegerValue()))
             {
-                return Convert.ToString(((char)e.get_IntegerValue()));
+                return Convert.ToString(((char) e.get_IntegerValue()));
             }
 
-            return "&#x"+ e.get_HexValue()+ ";";
+            return "&#x" + e.get_HexValue() + ";";
         }
-
 
         if (this.IsAttribute)
         {

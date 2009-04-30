@@ -5,10 +5,8 @@ import es.uji.dsign.crypto.digidoc.c14n.common.Convert;
 import es.uji.dsign.crypto.digidoc.c14n.common.StringImplementation;
 
 /**
- * a fragment represents a special bytestream, a class of bytes, for example
- * - spaces \x20 \x09 \x0D \0x0A
- * - markup for xml < > / "
- * it is alike java tokenizer yet different
+ * a fragment represents a special bytestream, a class of bytes, for example - spaces \x20 \x09 \x0D
+ * \0x0A - markup for xml < > / " it is alike java tokenizer yet different
  */
 public abstract class FragmentBase
 {
@@ -17,11 +15,9 @@ public abstract class FragmentBase
     public int Length;
     public FragmentBase_Bounds ExplicitBounds;
 
-
     protected FragmentBase()
     {
     }
-
 
     /**
      * gets the bytes held by the fragment
@@ -45,7 +41,7 @@ public abstract class FragmentBase
         ret = false;
         stringArray3 = e;
 
-        for (num4 = 0; (num4 < ((int)stringArray3.length)); num4++)
+        for (num4 = 0; (num4 < ((int) stringArray3.length)); num4++)
         {
             var = stringArray3[num4];
 
@@ -93,8 +89,7 @@ public abstract class FragmentBase
     {
         int i;
 
-
-        for (i = 0; (i < ((int)ds.length)); i++)
+        for (i = 0; (i < ((int) ds.length)); i++)
         {
 
             if (this.get_Item(ds[i]))
@@ -119,7 +114,7 @@ public abstract class FragmentBase
     {
         char c;
 
-        c = ((char)this.Data[(this.Offset + o)]);
+        c = ((char) this.Data[(this.Offset + o)]);
         return c;
     }
 
@@ -131,7 +126,6 @@ public abstract class FragmentBase
             return false;
         }
 
-
         if (!(this.ExplicitBounds == null))
         {
 
@@ -142,7 +136,7 @@ public abstract class FragmentBase
 
         }
 
-        return (p < ((int)this.Data.length));
+        return (p < ((int) this.Data.length));
     }
 
     protected static void SplitBy(FragmentBase left, FragmentBase right, int length)
@@ -153,12 +147,12 @@ public abstract class FragmentBase
     }
 
     /**
-     * returns the string between to fragments,
-     * used if only start and end tags are known
+     * returns the string between to fragments, used if only start and end tags are known
      */
     public static String GetDataBetweenFragments(FragmentBase from, FragmentBase to)
     {
-        return Convert.ToString(from.Data, (from.Offset + from.Length), (to.Offset - from.get_LastOffset()));
+        return Convert.ToString(from.Data, (from.Offset + from.Length), (to.Offset - from
+                .get_LastOffset()));
     }
 
 }

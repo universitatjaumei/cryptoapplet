@@ -7,26 +7,18 @@ public class TextPositionInfo
     public byte[] Data;
     public int Offset;
 
-
     public TextPositionInfo(byte[] d, int o)
     {
         this.Data = d;
         this.Offset = o;
     }
 
-
     public String toString()
     {
         Object[] objectArray1;
 
-        objectArray1 = new Object[]
-            {
-                "[line ",
-                new Integer(this.get_Line()),
-                ", col ",
-                new Integer(this.get_Column()),
-                "]"
-            };
+        objectArray1 = new Object[] { "[line ", new Integer(this.get_Line()), ", col ",
+                new Integer(this.get_Column()), "]" };
         return StringImplementation.Concat(objectArray1);
     }
 

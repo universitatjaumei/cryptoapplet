@@ -9,11 +9,9 @@ public final class TinyXMLParser_CData
     public TinyXMLParser_Fragment Begin;
     public TinyXMLParser_Fragment End;
 
-
     public TinyXMLParser_CData()
     {
     }
-
 
     public boolean get_IsValid()
     {
@@ -23,48 +21,40 @@ public final class TinyXMLParser_CData
             return false;
         }
 
-
         if ((this.End == null))
         {
             return false;
         }
-
 
         if (!this.Begin.get_Item("<!["))
         {
             return false;
         }
 
-
         if (!this.End.get_Item("]]>"))
         {
             return false;
         }
-
 
         if ((this.Begin.get_Next() == null))
         {
             return false;
         }
 
-
         if (!this.Begin.get_Next().get_IsLiteral())
         {
             return false;
         }
-
 
         if (!this.Begin.get_Next().get_DataString().equals("CDATA"))
         {
             return false;
         }
 
-
         if ((this.Begin.get_Next().get_Next() == null))
         {
             return false;
         }
-
 
         if (!this.Begin.get_Next().get_Next().get_Item("["))
         {

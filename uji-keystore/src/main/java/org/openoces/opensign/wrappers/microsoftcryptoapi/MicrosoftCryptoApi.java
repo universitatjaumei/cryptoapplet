@@ -44,64 +44,76 @@ import java.math.BigInteger;
 
 public class MicrosoftCryptoApi
 {
-	public native void hello();
-	public native byte[][] getCertificatesInSystemStore(String storeName);
-	public native byte[] signMessage(byte[] toBeSigned, byte[] certificate);
-	public native byte[] signHash(byte[] toBeSigned, byte[] certificate);
-	public native int getCertificateVersion(byte[] certificate);
-	public native byte[] digest(byte[] data, String algorithm);
-	public native int getLastErrorCode();
-	public native int getMajorVersion();
-	public native int getMinorVersion();
-	public native int getKeyUsage(byte[] certificate);
+    public native void hello();
 
-	private native String getSubjectDn(byte[] certificate);
-	private native String getIssuerDn(byte[] certificate);
-	private native byte[] getSerialNumber(byte[] certificate);
-	private native long getNotAfter(byte[] certificate);
-	private native long getNotBefore(byte[] certificate);
+    public native byte[][] getCertificatesInSystemStore(String storeName);
 
-	
-	/*static { 
-		System.loadLibrary("MicrosoftCryptoApi_0_2"); 
-	}*/
-	 
-	public Date getNotBeforeDate(byte[] certificate)
-	{
-		return new Date(getNotBefore(certificate));
-	}
+    public native byte[] signMessage(byte[] toBeSigned, byte[] certificate);
 
-	public Date getNotAfterDate(byte[] certificate)
-	{
-		return new Date(getNotAfter(certificate));
-	}
+    public native byte[] signHash(byte[] toBeSigned, byte[] certificate);
 
-	public BigInteger getSerialNumberBigInteger(byte[] certificate)
-	{
-		byte[] serialNumber = getSerialNumber(certificate);
+    public native int getCertificateVersion(byte[] certificate);
 
-		/* convert from little endian to big endian */
-		for (int i = 0; i < (serialNumber.length / 2); i++)
-		{
-			int lowerIdx = i;
-			int upperIdx = serialNumber.length - i - 1;
-			byte b = serialNumber[lowerIdx];
-			serialNumber[lowerIdx] = serialNumber[upperIdx];
-			serialNumber[upperIdx] = b;
-		}
+    public native byte[] digest(byte[] data, String algorithm);
 
-		return new BigInteger(serialNumber);
-	}
+    public native int getLastErrorCode();
 
-	public String getSubjectDnString(byte[] certificate)
-	{
-		String s = getSubjectDn(certificate);
-		return s == null ? null : s.substring(0, s.length() - 1);
-	}
+    public native int getMajorVersion();
 
-	public String getIssuerDnString(byte[] certificate)
-	{
-		String s = getIssuerDn(certificate);
-		return s == null ? null : s.substring(0, s.length() - 1);
-	}
+    public native int getMinorVersion();
+
+    public native int getKeyUsage(byte[] certificate);
+
+    private native String getSubjectDn(byte[] certificate);
+
+    private native String getIssuerDn(byte[] certificate);
+
+    private native byte[] getSerialNumber(byte[] certificate);
+
+    private native long getNotAfter(byte[] certificate);
+
+    private native long getNotBefore(byte[] certificate);
+
+    /*
+     * static { System.loadLibrary("MicrosoftCryptoApi_0_2"); }
+     */
+
+    public Date getNotBeforeDate(byte[] certificate)
+    {
+        return new Date(getNotBefore(certificate));
+    }
+
+    public Date getNotAfterDate(byte[] certificate)
+    {
+        return new Date(getNotAfter(certificate));
+    }
+
+    public BigInteger getSerialNumberBigInteger(byte[] certificate)
+    {
+        byte[] serialNumber = getSerialNumber(certificate);
+
+        /* convert from little endian to big endian */
+        for (int i = 0; i < (serialNumber.length / 2); i++)
+        {
+            int lowerIdx = i;
+            int upperIdx = serialNumber.length - i - 1;
+            byte b = serialNumber[lowerIdx];
+            serialNumber[lowerIdx] = serialNumber[upperIdx];
+            serialNumber[upperIdx] = b;
+        }
+
+        return new BigInteger(serialNumber);
+    }
+
+    public String getSubjectDnString(byte[] certificate)
+    {
+        String s = getSubjectDn(certificate);
+        return s == null ? null : s.substring(0, s.length() - 1);
+    }
+
+    public String getIssuerDnString(byte[] certificate)
+    {
+        String s = getIssuerDn(certificate);
+        return s == null ? null : s.substring(0, s.length() - 1);
+    }
 }

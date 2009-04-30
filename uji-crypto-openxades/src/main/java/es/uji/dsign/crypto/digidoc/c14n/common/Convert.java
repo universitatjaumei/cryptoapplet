@@ -7,12 +7,9 @@ import es.uji.dsign.crypto.digidoc.c14n.common.StringImplementation;
 public final class Convert
 {
 
-
     public Convert()
     {
     }
-
-
 
     public static String BytesToHuman(long bytes)
     {
@@ -22,13 +19,7 @@ public final class Convert
         boolean z;
         String[] stringArray5;
 
-        stringArray5 = new String[]
-            {
-                "bytes",
-                "KB",
-                "MB",
-                "GB"
-            };
+        stringArray5 = new String[] { "bytes", "KB", "MB", "GB" };
         u = stringArray5;
         x = 0;
         p = bytes;
@@ -37,12 +28,12 @@ public final class Convert
         {
             z = false;
 
-            if (!(p < ((long)1024)))
+            if (!(p < ((long) 1024)))
             {
 
-                if ((x < ((int)u.length)))
+                if ((x < ((int) u.length)))
                 {
-                    p = (p / ((long)1024));
+                    p = (p / ((long) 1024));
                     x++;
                     z = true;
                 }
@@ -50,7 +41,7 @@ public final class Convert
             }
 
         }
-        return new Long(p)+ " "+ u[x];
+        return new Long(p) + " " + u[x];
     }
 
     public static String ToHexString(String e)
@@ -66,7 +57,7 @@ public final class Convert
         for (num4 = 0; (num4 < string3.length()); num4++)
         {
             var = string3.charAt(num4);
-            z = z+ Convert.ToHexString(var);
+            z = z + Convert.ToHexString(var);
         }
 
         return z;
@@ -77,9 +68,9 @@ public final class Convert
         int[] i;
         int x;
 
-        i = new int[((int)e.length)];
+        i = new int[((int) e.length)];
 
-        for (x = 0; (x < ((int)e.length)); x++)
+        for (x = 0; (x < ((int) e.length)); x++)
         {
             i[x] = Convert.ToInt32(e[x]);
         }
@@ -137,7 +128,7 @@ public final class Convert
 
             if (((z.length() % 2) == 1))
             {
-                return "0"+ z;
+                return "0" + z;
             }
 
         }
@@ -157,7 +148,7 @@ public final class Convert
 
         e = Convert.ToHexString(pi);
 
-        for (z = (length - e.length()); (z-- > 0); e = "0"+ e)
+        for (z = (length - e.length()); (z-- > 0); e = "0" + e)
         {
         }
 
@@ -171,7 +162,7 @@ public final class Convert
 
         e = Convert.ToHexString(pi);
 
-        for (z = (length - e.length()); (z-- > 0); e = "0"+ e)
+        for (z = (length - e.length()); (z-- > 0); e = "0" + e)
         {
         }
 
@@ -183,10 +174,7 @@ public final class Convert
         char[] x;
         char[] charArray2;
 
-        charArray2 = new char[]
-            {
-                b
-            };
+        charArray2 = new char[] { b };
         x = charArray2;
         return String.valueOf(x);
     }
@@ -196,10 +184,7 @@ public final class Convert
         byte[] x;
         byte[] byteArray2;
 
-        byteArray2 = new byte[]
-            {
-                ((byte)b)
-            };
+        byteArray2 = new byte[] { ((byte) b) };
         x = byteArray2;
         return new String(x);
     }
@@ -230,17 +215,17 @@ public final class Convert
         byte[] s;
         int i;
 
-
         if (((val.length() % 2) == 1))
         {
-            return Convert.FromHexString("0"+ val);
+            return Convert.FromHexString("0" + val);
         }
 
         s = new byte[(val.length() / 2)];
 
         for (i = 0; (i < (val.length() - 1)); i = (i + 2))
         {
-            s[(i / 2)] = ((byte)Integer.parseInt(StringImplementation.Substring(val, i, (int)2), (int)16));
+            s[(i / 2)] = ((byte) Integer.parseInt(StringImplementation.Substring(val, i, (int) 2),
+                    (int) 16));
         }
 
         return s;
@@ -280,7 +265,7 @@ public final class Convert
             return null;
         }
 
-        return Convert.ToHexString(e, (int)0, ((int)e.length));
+        return Convert.ToHexString(e, (int) 0, ((int) e.length));
     }
 
     public static String ToHexString(byte[] e, int offset, int length)
@@ -292,7 +277,7 @@ public final class Convert
 
         for (i = offset; (i < (offset + length)); i++)
         {
-            x = x+ Convert.ToHexString(Convert.ToInt32(e[i]));
+            x = x + Convert.ToHexString(Convert.ToInt32(e[i]));
         }
 
         return x;
@@ -303,9 +288,9 @@ public final class Convert
         byte[] n;
         int i;
 
-        n = new byte[((int)e.length)];
+        n = new byte[((int) e.length)];
 
-        for (i = 0; (i < ((int)e.length)); i++)
+        for (i = 0; (i < ((int) e.length)); i++)
         {
             n[i] = Convert.ToByte(e[i]);
         }
@@ -315,38 +300,28 @@ public final class Convert
 
     private static byte ToByte(int p)
     {
-        return ((byte)p);
+        return ((byte) p);
     }
 
     public static byte[] ToByteArray(long n)
     {
         byte[] b;
 
-        b = new byte[]
-            {
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                ((byte)n)
-            };
+        b = new byte[] { 0, 0, 0, 0, 0, 0, 0, ((byte) n) };
         n = (n >> 8);
-        b[6] = ((byte)n);
+        b[6] = ((byte) n);
         n = (n >> 8);
-        b[5] = ((byte)n);
+        b[5] = ((byte) n);
         n = (n >> 8);
-        b[4] = ((byte)n);
+        b[4] = ((byte) n);
         n = (n >> 8);
-        b[3] = ((byte)n);
+        b[3] = ((byte) n);
         n = (n >> 8);
-        b[2] = ((byte)n);
+        b[2] = ((byte) n);
         n = (n >> 8);
-        b[1] = ((byte)n);
+        b[1] = ((byte) n);
         n = (n >> 8);
-        b[0] = ((byte)n);
+        b[0] = ((byte) n);
         return b;
     }
 
@@ -403,21 +378,21 @@ public final class Convert
 
     public static int ToInt16(long p)
     {
-        return ((int)p);
+        return ((int) p);
     }
 
     public static long ToLong(String s, int radix)
     {
         long _return;
 
-        _return = ((long)0);
+        _return = ((long) 0);
         try
         {
             _return = Long.parseLong(s, radix);
         }
         catch (java.lang.Throwable __exc)
         {
-            _return = ((long)0);
+            _return = ((long) 0);
         }
 
         return _return;
@@ -477,13 +452,12 @@ public final class Convert
             else
             {
 
-                if (!((offset + i) < ((int)b.length)))
+                if (!((offset + i) < ((int) b.length)))
                 {
                     seek = false;
                 }
 
             }
-
 
             if (seek)
             {
@@ -524,7 +498,7 @@ public final class Convert
 
         for (i = 0; (i < u.size()); i++)
         {
-            x[i] = ((Integer)u.get(i)).intValue();
+            x[i] = ((Integer) u.get(i)).intValue();
         }
 
         return x;

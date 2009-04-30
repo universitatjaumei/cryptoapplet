@@ -13,12 +13,9 @@ public final class TinyXMLParser_NestedElement
     public TinyXMLParser_Fragment InnerEnd;
     public ArrayList Children;
 
-
     public TinyXMLParser_NestedElement()
     {
     }
-
-
 
     public static TinyXMLParser_NestedElement Of(TinyXMLParser_Fragment f)
     {
@@ -97,7 +94,6 @@ public final class TinyXMLParser_NestedElement
                 }
 
             }
-
 
             if (seek)
             {
