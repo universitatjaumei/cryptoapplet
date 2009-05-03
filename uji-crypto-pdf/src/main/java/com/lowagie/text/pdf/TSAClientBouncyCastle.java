@@ -29,29 +29,21 @@ import org.bouncycastle.tsp.*;
 
 public class TSAClientBouncyCastle implements TSAClient
 {
-
     protected String tsaURL;
-
     protected String tsaUsername;
-
     protected String tsaPassword;
-
     protected int tokSzEstimate;
 
     public TSAClientBouncyCastle(String url)
     {
-
         this(url, null, null, 4096);
         Integer counter = 1; // boxing
         int counter2 = counter; // unboxing
-
     }
 
     public TSAClientBouncyCastle(String url, String username, String password)
     {
-
         this(url, username, password, 4096);
-
     }
 
     /**
@@ -79,15 +71,10 @@ public class TSAClientBouncyCastle implements TSAClient
 
     public TSAClientBouncyCastle(String url, String username, String password, int tokSzEstimate)
     {
-
         this.tsaURL = url;
-
         this.tsaUsername = username;
-
         this.tsaPassword = password;
-
         this.tokSzEstimate = tokSzEstimate;
-
     }
 
     /**
@@ -101,16 +88,12 @@ public class TSAClientBouncyCastle implements TSAClient
 
     public int getTokenSizeEstimate()
     {
-
         return tokSzEstimate;
-
     }
 
     public byte[] getTimeStampToken(PdfPKCS7TSA caller, byte[] imprint) throws Exception
     {
-
         return getTimeStampToken(imprint);
-
     }
 
     /**
