@@ -15,7 +15,6 @@ package com.lowagie.text.pdf;
 
 public interface TSAClient
 {
-
     /**
      * 
      * Get the time stamp token size estimate.
@@ -24,7 +23,6 @@ public interface TSAClient
      * 
      * returned by getTimeStampToken() _prior_ to actual getTimeStampToken() call.
      */
-
     public int getTokenSizeEstimate();
 
     /**
@@ -44,7 +42,5 @@ public interface TSAClient
      * @throws Exception
      *             - TSA request failed
      */
-
     public byte[] getTimeStampToken(PdfPKCS7TSA caller, byte[] imprint) throws Exception;
-
 }
