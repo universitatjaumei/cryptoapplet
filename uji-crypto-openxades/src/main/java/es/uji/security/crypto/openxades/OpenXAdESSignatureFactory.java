@@ -40,9 +40,9 @@ import es.uji.security.util.Base64;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
-public class XAdESSignatureFactory implements ISignFormatProvider
+public class OpenXAdESSignatureFactory implements ISignFormatProvider
 {
-    private Logger log = Logger.getLogger(XAdESSignatureFactory.class);
+    private Logger log = Logger.getLogger(OpenXAdESSignatureFactory.class);
     private String _strerr = "";
     private String signerRole = "UNSET";
     private String xadesFileName = "data.xml";

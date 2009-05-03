@@ -13,7 +13,7 @@ import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.util.ConfigHandler;
 
-public class XAdESCoSignatureFactory implements ISignFormatProvider
+public class OpenXAdESCoSignatureFactory implements ISignFormatProvider
 {
     private String signerRole = "UNSET";
     private String xadesFileName = "data.xml";
@@ -58,7 +58,7 @@ public class XAdESCoSignatureFactory implements ISignFormatProvider
         DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
         SignedDoc sdoc = digFac.readSignedDoc(new ByteArrayInputStream(toSign));
 
-        XAdESSignatureFactory xsf = new XAdESSignatureFactory();
+        OpenXAdESSignatureFactory xsf = new OpenXAdESSignatureFactory();
         xsf.setSignerRole(signerRole);
         xsf.setXadesFileName(xadesFileName);
         xsf.setXadesFileMimeType(xadesFileMimeType);
