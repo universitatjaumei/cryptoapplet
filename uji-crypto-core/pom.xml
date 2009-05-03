@@ -25,12 +25,12 @@
     </dependency>  
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk16</artifactId>
+      <artifactId>bcprov-jdk15</artifactId>
       <version>143</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bctsp-jdk16</artifactId>
+      <artifactId>bctsp-jdk15</artifactId>
       <version>143</version>
     </dependency>    
   </dependencies>
