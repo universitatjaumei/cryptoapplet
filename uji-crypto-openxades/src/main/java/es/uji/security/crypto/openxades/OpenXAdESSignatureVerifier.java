@@ -15,10 +15,10 @@ import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
-public class XAdESSignatureVerifier
+public class OpenXAdESSignatureVerifier
 {
 
-    public XAdESSignatureVerifier()
+    public OpenXAdESSignatureVerifier()
     {
 
     }
