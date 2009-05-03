@@ -1,6 +1,6 @@
 package es.uji.security.ui.applet;
 
-import es.uji.security.crypto.openxades.XAdESSignatureVerifier;
+import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
 import es.uji.security.ui.applet.io.FuncOutputParams;
 import es.uji.security.ui.applet.io.ParamInputData;
 import es.uji.security.ui.applet.io.URLInputParams;
@@ -662,7 +662,7 @@ public class SignatureApplet extends JApplet
         {
             public String[] run()
             {
-                XAdESSignatureVerifier sv = new XAdESSignatureVerifier();
+                OpenXAdESSignatureVerifier sv = new OpenXAdESSignatureVerifier();
                 return sv.verifyUrl(input);
             }
         });

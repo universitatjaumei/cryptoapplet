@@ -17,8 +17,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.openxades.XAdESCoSignatureFactory;
-import es.uji.security.crypto.openxades.XAdESSignatureFactory;
+import es.uji.security.crypto.openxades.OpenXAdESCoSignatureFactory;
+import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.ui.applet.io.InputParams;
@@ -177,14 +177,14 @@ public class SignatureThread extends Thread
                 if (_mw.getAppHandler().getSignFormat().equals(
                         "es.uji.dsign.crypto.XAdESSignatureFactory"))
                 {
-                    XAdESSignatureFactory xs = (XAdESSignatureFactory) signer;
+                    OpenXAdESSignatureFactory xs = (OpenXAdESSignatureFactory) signer;
                     xs.setSignerRole(sr);
                     xs.setXadesFileName(fname);
                     xs.setXadesFileMimeType(fmimetype);
                 }
                 else
                 {
-                    XAdESCoSignatureFactory xs = (XAdESCoSignatureFactory) signer;
+                    OpenXAdESCoSignatureFactory xs = (OpenXAdESCoSignatureFactory) signer;
                     xs.setSignerRole(sr);
                     xs.setXadesFileName(fname);
                     xs.setXadesFileMimeType(fmimetype);
