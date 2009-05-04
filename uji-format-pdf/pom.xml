@@ -5,9 +5,9 @@
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.uji.security</groupId>
-  <artifactId>uji-crypto-pdf</artifactId>
+  <artifactId>uji-format-pdf</artifactId>
   <version>2.1.0</version>
-  <name>uji-crypto-pdf</name>
+  <name>uji-format-pdf</name>
 
   <parent>
     <groupId>es.uji.security</groupId>
@@ -19,6 +19,11 @@
     <dependency>
       <groupId>es.uji.security</groupId>
       <artifactId>uji-crypto-core</artifactId>
+      <version>2.1.0</version>    
+    </dependency>  
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-cms</artifactId>
       <version>2.1.0</version>    
     </dependency>  
     <dependency>
