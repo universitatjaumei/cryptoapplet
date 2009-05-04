@@ -1,22 +1,21 @@
 package es.uji.dsign.applet2;
 
+import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
+import es.uji.dsign.crypto.verifiers.XAdESSignatureVerifier;
+import es.uji.dsign.util.i18n.LabelManager;
+import es.uji.dsign.applet2.io.FuncOutputParams;
+import es.uji.dsign.applet2.io.ParamInputData;
+import es.uji.dsign.applet2.io.URLInputParams;
+import es.uji.dsign.applet2.io.URLOutputParams;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import es.uji.dsign.applet2.Exceptions.SignatureAppletException;
-import es.uji.dsign.applet2.io.FuncOutputParams;
-import es.uji.dsign.applet2.io.ParamInputData;
-import es.uji.dsign.applet2.io.URLInputParams;
-import es.uji.dsign.applet2.io.URLOutputParams;
-import es.uji.dsign.crypto.verifiers.FacturaeSignatureVerifier;
-import es.uji.dsign.crypto.verifiers.XAdESSignatureVerifier;
-import es.uji.dsign.util.i18n.LabelManager;
 
 
 
@@ -619,18 +618,8 @@ public class SignatureApplet extends JApplet
 			}});
 		return res;
 	}
-
-	public String[] verifyFacturaeDataUrl(final String input)
-	{
-		String[] res= AccessController.doPrivileged(new PrivilegedAction<String[]>() {
-			public String[] run() {
-				FacturaeSignatureVerifier sv= new FacturaeSignatureVerifier();
-				return sv.verifyUrl(input);
-			}});
-		return res;
-	}
-
-
+	
+	
 	/**
 	 * Test the execution environment, is everything ok to do the signature.
 	 * 
