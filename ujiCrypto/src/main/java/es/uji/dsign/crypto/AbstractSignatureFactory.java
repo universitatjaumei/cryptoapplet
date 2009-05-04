@@ -5,6 +5,7 @@ import java.util.Hashtable;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+
 public abstract class AbstractSignatureFactory
 {
 	public static Hashtable<String,String> formatImplMap= null;
@@ -16,6 +17,7 @@ public abstract class AbstractSignatureFactory
 	public static String SIGN_FORMAT_XADES_COSIGN = "XADES_COSIGN";
 	public static String SIGN_FORMAT_PDF          = "PDF";
 	public static String SIGN_FORMAT_XMLDSIG      = "XMLDSIG";
+	public static String SIGN_FORMAT_FACTURAE	  = "FACTURAE";
 
 	
 	/**
@@ -29,7 +31,8 @@ public abstract class AbstractSignatureFactory
 												 "XADES",
 												 "XADES_COSIGN",
 												 "PDF",							 
-												 "XMLDSIG"
+												 "XMLDSIG",
+												 "FACTURAE"
 												 };
 	
 	/**
@@ -43,7 +46,8 @@ public abstract class AbstractSignatureFactory
 												 "es.uji.dsign.crypto.XAdESSignatureFactory",
 												 "es.uji.dsign.crypto.XAdESCoSignatureFactory",
 												 "es.uji.dsign.crypto.PDFSignatureFactory",
-												 "es.uji.dsign.crypto.XMLDsigSignatureFactory"
+												 "es.uji.dsign.crypto.XMLDsigSignatureFactory",
+												 "es.uji.dsign.crypto.FacturaeSignatureFactory"
 												};                                 
 	
 	
