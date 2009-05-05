@@ -15,6 +15,8 @@ import java.security.PrivilegedAction;
 
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 /**
  * This is the main applet class, it handles the web-to-java interaction by exporting some method to
@@ -44,6 +46,22 @@ public class SignatureApplet extends JApplet
 
     public void init()
     {
+        // Init Nimbus Look&Feel if available (JDK1.6u10 or higher)
+        try 
+        {
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) 
+            {
+                if ("Nimbus".equals(info.getName())) 
+                {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } 
+        catch (Exception e) 
+        {
+        }
+         
         try
         {
             Logger.getRootLogger().setLevel(Level.INFO/* Level.OFF */);
