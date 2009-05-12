@@ -123,13 +123,13 @@ public class AppHandler
     public String[] formats = new String[] { "RAW", "CMS", "CMS_HASH", "XADES", "XADES_COSIGN",
             "PDF", "XMLDSIG" };
 
-    public String[] impls = new String[] { "es.uji.dsign.crypto.RawSignatureFactory",
-            "es.uji.dsign.crypto.CMSSignatureFactory",
-            "es.uji.dsign.crypto.CMSHashSignatureFactory",
-            "es.uji.dsign.crypto.XAdESSignatureFactory",
-            "es.uji.dsign.crypto.XAdESCoSignatureFactory",
-            "es.uji.dsign.crypto.PDFSignatureFactory",
-            "es.uji.dsign.crypto.XMLDsigSignatureFactory" };
+    public String[] impls = new String[] { "es.uji.security.crypto.RawSignatureFactory",
+            "es.uji.security.crypto.cms.CMSSignatureFactory",
+            "es.uji.security.crypto.cms.CMSHashSignatureFactory",
+            "es.uji.security.crypto.openxades.XAdESSignatureFactory",
+            "es.uji.security.crypto.openxades.XAdESCoSignatureFactory",
+            "es.uji.security.crypto.pdf.PDFSignatureFactory",
+            "es.uji.security.crypto.xmldsign.XMLDsigSignatureFactory" };
 
     public Hashtable<String, String> getFormatImplMapping()
     {
