@@ -26,6 +26,7 @@ import org.bouncycastle.tsp.TimeStampTokenInfo;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.TimeStampFactory;
 import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.util.ConfigHandler;
 
 public class AppEnvironmentTester extends Thread
@@ -38,7 +39,8 @@ public class AppEnvironmentTester extends Thread
     private String appletTag, strerror = "", strwarn = "", inputUrl, outputUrl;
     int nerror = 0, ninfo = 0, nwarn = 0, delay = 1000;
     private Properties prop;
-
+    private KeyStoreManager keyStoreManager;
+    
     private void caption(String str)
     {
         _jta.append("\nTesting: " + str + "\n");
@@ -422,7 +424,7 @@ public class AppEnvironmentTester extends Thread
         {
             caption("User Certificates, you must check that the Issuer of your certificate is like any\nof the Subjects in allowed certificates section");
             String strinfo = "User Certificates detected: \n\n";
-            for (IKeyStoreHelper ikh : _apph.getKeyStoreTable().values())
+            for (IKeyStoreHelper ikh : this.keyStoreManager.getKeyStoreTable().values())
             {
                 for (Certificate c : ikh.getUserCertificates())
                 {
@@ -518,6 +520,9 @@ public class AppEnvironmentTester extends Thread
         _jf.setContentPane(_jsp);
         _jf.setVisible(true);
 
+        this.keyStoreManager = new KeyStoreManager();
+        this.keyStoreManager.initKeyStoresTable(this._apph.getNavigator());
+        
         // Lets go with the tests
         testJavaVersion();
         testAppletTag();

@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 import es.uji.security.keystore.pkcs12.PKCS12KeyStore;
@@ -28,8 +29,9 @@ import es.uji.security.util.i18n.LabelManager;
 public class EventActionHandler
 {
 
-    private MainWindow mw = null;
-    private AppHandler aph = null;
+    private MainWindow mw;
+    private AppHandler aph;
+    private KeyStoreManager keyStoreManager;
 
     /**
      * The main constructor
@@ -41,6 +43,7 @@ public class EventActionHandler
     {
         this.mw = mw;
         this.aph = mw.getAppHandler();
+        this.keyStoreManager = mw.getKeyStoreManager();
     }
 
     /**
@@ -249,7 +252,7 @@ public class EventActionHandler
                                 {
                                     pkStore.load(new FileInputStream(pkFile), pass);
 
-                                    mw.getAppHandler().addP12KeyStore(pkStore);
+                                    keyStoreManager.addP12KeyStore(pkStore);
                                     mw.reloadCertificateJTree();
                                 }
                             }
@@ -312,7 +315,7 @@ public class EventActionHandler
                                 if (pass != null)
                                 {
                                     pkStore.load(pass);
-                                    mw.getAppHandler().addP11KeyStore(pkStore);
+                                    keyStoreManager.addP11KeyStore(pkStore);
                                     mw.reloadCertificateJTree();
                                 }
                             }

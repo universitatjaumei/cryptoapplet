@@ -26,6 +26,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.util.i18n.LabelManager;
 
 public class MainWindow
@@ -59,10 +60,14 @@ public class MainWindow
     protected JTree jTree = null;
     private JScrollPane showDataScrollPane;
     private JLabel showSignatureLabel;
+    
+    private KeyStoreManager keyStoreManager;
 
-    public MainWindow(AppHandler aph) throws Exception
-    {
-        _aph = aph;
+    public MainWindow(KeyStoreManager keyStoreManager, AppHandler aph) throws Exception
+    {        
+        this.keyStoreManager = keyStoreManager;
+        this._aph = aph;
+        
         _aph.setMainWindow(this);
         _evthandler = new EventActionHandler(this);
         getMainFrame();
@@ -439,7 +444,7 @@ public class MainWindow
         if (jTree == null)
         {
             JTreeCertificateBuilder jbt = new JTreeCertificateBuilder();
-            DefaultMutableTreeNode dmf = jbt.build(_aph.getKeyStoreTable());
+            DefaultMutableTreeNode dmf = jbt.build(this.keyStoreManager.getKeyStoreTable());
             jTree = new JTree(dmf);
             jTree.addTreeSelectionListener(_evthandler.getJTreeSectionListener());
             jTree.expandRow(1);
@@ -540,5 +545,10 @@ public class MainWindow
     {
         return showSignatureCheckBox;
 
+    }
+
+    public KeyStoreManager getKeyStoreManager()
+    {
+        return this.keyStoreManager;
     }
 }

@@ -1,17 +1,12 @@
 package es.uji.security.ui.applet;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.util.Hashtable;
-import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -20,22 +15,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.swing.JOptionPane;
 
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
-import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.SupportedSignatureFormat;
-import es.uji.security.keystore.IKeyStoreHelper;
-import es.uji.security.keystore.clauer.ClauerKeyStore;
-import es.uji.security.keystore.dnie.Dnie;
-import es.uji.security.keystore.mozilla.Mozilla;
-import es.uji.security.keystore.mozilla.MozillaKeyStore;
-import es.uji.security.keystore.mscapi.MsCapiKeyStore;
-import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
 import es.uji.security.util.HexDump;
@@ -65,17 +52,11 @@ public class AppHandler
     // This object interacts with the signature thread and wraps all the multisignature complexity
     public SignatureHandler sigh = null;
 
-    // Testing porpouses only
-    private boolean desktopApplicationMode = false;
-
     // JavaScript Functions 
     private String jsSignOk = "onSignOk";
     private String jsSignError = "onSignError";
     private String jsSignCancel = "onSignCancel";
     private String jsWindowShow = "onWindowShow";
-
-    // Keystores
-    public Hashtable<SupportedKeystore, IKeyStoreHelper> keystores = new Hashtable<SupportedKeystore, IKeyStoreHelper>();
 
     // Signature output format
     private SupportedSignatureFormat signatureFormat = SupportedSignatureFormat.CMS;
@@ -100,8 +81,6 @@ public class AppHandler
     public AppHandler() throws SignatureAppletException
     {
         this(null);
-
-        desktopApplicationMode = true;
         
         log.debug("Running in desktop application mode");
     }
@@ -144,7 +123,7 @@ public class AppHandler
                     }
                 }
             }
-            catch (JSException exc)
+            catch (Exception exc)
             {
                 log.error("Error accesing web browser window", exc);
             }
@@ -155,8 +134,7 @@ public class AppHandler
         // Keep a copy to restore its value
         defaultSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
 
-        this.install();
-        initKeyStoresTable();
+        this.install();        
     }
 
     /**
@@ -192,78 +170,6 @@ public class AppHandler
         }
 
         return singleton;
-    }
-
-    /**
-     * If the browser is not Explorer, this method tries to initialize the spanish dnie if the
-     * browser is Internet Explorer, we can rely on cryptoApi to deal with this. Nothing happens if
-     * it is not plugged.
-     * 
-     */
-    public void initDnie()
-    {
-        if (!this.navigator.equals(SupportedBrowser.IEXPLORER))
-        {
-            try
-            {
-                // DNI-E stuff
-                Dnie dnie = new Dnie();
-
-                /* We let then three password attempts. */
-                for (int i = 0; i < 3; i++)
-                {
-                    if (dnie.isPresent())
-                    {
-                        // Main window is not yet created
-                        PasswordPrompt pp = new PasswordPrompt(null, LabelManager
-                                .get("DNIE_PASSWORD_TITLE"), LabelManager.get("DNIE_PIN"));
-
-                        IKeyStoreHelper dnieks = (IKeyStoreHelper) new PKCS11KeyStore(dnie
-                                .getDnieConfigInputStream(), null, false);
-                        try
-                        {
-                            if (pp.getPassword() != null)
-                            {
-                                dnieks.load(pp.getPassword());
-                                keystores.put(SupportedKeystore.PKCS11, dnieks);
-                            }
-                            break;
-                        }
-                        catch (Exception e)
-                        {
-                            ByteArrayOutputStream os = new ByteArrayOutputStream();
-                            PrintStream ps = new PrintStream(os);
-                            e.printStackTrace(ps);
-                            String stk = new String(os.toByteArray()).toLowerCase();
-
-                            e.printStackTrace();
-
-                            if (stk.indexOf("incorrect") > -1)
-                            {
-                                JOptionPane.showMessageDialog(null, LabelManager
-                                        .get("ERROR_INCORRECT_DNIE_PWD"), "",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
-                            else
-                            {
-                                JOptionPane.showMessageDialog(null, LabelManager
-                                        .get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-
-            }
-        }
     }
 
     /**
@@ -408,18 +314,18 @@ public class AppHandler
      *             with the message
      * @throws
      */
-    public void installDll(String downloadUrl, String completeDllPath)
+    public void installDLL(String downloadUrl, String completeDllPath)
             throws SignatureAppletException
     {
         try
         {
-            System.out.println("Doing a dumpfile downloadUrl: " + downloadUrl + "completeDllPath: "
+            log.debug("Performing a dumpfile from URL " + downloadUrl + ". Complete DLL path is "
                     + completeDllPath);
             dumpFile(downloadUrl + "MicrosoftCryptoApi_0_3.dll", completeDllPath);
         }
-        catch (IOException ioex)
+        catch (IOException e)
         {
-            ioex.printStackTrace();
+            log.error(LabelManager.get("ERROR_CAPI_DLL_INSTALL"), e);
             throw new SignatureAppletException(LabelManager.get("ERROR_CAPI_DLL_INSTALL"));
         }
     }
@@ -433,7 +339,6 @@ public class AppHandler
      */
     public void install() throws SignatureAppletException
     {
-
         if (this.navigator.equals(SupportedBrowser.IEXPLORER))
         {
             String downloadUrl = (_parent.getParameter("downloadUrl") != null) ? _parent
@@ -447,7 +352,7 @@ public class AppHandler
 
             if (!dllFile.exists())
             {
-                installDll(downloadUrl, completeDllPath);
+                installDLL(downloadUrl, completeDllPath);
             }
             else
             {
@@ -476,7 +381,7 @@ public class AppHandler
                     {
                         if (origHash[i] != digest[i])
                         {
-                            installDll(downloadUrl, completeDllPath);
+                            installDLL(downloadUrl, completeDllPath);
                             break;
                         }
                     }
@@ -486,6 +391,7 @@ public class AppHandler
                     throw new SignatureAppletException(e.getMessage(), false);
                 }
             }
+            
             try
             {
                 // Must check if the dll is already loaded here.
@@ -497,172 +403,6 @@ public class AppHandler
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Returns true if the user has initialized and set a master password for its mozilla
-     * certificate store False otherwise
-     * 
-     * @return true or false indicating the store state
-     */
-    private boolean isMozillaStoreInitialized()
-    {
-        try
-        {
-            MozillaKeyStore mks = new MozillaKeyStore();
-            mks.load("".toCharArray());
-            mks.cleanUp();
-            return true;
-        }
-        catch (Exception e)
-        {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(os);
-            e.printStackTrace(ps);
-            String stk = new String(os.toByteArray());
-            if (stk.indexOf("CKR_USER_TYPE_INVALID") > -1)
-                return false;
-            return true;
-        }
-    }
-
-    /**
-     * Flushes the KeyStore Hashtable
-     * 
-     *@throws SignatureAppletException
-     **/
-    protected void flushKeyStoresTable() throws SignatureAppletException
-    {
-        keystores.clear();
-    }
-
-    /**
-     * Initializes the KeyStore Hashtable with the store/s that must be used depending on the
-     * navigator
-     * 
-     *@throws SignatureAppletException
-     **/
-    protected void initKeyStoresTable() throws SignatureAppletException
-    {
-        if (this.navigator.equals(SupportedBrowser.IEXPLORER))
-        {
-            /* Explorer Keystore */
-            IKeyStoreHelper explorerks = (IKeyStoreHelper) new MsCapiKeyStore();
-
-            try
-            {
-                explorerks.load("".toCharArray());
-                keystores.put(SupportedKeystore.IEXPLORER, explorerks);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-                System.out.println("ERR_MS_KEYSTORE_LOAD");
-                JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                        .get("ERR_MS_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-                // throw new SignatureAppletException(LabelManager.get("ERR_MS_KEYSTORE_LOAD"));
-            }
-        }
-        else
-        {
-            /* Mozilla Keystore */
-            try
-            {
-                if (isMozillaStoreInitialized())
-                {
-
-                    Mozilla mozilla = new Mozilla();
-
-                    IKeyStoreHelper p11mozillaks = (IKeyStoreHelper) new PKCS11KeyStore(mozilla
-                            .getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(), mozilla
-                            .getPkcs11InitArgsString());
-                    p11mozillaks.load(null);
-                    keystores.put(SupportedKeystore.MOZILLA, p11mozillaks);
-                }
-                // We have to look here for spanish dnie and ask for the password.
-
-            }
-            catch (Exception ex)
-            {
-                System.out.println("ERR_MOZ_KEYSTORE_LOAD");
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                        .get("ERR_MOZ_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-                // throw new SignatureAppletException(LabelManager.get("ERR_MOZ_KEYSTORE_LOAD"));
-            }
-
-            /* Clauer KeyStore */
-            try
-            {
-
-                IKeyStoreHelper p11clauerks = (IKeyStoreHelper) new ClauerKeyStore();
-                try
-                {
-                    p11clauerks.load(null);
-                    keystores.put(SupportedKeystore.CLAUER, p11clauerks);
-
-                }
-                catch (KeyStoreException kex)
-                {
-                    // Here do nothing because that mean
-                    // that there is no clauer plugged on
-                    // the system.
-                }
-                catch (ConnectException cex)
-                {
-                    // Nothing to do also, clauer is not
-                    // installed,go ahead!
-                }
-            }
-            catch (Exception ex)
-            {
-                JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                        .get("ERR_CL_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-                // throw new SignatureAppletException(LabelManager.get("ERR_CL_KEYSTORE_LOAD"));
-            }
-        }
-    }
-
-    /**
-     * Returns the IKeyStoreHelper object that represents the store
-     * 
-     * @param ksName
-     *            posible input values are: explorer,mozilla,clauer
-     * @return the IkeyStoreHelper object
-     */
-    public IKeyStoreHelper getKeyStore(SupportedKeystore keystore)
-    {
-        return this.keystores.get(keystore);
-    }
-
-    /**
-     * Returns the IKeyStoreHelper object that represents the store
-     * 
-     * @param ksName
-     *            posible input values are: explorer,mozilla,clauer
-     * @return the IkeyStoreHelper object
-     */
-    public Hashtable<SupportedKeystore, IKeyStoreHelper> getKeyStoreTable()
-    {
-        return this.keystores;
-    }
-
-    /**
-     * Add a new loaded and authenticated PKCS12 keyStore to the hash table
-     */
-    public void addP12KeyStore(IKeyStoreHelper pkcs12Store)
-    {
-        keystores.put(SupportedKeystore.PKCS12, pkcs12Store);
-    }
-
-    /**
-     * Add a new loaded and authenticated PKCS11 keyStore to the hash table. That function will be
-     * implemented in a near future, a Load PKCS#11 entry will appear to the applets main window
-     * that will allow to load pkcs#11
-     */
-    public void addP11KeyStore(IKeyStoreHelper pkcs11Store)
-    {
-        keystores.put(SupportedKeystore.PKCS11, pkcs11Store);
     }
 
     /**
@@ -900,7 +640,6 @@ public class AppHandler
      */
     public void setSSLCertificateVerfication(boolean validate)
     {
-
         if (validate)
         {
             HttpsURLConnection.setDefaultSSLSocketFactory(defaultSocketFactory);
@@ -908,23 +647,22 @@ public class AppHandler
         else
         {
             // Create a trust manager that does not validate certificate chains
-            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
-            {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers()
-                {
-                    return null;
-                }
+            TrustManager[] trustAllCerts = new TrustManager[] { 
+                    new X509TrustManager() {                
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers()
+                        {
+                            return null;
+                        }
+                        
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType)
+                        {
+                        }
 
-                public void checkClientTrusted(java.security.cert.X509Certificate[] certs,
-                        String authType)
-                {
-                }
-
-                public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
-                        String authType)
-                {
-                }
-            } };
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
+                        {
+                        }
+                    } 
+            };
 
             // Install the all-trusting trust manager
             try
