@@ -1,27 +1,36 @@
 package es.uji.security.keystore.dnie;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.ProviderException;
 import java.security.Security;
+import java.security.cert.CertificateException;
+
+import javax.swing.JOptionPane;
+
+import org.apache.log4j.Logger;
+
+import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.security.util.i18n.LabelManager;
 
 public class Dnie
 {
-
-    public Dnie()
-    {
-        // nothing to do
-    }
-
+    private Logger log = Logger.getLogger(Dnie.class);
+    
     public boolean isPresent()
     {
+        boolean dnieInserted = false;
+        
         try
         {
-
             System.out.println("Obtenido path " + getPkcs11FilePath());
 
             ByteArrayInputStream in = new ByteArrayInputStream(("name = DNIE-Pres\r" + "library = "
@@ -29,39 +38,33 @@ public class Dnie
 
             Provider _pk11provider = new sun.security.pkcs11.SunPKCS11(in);
             Security.addProvider(_pk11provider);
-            KeyStore _p11KeyStore = KeyStore.getInstance("PKCS11", _pk11provider);
+            KeyStore.getInstance("PKCS11", _pk11provider);
 
             // Si pasamos de aquí el dnie está insertado.
             Security.removeProvider(_pk11provider.getName());
             System.out.println("Saliendo true ...");
-            return true;
+            
+            dnieInserted = true;
+            
+            log.debug("DNIe is now accesible");            
         }
-        catch (KeyStoreException ex)
+        catch (Exception e)
         {
-            // El dni no esta insertado!
-            System.out.println("Saliendo false ...");
-            return false;
+            log.debug("DNIe is not inserted or it can not be loaded");
         }
-        catch (ProviderException ex)
-        {
-            System.out.println("Saliendo false por el ProviderException...");
-            return false;
-        }
-        catch (Exception ex)
-        {
-            System.out.println("Saliendo false por el Exception...");
-            return false;
-        }
+        
+        return dnieInserted;
     }
 
     public String getPkcs11FilePath()
     {
-        String[] strFiles = { "/usr/lib/opensc-pkcs11.so", "/usr/local/lib/opensc-pkcs11.so",
+        String[] systemLibraryList = { "/usr/lib/opensc-pkcs11.so", "/usr/local/lib/opensc-pkcs11.so",
                 "/lib/opensc-pkcs11.so", "C:\\WINDOWS\\system32\\UsrPkcs11.dll" };
 
-        for (int i = 0; i < strFiles.length; i++)
+        for (String file : systemLibraryList)
         {
-            File f = new File(strFiles[i]);
+            File f = new File(file);
+            
             if (f.exists())
             {
                 return f.getAbsolutePath();
@@ -76,5 +79,49 @@ public class Dnie
         ByteArrayInputStream in = new ByteArrayInputStream(("name = DNIE-Pres\r" + "library = "
                 + getPkcs11FilePath() + "\r\nslot=1\r\n").getBytes());
         return in;
+    }
+
+    /**
+     * This method tries to initialize the spanish dnie. If the browser is Internet Explorer, 
+     * we can rely on CryptoAPI to deal with this. Nothing happens if it is not plugged.
+     */
+    
+    public IKeyStoreHelper initDnie(char[] password) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, Exception
+    {
+        IKeyStoreHelper keystoreDNIe = null;
+        
+        Dnie dnie = new Dnie();
+
+        if (dnie.isPresent())
+        {
+            keystoreDNIe = (IKeyStoreHelper) new PKCS11KeyStore(dnie.getDnieConfigInputStream(), null, false);
+            
+            // We let then three password attempts
+            for (int i = 0; i < 3; i++)
+            {
+                 try
+                 {
+                     keystoreDNIe.load(password);
+                 }
+                 catch (Exception e)
+                 {
+                     ByteArrayOutputStream os = new ByteArrayOutputStream();
+                     PrintStream ps = new PrintStream(os);
+                     e.printStackTrace(ps);
+                     String stk = new String(os.toByteArray()).toLowerCase();
+
+                     if (stk.indexOf("incorrect") > -1)
+                     {
+                         JOptionPane.showMessageDialog(null, LabelManager.get("ERROR_INCORRECT_DNIE_PWD"), "", JOptionPane.ERROR_MESSAGE);
+                     }
+                     else
+                     {
+                         JOptionPane.showMessageDialog(null, LabelManager.get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
+                     }
+                 }
+            }
+        }
+        
+        return keystoreDNIe;
     }
 }

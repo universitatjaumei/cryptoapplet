@@ -1,11 +1,13 @@
 package es.uji.security.keystore.mozilla;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.security.Provider;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -225,5 +227,5 @@ public class MozillaKeyStore implements IKeyStoreHelper
         File f = new File(_configName);
         f.delete();
         Security.removeProvider(_pk11provider.getName());
-    }
+    }    
 }
