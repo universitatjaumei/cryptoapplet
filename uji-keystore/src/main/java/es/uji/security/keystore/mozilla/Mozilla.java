@@ -1,8 +1,10 @@
 package es.uji.security.keystore.mozilla;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 
 import java.util.Enumeration;
 import java.util.Properties;
@@ -272,4 +274,29 @@ public class Mozilla
         return "configdir='" + getCurrentProfiledir().replace("\\", "/")
                 + "' certPrefix='' keyPrefix='' secmod='secmod.db' flags=";
     }
+    
+    public boolean isInitialized()
+    {
+        try
+        {
+            MozillaKeyStore mks = new MozillaKeyStore();
+            mks.load("".toCharArray());
+            mks.cleanUp();
+            return true;
+        }
+        catch (Exception e)
+        {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(os);
+            e.printStackTrace(ps);
+            String stk = new String(os.toByteArray());
+            
+            if (stk.indexOf("CKR_USER_TYPE_INVALID") > -1)
+            {
+                return false;
+            }
+            
+            return true;
+        }
+    }    
 }
