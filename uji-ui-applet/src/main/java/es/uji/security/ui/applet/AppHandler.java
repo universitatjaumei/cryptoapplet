@@ -10,7 +10,6 @@ import java.io.PrintStream;
 
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.net.ConnectException;
 import java.net.URL;
@@ -23,8 +22,13 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.swing.JOptionPane;
 
+import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
+import es.uji.security.crypto.SupportedBrowser;
+import es.uji.security.crypto.SupportedDataEncoding;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.dnie.Dnie;
@@ -32,115 +36,74 @@ import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.mozilla.MozillaKeyStore;
 import es.uji.security.keystore.mscapi.MsCapiKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
-import es.uji.security.ui.applet.io.FileInputParams;
-import es.uji.security.ui.applet.io.FileOutputParams;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
 import es.uji.security.util.HexDump;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 /**
- * 
  * Handles all the applet singularities such as applet parameters, applet installation, host
- * navigator and keystore list l
+ * navigator and keystore list
  */
+
 public class AppHandler
 {
+    private Logger log = Logger.getLogger(AppHandler.class);
+    
     /* The singleton applet object */
     private static AppHandler singleton;
 
-    /* The Applet or Application Main window who is refereing to */
+    /* The Applet or Application Main window who is referencing to */
     private MainWindow _mw = null;
 
     /* Parent applet reference */
     private SignatureApplet _parent = null;
 
-    /*
-     * This object interacts with the signature thread and wraps all the multisignature complexity
-     */
+    // This object interacts with the signature thread and wraps all the multisignature complexity
     public SignatureHandler sigh = null;
 
-    /* Host navigator */
-    private String strNavigator = null;
-
-    /* Testing porpouses only */
+    // Testing porpouses only
     private boolean desktopApplicationMode = false;
-    /* -- */
 
-    /* Keystores */
-    static Hashtable<String, IKeyStoreHelper> ksh = new Hashtable<String, IKeyStoreHelper>();
-
-    /* JavaScript Functions */
+    // JavaScript Functions 
     private String jsSignOk = "onSignOk";
     private String jsSignError = "onSignError";
     private String jsSignCancel = "onSignCancel";
     private String jsWindowShow = "onWindowShow";
 
-    /* Browser identification */
-    public static String BROWSER_IEXPLORER = "IEXPLORER";
-    public static String BROWSER_MOZILLA = "MOZILLA";
-    public static String BROWSER_OTHERS = "OTHERS";
+    // Keystores
+    public Hashtable<SupportedKeystore, IKeyStoreHelper> keystores = new Hashtable<SupportedKeystore, IKeyStoreHelper>();
 
-    /* KeyStore identification */
-    public static String KEYSTORE_IEXPLORER = "IEXPLORER";
-    public static String KEYSTORE_MOZILLA = "MOZILLA";
-    public static String KEYSTORE_CLAUER = "CLAUER";
-    public static String KEYSTORE_PKCS11 = "PKCS11";
-    public static String KEYSTORE_PKCS12 = "PKCS12";
+    // Signature output format
+    private SupportedSignatureFormat signatureFormat = SupportedSignatureFormat.CMS;
 
-    /* Signature output format */
-    private String signatureOutputFormat;
-
-    /* Format name / implementation relation */
-    private Hashtable<String, String> formatImplMap;
-
-    /* Input data encoding format */
-    private String inputDataEncoding = "PLAIN";
-
-    /* The data cames from an enconded source? */
-    public static String INPUT_DATA_PLAIN = "PLAIN";
-    public static String INPUT_DATA_HEX = "HEX";
-    public static String INPUT_DATA_BASE64 = "BASE64";
-
-    /* Input/Output Data handling */
+    // Input data encoding format
+    private SupportedDataEncoding inputDataEncoding = SupportedDataEncoding.PLAIN;
+    
+    // Host navigator
+    private SupportedBrowser navigator = SupportedBrowser.MOZILLA;
+    
+    // Input/Output Data handling
     private InputParams input;
     private OutputParams output;
 
-    /* XAdES signer role customization */
+    // XAdES signer role customization
     private String[] signerRole;
     private String xadesFilename;
     private String xadesFileMimeType;
 
-    /* Logging facilities */
-    Logger log = Logger.getLogger(AppHandler.class);
-
     private SSLSocketFactory defaultSocketFactory;
 
-    public String[] formats = new String[] { "RAW", "CMS", "CMS_HASH", "XADES", "XADES_COSIGN",
-            "PDF", "XMLDSIG" };
-
-    public String[] impls = new String[] { "es.uji.security.crypto.RawSignatureFactory",
-            "es.uji.security.crypto.cms.CMSSignatureFactory",
-            "es.uji.security.crypto.cms.CMSHashSignatureFactory",
-            "es.uji.security.crypto.openxades.XAdESSignatureFactory",
-            "es.uji.security.crypto.openxades.XAdESCoSignatureFactory",
-            "es.uji.security.crypto.pdf.PDFSignatureFactory",
-            "es.uji.security.crypto.xmldsign.XMLDsigSignatureFactory" };
-
-    public Hashtable<String, String> getFormatImplMapping()
+    public AppHandler() throws SignatureAppletException
     {
-        if (formatImplMap == null)
-        {
-            formatImplMap = new Hashtable<String, String>();
-            for (int i = 0; i < formats.length; i++)
-                formatImplMap.put(formats[i], impls[i]);
+        this(null);
 
-        }
-        return formatImplMap;
+        desktopApplicationMode = true;
+        
+        log.debug("Running in desktop application mode");
     }
 
     /**
@@ -149,28 +112,47 @@ public class AppHandler
      * 
      * That class should be used as a Sigleton so you must use getInstance in order to get this
      * class object.
-     * 
-     * @param parent
-     *            the main applet object
      **/
+    
     public AppHandler(SignatureApplet parent) throws SignatureAppletException
     {
-
-        BasicConfigurator.configure();
-
-        _parent = parent;
-
-        if (parent == null)
+        if (parent != null)
         {
-            desktopApplicationMode = true;
-            strNavigator = BROWSER_MOZILLA;
+            _parent = parent;
+
+            try
+            {
+                JSObject win = (JSObject) netscape.javascript.JSObject.getWindow(_parent);
+                JSObject doc = (JSObject) win.getMember("navigator");
+                String userAgent = (String) doc.getMember("userAgent");
+    
+                if (userAgent != null)
+                {
+                    userAgent = userAgent.toLowerCase();
+    
+                    log.debug("Detected user agent " + userAgent);
+    
+                    if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
+                    {
+                        this.navigator = SupportedBrowser.IEXPLORER;
+                    }
+                    else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1 || 
+                             userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1 || 
+                             userAgent.indexOf("netscape") > -1)
+                    {
+                        this.navigator = SupportedBrowser.MOZILLA;
+                    }
+                }
+            }
+            catch (JSException exc)
+            {
+                log.error("Error accesing web browser window", exc);
+            }
         }
-        else
-            strNavigator = getNavigator();
 
-        formatImplMap = getFormatImplMapping();
-
-        /* Keep a copy to restore its value */
+        log.debug("Navigator variable set to " + this.navigator);
+        
+        // Keep a copy to restore its value
         defaultSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
 
         this.install();
@@ -206,20 +188,10 @@ public class AppHandler
     {
         if (singleton == null)
         {
-            throw new SignatureAppletException("AppHandler not initialized!!");
+            singleton = new AppHandler();
         }
 
         return singleton;
-    }
-
-    /**
-     * A method to set the application language.
-     * 
-     * @param lang
-     */
-    public void setLanguage(String lang)
-    {
-        LabelManager.setLang(lang);
     }
 
     /**
@@ -230,7 +202,7 @@ public class AppHandler
      */
     public void initDnie()
     {
-        if (!strNavigator.equals(BROWSER_IEXPLORER))
+        if (!this.navigator.equals(SupportedBrowser.IEXPLORER))
         {
             try
             {
@@ -253,7 +225,7 @@ public class AppHandler
                             if (pp.getPassword() != null)
                             {
                                 dnieks.load(pp.getPassword());
-                                ksh.put(KEYSTORE_PKCS11, dnieks);
+                                keystores.put(SupportedKeystore.PKCS11, dnieks);
                             }
                             break;
                         }
@@ -311,10 +283,7 @@ public class AppHandler
      **/
     public InputParams getInputParams()
     {
-        if (desktopApplicationMode)
-            return new FileInputParams();
-        else
-            return input;
+        return input;
     }
 
     /**
@@ -324,23 +293,7 @@ public class AppHandler
      **/
     public OutputParams getOutputParams()
     {
-        if (desktopApplicationMode)
-            return new FileOutputParams();
-        else
-            return output;
-    }
-
-    /**
-     * A method to obtain the signformat selected
-     * 
-     * @return signatureOutputFormat String representing the signature output format
-     **/
-    public String getSignFormat()
-    {
-        if (desktopApplicationMode)
-            return "es.uji.dsign.crypto.XAdESSignatureFactory";
-        else
-            return formatImplMap.get(this.signatureOutputFormat);
+        return output;
     }
 
     /**
@@ -374,60 +327,13 @@ public class AppHandler
     }
 
     /**
-     * Obtains the encoding of the input data to be signed, the application will decode it after
-     * applying the signature.
-     * 
-     * @return inputDataEncoding The encoding of the input data.
-     **/
-    public String getEncoding()
-    {
-        if (desktopApplicationMode)
-            return "plain";
-        else
-            return inputDataEncoding;
-    }
-
-    /**
      * Returns a string representing the host browser over the applet is running
      * 
      * @return string representing the browser
      **/
-    public String getNavigator()
+    public SupportedBrowser getNavigator()
     {
-        // String navigator = BROWSER_OTHERS;
-        // Better to assume that it is firefox so we can try to do
-        // our best
-        String navigator = BROWSER_MOZILLA;
-
-        try
-        {
-            JSObject win = (JSObject) netscape.javascript.JSObject.getWindow(_parent);
-            JSObject doc = (JSObject) win.getMember("navigator");
-            String userAgent = (String) doc.getMember("userAgent");
-
-            System.out.println("User Agent: " + userAgent);
-
-            if (userAgent != null)
-            {
-                userAgent = userAgent.toLowerCase();
-                log.debug("USER AGENT: " + userAgent);
-                if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
-                {
-                    navigator = BROWSER_IEXPLORER;
-                }
-                else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1
-                        || userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1
-                        || userAgent.indexOf("netscape") > -1)
-                {
-                    navigator = BROWSER_MOZILLA;
-                }
-            }
-        }
-        catch (Exception exc)
-        {
-            exc.printStackTrace();
-        }
-        return navigator;
+        return this.navigator;
     }
 
     /**
@@ -528,9 +434,8 @@ public class AppHandler
     public void install() throws SignatureAppletException
     {
 
-        if (strNavigator.equals(BROWSER_IEXPLORER))
+        if (this.navigator.equals(SupportedBrowser.IEXPLORER))
         {
-
             String downloadUrl = (_parent.getParameter("downloadUrl") != null) ? _parent
                     .getParameter("downloadUrl") : _parent.getCodeBase().toString();
             String destAbsolutePath = System.getenv("TEMP");
@@ -548,7 +453,6 @@ public class AppHandler
             {
                 try
                 {
-
                     byte[] digest = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
                             (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35,
                             0x71, (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
@@ -629,7 +533,7 @@ public class AppHandler
      **/
     protected void flushKeyStoresTable() throws SignatureAppletException
     {
-        ksh.clear();
+        keystores.clear();
     }
 
     /**
@@ -640,17 +544,15 @@ public class AppHandler
      **/
     protected void initKeyStoresTable() throws SignatureAppletException
     {
-        System.out.println("navigator: " + strNavigator);
-        if (strNavigator.equals(BROWSER_IEXPLORER))
+        if (this.navigator.equals(SupportedBrowser.IEXPLORER))
         {
-
             /* Explorer Keystore */
             IKeyStoreHelper explorerks = (IKeyStoreHelper) new MsCapiKeyStore();
 
             try
             {
                 explorerks.load("".toCharArray());
-                ksh.put(KEYSTORE_IEXPLORER, explorerks);
+                keystores.put(SupportedKeystore.IEXPLORER, explorerks);
             }
             catch (Exception ex)
             {
@@ -675,7 +577,7 @@ public class AppHandler
                             .getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(), mozilla
                             .getPkcs11InitArgsString());
                     p11mozillaks.load(null);
-                    ksh.put(KEYSTORE_MOZILLA, p11mozillaks);
+                    keystores.put(SupportedKeystore.MOZILLA, p11mozillaks);
                 }
                 // We have to look here for spanish dnie and ask for the password.
 
@@ -697,7 +599,7 @@ public class AppHandler
                 try
                 {
                     p11clauerks.load(null);
-                    ksh.put(KEYSTORE_CLAUER, p11clauerks);
+                    keystores.put(SupportedKeystore.CLAUER, p11clauerks);
 
                 }
                 catch (KeyStoreException kex)
@@ -728,9 +630,9 @@ public class AppHandler
      *            posible input values are: explorer,mozilla,clauer
      * @return the IkeyStoreHelper object
      */
-    public IKeyStoreHelper getKeyStore(String ksName)
+    public IKeyStoreHelper getKeyStore(SupportedKeystore keystore)
     {
-        return ksh.get(ksName.toLowerCase());
+        return this.keystores.get(keystore);
     }
 
     /**
@@ -740,18 +642,17 @@ public class AppHandler
      *            posible input values are: explorer,mozilla,clauer
      * @return the IkeyStoreHelper object
      */
-    public Hashtable<String, IKeyStoreHelper> getKeyStoreTable()
+    public Hashtable<SupportedKeystore, IKeyStoreHelper> getKeyStoreTable()
     {
-        System.out.println("Returning ksh= " + ksh);
-        return ksh;
+        return this.keystores;
     }
 
     /**
      * Add a new loaded and authenticated PKCS12 keyStore to the hash table
      */
-    public void addP12KeyStore(IKeyStoreHelper p12Store)
+    public void addP12KeyStore(IKeyStoreHelper pkcs12Store)
     {
-        ksh.put(KEYSTORE_PKCS12, p12Store);
+        keystores.put(SupportedKeystore.PKCS12, pkcs12Store);
     }
 
     /**
@@ -759,9 +660,9 @@ public class AppHandler
      * implemented in a near future, a Load PKCS#11 entry will appear to the applets main window
      * that will allow to load pkcs#11
      */
-    public void addP11KeyStore(IKeyStoreHelper p11Store)
+    public void addP11KeyStore(IKeyStoreHelper pkcs11Store)
     {
-        ksh.put(KEYSTORE_PKCS11, p11Store);
+        keystores.put(SupportedKeystore.PKCS11, pkcs11Store);
     }
 
     /**
@@ -775,9 +676,13 @@ public class AppHandler
     public void callJavaScriptCallbackFunction(String func, String[] params)
     {
         if (_parent != null)
+        {
             netscape.javascript.JSObject.getWindow(_parent).call(func, params);
+        }
         else
+        {
             System.out.println("Parent is null called ok");
+        }
     }
 
     /**
@@ -892,9 +797,9 @@ public class AppHandler
      * 
      * @return signatureOutputFormat The name of the output format
      */
-    public String getSignatureOutputFormat()
+    public SupportedSignatureFormat getSignatureFormat()
     {
-        return signatureOutputFormat;
+        return this.signatureFormat;
     }
 
     /**
@@ -903,23 +808,11 @@ public class AppHandler
      * @param signOutputFormat
      *            The signature output format description
      */
-    @SuppressWarnings("unchecked")
-    public void setSignatureOutputFormat(String signOutputFormat)
+    public void setSignatureOutputFormat(SupportedSignatureFormat signatureFormat)
     {
-        log.debug("Received signOutputFormat= " + signOutputFormat);
+        this.signatureFormat = signatureFormat;
 
-        signOutputFormat = signOutputFormat.toUpperCase();
-
-        if (formatImplMap.get(signOutputFormat) == null)
-        {
-            String formats = "";
-            for (Enumeration e = formatImplMap.keys(); e.hasMoreElements();)
-                formats += " " + e.nextElement();
-
-            throw new IllegalArgumentException("Format must be one of: " + formats);
-        }
-
-        this.signatureOutputFormat = signOutputFormat;
+        log.debug("Setting signOutputFormat to " + signatureFormat);        
     }
 
     /**
@@ -927,9 +820,9 @@ public class AppHandler
      * 
      * @return inputDataEncoding the selected input data encoding
      */
-    public String getInputDataEncoding()
+    public SupportedDataEncoding getInputDataEncoding()
     {
-        return inputDataEncoding;
+        return this.inputDataEncoding;
     }
 
     /**
@@ -948,21 +841,11 @@ public class AppHandler
      * @param inputDataEncoding
      *            the encoding name
      */
-    public void setInputDataEncoding(String inputDataEncoding)
+    public void setInputDataEncoding(SupportedDataEncoding inputDataEncoding)
     {
-        log.debug("Recived inputDataEncoding= " + inputDataEncoding);
-
-        inputDataEncoding = inputDataEncoding.toUpperCase();
-
-        if (!inputDataEncoding.equals(INPUT_DATA_PLAIN)
-                && !inputDataEncoding.equals(INPUT_DATA_HEX)
-                && !inputDataEncoding.equals(INPUT_DATA_BASE64))
-        {
-            throw new IllegalArgumentException("Input data encoding must be PLAIN, HEX or BASE64");
-        }
-
         this.inputDataEncoding = inputDataEncoding;
-
+        
+        log.debug("Setting inputDataEncoding to " + inputDataEncoding);
     }
 
     /**
@@ -1006,11 +889,6 @@ public class AppHandler
     public SignatureApplet getSignatureApplet()
     {
         return _parent;
-    }
-
-    public Hashtable<String, String> getformatImplMap()
-    {
-        return formatImplMap;
     }
 
     /**

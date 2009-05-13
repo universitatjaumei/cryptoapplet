@@ -17,6 +17,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.SupportedDataEncoding;
+import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.openxades.OpenXAdESCoSignatureFactory;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.keystore.IKeyStoreHelper;
@@ -155,27 +157,26 @@ public class SignatureThread extends Thread
             _mw.getGlobalProgressBar().setValue(_ini_percent + 3 * inc);
 
             // Creating an instance of the signature formater: CMS, XAdES, etc
-            Class sf = Class.forName(_mw.getAppHandler().getSignFormat());
+            Class<?> sf = Class.forName(_mw.getAppHandler().getSignatureFormat().toString());
             ISignFormatProvider signer = (ISignFormatProvider) sf.newInstance();
 
-            if (_mw.getAppHandler().getSignFormat().equals(
-                    "es.uji.dsign.crypto.XAdESSignatureFactory")
-                    || _mw.getAppHandler().getSignFormat().equals(
-                            "es.uji.dsign.crypto.XAdESCoSignatureFactory"))
+            if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES) || 
+                _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES_COSIGN))
             {
                 String[] roles = _mw.getAppHandler().getSignerRole();
                 String sr = "UNSET";
-                if (this._step < roles.length)
+                
+                if (roles != null && this._step < roles.length)
                 {
                     sr = roles[this._step];
                 }
+                
                 String fname = (_mw.getAppHandler().getXadesFileName() != null) ? _mw
                         .getAppHandler().getXadesFileName() : "UNSET";
                 String fmimetype = (_mw.getAppHandler().getXadesFileMimeType() != null) ? _mw
                         .getAppHandler().getXadesFileMimeType() : "application/binary";
 
-                if (_mw.getAppHandler().getSignFormat().equals(
-                        "es.uji.dsign.crypto.XAdESSignatureFactory"))
+                if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES))
                 {
                     OpenXAdESSignatureFactory xs = (OpenXAdESSignatureFactory) signer;
                     xs.setSignerRole(sr);
@@ -192,6 +193,7 @@ public class SignatureThread extends Thread
             }
 
             _mw.getGlobalProgressBar().setValue(_ini_percent + 4 * inc);
+            
             if (_mw.jTree.getLastSelectedPathComponent() != null)
             {
                 X509CertificateHandler xcert;
@@ -207,26 +209,24 @@ public class SignatureThread extends Thread
                     throw new SignatureAppletException("ERROR_CERTIFICATE_NOT_SELECTED");
 
                 }
-                if (xcert.isDigitalSignatureCertificate()
-                        || (xcert.isEmailProtectionCertificate() && _mw.getAppHandler()
-                                .getSignFormat().equals("es.uji.dsign.crypto.CMSSignatureFactory")))
-                    ;
+                if (xcert.isDigitalSignatureCertificate() || 
+                    (xcert.isEmailProtectionCertificate() && 
+                     _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS)))
                 {
                     ByteArrayOutputStream ot = new ByteArrayOutputStream();
 
                     byte[] in;
 
-                    String encoding = _mw.getAppHandler().getEncoding() != null ? _mw._aph
-                            .getEncoding() : "plain";
+                    SupportedDataEncoding encoding = _mw.getAppHandler().getInputDataEncoding();
 
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 5 * inc);
-                    if (encoding.toLowerCase().equals("hex"))
+                    if (encoding.equals(SupportedDataEncoding.HEX))
                     {
                         HexEncoder h = new HexEncoder();
                         h.decode(new String(inputParams.getSignData()), ot);
                         in = ot.toByteArray();
                     }
-                    else if (encoding.toLowerCase().equals("base64"))
+                    else if (encoding.equals(SupportedDataEncoding.BASE64))
                     {
                         in = Base64.decode(inputParams.getSignData());
                     }

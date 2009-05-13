@@ -5,24 +5,19 @@ import java.io.IOException;
 import java.io.FileOutputStream;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import es.uji.security.ui.applet.SignatureApplet;
-import es.uji.security.util.OS;
 
 public class FileOutputParams implements OutputParams
 {
-    private SignatureApplet sap;
-
-    public void setSignData(SignatureApplet base, byte[] data) throws IOException
+    private Logger log = Logger.getLogger(FileOutputParams.class);
+    
+    public void setSignData(byte[] data) throws IOException
     {
-        sap = base;
-
         JFileChooser chooser = new JFileChooser();
         FileOutputStream fos = null;
 
-        int returnVal = chooser.showSaveDialog(base);
+        int returnVal = chooser.showSaveDialog(null);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {
@@ -33,31 +28,17 @@ public class FileOutputParams implements OutputParams
         }
     }
 
-    public void setSignFormat(SignatureApplet base, byte[] signFormat)
-    {
-        // TODO Auto-generated method stub
-    }
-
-    public void setSignData(byte[] data) throws IOException
-    {
-        // TODO Auto-generated method stub
-
-    }
-
     public void setSignFormat(byte[] signFormat) throws IOException
     {
-        // TODO Auto-generated method stub
-
+        log.debug("Called setSignFormat: " + new String(signFormat));
     }
 
     public void signOk()
     {
-        netscape.javascript.JSObject.getWindow(sap).call("onSignOk", new String[] { "" });
+        log.debug("Called signOk function");
     }
 
     public void flush()
     {
-        // TODO Auto-generated method stub
-
     }
 }
