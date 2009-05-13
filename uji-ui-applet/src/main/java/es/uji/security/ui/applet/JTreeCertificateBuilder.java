@@ -8,6 +8,7 @@ import java.security.cert.Certificate;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.util.i18n.LabelManager;
@@ -18,7 +19,7 @@ public class JTreeCertificateBuilder
     {
     }
 
-    public DefaultMutableTreeNode build(Hashtable<String, IKeyStoreHelper> ksh) throws Exception
+    public DefaultMutableTreeNode build(Hashtable<SupportedKeystore, IKeyStoreHelper> ksh) throws Exception
     {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(LabelManager
                 .get("LABEL_TREE_ROOT"));

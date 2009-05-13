@@ -1,14 +1,15 @@
 package es.uji.security.ui.applet;
 
+import es.uji.security.crypto.SupportedDataEncoding;
+import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
+import es.uji.security.ui.applet.io.ConsoleOutputParams;
+import es.uji.security.ui.applet.io.FileInputParams;
 import es.uji.security.ui.applet.io.FuncOutputParams;
 import es.uji.security.ui.applet.io.ParamInputData;
 import es.uji.security.ui.applet.io.URLInputParams;
 import es.uji.security.ui.applet.io.URLOutputParams;
 import es.uji.security.util.i18n.LabelManager;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.Level;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -17,6 +18,8 @@ import javax.swing.JApplet;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+
+import org.apache.log4j.Logger;
 
 /**
  * This is the main applet class, it handles the web-to-java interaction by exporting some method to
@@ -29,9 +32,12 @@ import javax.swing.UIManager.LookAndFeelInfo;
  * 
  * Each method below related to setup or signature forgery can be invoked from JavaScript
  */
+
+@SuppressWarnings("serial")
 public class SignatureApplet extends JApplet
 {
-    private static final long serialVersionUID = 1L;
+    private Logger log = Logger.getLogger(SignatureApplet.class);
+    
     private AppHandler apph;
     private MainWindow window;
     private String _separator = "\\|";
@@ -53,56 +59,38 @@ public class SignatureApplet extends JApplet
             {
                 if ("Nimbus".equals(info.getName())) 
                 {
-                    UIManager.setLookAndFeel(info.getClassName());
+                    UIManager.setLookAndFeel(info.getClassName());                    
+                    log.debug("Nimbus Look&Feel loaded");
+                    
                     break;
                 }
             }
         } 
         catch (Exception e) 
         {
+            log.debug("Nimbus Look&Feel is not present. Using default Look&Feel");            
         }
          
         try
         {
-            Logger.getRootLogger().setLevel(Level.INFO/* Level.OFF */);
             apph = AppHandler.getInstance(this);
-        }
-        catch (SignatureAppletException ex)
-        {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-            netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
-            return;
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-            netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
-            return;
-        }
-
-        try
-        {
-            System.out.println("Invoking netscape.javascript.JSObject onInintOk");
+            
             netscape.javascript.JSObject.getWindow(this).call("onInitOk", new String[] {});
-
-            System.out
-                    .println("onInitOk should be invoked, we pass netscape.javascript.JSObject.getWindow(this).call(\"onInitOk\", new String[] {}); with no exception.");
-
-            /*
-             * TODO: Testing purposes, take this out setInputDataEncoding("PLAIN");
-             * setSignatureOutputFormat("XADES"); setXadesSignerRole("R1|R2");
-             * setXadesFileName("fichero.pdf"); setXadesFileMimeType("application/pdf");
-             * signDataUrlToUrl
-             * ("http://www.uji.es","http://lab9083.act.uji.es/~paul/test/write.php"); ... END This
-             * OUT ...
-             */
-
+            log.debug("onInintOk JavaScript function has been invoked");            
         }
-        catch (Exception ex)
+        catch (SignatureAppletException e)
         {
-            ex.printStackTrace();
+            log.error(e);
+            
+            JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+            netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
+        }
+        catch (Exception e)
+        {
+            log.error(e);
+
+            JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+            netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
         }
     }
 
@@ -168,7 +156,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setLanguage(lang);
+                LabelManager.setLang(lang);
                 return null;
             }
         });
@@ -213,7 +201,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setSignatureOutputFormat(format);
+                apph.setSignatureOutputFormat(SupportedSignatureFormat.valueOf(format));
                 return null;
             }
         });
@@ -233,7 +221,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setInputDataEncoding(encoding);
+                apph.setInputDataEncoding(SupportedDataEncoding.valueOf(encoding));
                 return null;
             }
         });
@@ -719,6 +707,8 @@ public class SignatureApplet extends JApplet
     {
         super.destroy();
         Runtime.getRuntime().gc();
+        
+        log.debug("Applet destoy called. Executing garbage collection");
     }
 
     public String getAppletInfo()
@@ -734,5 +724,28 @@ public class SignatureApplet extends JApplet
     public String getJavaVersion()
     {
         return System.getProperty("java.version");
+    }
+    
+    public static void main(String args[])
+    {
+         try
+         {
+             new SignatureApplet();
+             AppHandler apph = AppHandler.getInstance();
+         
+             apph.setInput(new FileInputParams());
+             apph.setOutput(new ConsoleOutputParams());
+             apph.setInputDataEncoding(SupportedDataEncoding.PLAIN);
+             apph.setSignatureOutputFormat(SupportedSignatureFormat.XADES);
+             
+             MainWindow window = new MainWindow(apph);
+             window.getMainFrame().setSize(590, 520);
+             window.getMainFrame().setResizable(true);
+             window.repaint();             
+         }
+         catch (Exception ee)
+         {
+             ee.printStackTrace();
+         }
     }
 }

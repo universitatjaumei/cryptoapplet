@@ -1,27 +1,17 @@
 package es.uji.security.crypto.openxades;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Properties;
 
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.PrivateKey;
 import java.security.Provider;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.net.SocketTimeoutException;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.tsp.TSPAlgorithms;
-import org.bouncycastle.tsp.TimeStampRequest;
 import org.bouncycastle.tsp.TimeStampRequestGenerator;
 import org.bouncycastle.tsp.TimeStampResponse;
-import org.bouncycastle.tsp.TSPException;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 
@@ -36,7 +26,6 @@ import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
-import es.uji.security.util.Base64;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -286,7 +275,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         }
 
         // Devolvemos el documento firmado y codificado
-        return Base64.encode(sdoc.toXML().getBytes(), true);
+        return sdoc.toXML().getBytes();
     }
 
     public String getError()

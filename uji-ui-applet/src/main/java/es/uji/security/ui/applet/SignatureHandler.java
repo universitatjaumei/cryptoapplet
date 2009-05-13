@@ -4,7 +4,6 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class SignatureHandler
 {
-
     static AppHandler aph = null;
     static int signatureCount = 0;
     static int start = 0;

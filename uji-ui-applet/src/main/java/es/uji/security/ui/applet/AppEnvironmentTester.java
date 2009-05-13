@@ -23,6 +23,7 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 
+import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.TimeStampFactory;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.util.ConfigHandler;
@@ -363,16 +364,10 @@ public class AppEnvironmentTester extends Thread
     {
         caption("SignatureOutputFormat");
 
-        String format = _apph.getSignatureOutputFormat();
+        SupportedSignatureFormat format = _apph.getSignatureFormat();
         String lowerTag = this.appletTag.toLowerCase();
 
         info("signatureOutputFormat set to: " + format);
-
-        if (_apph.getformatImplMap().get(format) == null)
-        {
-            error("Invalid output format " + format);
-            return;
-        }
 
         // Check dependencies.
         String gendeps[] = { "bcprov", "jakarta", "ujiutils", "ujiapplet", "ujicrypto", "ujiconfig" };
