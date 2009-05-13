@@ -1,8 +1,12 @@
 package es.uji.security.ui.applet;
 
+import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
+import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.KeyStoreManager;
+import es.uji.security.keystore.dnie.Dnie;
 import es.uji.security.ui.applet.io.ConsoleOutputParams;
 import es.uji.security.ui.applet.io.FileInputParams;
 import es.uji.security.ui.applet.io.FuncOutputParams;
@@ -11,6 +15,8 @@ import es.uji.security.ui.applet.io.URLInputParams;
 import es.uji.security.ui.applet.io.URLOutputParams;
 import es.uji.security.util.i18n.LabelManager;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -43,6 +49,8 @@ public class SignatureApplet extends JApplet
     private String _separator = "\\|";
     private String appletTag, appletInput, appletOutput;
 
+    private KeyStoreManager keyStoreManager;
+    
     public String recvHash; // compatibility issues
 
     /**
@@ -73,7 +81,10 @@ public class SignatureApplet extends JApplet
          
         try
         {
-            apph = AppHandler.getInstance(this);
+            this.apph = AppHandler.getInstance(this);
+            
+            this.keyStoreManager = new KeyStoreManager();
+            this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
             
             netscape.javascript.JSObject.getWindow(this).call("onInitOk", new String[] {});
             log.debug("onInintOk JavaScript function has been invoked");            
@@ -94,22 +105,63 @@ public class SignatureApplet extends JApplet
         }
     }
 
+    public KeyStoreManager getKeyStoreManager()
+    {
+        return this.keyStoreManager;
+    }
+    
     private void initializeWindow()
     {
         try
         {
             if (window == null)
             {
-                apph.initDnie();
-                window = new MainWindow(apph);
+                if (! this.apph.getNavigator().equals(SupportedBrowser.IEXPLORER))
+                {
+                    PasswordPrompt pp = new PasswordPrompt(null, LabelManager.get("DNIE_PASSWORD_TITLE"), 
+                            LabelManager.get("DNIE_PIN"));
+
+                    Dnie dnie = new Dnie();
+                    
+                    try
+                    {
+                        IKeyStoreHelper keystoreDNIe = dnie.initDnie(pp.getPassword());
+                        this.keyStoreManager.addP11KeyStore(keystoreDNIe);                
+                    }
+                    catch (Exception e)
+                    {
+                        ByteArrayOutputStream os = new ByteArrayOutputStream();
+                        PrintStream ps = new PrintStream(os);
+                        e.printStackTrace(ps);
+                        String stk = new String(os.toByteArray()).toLowerCase();
+
+                        e.printStackTrace();
+
+                        if (stk.indexOf("incorrect") > -1)
+                        {
+                            JOptionPane.showMessageDialog(null, LabelManager
+                                    .get("ERROR_INCORRECT_DNIE_PWD"), "",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                        else
+                        {
+                            JOptionPane.showMessageDialog(null, LabelManager
+                                    .get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }            
+                }
+
+                window = new MainWindow(this.keyStoreManager, this.apph);
             }
             else
             {
                 window.getPasswordTextField().setText("");
                 window.getGlobalProgressBar().setValue(0);
                 window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
-                window.getAppHandler().flushKeyStoresTable();
-                window.getAppHandler().initKeyStoresTable();
+                
+                this.keyStoreManager.flushKeyStoresTable();
+                this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
+                
                 window.reloadCertificateJTree();
                 window.getMainFrame().setVisible(true);
                 window.getShowSignatureCheckBox().setVisible(true);
@@ -539,7 +591,6 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                String[] in = inputURLs.split(_separator);
                 URLInputParams input = new URLInputParams(inputURLs.split(_separator));
                 FuncOutputParams output = new FuncOutputParams(sa, funcOut);
 
@@ -738,7 +789,10 @@ public class SignatureApplet extends JApplet
              apph.setInputDataEncoding(SupportedDataEncoding.PLAIN);
              apph.setSignatureOutputFormat(SupportedSignatureFormat.XADES);
              
-             MainWindow window = new MainWindow(apph);
+             KeyStoreManager keyStoreManager = new KeyStoreManager();
+             keyStoreManager.initKeyStoresTable(apph.getNavigator());
+             
+             MainWindow window = new MainWindow(keyStoreManager, apph);
              window.getMainFrame().setSize(590, 520);
              window.getMainFrame().setResizable(true);
              window.repaint();             
