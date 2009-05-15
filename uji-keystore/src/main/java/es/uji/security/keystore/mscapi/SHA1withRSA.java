@@ -1,4 +1,4 @@
-package es.uji.security.keystore;
+package es.uji.security.keystore.mscapi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,8 +13,6 @@ import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.SignatureSpi;
 
-import es.uji.security.keystore.mscapi.MSCAPIPrivateKey;
-import es.uji.security.keystore.mscapi.MsCapiKeyStore;
 
 /**
  * Signature creation service provider interface for our security provider that deals with cryptApi.

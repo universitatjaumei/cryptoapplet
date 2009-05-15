@@ -24,7 +24,7 @@ public final class MSCAPIProvider extends Provider
         {
             public Object run()
             {
-                put("Signature.SHA1withRSA", "es.uji.dsign.crypto.SHA1withRSA");
+                put("Signature.SHA1withRSA", "es.uji.security.keystore.mscapi.SHA1withRSA");
 
                 put("Signature.SHA1withRSA ImplementedIn", "Software");
                 put("Alg.Alias.Signature.sha-1WithRSAEncryption", "SHA1withRSA");
