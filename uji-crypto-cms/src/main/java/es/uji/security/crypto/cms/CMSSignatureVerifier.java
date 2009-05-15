@@ -42,7 +42,9 @@ import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-public class CMSSignatureVerifier
+import es.uji.security.crypto.AbstractSignatureFactory;
+
+public class CMSSignatureVerifier 
 {
 
     private X509Certificate[] _IntCert = null;
@@ -130,7 +132,7 @@ public class CMSSignatureVerifier
             {
                 cpv.validate(cp, param);
                 result = true;
-                System.out.println("Verificación de la cadena de certificación correcta.");
+                System.out.println("Verificaciï¿½n de la cadena de certificaciï¿½n correcta.");
             }
             catch (CertPathValidatorException e)
             {
@@ -198,7 +200,7 @@ public class CMSSignatureVerifier
     }
 
     // Comprueba que la firma es correcta, que corresponde a los
-    // datos en texto plano y que además, la cadena de certificación
+    // datos en texto plano y que ademï¿½s, la cadena de certificaciï¿½n
     // ofrecida como primer argumento del constructor, valida la
     // .
     @SuppressWarnings("unchecked")
@@ -319,7 +321,7 @@ public class CMSSignatureVerifier
      */
     public static void main(String[] args)
     {
-
+      
         Vector<String> caPaths = new Vector<String>();
         String cmsFile = null, dataFile = null;
 

@@ -5,7 +5,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Vector;
 
-public class CMSTSSignatureVerifier
+
+import es.uji.security.crypto.AbstractSignatureFactory;
+
+public class CMSTSSignatureVerifier 
 {
     // TODO: Implement this ...
     public static boolean verifyTS(String[] tsaPaths, InputStream bsig, InputStream bts)
@@ -16,11 +19,12 @@ public class CMSTSSignatureVerifier
 
     public static void main(String[] args)
     {
-
+       
         Vector<String> caPaths = new Vector<String>();
         Vector<String> tsaPaths = new Vector<String>();
         String cmsFile = null, dataFile = null;
-
+      
+        
         try
         {
             if (args.length == 0)

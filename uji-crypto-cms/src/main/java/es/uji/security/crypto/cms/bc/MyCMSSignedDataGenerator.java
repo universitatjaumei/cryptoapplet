@@ -1,4 +1,4 @@
-package org.bouncycastle.cms;
+package es.uji.security.crypto.cms.bc;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
@@ -20,6 +20,14 @@ import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.cms.CMSAttributeTableGenerator;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.cms.CMSProcessable;
+import org.bouncycastle.cms.CMSSignedData;
+import org.bouncycastle.cms.CMSSignedGenerator;
+import org.bouncycastle.cms.DefaultSignedAttributeTableGenerator;
+import org.bouncycastle.cms.SignerInformation;
+import org.bouncycastle.cms.SimpleAttributeTableGenerator;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -193,10 +201,13 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
             AlgorithmIdentifier digAlgId = new AlgorithmIdentifier(new DERObjectIdentifier(this
                     .getDigestAlgOID()), new DERNull());
             AlgorithmIdentifier encAlgId = getEncAlgorithmIdentifier(this.getEncryptionAlgOID());
+         
             String digestName = CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
             String signatureName = digestName + "with"
                     + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
-            Signature sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName,
+            
+                        
+            Signature sig = CMSSignedHelper.INSTANCE.getSignatureInstance(signatureName, 
                     sigProvider);
 
             byte[] hash = null;

@@ -16,22 +16,25 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedGenerator;
-import org.bouncycastle.cms.MyCMSSignedDataGenerator;
 
+import es.uji.security.crypto.AbstractSignatureFactory;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.TimeStampFactory;
+import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
 import es.uji.security.util.Base64;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
-public class CMSSignatureFactory implements ISignFormatProvider
+public class CMSSignatureFactory extends AbstractSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(CMSSignatureFactory.class);
     private String _strerr = "";
 
     public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
     {
+        super.initialize();
+        
         byte[] content = sigOpt.getToSignByteArray();
         X509Certificate sCer = sigOpt.getCertificate();
         PrivateKey pk = sigOpt.getPrivateKey();
