@@ -6,6 +6,7 @@ import java.security.Key;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -207,7 +208,7 @@ public class MsCapiKeyStore implements IKeyStoreHelper
             }
             catch (Exception e)
             {
-                log.debug("Devolviendo NULL: Excepción " + e.getCause());
+                log.debug("Devolviendo NULL: Excepciï¿½n " + e.getCause());
                 return null;
             }
         }
