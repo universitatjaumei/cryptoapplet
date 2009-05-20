@@ -28,11 +28,6 @@
       <artifactId>bcprov-jdk15</artifactId>
       <version>143</version>
     </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bctsp-jdk15</artifactId>
-      <version>143</version>
-    </dependency>    
   </dependencies>
   
   <build>
