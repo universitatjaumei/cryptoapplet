@@ -18,10 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.bouncycastle.tsp.TimeStampRequestGenerator;
-import org.bouncycastle.tsp.TimeStampResponse;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.tsp.TimeStampTokenInfo;
+import sun.security.timestamp.TSResponse;
 
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.TimeStampFactory;
@@ -164,63 +161,15 @@ public class AppEnvironmentTester extends Thread
 
     public void testTSA()
     {
-
         String tst = new String("01234567890123456789");
 
         try
         {
             caption(" TSA (Time Stamp Authority)");
 
-            TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
-            reqGen.setCertReq(false);
-
-            byte[] hash = tst.getBytes();
-
-            prop = ConfigHandler.getProperties();
-            if (prop == null)
-            {
-                error("DDOC config file not found.");
-                return;
-            }
             String tsaUrl = prop.getProperty("DIGIDOC_TSA1_URL");
-            byte[] asn1Resp = TimeStampFactory.getTimeStamp(tsaUrl, hash);
 
-            if (asn1Resp == null)
-            {
-                error("Timeout getting the timestamp.");
-            }
-
-            TimeStampResponse tsr = new TimeStampResponse(asn1Resp);
-            TimeStampToken ttk = tsr.getTimeStampToken();
-
-            if (ttk == null)
-            {
-                error("Cannot get TSARESPONSE");
-            }
-
-            TimeStampTokenInfo tstki = ttk.getTimeStampInfo();
-            if (tstki == null)
-            {
-                error("Cannot get TimeStampInfo");
-            }
-
-            byte[] msgdig = tstki.getMessageImprintDigest();
-            if (msgdig == null)
-            {
-                error("Cannot get MessageImprintDigest");
-            }
-
-            String dig = new String(msgdig);
-
-            if (new String(msgdig).equals(tst))
-            {
-                info("Message digest got ok : " + dig);
-                info("Timestamped time for the digest: " + tstki.getGenTime());
-            }
-            else
-            {
-                error("Message digests does not match");
-            }
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, tst.getBytes(), true);
         }
         catch (Exception e)
         {
