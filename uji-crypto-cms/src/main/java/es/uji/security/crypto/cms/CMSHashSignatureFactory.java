@@ -1,7 +1,6 @@
 package es.uji.security.crypto.cms;
 
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.CertStore;
@@ -17,24 +16,21 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedGenerator;
 
-import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
-import es.uji.security.crypto.AbstractSignatureFactory;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.TimeStampFactory;
+import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
 import es.uji.security.util.Base64;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
-public class CMSHashSignatureFactory extends AbstractSignatureFactory implements ISignFormatProvider
+public class CMSHashSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(CMSHashSignatureFactory.class);
     private String _strerr = "";
 
     public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
     {
-        super.initialize();
-        
         byte[] hash = sigOpt.getToSignByteArray();
         X509Certificate sCer = sigOpt.getCertificate();
         PrivateKey pk = sigOpt.getPrivateKey();
@@ -98,11 +94,7 @@ public class CMSHashSignatureFactory extends AbstractSignatureFactory implements
                         return null;
                     }
 
-                    MessageDigest dig = MessageDigest.getInstance("SHA1");
-                    dig.update(data.getEncoded());
-                    byte[] tsHash = dig.digest();
-
-                    byte[] ts = TimeStampFactory.getTimeStamp(tsaUrl, tsHash);
+                    byte[] ts = TimeStampFactory.getTimeStamp(tsaUrl, data.getEncoded(), true);
 
                     if (ts == null)
                     {

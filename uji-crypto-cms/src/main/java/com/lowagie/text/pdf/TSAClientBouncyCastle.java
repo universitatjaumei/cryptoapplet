@@ -1,16 +1,12 @@
 package com.lowagie.text.pdf;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
-import java.math.*;
-
-import java.net.*;
-
-import org.bouncycastle.asn1.cmp.*;
-
-import org.bouncycastle.asn1.x509.*;
-
-import org.bouncycastle.tsp.*;
+import es.uji.security.crypto.TimeStampFactory;
 
 /**
  * 
@@ -102,176 +98,7 @@ public class TSAClientBouncyCastle implements TSAClient
      */
 
     protected byte[] getTimeStampToken(byte[] imprint) throws Exception
-    {
-
-        byte[] respBytes = null;
-
-        try
-        {
-
-            // Setup the time stamp request
-
-            TimeStampRequestGenerator tsqGenerator = new TimeStampRequestGenerator();
-
-            tsqGenerator.setCertReq(true);
-
-            // tsqGenerator.setReqPolicy("1.3.6.1.4.1.601.10.3.1");
-
-            BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
-
-            TimeStampRequest request = tsqGenerator.generate(X509ObjectIdentifiers.id_SHA1.getId(),
-                    imprint, nonce);
-
-            byte[] requestBytes = request.getEncoded();
-
-            // Call the communications layer
-
-            respBytes = getTSAResponse(requestBytes);
-
-            // Handle the TSA response
-
-            TimeStampResponse response = new TimeStampResponse(respBytes);
-
-            // validate communication level attributes (RFC 3161 PKIStatus)
-
-            response.validate(request);
-
-            PKIFailureInfo failure = response.getFailInfo();
-
-            int value = (failure == null) ? 0 : failure.intValue();
-
-            if (value != 0)
-            {
-
-                // @todo: Translate value of 15 error codes defined by PKIFailureInfo to string
-
-                throw new Exception("Invalid TSA '" + tsaURL + "' response, code " + value);
-
-            }
-
-            // @todo: validate the time stap certificate chain (if we want
-
-            // assure we do not sign using an invalid timestamp).
-
-            // extract just the time stamp token (removes communication status info)
-
-            TimeStampToken tsToken = response.getTimeStampToken();
-
-            if (tsToken == null)
-            {
-
-                throw new Exception("TSA '" + tsaURL + "' failed to return time stamp token");
-
-            }
-
-            TimeStampTokenInfo info = tsToken.getTimeStampInfo(); // to view details
-
-            byte[] encoded = tsToken.getEncoded();
-
-            long stop = System.currentTimeMillis();
-
-            // Update our token size estimate for the next call (padded to be safe)
-
-            this.tokSzEstimate = encoded.length + 32;
-
-            return encoded;
-
-        }
-
-        catch (Exception e)
-        {
-
-            throw e;
-
-        }
-
-        catch (Throwable t)
-        {
-
-            throw new Exception("Failed to get TSA response from '" + tsaURL + "'", t);
-
-        }
-
+    {        
+        return TimeStampFactory.getTimeStampResponse(tsaURL, imprint, false).getEncodedToken();
     }
-
-    /**
-     * 
-     * Get timestamp token - communications layer
-     * 
-     * @return - byte[] - TSA response, raw bytes (RFC 3161 encoded)
-     */
-
-    protected byte[] getTSAResponse(byte[] requestBytes) throws Exception
-    {
-
-        // Setup the TSA connection
-
-        URL url = new URL(tsaURL);
-
-        URLConnection tsaConnection = (URLConnection) url.openConnection();
-
-        tsaConnection.setDoInput(true);
-
-        tsaConnection.setDoOutput(true);
-
-        tsaConnection.setUseCaches(false);
-
-        tsaConnection.setRequestProperty("Content-Type", "application/timestamp-query");
-
-        // tsaConnection.setRequestProperty("Content-Transfer-Encoding", "base64");
-
-        tsaConnection.setRequestProperty("Content-Transfer-Encoding", "binary");
-
-        if ((tsaUsername != null) && !tsaUsername.equals(""))
-        {
-
-            String userPassword = tsaUsername + ":" + tsaPassword;
-
-            tsaConnection.setRequestProperty("Authorization", "Basic " +
-
-            new String(new sun.misc.BASE64Encoder().encode(userPassword.getBytes())));
-
-        }
-        ;
-
-        OutputStream out = tsaConnection.getOutputStream();
-
-        out.write(requestBytes);
-
-        out.close();
-
-        // Get TSA response as a byte array
-
-        InputStream inp = tsaConnection.getInputStream();
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[1024];
-
-        int bytesRead = 0;
-
-        while ((bytesRead = inp.read(buffer, 0, buffer.length)) >= 0)
-        {
-
-            baos.write(buffer, 0, bytesRead);
-
-        }
-
-        byte[] respBytes = baos.toByteArray();
-
-        String encoding = tsaConnection.getContentEncoding();
-
-        if (encoding != null && encoding.equalsIgnoreCase("base64"))
-        {
-
-            sun.misc.BASE64Decoder dec = new sun.misc.BASE64Decoder();
-
-            respBytes = dec.decodeBuffer(new String(respBytes));
-
-        }
-
-        return respBytes;
-
-    }
-
 }

@@ -5,9 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Vector;
 
-
-import es.uji.security.crypto.AbstractSignatureFactory;
-
 public class CMSTSSignatureVerifier 
 {
     // TODO: Implement this ...
