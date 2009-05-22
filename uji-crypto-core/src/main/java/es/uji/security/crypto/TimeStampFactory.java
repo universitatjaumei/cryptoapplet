@@ -13,12 +13,17 @@ import es.uji.security.util.Base64;
 
 public class TimeStampFactory
 {
-    public static byte[] getTimeStamp(String strUrl, byte[] hash) throws NoSuchAlgorithmException, IOException, SignatureException
+    public static TSResponse getTimeStampResponse(String strUrl, byte[] data, boolean calculateDigest) throws NoSuchAlgorithmException, IOException, SignatureException
     {
         HttpTimestamper httpTimestamper = new HttpTimestamper(strUrl);
         
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
-        byte[] digest = messageDigest.digest(hash);
+        byte[] digest = data;
+        
+        if (calculateDigest)
+        {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+            digest = messageDigest.digest(data);
+        }
 
         TSRequest request = new TSRequest(digest, "SHA-1");
         request.requestCertificate(false);
@@ -27,11 +32,19 @@ public class TimeStampFactory
         
         response.getToken().verify();        
 
+        return response;
+    }
+    
+    public static byte[] getTimeStamp(String tsaURL, byte[] data, boolean calculateDigest) throws NoSuchAlgorithmException, IOException, SignatureException
+    {
+        TSResponse response = getTimeStampResponse(tsaURL, data, calculateDigest); 
+
         return response.getEncodedToken();
     }
 
     public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException, IOException
     {
-        System.out.println(new String(Base64.encode(TimeStampFactory.getTimeStamp("http://tss.accv.es:8318/tsa", "test".getBytes()))));
+        System.out.println(new String(Base64.encode(TimeStampFactory.getTimeStamp("http://tss.accv.es:8318/tsa", "test".getBytes(), true))));
+        System.out.println(TimeStampFactory.getTimeStampResponse("http://tss.accv.es:8318/tsa", "test".getBytes(), true).getToken());
     }
 }
