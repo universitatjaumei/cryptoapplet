@@ -1,4 +1,4 @@
-package es.uji.security.crypto.facturae;
+package es.uji.security.crypto.jxades;
 
 public class FacturaeSignatureVerifier
 {
