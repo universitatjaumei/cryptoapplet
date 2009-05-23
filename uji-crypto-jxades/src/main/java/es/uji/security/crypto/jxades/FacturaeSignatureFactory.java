@@ -1,4 +1,4 @@
-package es.uji.security.crypto.facturae;
+package es.uji.security.crypto.jxades;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
