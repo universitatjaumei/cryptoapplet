@@ -1,27 +1,13 @@
 package es.uji.security.crypto.jxades;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.BufferedOutputStream;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Properties;
-
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.X509Certificate;
-import java.net.SocketTimeoutException;
+import java.util.Arrays;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
@@ -33,13 +19,13 @@ import net.java.jxades.security.xml.XAdES.SignaturePolicyIdentifierImpl;
 import net.java.jxades.security.xml.XAdES.XAdES;
 import net.java.jxades.security.xml.XAdES.XAdES_EPES;
 import net.java.jxades.security.xml.XAdES.XMLAdvancedSignature;
+import net.java.jxades.util.XMLUtils;
 
 import org.w3c.dom.Element;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.util.i18n.LabelManager;
-import net.java.jxades.util.XMLUtils;
 
 
 public class FacturaeSignatureFactory implements ISignFormatProvider
@@ -109,8 +95,7 @@ public class FacturaeSignatureFactory implements ISignFormatProvider
 			
 			try{
 				xmlSignature.sign(sCer, pk, Arrays.asList(new String[] { "" }), "S0");
-			}
-			
+			}			
 			catch (MarshalException me){
 				_strerr=LabelManager.get("ERROR_FACTURAE_SIGNATURE");
 				me.printStackTrace();
