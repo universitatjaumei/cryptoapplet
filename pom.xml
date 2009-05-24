@@ -43,6 +43,8 @@
     <module>uji-crypto-cms</module>
     <module>uji-crypto-xmldsign</module>
     <module>uji-crypto-openxades</module>
+    <module>uji-crypto-jxades</module>
+    <module>uji-crypto-mityc</module>
     <module>uji-format-pdf</module>
     <module>uji-keystore</module>
     <module>uji-ui-applet</module>
