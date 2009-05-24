@@ -1,6 +1,7 @@
 package es.uji.security.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.File;
@@ -59,6 +60,17 @@ public class OS
         return baos.toByteArray();
     }
 
+    public static void dumpToFile(String fileName, byte[] data) throws IOException
+    {
+        if (fileName != null && fileName.length() > 0)
+        {
+            FileOutputStream fos = new FileOutputStream(fileName);
+            fos.write(data);
+            fos.flush();
+            fos.close();
+        }
+    }
+    
     public static String getOS()
     {
         return System.getProperty("os.name").toLowerCase();
