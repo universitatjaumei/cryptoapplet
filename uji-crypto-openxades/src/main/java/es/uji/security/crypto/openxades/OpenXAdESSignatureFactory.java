@@ -10,13 +10,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import org.apache.log4j.Logger;
-import org.bouncycastle.tsp.TimeStampRequestGenerator;
-import org.bouncycastle.tsp.TimeStampResponse;
-import org.bouncycastle.tsp.TimeStampToken;
-import org.bouncycastle.tsp.TimeStampTokenInfo;
+
+import sun.security.timestamp.TSResponse;
 
 import es.uji.security.crypto.ISignFormatProvider;
-import es.uji.security.crypto.SHA1Digest;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.TimeStampFactory;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
@@ -147,62 +144,20 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         int tsaCount = ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT", 0);
         if (tsaCount != 0)
         {
-            TimeStampRequestGenerator reqGen = new TimeStampRequestGenerator();
-
-            // Request TSA to return certificate
-            reqGen.setCertReq(false);
-
-            SHA1Digest sha = new SHA1Digest();
-            sha.engineUpdate(sig.getSignatureValue().toString().getBytes(), 0, sig
-                    .getSignatureValue().toString().length());
-
-            byte[] hash = sha.engineDigest();
-            if (hash == null)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_TSDIGEST");
-                return null;
-            }
-
             String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
-            byte[] asn1Resp = TimeStampFactory.getTimeStamp(tsaUrl, hash);
-
-            if (asn1Resp == null)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_TSATIMEOUT");
-                return null;
-            }
-
-            TimeStampResponse tsr = new TimeStampResponse(asn1Resp);
+            byte[] signatureValue = sig.getSignatureValue().toString().getBytes();
+            
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true);
 
             TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
-            ts.setTimeStampResponse(tsr);
+            ts.setTimeStampResponse(response);
             ts.setSignature(sig);
-
-            TimeStampToken ttk = tsr.getTimeStampToken();
-            if (ttk == null)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_TSARESPONSE");
-                return null;
-            }
-
-            TimeStampTokenInfo tstki = ttk.getTimeStampInfo();
-            if (tstki == null)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_TSARESPONSE");
-                return null;
-            }
-
-            byte[] msgdig = tstki.getMessageImprintDigest();
-            if (msgdig == null)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_TSARESPONSE");
-                return null;
-            }
-
-            ts.setHash(msgdig);
+            ts.setHash(response.getToken().getContentInfo().getContentBytes());
 
             sig.addTimestampInfo(ts);
+            
             String tsa1_ca = ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
+            
             if (tsa1_ca == null)
             {
                 _strerr = LabelManager.get("ERROR_DDOC_TSACA");
@@ -218,6 +173,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             // Check the certificate validity against the timestamp:
             Date d = ts.getTime();
+            
             try
             {
                 sCer.checkValidity(d);

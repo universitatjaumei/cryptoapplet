@@ -32,10 +32,12 @@ import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
-import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.asn1.cmp.PKIStatus;
 
 import org.apache.log4j.Logger;
+
+import sun.security.timestamp.TSResponse;
+
 import java.util.Date;
 
 /**
@@ -87,13 +89,16 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
             throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_VERIFY,
                     "Bad digest for timestamp: " + ts.getId(), null);
         }
-        TimeStampResponse resp = ts.getTimeStampResponse();
+        
+        TSResponse resp = ts.getTimeStampResponse();
+        
         if (resp != null)
         {
             if (m_logger.isDebugEnabled())
-                m_logger.debug("TS status: " + resp.getStatus());
-            if (resp.getStatus() == PKIStatus.GRANTED
-                    || resp.getStatus() == PKIStatus.GRANTED_WITH_MODS)
+                m_logger.debug("TS status: " + resp.getStatusCode());
+            
+            if (resp.getStatusCode() == TSResponse.GRANTED
+                    || resp.getStatusCode() == TSResponse.GRANTED_WITH_MODS)
             {
                 try
                 {
@@ -115,7 +120,7 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
             }
             else
                 throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_VERIFY,
-                        "Invalid timestamp status: " + resp.getStatus(), null);
+                        "Invalid timestamp status: " + resp.getStatusCode(), null);
         }
 
         return bOk;
