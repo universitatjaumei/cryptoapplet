@@ -27,7 +27,7 @@ import java.math.BigInteger;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
-import org.bouncycastle.tsp.TimeStampResponse;
+import sun.security.timestamp.TSResponse;
 
 //import org.bouncycastle.cms.SignerId;
 //import org.bouncycastle.cms.CMSSignedData;
@@ -49,7 +49,7 @@ public class TimestampInfo
     /** Include sublements */
     private ArrayList m_includes;
     /** timestamp response */
-    private TimeStampResponse m_tsResp;
+    private TSResponse m_tsResp;
     /** real hash calculated over the corresponding xml block */
     private byte[] m_hash;
 
@@ -223,7 +223,7 @@ public class TimestampInfo
      * 
      * @return value of TimeStampResponse attribute
      */
-    public TimeStampResponse getTimeStampResponse()
+    public TSResponse getTimeStampResponse()
     {
         return m_tsResp;
     }
@@ -236,7 +236,7 @@ public class TimestampInfo
      * @throws DigiDocException
      *             for validation errors
      */
-    public void setTimeStampResponse(TimeStampResponse tsr) throws DigiDocException
+    public void setTimeStampResponse(TSResponse tsr) throws DigiDocException
     {
         DigiDocException ex = validateTimeStampResponse(tsr);
         if (ex != null)
@@ -251,7 +251,7 @@ public class TimestampInfo
      *            input data
      * @return exception or null for ok
      */
-    private DigiDocException validateTimeStampResponse(TimeStampResponse tsr)
+    private DigiDocException validateTimeStampResponse(TSResponse tsr)
     {
         DigiDocException ex = null;
         if (tsr == null)
@@ -316,80 +316,89 @@ public class TimestampInfo
             return null; // not found
     }
 
-    /**
-     * Retrieves timestamp responses signature algorithm OID.
-     * 
-     * @return responses signature algorithm OID
-     */
-    public String getAlgorithmOid()
-    {
-        String oid = null;
-        if (m_tsResp != null)
-        {
-            oid = m_tsResp.getTimeStampToken().getTimeStampInfo().getMessageImprintAlgOID();
-        }
-        return oid;
-    }
-
-    /**
-     * Retrieves timestamp responses policy
-     * 
-     * @return responses policy
-     */
-    public String getPolicy()
-    {
-        String oid = null;
-        if (m_tsResp != null)
-        {
-            oid = m_tsResp.getTimeStampToken().getTimeStampInfo().getPolicy();
-        }
-        return oid;
-    }
+//    /**
+//     * Retrieves timestamp responses signature algorithm OID.
+//     * 
+//     * @return responses signature algorithm OID
+//     */
+//    public String getAlgorithmOid()
+//    {
+//        String oid = null;
+//        if (m_tsResp != null)
+//        {
+//            oid = m_tsResp.getTimeStampToken().getTimeStampInfo().getMessageImprintAlgOID();
+//        }
+//        return oid;
+//    }
+//
+//    /**
+//     * Retrieves timestamp responses policy
+//     * 
+//     * @return responses policy
+//     */
+//    public String getPolicy()
+//    {
+//        String oid = null;
+//        if (m_tsResp != null)
+//        {
+//            oid = m_tsResp.getTimeStampToken().getTimeStampInfo().getPolicy();
+//        }
+//        return oid;
+//    }
 
     /**
      * Retrieves timestamp issuing time
      * 
      * @return timestamp issuing time
+     * @throws IOException 
      */
     public Date getTime()
     {
         Date d = null;
+        
         if (m_tsResp != null)
         {
-            d = m_tsResp.getTimeStampToken().getTimeStampInfo().getGenTime();
+            try
+            {
+                d = m_tsResp.getToken().getContentInfo().getContent().getUTCTime();
+            }
+            catch (IOException e)
+            {
+            }
         }
+        
         return d;
     }
 
-    /**
-     * Retrieves timestamp msg-imprint digest
-     * 
-     * @return timestamp msg-imprint digest
-     */
-    public byte[] getMessageImprint()
-    {
-        byte[] b = null;
-        if (m_tsResp != null)
-        {
-            b = m_tsResp.getTimeStampToken().getTimeStampInfo().getMessageImprintDigest();
-        }
-        return b;
-    }
-
-    /**
-     * Retrieves timestamp nonce
-     * 
-     * @return timestamp nonce
-     */
-    public BigInteger getNonce()
-    {
-        BigInteger b = null;
-        if (m_tsResp != null)
-        {
-            b = m_tsResp.getTimeStampToken().getTimeStampInfo().getNonce();
-        }
-        return b;
-    }
+//    /**
+//     * Retrieves timestamp msg-imprint digest
+//     * 
+//     * @return timestamp msg-imprint digest
+//     */
+//    public byte[] getMessageImprint()
+//    {
+//        byte[] b = null;
+//        if (m_tsResp != null)
+//        {
+//            b = m_tsResp.getTimeStampToken().getTimeStampInfo().getMessageImprintDigest();
+//        }
+//        return b;
+//    }
+//
+//    /**
+//     * Retrieves timestamp nonce
+//     * 
+//     * @return timestamp nonce
+//     */
+//    public BigInteger getNonce()
+//    {
+//        BigInteger b = null;
+//        if (m_tsResp != null)
+//        {
+//            b = m_tsResp.getTimeStampToken().getTimeStampInfo().getNonce();
+//        }
+//        return b;
+//    }
 
     /**
      * Retrieves timestamp serial number
@@ -401,25 +410,31 @@ public class TimestampInfo
         BigInteger b = null;
         if (m_tsResp != null)
         {
-            b = m_tsResp.getTimeStampToken().getTimeStampInfo().getSerialNumber();
+            try
+            {
+                b = m_tsResp.getToken().getContentInfo().getContent().getBigInteger();
+            }
+            catch (IOException e)
+            {
+            }
         }
         return b;
     }
 
-    /**
-     * Retrieves timestamp is-ordered atribute
-     * 
-     * @return timestamp is-ordered atribute
-     */
-    public boolean isOrdered()
-    {
-        boolean b = false;
-        if (m_tsResp != null)
-        {
-            b = m_tsResp.getTimeStampToken().getTimeStampInfo().isOrdered();
-        }
-        return b;
-    }
+//    /**
+//     * Retrieves timestamp is-ordered atribute
+//     * 
+//     * @return timestamp is-ordered atribute
+//     */
+//    public boolean isOrdered()
+//    {
+//        boolean b = false;
+//        if (m_tsResp != null)
+//        {
+//            b = m_tsResp.getTimeStampToken().getTimeStampInfo().isOrdered();
+//        }
+//        return b;
+//    }
 
     /**
      * Retrieves timestamp is-ordered atribute
@@ -495,7 +510,7 @@ public class TimestampInfo
             }
             bos.write(ConvertUtils.str2data("<EncapsulatedTimeStamp>"));
             if (m_tsResp != null)
-                bos.write(ConvertUtils.str2data(Base64Util.encode(m_tsResp.getEncoded(), 64)));
+                bos.write(ConvertUtils.str2data(Base64Util.encode(m_tsResp.getEncodedToken(), 64)));
             bos.write(ConvertUtils.str2data("</EncapsulatedTimeStamp>"));
             switch (m_type)
             {

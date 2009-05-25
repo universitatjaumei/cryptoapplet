@@ -21,34 +21,46 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.openxades.digidoc.*;
-import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
-import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
-import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
-import es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocException;
-import es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
-import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
-
-import java.util.Stack;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import org.xml.sax.SAXException;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.SAXParser;
-import java.security.cert.X509Certificate;
-import org.bouncycastle.tsp.TimeStampResponse;
-import org.bouncycastle.tsp.TSPException;
+import java.util.Stack;
 
-// Logging classes
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.log4j.Logger;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import sun.security.timestamp.TSResponseFactory;
+import es.uji.security.crypto.openxades.digidoc.Base64Util;
+import es.uji.security.crypto.openxades.digidoc.CertID;
+import es.uji.security.crypto.openxades.digidoc.CertValue;
+import es.uji.security.crypto.openxades.digidoc.CompleteCertificateRefs;
+import es.uji.security.crypto.openxades.digidoc.CompleteRevocationRefs;
+import es.uji.security.crypto.openxades.digidoc.DataFile;
+import es.uji.security.crypto.openxades.digidoc.DataFileAttribute;
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
+import es.uji.security.crypto.openxades.digidoc.IncludeInfo;
+import es.uji.security.crypto.openxades.digidoc.KeyInfo;
+import es.uji.security.crypto.openxades.digidoc.Notary;
+import es.uji.security.crypto.openxades.digidoc.Reference;
+import es.uji.security.crypto.openxades.digidoc.Signature;
+import es.uji.security.crypto.openxades.digidoc.SignatureProductionPlace;
+import es.uji.security.crypto.openxades.digidoc.SignatureValue;
+import es.uji.security.crypto.openxades.digidoc.SignedDoc;
+import es.uji.security.crypto.openxades.digidoc.SignedInfo;
+import es.uji.security.crypto.openxades.digidoc.SignedProperties;
+import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
+import es.uji.security.crypto.openxades.digidoc.UnsignedProperties;
+import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
+import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
 /**
  * SAX implementation of DigiDocFactory Provides methods for reading a DigiDoc file
@@ -1664,17 +1676,10 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
             {
                 Signature sig = m_doc.getLastSignature();
                 TimestampInfo ts = sig.getLastTimestampInfo();
+                
                 try
                 {
-                    // System.out.println("\n--TS_RESP--\n" + m_sbCollectItem.toString() +
-                    // "\n--TS_RESP--\n");
-                    ts.setTimeStampResponse(new TimeStampResponse(Base64Util.decode(m_sbCollectItem
-                            .toString())));
-                }
-                catch (TSPException ex)
-                {
-                    throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_RESP,
-                            "Invalid timestamp response", ex);
+                    ts.setTimeStampResponse(TSResponseFactory.getTSResponseInstance(Base64Util.decode(m_sbCollectItem.toString())));
                 }
                 catch (IOException ex)
                 {
