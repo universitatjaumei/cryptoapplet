@@ -3,6 +3,7 @@ package es.uji.security.crypto.pdf;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.Security;
 import java.security.SignatureException;
 
 import java.security.cert.CertificateFactory;
@@ -27,18 +28,17 @@ import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfDate;
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfName;
-import com.lowagie.text.pdf.PdfPKCS7TSA;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfSignature;
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 import com.lowagie.text.pdf.PdfStamper;
 import com.lowagie.text.pdf.PdfString;
-import com.lowagie.text.pdf.TSAClient;
-import com.lowagie.text.pdf.TSAClientBouncyCastle;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.util.Base64;
+import es.uji.security.crypto.cms.pdf.PdfPKCS7TSA;
+import es.uji.security.crypto.cms.pdf.TSAClient;
+import es.uji.security.crypto.cms.pdf.TSAClientBouncyCastle;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -165,6 +165,11 @@ public class PDFSignatureFactory implements ISignFormatProvider
             this.pk = sigOpt.getPrivateKey();
             this.pv = sigOpt.getProvider();
 
+            if (Security.getProvider(this.pv.getName()) == null)
+            {
+                Security.addProvider(this.pv);
+            }
+            
             chain = new Certificate[2];
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
@@ -237,7 +242,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 stp.close();
             }
             
-            return Base64.encode(sout.toByteArray());
+            return sout.toByteArray();
         }
         catch (Exception e)
         {
