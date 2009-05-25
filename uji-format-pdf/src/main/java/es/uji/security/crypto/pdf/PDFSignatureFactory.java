@@ -165,7 +165,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             this.pk = sigOpt.getPrivateKey();
             this.pv = sigOpt.getProvider();
 
-            if (Security.getProvider(this.pv.getName()) == null)
+            if (Security.getProvider(this.pv.getName()) == null && this.pv != null)
             {
                 Security.addProvider(this.pv);
             }
