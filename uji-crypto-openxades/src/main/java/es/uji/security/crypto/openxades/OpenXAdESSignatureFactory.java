@@ -1,18 +1,24 @@
 package es.uji.security.crypto.openxades;
 
 import java.io.File;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.Timestamp;
+import java.security.cert.CertPath;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
 import org.apache.log4j.Logger;
 
+import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.PKCS9Attribute;
+import sun.security.pkcs.PKCS9Attributes;
+import sun.security.pkcs.SignerInfo;
 import sun.security.timestamp.TSResponse;
-
+import sun.security.timestamp.TimestampToken;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.TimeStampFactory;
@@ -29,7 +35,7 @@ import es.uji.security.util.i18n.LabelManager;
 public class OpenXAdESSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(OpenXAdESSignatureFactory.class);
-    
+
     private String _strerr = "";
     private String signerRole = "UNSET";
     private String xadesFileName = "data.xml";
@@ -146,8 +152,9 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         {
             String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
             byte[] signatureValue = sig.getSignatureValue().toString().getBytes();
-            
-            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true);
+
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue,
+                    true);
 
             TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
             ts.setTimeStampResponse(response);
@@ -155,9 +162,9 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             ts.setHash(response.getToken().getContentInfo().getContentBytes());
 
             sig.addTimestampInfo(ts);
-            
+
             String tsa1_ca = ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
-            
+
             if (tsa1_ca == null)
             {
                 _strerr = LabelManager.get("ERROR_DDOC_TSACA");
@@ -173,7 +180,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             // Check the certificate validity against the timestamp:
             Date d = ts.getTime();
-            
+
             try
             {
                 sCer.checkValidity(d);
@@ -183,8 +190,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
                 _strerr = LabelManager.get("ERROR_CERTIFICATE_EXPIRED");
                 return null;
             }
-
         }
+
         try
         {
             // Añadimos certificado TSA
@@ -198,6 +205,28 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             {
                 sig.getConfirmation();
             }
+
+            String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+            byte[] completeCertificateRefs = sig.getUnsignedProperties()
+                    .getCompleteCertificateRefs().toString().getBytes();
+            byte[] completeRevocationRefs = sig.getUnsignedProperties().getCompleteRevocationRefs()
+                    .toString().getBytes();
+
+            byte[] refsOnlyData = new byte[completeCertificateRefs.length
+                    + completeRevocationRefs.length];
+            System.arraycopy(completeCertificateRefs, 0, refsOnlyData, 0,
+                    completeCertificateRefs.length);
+            System.arraycopy(completeRevocationRefs, 0, refsOnlyData,
+                    completeCertificateRefs.length, completeRevocationRefs.length);
+
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
+
+            TimestampInfo ts = new TimestampInfo("TS2", TimestampInfo.TIMESTAMP_TYPE_REFS_ONLY);
+            ts.setTimeStampResponse(response);
+            ts.setSignature(sig);
+            ts.setHash(response.getToken().getContentInfo().getContentBytes());
+
+            sig.addTimestampInfo(ts);
 
             log.debug("Verificación OCSP completa");
         }
