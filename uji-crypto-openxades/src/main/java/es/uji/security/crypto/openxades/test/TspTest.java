@@ -1,7 +1,6 @@
 package es.uji.security.crypto.openxades.test;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.tsp.*;
 import java.io.*;
 import java.util.*;
 import java.math.BigInteger;
@@ -39,33 +38,33 @@ public class TspTest
         // TODO Auto-generated method stub
         try
         {
-            if (Security.getProvider("BC") == null)
-            {
-                BouncyCastleProvider bcp = new BouncyCastleProvider();
-                Security.addProvider(bcp);
-            }
-
-            FileInputStream fis = new FileInputStream(new File("/tmp/token"));
-            TimeStampResponse tr = new TimeStampResponse(fis);
-            fis.close();
-            // System.out.println("TimeStampResponse: " + tr);
-
-            InputStream inStream = new FileInputStream("/tmp/tsa1_accv_ldap.cer");
-            // "/home/paul/doc/java/workspace/ujiCrypto/etc/cagva.pem");
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
-            inStream.close();
-
-            tr.getTimeStampToken().validate(cert, "BC");
-            HexDump h = new HexDump();
-
-            TimeStampTokenInfo tstInfo = tr.getTimeStampToken().getTimeStampInfo();
-
-            // TODO: Ojo, para acabar de validar el timestamp, deberíamos comparar este digest
-            // con el digest obtenido de resumir los datos sobre los que hemos solicitado
-            // el timestamp.
-            System.out.println("Signed Digest: " + h.xdump(tstInfo.getMessageImprintDigest()));
-
+//            if (Security.getProvider("BC") == null)
+//            {
+//                BouncyCastleProvider bcp = new BouncyCastleProvider();
+//                Security.addProvider(bcp);
+//            }
+//
+//            FileInputStream fis = new FileInputStream(new File("/tmp/token"));
+//            TimeStampResponse tr = new TimeStampResponse(fis);
+//            fis.close();
+//            // System.out.println("TimeStampResponse: " + tr);
+//
+//            InputStream inStream = new FileInputStream("/tmp/tsa1_accv_ldap.cer");
+//            // "/home/paul/doc/java/workspace/ujiCrypto/etc/cagva.pem");
+//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+//            X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
+//            inStream.close();
+//
+//            tr.getTimeStampToken().validate(cert, "BC");
+//            HexDump h = new HexDump();
+//
+//            TimeStampTokenInfo tstInfo = tr.getTimeStampToken().getTimeStampInfo();
+//
+//            // TODO: Ojo, para acabar de validar el timestamp, deberíamos comparar este digest
+//            // con el digest obtenido de resumir los datos sobre los que hemos solicitado
+//            // el timestamp.
+//            System.out.println("Signed Digest: " + h.xdump(tstInfo.getMessageImprintDigest()));
+//
         }
         catch (Exception e)
         {
