@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
 public class SignatureApplet extends JApplet
 {
     private Logger log = Logger.getLogger(SignatureApplet.class);
-    
+
     private AppHandler apph;
     private MainWindow window;
     private String _separator = "\\|";
@@ -57,6 +57,7 @@ public class SignatureApplet extends JApplet
      * Init method. Installs the applet on client side. Downloads MicrosoftCryptoApi dll and loads
      * it in case of Internet Explorer
      */
+     
 
     public void init()
     {
@@ -76,7 +77,7 @@ public class SignatureApplet extends JApplet
         } 
         catch (Exception e) 
         {
-            log.debug("Nimbus Look&Feel is not present. Using default Look&Feel");            
+        	log.debug("Nimbus Look&Feel is not present. Using default Look&Feel");            
         }
          
         try

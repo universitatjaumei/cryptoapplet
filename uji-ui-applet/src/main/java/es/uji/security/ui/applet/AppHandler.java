@@ -1,26 +1,33 @@
 package es.uji.security.ui.applet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import java.security.MessageDigest;
+import java.io.PrintStream;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.util.Hashtable;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.swing.JOptionPane;
 
-import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
+
+import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
+import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.ui.applet.io.InputParams;
@@ -28,8 +35,6 @@ import es.uji.security.ui.applet.io.OutputParams;
 import es.uji.security.util.HexDump;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
-
-import org.apache.log4j.Logger;
 
 /**
  * Handles all the applet singularities such as applet parameters, applet installation, host
@@ -103,8 +108,8 @@ public class AppHandler
             {
                 JSObject win = (JSObject) netscape.javascript.JSObject.getWindow(_parent);
                 JSObject doc = (JSObject) win.getMember("navigator");
-                String userAgent = (String) doc.getMember("userAgent");
-    
+                String userAgent = (String) doc.getMember("userAgent");        
+                
                 if (userAgent != null)
                 {
                     userAgent = userAgent.toLowerCase();
@@ -339,7 +344,7 @@ public class AppHandler
      */
     public void install() throws SignatureAppletException
     {
-        if (this.navigator.equals(SupportedBrowser.IEXPLORER))
+        if (this.navigator.equals(SupportedBrowser.IEXPLORER) && ! OS.isJavaUpperEqualTo6())
         {
             String downloadUrl = (_parent.getParameter("downloadUrl") != null) ? _parent
                     .getParameter("downloadUrl") : _parent.getCodeBase().toString();
@@ -395,7 +400,13 @@ public class AppHandler
             try
             {
                 // Must check if the dll is already loaded here.
-                System.load(completeDllPath);
+            	// If the java versión is greater than 1.6, the load 
+            	// is not necessary.
+            	 String version = System.getProperty("java.version");
+            	 if (version.indexOf("1.5") > -1)
+                 {
+                	 System.load(completeDllPath);
+                 }
             }
             catch (Throwable e)
             {
@@ -404,7 +415,6 @@ public class AppHandler
             }
         }
     }
-
     /**
      * Calls the javascript function indicated as func with params arguments
      * 
