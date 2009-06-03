@@ -20,6 +20,7 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
+import es.uji.security.crypto.TimeStampFactory;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
@@ -29,6 +30,7 @@ import es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleTimestampFac
 import es.uji.security.crypto.openxades.digidoc.factory.TimestampFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
@@ -37,6 +39,7 @@ import org.bouncycastle.asn1.cmp.PKIStatus;
 import org.apache.log4j.Logger;
 
 import sun.security.timestamp.TSResponse;
+import sun.security.timestamp.TSResponseFactory;
 
 import java.util.Date;
 
@@ -79,12 +82,17 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
             throws DigiDocException
     {
         boolean bOk = false;
+        byte[] messageImp=null;
+        
+        try{
+        	messageImp= TimeStampFactory.getMessageImprint(ts.getTimeStampResponse());
+     
 
         if (m_logger.isDebugEnabled())
             m_logger.debug("Verifying TS: " + ts.getId() + " nr: " + ts.getSerialNumber());
-        if (!SignedDoc.compareDigests(ts.getMessageImprint(), ts.getHash()))
+        if (!SignedDoc.compareDigests(messageImp, ts.getHash()))
         {
-            m_logger.error("TS digest: " + Base64Util.encode(ts.getMessageImprint())
+            m_logger.error("TS digest: " + Base64Util.encode(messageImp)
                     + " real digest: " + Base64Util.encode(ts.getHash()));
             throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_VERIFY,
                     "Bad digest for timestamp: " + ts.getId(), null);
@@ -107,7 +115,12 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
                     // fos.write( resp.getTimeStampToken().getEncoded());
                     // fos.close();
                     bOk = true;
-                    resp.getTimeStampToken().validate(tsaCert, "BC");
+                    if  (! TimeStampFactory.verify(tsaCert, resp)){
+                    	bOk = false;
+                        m_logger.error("Timestamp verification error vfy error");
+                        throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_VERIFY,
+                                "Invalid timestamp: verify error", null);
+                    }
 
                 }
                 catch (Exception ex)
@@ -121,6 +134,13 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
             else
                 throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_VERIFY,
                         "Invalid timestamp status: " + resp.getStatusCode(), null);
+        }
+        }
+        catch (IOException iex){
+        	 bOk = false;
+             m_logger.error("Timestamp verification error: " + iex);
+             throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_VERIFY,
+                     "Invalid timestamp: " + iex.getMessage(), iex);
         }
 
         return bOk;

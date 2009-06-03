@@ -3,22 +3,14 @@ package es.uji.security.crypto.openxades;
 import java.io.File;
 import java.security.PrivateKey;
 import java.security.Provider;
-import java.security.Timestamp;
-import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import sun.security.pkcs.PKCS7;
-import sun.security.pkcs.PKCS9Attribute;
-import sun.security.pkcs.PKCS9Attributes;
-import sun.security.pkcs.SignerInfo;
 import sun.security.timestamp.TSResponse;
-import sun.security.timestamp.TimestampToken;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.TimeStampFactory;
@@ -84,7 +76,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
         // Creamos un nuevo SignedDoc XAdES
         SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
-        // Añadimos una nueva referencia de fichero en base64 ... aunque establecemos el body
+        // Aï¿½adimos una nueva referencia de fichero en base64 ... aunque establecemos el body
         DataFile df = sdoc.addDataFile(new File("jar://data.xml"), "application/binary",
                 DataFile.CONTENT_EMBEDDED_BASE64);
 
@@ -194,13 +186,13 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
         try
         {
-            // Añadimos certificado TSA
+            // Aï¿½adimos certificado TSA
             if (tsaCount != 0)
             {
                 sig.addCertValue(cval);
             }
 
-            // Verificación OCSP
+            // Verificaciï¿½n OCSP
             if (ConfigManager.instance().getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
             {
                 sig.getConfirmation();
@@ -228,7 +220,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             sig.addTimestampInfo(ts);
 
-            log.debug("Verificación OCSP completa");
+            log.debug("Verificaciï¿½n OCSP completa");
+
         }
         catch (DigiDocException e)
         {
