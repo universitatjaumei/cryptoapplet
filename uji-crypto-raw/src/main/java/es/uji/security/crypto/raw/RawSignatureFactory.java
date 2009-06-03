@@ -46,7 +46,7 @@ public class RawSignatureFactory implements ISignFormatProvider
         rsa_vfy.initVerify(sCer);
         rsa_vfy.initVerify(sCer.getPublicKey());
         rsa_vfy.update(datos);
-        System.out.println("La verificación resultó:  " + rsa_vfy.verify(res));
+        System.out.println("La verificaciï¿½n resultï¿½:  " + rsa_vfy.verify(res));
 
         if (res == null)
         {
