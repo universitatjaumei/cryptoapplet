@@ -17,16 +17,13 @@ import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
 import java.security.PrivateKey;
 import java.security.Security;
-import java.security.cert.CertificateFactory; //import java.security.KeyFactory;
-//import java.security.spec.PKCS8EncodedKeySpec;
+	import java.security.cert.CertificateFactory; 
+
 import java.security.KeyPair;
 
-//import org.bouncycastle.asn1.ASN1InputStream;
 
-//import es.uji.util.Base64;
 
 import org.bouncycastle.util.encoders.HexEncoder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.*;
 
 import es.uji.security.keystore.clauer.ClauerRunTime;
@@ -49,11 +46,11 @@ public class Clauer
     public Clauer()
     {
         // Install BC Provider
-        if (Security.getProvider("BC") == null)
-        {
-            BouncyCastleProvider bcp = new BouncyCastleProvider();
-            Security.addProvider(bcp);
-        }
+        //if (Security.getProvider("BC") == null)
+        //{
+        //    BouncyCastleProvider bcp = new BouncyCastleProvider();
+        //    Security.addProvider(bcp);
+        //}
     }
 
     public void open(String device) throws IOException, Exception

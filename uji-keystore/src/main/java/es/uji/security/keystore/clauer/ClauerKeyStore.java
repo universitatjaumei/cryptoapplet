@@ -5,6 +5,7 @@ import java.security.Key;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -12,8 +13,6 @@ import java.security.PrivateKey;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.keystore.IKeyStoreHelper;
 
@@ -153,7 +152,8 @@ public class ClauerKeyStore implements IKeyStoreHelper
 
     public Provider getProvider()
     {
-        return new BouncyCastleProvider();
+    	//System.out.println("Security.getProviders()[0]: " + Security.getProviders()[0]);
+        return Security.getProviders()[0];
     }
 
     public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,
