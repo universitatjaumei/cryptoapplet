@@ -1,15 +1,7 @@
 package es.uji.security.crypto.openxades.test;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import java.io.*;
-import java.util.*;
 import java.math.BigInteger;
-import java.security.Security;
 import java.security.interfaces.RSAPublicKey;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateFactory;
-import org.bouncycastle.asn1.cms.CMSAttributes;
-import org.bouncycastle.jce.provider.*;
 
 import es.uji.security.util.HexDump;
 
@@ -60,11 +52,12 @@ public class TspTest
 //
 //            TimeStampTokenInfo tstInfo = tr.getTimeStampToken().getTimeStampInfo();
 //
-//            // TODO: Ojo, para acabar de validar el timestamp, deberíamos comparar este digest
+//            // TODO: Ojo, para acabar de validar el timestamp, deberï¿½amos comparar este digest
 //            // con el digest obtenido de resumir los datos sobre los que hemos solicitado
 //            // el timestamp.
 //            System.out.println("Signed Digest: " + h.xdump(tstInfo.getMessageImprintDigest()));
 //
+
         }
         catch (Exception e)
         {
