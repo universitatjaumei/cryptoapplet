@@ -112,4 +112,10 @@ public class OS
                 || getOS().indexOf("windows 2000") > -1 || getOS().indexOf("windows xp") > -1 || getOS()
                 .indexOf("windows 2003") > -1);
     }
+    public static boolean isJavaUpperEqualTo6(){
+    	
+    	 String version = System.getProperty("java.version");
+         return (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1);
+    }
+    
 }
