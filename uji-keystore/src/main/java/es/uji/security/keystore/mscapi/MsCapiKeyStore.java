@@ -6,7 +6,6 @@ import java.security.Key;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -19,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.openoces.opensign.wrappers.microsoftcryptoapi.MicrosoftCryptoApi;
 
 import es.uji.security.keystore.IKeyStoreHelper;
+
 
 public class MsCapiKeyStore implements IKeyStoreHelper
 {
