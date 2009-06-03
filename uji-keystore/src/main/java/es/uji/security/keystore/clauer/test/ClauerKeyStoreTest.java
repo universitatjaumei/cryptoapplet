@@ -8,7 +8,8 @@ public class ClauerKeyStoreTest
 	{
 		try
 		{
-			new ClauerKeyStore();
+			ClauerKeyStore cls= new ClauerKeyStore();
+			System.out.println(cls.getProvider()); 
 		}
 		catch (Exception e)
 		{
