@@ -14,12 +14,12 @@ import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import net.java.jxades.security.xml.XAdES.SignaturePolicyIdentifier;
-import net.java.jxades.security.xml.XAdES.SignaturePolicyIdentifierImpl;
-import net.java.jxades.security.xml.XAdES.XAdES;
-import net.java.jxades.security.xml.XAdES.XAdES_EPES;
-import net.java.jxades.security.xml.XAdES.XMLAdvancedSignature;
-import net.java.jxades.util.XMLUtils;
+import net.java.xades.security.xml.XAdES.SignaturePolicyIdentifier;
+import net.java.xades.security.xml.XAdES.SignaturePolicyIdentifierImpl;
+import net.java.xades.security.xml.XAdES.XAdES;
+import net.java.xades.security.xml.XAdES.XAdES_EPES;
+import net.java.xades.security.xml.XAdES.XMLAdvancedSignature;
+import net.java.xades.util.XMLUtils;
 
 import org.w3c.dom.Element;
 
@@ -85,7 +85,7 @@ public class FacturaeSignatureFactory implements ISignFormatProvider
 			//Set SignaturePolicyIdentifier
 			
 			spi.setIdentifier("http://www.facturae.es/politica_de_firma_formato_facturae/politica_de_firma_formato_facturae_v3_1.pdf");		
-			spi.setDescription("Política de firma electrónica para facturación electrónica con formato Facturae");
+			spi.setDescription("Pol\u00edtica de firma electr\u00f3nica para facturaci\u00f3n electr\u00f3nica con formato Facturae");
 
 			xades.setSignaturePolicyIdentifier(spi);
 			
@@ -93,8 +93,9 @@ public class FacturaeSignatureFactory implements ISignFormatProvider
 			
 			XMLAdvancedSignature xmlSignature = XMLAdvancedSignature.newInstance(xades);
 			
-			try{
-				xmlSignature.sign(sCer, pk, Arrays.asList(new String[] { "" }), "S0");
+			try
+			{
+				xmlSignature.sign(sCer, pk, Arrays.asList(new String[] { "" }), "S0", "http://tss.accv.es:8318/tsa");
 			}			
 			catch (MarshalException me){
 				_strerr=LabelManager.get("ERROR_FACTURAE_SIGNATURE");
