@@ -23,27 +23,7 @@ public class Test
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
 
-        // Cargando certificado de aplicación
-        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keystore.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
-
-        // Recuperando clave privada para firmar
-        Certificate certificate = keystore.getCertificate("uji");
-        Key key = keystore.getKey("uji", "cryptoapplet".toCharArray());
-
-		byte[] data = OS.inputStreamToByteArray(new FileInputStream("src/main/resources/in.xml"));
-		
-		ISignFormatProvider s = new MitycXAdESSignatureFactory();
-		
-		SignatureOptions signatureOptions = new SignatureOptions();
-		signatureOptions.setToSignByteArray(data);
-		signatureOptions.setCertificate((X509Certificate) certificate);
-		signatureOptions.setPrivateKey((PrivateKey) key);
-		signatureOptions.setProvider(new BouncyCastleProvider());
-		
-		byte[] signedData = s.formatSignature(signatureOptions);
-		
-		OS.dumpToFile("src/main/resources/out.xml", signedData);
+		byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("/tmp/test.xml"));
 				
 		MitycXAdESSignatureValidator v = new MitycXAdESSignatureValidator();		
 		System.out.println((v.verify(signedData)) ? "OK" : "MAL");
