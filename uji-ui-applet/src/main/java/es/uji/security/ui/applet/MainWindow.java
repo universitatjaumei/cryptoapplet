@@ -1,29 +1,27 @@
 package es.uji.security.ui.applet;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.TextField;
 import java.awt.Toolkit;
-
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.JFormattedTextField;
-import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.JLabel;
-
-import javax.swing.JCheckBox;
-import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
-import javax.swing.JPasswordField;
-import javax.swing.JProgressBar;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTree;
+import javax.swing.SwingConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.security.keystore.KeyStoreManager;

@@ -1,12 +1,11 @@
 package es.uji.security.ui.applet;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import java.security.cert.X509Certificate;
 import java.security.cert.Certificate;
-
+import java.security.cert.X509Certificate;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.IKeyStoreHelper;

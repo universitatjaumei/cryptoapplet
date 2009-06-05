@@ -1,11 +1,6 @@
 package es.uji.security.ui.applet.io;
 
 import java.io.IOException;
-import java.util.Hashtable;
-
-import javax.swing.JApplet;
-
-import es.uji.security.ui.applet.SignatureApplet;
 
 public interface OutputParams
 {

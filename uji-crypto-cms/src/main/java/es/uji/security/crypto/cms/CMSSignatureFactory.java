@@ -18,8 +18,8 @@ import org.bouncycastle.cms.CMSSignedGenerator;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.TimeStampFactory;
 import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
+import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.Base64;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;

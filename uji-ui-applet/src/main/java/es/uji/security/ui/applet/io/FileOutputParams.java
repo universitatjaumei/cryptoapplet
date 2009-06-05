@@ -1,8 +1,8 @@
 package es.uji.security.ui.applet.io;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import javax.swing.JFileChooser;
 

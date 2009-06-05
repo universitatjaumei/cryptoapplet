@@ -6,9 +6,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateNotYetValidException;
-import java.util.Date;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.JLabel;

@@ -1,12 +1,6 @@
 package es.uji.security.crypto.cms.pdf;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
-
-import es.uji.security.crypto.TimeStampFactory;
+import es.uji.security.crypto.timestamp.TimeStampFactory;
 
 /**
  * 

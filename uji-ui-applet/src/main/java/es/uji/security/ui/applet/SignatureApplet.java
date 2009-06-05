@@ -1,5 +1,17 @@
 package es.uji.security.ui.applet;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
+import javax.swing.JApplet;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+
+import org.apache.log4j.Logger;
+
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
@@ -14,18 +26,6 @@ import es.uji.security.ui.applet.io.ParamInputData;
 import es.uji.security.ui.applet.io.URLInputParams;
 import es.uji.security.ui.applet.io.URLOutputParams;
 import es.uji.security.util.i18n.LabelManager;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
-import javax.swing.JApplet;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-
-import org.apache.log4j.Logger;
 
 /**
  * This is the main applet class, it handles the web-to-java interaction by exporting some method to

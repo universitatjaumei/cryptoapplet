@@ -5,9 +5,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import javax.swing.JApplet;
-
-
 import es.uji.security.ui.applet.SignatureApplet;
 import es.uji.security.util.OS;
 
