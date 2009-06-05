@@ -89,8 +89,6 @@ public class TimeStampFactory
         request.requestCertificate(false);
         
         TSResponse response = httpTimestamper.generateTimestamp(request); 
-        
-        response.getToken().verify();        
 
         return response;
     }
