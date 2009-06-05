@@ -1,8 +1,8 @@
 package es.uji.security.ui.applet.io;
 
-import es.uji.security.ui.applet.SignatureApplet;
-
 import java.util.Hashtable;
+
+import es.uji.security.ui.applet.SignatureApplet;
 
 public class ParamInputData extends AbstractData implements InputParams
 {

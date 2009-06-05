@@ -1,7 +1,6 @@
 package es.uji.dsign.applet2.junit;
 
 import java.util.Hashtable;
-import javax.swing.JApplet;
 
 import es.uji.security.ui.applet.SignatureApplet;
 

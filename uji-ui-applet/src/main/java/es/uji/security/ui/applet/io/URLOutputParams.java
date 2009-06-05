@@ -7,11 +7,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.StringTokenizer;
 
+import netscape.javascript.JSObject;
+
 import org.apache.log4j.Logger;
 
 import es.uji.security.ui.applet.SignatureApplet;
-
-import netscape.javascript.JSObject;
 
 public class URLOutputParams extends AbstractData implements OutputParams
 {

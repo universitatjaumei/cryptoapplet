@@ -1,16 +1,15 @@
 package es.uji.security.ui.applet;
 
-import javax.swing.JPanel;
-
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 
-import javax.swing.JDialog;
-import javax.swing.JPasswordField;
-import java.awt.Rectangle;
-import javax.swing.JLabel;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 
 import es.uji.security.util.i18n.LabelManager;
 

@@ -1,25 +1,19 @@
 package es.uji.security.ui.applet;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
-import java.util.Hashtable;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.swing.JOptionPane;
 
 import netscape.javascript.JSObject;
 
@@ -27,9 +21,7 @@ import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
-import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.SupportedSignatureFormat;
-import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
 import es.uji.security.util.HexDump;

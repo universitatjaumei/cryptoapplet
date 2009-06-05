@@ -13,7 +13,6 @@ import org.apache.log4j.Logger;
 import sun.security.timestamp.TSResponse;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.TimeStampFactory;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
@@ -21,6 +20,7 @@ import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
+import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
