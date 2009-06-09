@@ -18,8 +18,8 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import sun.security.timestamp.TSResponse;
 import es.uji.security.crypto.SupportedSignatureFormat;
+import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.keystore.IKeyStoreHelper;
 import es.uji.security.keystore.KeyStoreManager;
