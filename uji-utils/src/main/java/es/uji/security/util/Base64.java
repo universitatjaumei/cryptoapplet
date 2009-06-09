@@ -334,4 +334,14 @@ public final class Base64
     {
         return (isArrayByteBase64(isValidString.getBytes()));
     }
+    
+    public static String encodeToStr(byte[] data)
+    {
+        return new String(encode(data));
+    }
+    
+    public static String encodeToStr(byte[] data, boolean splitColumns)
+    {
+        return new String(encode(data, splitColumns));
+    }    
 }
