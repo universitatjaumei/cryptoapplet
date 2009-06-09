@@ -21,16 +21,13 @@ package es.uji.security.crypto.openxades.digidoc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.cert.X509Certificate;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
-import java.math.BigInteger;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
-import sun.security.pkcs.SignerInfo;
-import sun.security.timestamp.TSResponse;
-import sun.security.timestamp.TimestampToken;
+import es.uji.security.crypto.timestamp.TSResponse;
+import es.uji.security.crypto.timestamp.TimestampToken;
 
 //import org.bouncycastle.cms.SignerId;
 //import org.bouncycastle.cms.CMSSignedData;

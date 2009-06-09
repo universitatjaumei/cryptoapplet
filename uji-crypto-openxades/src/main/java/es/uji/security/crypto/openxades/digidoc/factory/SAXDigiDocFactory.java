@@ -38,7 +38,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import sun.security.timestamp.TSResponseFactory;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.CertID;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
@@ -61,6 +60,7 @@ import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.UnsignedProperties;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.crypto.timestamp.TSResponse;
 
 /**
  * SAX implementation of DigiDocFactory Provides methods for reading a DigiDoc file
@@ -1679,7 +1679,8 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 
                 try
                 {
-                    ts.setTimeStampResponse(TSResponseFactory.getTSResponseInstance(Base64Util.decode(m_sbCollectItem.toString())));
+                    TSResponse response = new TSResponse(Base64Util.decode(m_sbCollectItem.toString()));
+                    ts.setTimeStampResponse(response);
                 }
                 catch (IOException ex)
                 {

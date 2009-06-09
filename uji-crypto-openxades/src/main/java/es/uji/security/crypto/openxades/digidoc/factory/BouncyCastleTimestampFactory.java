@@ -27,13 +27,13 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import sun.security.timestamp.TSResponse;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
+import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 
