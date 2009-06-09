@@ -46,25 +46,10 @@
 
 package es.uji.security.crypto.timestamp;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.SimpleTimeZone;
-
-import javax.crypto.Cipher;
-
-import sun.security.timestamp.HttpTimestamper;
-import sun.security.timestamp.TSRequest;
-import sun.security.timestamp.TSResponse;
-import es.uji.security.util.asn1.DERObjectIdentifier;
 
 public class TimeStampFactory
 {

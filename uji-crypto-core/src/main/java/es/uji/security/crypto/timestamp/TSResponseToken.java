@@ -15,7 +15,6 @@ import java.util.SimpleTimeZone;
 
 import javax.crypto.Cipher;
 
-import sun.security.timestamp.TSResponse;
 import es.uji.security.util.asn1.DERObjectIdentifier;
 
 public class TSResponseToken
