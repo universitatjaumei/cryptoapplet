@@ -15,13 +15,13 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.keystore.IKeyStore;
 
 
-public class SunMsCapiKeyStore implements IKeyStoreHelper
+public class SunMsCapiKeyStore implements IKeyStore
 {
 	private KeyStore _mscapi;
-	private Logger log = Logger.getLogger(SunMsCapiKeyStore.class);
 
 	public SunMsCapiKeyStore()
 	{
@@ -35,12 +35,11 @@ public class SunMsCapiKeyStore implements IKeyStoreHelper
 
 	public String getAliasFromCertificate(Certificate cer) throws KeyStoreException
 	{
-
 		X509Certificate xcer = (X509Certificate) cer, auxCer = null;
 		String auxAlias = null;
-		Enumeration e;
 
-		e = _mscapi.aliases();
+		Enumeration<String> e = _mscapi.aliases();
+		
 		while (e.hasMoreElements())
 		{
 			auxAlias = (String) e.nextElement();
@@ -62,7 +61,7 @@ public class SunMsCapiKeyStore implements IKeyStoreHelper
 		// log.debug("loading .load(), doing nothing");
 	}
 
-	public Enumeration aliases() throws KeyStoreException, Exception
+	public Enumeration<String> aliases() throws KeyStoreException, Exception
 	{
 		return _mscapi.aliases();
 	}
@@ -77,7 +76,7 @@ public class SunMsCapiKeyStore implements IKeyStoreHelper
 		Vector<Certificate> certs = new Vector<Certificate>();
 		Certificate tmp_cert;
 
-		for (Enumeration e = this.aliases(); e.hasMoreElements();)
+		for (Enumeration<String> e = this.aliases(); e.hasMoreElements();)
 		{
 			tmp_cert = this.getCertificate((String) e.nextElement());
 			certs.add(tmp_cert);
@@ -108,9 +107,9 @@ public class SunMsCapiKeyStore implements IKeyStoreHelper
 		return b;
 	}
 
-	public String getName()
+	public SupportedKeystore getName()
 	{
-		return IKeyStoreHelper.MSCAPI_KEY_STORE;
+		return SupportedKeystore.MSCAPI;
 	}
 
 	public String getTokenName()

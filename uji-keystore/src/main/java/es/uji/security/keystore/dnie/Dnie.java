@@ -17,7 +17,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -86,15 +86,15 @@ public class Dnie
      * we can rely on CryptoAPI to deal with this. Nothing happens if it is not plugged.
      */
     
-    public IKeyStoreHelper initDnie(char[] password) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, Exception
+    public IKeyStore initDnie(char[] password) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, Exception
     {
-        IKeyStoreHelper keystoreDNIe = null;
+        IKeyStore keystoreDNIe = null;
         
         Dnie dnie = new Dnie();
 
         if (dnie.isPresent())
         {
-            keystoreDNIe = (IKeyStoreHelper) new PKCS11KeyStore(dnie.getDnieConfigInputStream(), null, false);
+            keystoreDNIe = (IKeyStore) new PKCS11KeyStore(dnie.getDnieConfigInputStream(), null, false);
             
             // We let then three password attempts
             for (int i = 0; i < 3; i++)

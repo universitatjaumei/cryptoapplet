@@ -1,20 +1,16 @@
 package es.uji.security.keystore.mozilla;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.security.Provider;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import java.security.Key;
 import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.Security;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -22,11 +18,12 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Random;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.keystore.IKeyStore;
 import es.uji.security.util.OS;
 import es.uji.security.util.RegQuery;
 
-public class MozillaKeyStore implements IKeyStoreHelper
+public class MozillaKeyStore implements IKeyStore
 {
     private Mozilla _mozilla;
     private String _pkcs11file;
@@ -122,14 +119,15 @@ public class MozillaKeyStore implements IKeyStoreHelper
         }
     }
 
-    public Enumeration aliases() throws KeyStoreException, Exception
+    public Enumeration<String> aliases() throws KeyStoreException, Exception
     {
         if (!_initialized)
         {
             throw (new Exception("UninitializedKeyStore"));
         }
 
-        Enumeration e = _mozillaKeyStore.aliases();
+        Enumeration<String> e = _mozillaKeyStore.aliases();
+        
         while (e.hasMoreElements())
         {
             System.out.println("Alias: " + e.nextElement());
@@ -139,7 +137,6 @@ public class MozillaKeyStore implements IKeyStoreHelper
 
     public String getAliasFromCertificate(Certificate cer) throws Exception
     {
-
         if (!_initialized)
         {
             throw (new Exception("UninitializedKeyStore"));
@@ -147,9 +144,9 @@ public class MozillaKeyStore implements IKeyStoreHelper
 
         X509Certificate xcer = (X509Certificate) cer, auxCer = null;
         String auxAlias = null;
-        Enumeration e;
 
-        e = _mozillaKeyStore.aliases();
+        Enumeration<String> e = _mozillaKeyStore.aliases();
+        
         while (e.hasMoreElements())
         {
             auxAlias = (String) e.nextElement();
@@ -207,9 +204,9 @@ public class MozillaKeyStore implements IKeyStoreHelper
         return res;
     }
 
-    public String getName()
+    public SupportedKeystore getName()
     {
-        return IKeyStoreHelper.MOZILLA_KEY_STORE;
+        return SupportedKeystore.MOZILLA;
     }
 
     public String getTokenName()

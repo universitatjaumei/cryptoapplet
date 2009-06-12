@@ -17,10 +17,11 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.openoces.opensign.wrappers.microsoftcryptoapi.MicrosoftCryptoApi;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.keystore.IKeyStore;
 
 
-public class MsCapiKeyStore implements IKeyStoreHelper
+public class MsCapiKeyStore implements IKeyStore
 {
     private MicrosoftCryptoApi _mscapi;
     private Logger log = Logger.getLogger(MsCapiKeyStore.class);
@@ -250,9 +251,9 @@ public class MsCapiKeyStore implements IKeyStoreHelper
         return null;
     }
 
-    public String getName()
+    public SupportedKeystore getName()
     {
-        return IKeyStoreHelper.MSCAPI_KEY_STORE;
+        return SupportedKeystore.MSCAPI;
     }
 
     public String getTokenName()

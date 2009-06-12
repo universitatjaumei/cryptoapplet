@@ -9,29 +9,14 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
 
-/**
- * <pre>
- *  Keystores interface, by the time we support:
- *    Mozilla native certificate store.
- *    Microsoft CryptoApi native store.
- *    Clauer store (work in progress).
- * </pre>
- * 
- * @author PSN
- */
+import es.uji.security.crypto.SupportedKeystore;
 
-public interface IKeyStoreHelper
+public interface IKeyStore
 {
-    public static final String MOZILLA_KEY_STORE = "MozillaKeyStore";
-    public static final String CLAUER_KEY_STORE = "ClauerKeyStore";
-    public static final String MSCAPI_KEY_STORE = "MSCapiKeyStore";
-    public static final String PKCS12_KEY_STORE = "PKCS12KeyStore";
-    public static final String PKCS11_KEY_STORE = "PKCS11KeyStore";
-
     public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
             CertificateException, Exception;
 
-    public Enumeration aliases() throws KeyStoreException, Exception;
+    public Enumeration<String> aliases() throws KeyStoreException, Exception;
 
     public Certificate getCertificate(String alias) throws KeyStoreException, Exception;
 
@@ -43,7 +28,7 @@ public interface IKeyStoreHelper
 
     public Provider getProvider();
 
-    public String getName();
+    public SupportedKeystore getName();
 
     public String getTokenName();
 
