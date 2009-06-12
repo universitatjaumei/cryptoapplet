@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
@@ -30,6 +33,7 @@ public class OpenXAdESSignatureVerifier
 
             URL url = new URL(strUrl);
             URLConnection uc = url.openConnection();
+            uc.setUseCaches(false);
             uc.connect();
             InputStream in = uc.getInputStream();
             return verify(in);
@@ -43,7 +47,8 @@ public class OpenXAdESSignatureVerifier
 
     public String[] verify(InputStream in)
     {
-
+    	//Logger.getRootLogger().setLevel(Level.OFF);
+    
         try
         {
             Properties prop = ConfigHandler.getProperties();
@@ -53,19 +58,18 @@ public class OpenXAdESSignatureVerifier
             }
             else
             {
-                return null;
+            	return new String[] { "Invalid Server configuration." };
             }
-
             DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
             SignedDoc sdoc = digFac.readSignedDoc(in);
-
             Signature sig;
+            
             boolean confirmation = ConfigManager.instance().getProperty(
                     "DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY").equals("true");
+    
             boolean isvalid = true;
             Vector<String> outErrs = new Vector<String>();
-
-            System.out.println("Let's go!");
+           
             for (int i = 0; i < sdoc.countSignatures(); i++)
             {
                 sig = sdoc.getSignature(i);
@@ -84,7 +88,7 @@ public class OpenXAdESSignatureVerifier
             }
             if (sdoc.countSignatures() == 0)
             {
-                return new String[] { "No signatures found" };
+            	return new String[] { "No signatures found" };
             }
             else if (isvalid)
             {

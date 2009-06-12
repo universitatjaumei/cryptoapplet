@@ -25,11 +25,12 @@ public class ParamInputData extends AbstractData implements InputParams
     public byte[] getSignData() throws Exception
     {
 
-        byte[] ret = this.str_in[_current].getBytes();
+    	System.out.println("Current= " + _current);
+    	byte[] ret = this.str_in[_current].getBytes();
 
         if (mustHash)
             ret = AbstractData.getMessageDigest(ret);
-
+ 
         _current++;
 
         return ret;

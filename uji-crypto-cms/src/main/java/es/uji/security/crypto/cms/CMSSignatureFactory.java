@@ -59,7 +59,7 @@ public class CMSSignatureFactory implements ISignFormatProvider
         certList.add(sCer);
 
         CertStore certst = CertStore.getInstance("Collection", new CollectionCertStoreParameters(
-                certList), pv);
+                certList));
 
         gen.addCertificatesAndCRLs(certst);
 

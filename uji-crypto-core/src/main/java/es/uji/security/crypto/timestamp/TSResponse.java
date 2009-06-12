@@ -7,6 +7,7 @@
 
 package es.uji.security.crypto.timestamp;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import sun.security.pkcs.PKCS7;
@@ -305,9 +306,9 @@ public class TSResponse {
 	    throw new IOException("Bad encoding for timestamp response");
 	}
 
-        // Parse status
-
+    // Parse status
 	DerValue status = derValue.data.getDerValue();
+	
 	// Parse status
 	this.status = status.data.getInteger();
 	if (DEBUG) {

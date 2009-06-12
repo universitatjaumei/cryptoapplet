@@ -23,13 +23,13 @@ public class Test
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
 
-        // Cargando certificado de aplicación
+        // Cargando certificado de aplicaciï¿½n
         KeyStore keystore = KeyStore.getInstance("PKCS12");
-        keystore.load(new FileInputStream("/mnt/data/oracle/OraHome1/Apache/Apache/recursos-uji/certificados-uji/eujier.p12"), "Heroes2000".toCharArray());
+        keystore.load(new FileInputStream("/tmp/x.p12"), "here your pwd".toCharArray());
 
         // Recuperando clave privada para firmar
-        Certificate certificate = keystore.getCertificate("eujier");
-        Key key = keystore.getKey("eujier", "Heroes2000".toCharArray());
+        Certificate certificate = keystore.getCertificate(keystore.aliases().nextElement());
+        Key key = keystore.getKey(keystore.aliases().nextElement(), "here your pwd".toCharArray());
 
         byte[] data = "<root />".getBytes();
 
@@ -44,10 +44,10 @@ public class Test
 
         byte[] signedData = signFormatProvider.formatSignature(signatureOptions);
 
-        OS.dumpToFile("src/main/resources/signed-output.xml", signedData);
+        OS.dumpToFile("/tmp/signed-output.xml", signedData);
         
         OpenXAdESSignatureVerifier verifier = new OpenXAdESSignatureVerifier();
-        String[] result = verifier.verify(new FileInputStream("src/main/resources/signed-output.xml"));
+        String[] result = verifier.verify(new FileInputStream("/tmp/signed-output.xml"));
         
         if (result != null && result.length > 0)
         {

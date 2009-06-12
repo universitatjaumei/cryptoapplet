@@ -1679,7 +1679,10 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 
                 try
                 {
-                    TSResponse response = new TSResponse(Base64Util.decode(m_sbCollectItem.toString()));
+                	byte[] resp= Base64Util.decode(m_sbCollectItem.toString());
+                
+                	
+                	TSResponse response = new TSResponse(resp);
                     ts.setTimeStampResponse(response);
                 }
                 catch (IOException ex)

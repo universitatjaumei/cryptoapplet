@@ -21,11 +21,15 @@
 
 package es.uji.security.crypto.openxades.digidoc.utils;
 
-import java.util.Properties;
-import java.util.Hashtable;
-import java.io.InputStream;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Hashtable;
+import java.util.Properties;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
@@ -35,10 +39,6 @@ import es.uji.security.crypto.openxades.digidoc.factory.SignatureFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.TimestampFactory;
 import es.uji.security.crypto.openxades.digidoc.xmlenc.factory.EncryptedDataParser;
 import es.uji.security.crypto.openxades.digidoc.xmlenc.factory.EncryptedStreamParser;
-
-// Logging classes
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.Logger;
 
 /**
  * Configuration reader for JDigiDoc
