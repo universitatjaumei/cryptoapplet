@@ -2,7 +2,7 @@ package es.uji.security.crypto;
 
 public enum SupportedKeystore
 {
-    IEXPLORER,
+    MSCAPI,
     MOZILLA,
     CLAUER,
     PKCS11,
