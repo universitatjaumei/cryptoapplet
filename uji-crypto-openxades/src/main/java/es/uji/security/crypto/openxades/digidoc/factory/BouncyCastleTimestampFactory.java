@@ -20,6 +20,7 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
         byte[] messageImp = null;
 
         try
-        {
+        {      	
             TSResponseToken tsResponseToken = new TSResponseToken(ts.getTimeStampResponse());            
             messageImp = tsResponseToken.getMessageImprint();
 

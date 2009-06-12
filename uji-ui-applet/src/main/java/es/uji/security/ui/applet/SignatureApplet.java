@@ -113,86 +113,88 @@ public class SignatureApplet extends JApplet
     
     private void initializeWindow()
     {
-        try
-        {
-            if (window == null)
-            {
-                if (! this.apph.getNavigator().equals(SupportedBrowser.IEXPLORER))
-                {
-                    PasswordPrompt pp = new PasswordPrompt(null, LabelManager.get("DNIE_PASSWORD_TITLE"), 
-                            LabelManager.get("DNIE_PIN"));
+    	try
+    	{
+    		if (window == null)
+    		{
+    			if (! this.apph.getNavigator().equals(SupportedBrowser.IEXPLORER))
+    			{
+    			
+    				Dnie dnie = new Dnie();
+    				if (dnie.isPresent()){
+    					PasswordPrompt pp = new PasswordPrompt(null, LabelManager.get("DNIE_PASSWORD_TITLE"), 
+    							LabelManager.get("DNIE_PIN"));
 
-                    Dnie dnie = new Dnie();
-                    
-                    try
-                    {
-                        IKeyStore keystoreDNIe = dnie.initDnie(pp.getPassword());
-                        this.keyStoreManager.addP11KeyStore(keystoreDNIe);                
-                    }
-                    catch (Exception e)
-                    {
-                        ByteArrayOutputStream os = new ByteArrayOutputStream();
-                        PrintStream ps = new PrintStream(os);
-                        e.printStackTrace(ps);
-                        String stk = new String(os.toByteArray()).toLowerCase();
+    					try
+    					{
+    						IKeyStore keystoreDNIe = dnie.initDnie(pp.getPassword());
+    						this.keyStoreManager.addP11KeyStore(keystoreDNIe);                
+    					}
+    					catch (Exception e)
+    					{
+    						ByteArrayOutputStream os = new ByteArrayOutputStream();
+    						PrintStream ps = new PrintStream(os);
+    						e.printStackTrace(ps);
+    						String stk = new String(os.toByteArray()).toLowerCase();
 
-                        e.printStackTrace();
+    						e.printStackTrace();
 
-                        if (stk.indexOf("incorrect") > -1)
-                        {
-                            JOptionPane.showMessageDialog(null, LabelManager
-                                    .get("ERROR_INCORRECT_DNIE_PWD"), "",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
-                        else
-                        {
-                            JOptionPane.showMessageDialog(null, LabelManager
-                                    .get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }            
-                }
+    						if (stk.indexOf("incorrect") > -1)
+    						{
+    							JOptionPane.showMessageDialog(null, LabelManager
+    									.get("ERROR_INCORRECT_DNIE_PWD"), "",
+    									JOptionPane.ERROR_MESSAGE);
+    						}
+    						else
+    						{
+    							JOptionPane.showMessageDialog(null, LabelManager
+    									.get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
+    						}
+    					}
+    				}
+    			}
 
-                window = new MainWindow(this.keyStoreManager, this.apph);
-            }
-            else
-            {
-                window.getPasswordTextField().setText("");
-                window.getGlobalProgressBar().setValue(0);
-                window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
-                
-                this.keyStoreManager.flushKeyStoresTable();
-                this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
-                
-                window.reloadCertificateJTree();
-                window.getMainFrame().setVisible(true);
-                window.getShowSignatureCheckBox().setVisible(true);
-            }
-        }
-        catch (SignatureAppletException ex)
-        {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-            netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(),
-                    new String[] { "" });
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-            netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(),
-                    new String[] { "" });
-        }
+    			window = new MainWindow(this.keyStoreManager, this.apph);
+    		}
+    		else
+    		{
+    			window.getPasswordTextField().setText("");
+    			window.getGlobalProgressBar().setValue(0);
+    			window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
 
-        try
-        {
+    			this.keyStoreManager.flushKeyStoresTable();
+    			this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
 
-            netscape.javascript.JSObject.getWindow(this).call(apph.getJsWindowShow(),
-                    new String[] { "" });
-        }
-        catch (netscape.javascript.JSException e)
-        {
-            // Perhaps the function does not exists
-        }
+    			window.reloadCertificateJTree();
+    			window.getMainFrame().setVisible(true);
+    			window.getShowSignatureCheckBox().setVisible(true);
+    		}
+    	}
+    	catch (SignatureAppletException ex)
+    	{
+    		ex.printStackTrace();
+    		JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+    		netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(),
+    				new String[] { "" });
+    	}
+    	catch (Exception ex)
+    	{
+    		ex.printStackTrace();
+    		JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+    		netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(),
+    				new String[] { "" });
+    	}
+
+    	try
+    	{
+
+    		netscape.javascript.JSObject.getWindow(this).call(apph.getJsWindowShow(),
+    				new String[] { "" });
+    	}
+    	catch (netscape.javascript.JSException e)
+    	{
+    		// Perhaps the function does not exists
+    	}
     }
 
     /**

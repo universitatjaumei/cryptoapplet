@@ -9,6 +9,7 @@ package es.uji.security.crypto.timestamp;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -62,7 +63,7 @@ public class HttpTimestamper implements Timestamper
      * @throws IOException
      *             The exception is thrown if a problem occurs while communicating with the TSA.
      */
-    public TSResponse generateTimestamp(TSRequest tsQuery) throws IOException
+    public byte[] generateTimestampAsByteArray(TSRequest tsQuery) throws IOException
     {
         HttpURLConnection connection = (HttpURLConnection) new URL(tsaUrl).openConnection();
         connection.setDoOutput(true);
@@ -131,9 +132,15 @@ public class HttpTimestamper implements Timestamper
         }
 
         input.close();
-        return new TSResponse(replyBuffer);
+        
+        return replyBuffer;
     }
 
+    public TSResponse  generateTimestamp(TSRequest tsQuery) throws IOException
+    {
+      return new TSResponse(generateTimestampAsByteArray(tsQuery));
+    }
+    
     /*
      * Checks that the MIME content type is a timestamp reply.
      * 

@@ -31,6 +31,7 @@ import java.io.DataInputStream;
 import java.io.InputStream; //import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -42,6 +43,7 @@ import javax.crypto.Cipher;
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
+import es.uji.security.util.ConfigHandler;
 
 /**
  * Represents an instance of signed doc in DIGIDOC format. Contains one or more DataFile -s and zero
@@ -986,6 +988,16 @@ public class SignedDoc implements Serializable
             {
                 ClassLoader cl = ConfigManager.instance().getClass().getClassLoader();
                 isCert = cl.getResourceAsStream(certLocation.substring(6));
+            }
+            else if (certLocation.startsWith("keystore://"))
+            {
+                ClassLoader cl = ConfigManager.instance().getClass().getClassLoader();
+                isCert = cl.getResourceAsStream(ConfigHandler.getProperty("DEFAULT_KEYSTORE"));
+                
+                String str_cert= certLocation.substring(11);
+                KeyStore ks= KeyStore.getInstance("JKS");
+                
+                return (X509Certificate) ks.getCertificate(str_cert);                 
             }
             else
             {

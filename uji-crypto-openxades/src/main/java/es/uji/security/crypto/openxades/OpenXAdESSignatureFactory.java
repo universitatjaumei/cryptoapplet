@@ -10,6 +10,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.crypto.timestamp.TSResponse;
+import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
@@ -19,7 +21,6 @@ import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
-import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
@@ -148,10 +149,12 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue,
                     true);
 
+            TSResponseToken responseToken= new TSResponseToken(response);
+            
             TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
             ts.setTimeStampResponse(response);
             ts.setSignature(sig);
-            ts.setHash(response.getToken().getContentInfo().getContentBytes());
+            ts.setHash(responseToken.getMessageImprint());
 
             sig.addTimestampInfo(ts);
 
@@ -212,11 +215,12 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
                     completeCertificateRefs.length, completeRevocationRefs.length);
 
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
-
+            TSResponseToken responseToken= new TSResponseToken(response);
+            
             TimestampInfo ts = new TimestampInfo("TS2", TimestampInfo.TIMESTAMP_TYPE_REFS_ONLY);
             ts.setTimeStampResponse(response);
             ts.setSignature(sig);
-            ts.setHash(response.getToken().getContentInfo().getContentBytes());
+            ts.setHash(responseToken.getMessageImprint());
 
             sig.addTimestampInfo(ts);
 
