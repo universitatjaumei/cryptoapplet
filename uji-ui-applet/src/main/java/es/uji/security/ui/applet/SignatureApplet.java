@@ -16,7 +16,7 @@ import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.keystore.dnie.Dnie;
 import es.uji.security.ui.applet.io.ConsoleOutputParams;
@@ -126,7 +126,7 @@ public class SignatureApplet extends JApplet
                     
                     try
                     {
-                        IKeyStoreHelper keystoreDNIe = dnie.initDnie(pp.getPassword());
+                        IKeyStore keystoreDNIe = dnie.initDnie(pp.getPassword());
                         this.keyStoreManager.addP11KeyStore(keystoreDNIe);                
                     }
                     catch (Exception e)

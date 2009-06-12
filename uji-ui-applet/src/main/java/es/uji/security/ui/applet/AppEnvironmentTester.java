@@ -21,7 +21,7 @@ import javax.swing.JTextArea;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.util.ConfigHandler;
 
@@ -372,7 +372,7 @@ public class AppEnvironmentTester extends Thread
         {
             caption("User Certificates, you must check that the Issuer of your certificate is like any\nof the Subjects in allowed certificates section");
             String strinfo = "User Certificates detected: \n\n";
-            for (IKeyStoreHelper ikh : this.keyStoreManager.getKeyStoreTable().values())
+            for (IKeyStore ikh : this.keyStoreManager.getKeyStoreTable().values())
             {
                 for (Certificate c : ikh.getUserCertificates())
                 {

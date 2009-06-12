@@ -18,7 +18,7 @@ import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.openxades.OpenXAdESCoSignatureFactory;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
@@ -60,7 +60,7 @@ public class SignatureThread extends Thread
     public void run()
     {
 
-        IKeyStoreHelper iksh;
+        IKeyStore iksh;
         guiInitialize();
         JLabel infoLabelField = _mw.getInformationLabelField();
 
@@ -251,7 +251,7 @@ public class SignatureThread extends Thread
 
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 6 * inc);
 
-                    IKeyStoreHelper kAux = xcert.getKeyStore();
+                    IKeyStore kAux = xcert.getKeyStore();
 
                     try
                     {
