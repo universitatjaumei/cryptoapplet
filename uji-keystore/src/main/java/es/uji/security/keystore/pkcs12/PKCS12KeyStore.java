@@ -15,9 +15,10 @@ import java.util.Vector;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.keystore.IKeyStore;
 
-public class PKCS12KeyStore implements IKeyStoreHelper
+public class PKCS12KeyStore implements IKeyStore
 {
     private KeyStore ks = null;
     char[] _pin = null;
@@ -36,7 +37,7 @@ public class PKCS12KeyStore implements IKeyStoreHelper
         _pin = pin;
     }
 
-    public Enumeration aliases() throws KeyStoreException, Exception
+    public Enumeration<String> aliases() throws KeyStoreException, Exception
     {
         return ks.aliases();
     }
@@ -51,7 +52,7 @@ public class PKCS12KeyStore implements IKeyStoreHelper
         Vector<Certificate> certs = new Vector<Certificate>();
         Certificate tmp_cert;
 
-        for (Enumeration e = this.aliases(); e.hasMoreElements();)
+        for (Enumeration<String> e = this.aliases(); e.hasMoreElements();)
         {
             tmp_cert = this.getCertificate((String) e.nextElement());
             certs.add(tmp_cert);
@@ -73,9 +74,9 @@ public class PKCS12KeyStore implements IKeyStoreHelper
         return new BouncyCastleProvider();
     }
 
-    public String getName()
+    public SupportedKeystore getName()
     {
-        return IKeyStoreHelper.PKCS12_KEY_STORE;
+        return SupportedKeystore.PKCS12;
     }
 
     public String getTokenName()
@@ -85,12 +86,11 @@ public class PKCS12KeyStore implements IKeyStoreHelper
 
     public String getAliasFromCertificate(Certificate cer) throws KeyStoreException
     {
-
         X509Certificate xcer = (X509Certificate) cer, auxCer = null;
         String auxAlias = null;
-        Enumeration e;
 
-        e = ks.aliases();
+        Enumeration<String> e = ks.aliases();
+        
         while (e.hasMoreElements())
         {
             auxAlias = (String) e.nextElement();

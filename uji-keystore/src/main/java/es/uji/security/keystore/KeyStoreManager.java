@@ -16,7 +16,7 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class KeyStoreManager
 {
-    public Hashtable<SupportedKeystore, IKeyStoreHelper> keystores = new Hashtable<SupportedKeystore, IKeyStoreHelper>();
+    public Hashtable<SupportedKeystore, IKeyStore> keystores = new Hashtable<SupportedKeystore, IKeyStore>();
     
     /**
      * Flushes the KeyStore Hashtable
@@ -42,12 +42,12 @@ public class KeyStoreManager
         if (navigator.equals(SupportedBrowser.IEXPLORER))
         {
             /* Explorer Keystore */
-            IKeyStoreHelper explorerks = (IKeyStoreHelper) new MsCapiKeyStore();
+            IKeyStore explorerks = (IKeyStore) new MsCapiKeyStore();
 
             try
             {
                 explorerks.load("".toCharArray());
-                keystores.put(SupportedKeystore.IEXPLORER, explorerks);
+                keystores.put(SupportedKeystore.MSCAPI, explorerks);
             }
             catch (Exception ex)
             {
@@ -67,7 +67,7 @@ public class KeyStoreManager
                 
                 if (mozilla.isInitialized())
                 {
-                    IKeyStoreHelper p11mozillaks = (IKeyStoreHelper) new PKCS11KeyStore(mozilla
+                    IKeyStore p11mozillaks = (IKeyStore) new PKCS11KeyStore(mozilla
                             .getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(), mozilla
                             .getPkcs11InitArgsString());
                     p11mozillaks.load(null);
@@ -89,7 +89,7 @@ public class KeyStoreManager
             try
             {
 
-                IKeyStoreHelper p11clauerks = (IKeyStoreHelper) new ClauerKeyStore();
+                IKeyStore p11clauerks = (IKeyStore) new ClauerKeyStore();
                 try
                 {
                     p11clauerks.load(null);
@@ -125,7 +125,7 @@ public class KeyStoreManager
      * @return the IkeyStoreHelper object
      */
     
-    public IKeyStoreHelper getKeyStore(SupportedKeystore keystore)
+    public IKeyStore getKeyStore(SupportedKeystore keystore)
     {
         return this.keystores.get(keystore);
     }
@@ -138,7 +138,7 @@ public class KeyStoreManager
      * @return the IkeyStoreHelper object
      */
     
-    public Hashtable<SupportedKeystore, IKeyStoreHelper> getKeyStoreTable()
+    public Hashtable<SupportedKeystore, IKeyStore> getKeyStoreTable()
     {
         return this.keystores;
     }
@@ -147,7 +147,7 @@ public class KeyStoreManager
      * Add a new loaded and authenticated PKCS12 keyStore to the hash table
      */
     
-    public void addP12KeyStore(IKeyStoreHelper pkcs12Store)
+    public void addP12KeyStore(IKeyStore pkcs12Store)
     {
         keystores.put(SupportedKeystore.PKCS12, pkcs12Store);
     }    
@@ -158,7 +158,7 @@ public class KeyStoreManager
      * that will allow to load pkcs#11
      */
     
-    public void addP11KeyStore(IKeyStoreHelper pkcs11Store)
+    public void addP11KeyStore(IKeyStore pkcs11Store)
     {
         keystores.put(SupportedKeystore.PKCS11, pkcs11Store);
     }    

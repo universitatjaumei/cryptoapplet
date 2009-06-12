@@ -14,9 +14,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.keystore.IKeyStore;
 
-public class ClauerKeyStore implements IKeyStoreHelper
+public class ClauerKeyStore implements IKeyStore
 {
     private Clauer cl = new Clauer();
     private ClauerRunTime clr = new ClauerRunTime();
@@ -66,7 +67,7 @@ public class ClauerKeyStore implements IKeyStoreHelper
         }
     }
 
-    public Enumeration aliases() throws KeyStoreException, Exception
+    public Enumeration<String> aliases() throws KeyStoreException, Exception
     {
         Vector<String> vs = new Vector<String>();
 
@@ -126,7 +127,7 @@ public class ClauerKeyStore implements IKeyStoreHelper
         Vector<Certificate> certs = new Vector<Certificate>();
         Certificate tmp_cert;
 
-        for (Enumeration e = this.aliases(); e.hasMoreElements();)
+        for (Enumeration<String> e = this.aliases(); e.hasMoreElements();)
         {
             tmp_cert = this.getCertificate((String) e.nextElement());
             certs.add(tmp_cert);
@@ -163,9 +164,9 @@ public class ClauerKeyStore implements IKeyStoreHelper
         return b;
     }
 
-    public String getName()
+    public SupportedKeystore getName()
     {
-        return IKeyStoreHelper.CLAUER_KEY_STORE;
+        return SupportedKeystore.CLAUER;
     }
 
     public String getTokenName()

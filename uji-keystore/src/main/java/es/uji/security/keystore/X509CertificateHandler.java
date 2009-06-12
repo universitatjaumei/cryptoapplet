@@ -7,7 +7,8 @@ import java.security.cert.CertificateParsingException;
 import java.util.List;
 import java.util.Iterator;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.keystore.IKeyStore;
 
 /**
  * _keyUsage is a boolean array where positions are:
@@ -23,11 +24,12 @@ public class X509CertificateHandler
     private String _IssuerDN;
     private String _IssuerOrganization;
     private String _alias;
-    private String _storeName, _tokenName;
+    private SupportedKeystore _storeName;
+    private String _tokenName;
     private Provider _provider;
-    private List _extKeyUsage;
+    private List<String> _extKeyUsage;
     private X509Certificate _xcer = null;
-    private IKeyStoreHelper _iksh = null;
+    private IKeyStore _iksh = null;
 
     boolean[] _keyUsage;
     boolean _emailProtection = false;
@@ -36,7 +38,7 @@ public class X509CertificateHandler
             "dataEncipherment", "keyAgreement", "keycertSign", "CRLSign", "encipherOnly",
             "decipherOnly", };
 
-    public X509CertificateHandler(X509Certificate xcer, String alias, IKeyStoreHelper iksh)
+    public X509CertificateHandler(X509Certificate xcer, String alias, IKeyStore iksh)
             throws CertificateParsingException
     {
         _iksh = iksh;
@@ -45,14 +47,14 @@ public class X509CertificateHandler
     }
 
     public X509CertificateHandler(X509Certificate xcer, String alias, Provider provider,
-            String storeName, String tokenName) throws CertificateParsingException
+            SupportedKeystore storeName, String tokenName) throws CertificateParsingException
     {
         _iksh = null;
         initialize(xcer, alias, provider, storeName, tokenName);
 
     }
 
-    public void initialize(X509Certificate xcer, String alias, Provider provider, String storeName,
+    public void initialize(X509Certificate xcer, String alias, Provider provider, SupportedKeystore storeName,
             String tokenName) throws CertificateParsingException
     {
         String auxStr;
@@ -166,12 +168,10 @@ public class X509CertificateHandler
 
         if (_extKeyUsage != null)
         {
-
-            Iterator iter = _extKeyUsage.iterator();
-
-            while (iter.hasNext())
-                auxStr += (String) iter.next() + ", ";
-
+            for (String u : _extKeyUsage)
+            {
+                 auxStr += u + ", ";
+            }
         }
 
         auxStr = auxStr.substring(0, auxStr.length() - 2);
@@ -202,14 +202,13 @@ public class X509CertificateHandler
 
         if (_extKeyUsage != null)
         {
-
-            Iterator iter = _extKeyUsage.iterator();
-
-            while (iter.hasNext())
-                // auxStr += (String) iter.next() + ", ";
-                if (((String) iter.next()).equals("1.3.6.1.5.5.7.3.2"))
+            for (String u : _extKeyUsage)
+            {
+                if (u.equals("1.3.6.1.5.5.7.3.2"))
+                {
                     _emailProtection = true;
-
+                }
+            }
         }
 
         return auxStr;
@@ -239,7 +238,7 @@ public class X509CertificateHandler
     public boolean isPKCS11Provider()
     {
         System.out.println("STORE: " + getStoreName());
-        if (getStoreName().equals(IKeyStoreHelper.PKCS11_KEY_STORE))
+        if (getStoreName().equals(SupportedKeystore.PKCS11))
         {
             return true;
         }
@@ -254,7 +253,7 @@ public class X509CertificateHandler
      */
     public boolean isClauerProvider()
     {
-        if (getStoreName().equals(IKeyStoreHelper.CLAUER_KEY_STORE))
+        if (getStoreName().equals(SupportedKeystore.CLAUER))
         {
             return true;
         }
@@ -264,12 +263,12 @@ public class X509CertificateHandler
         }
     }
 
-    public IKeyStoreHelper getKeyStore()
+    public IKeyStore getKeyStore()
     {
         return _iksh;
     }
 
-    public String getStoreName()
+    public SupportedKeystore getStoreName()
     {
         return _storeName;
     }

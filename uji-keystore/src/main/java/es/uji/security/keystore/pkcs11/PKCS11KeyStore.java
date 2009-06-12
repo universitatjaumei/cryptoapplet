@@ -1,24 +1,24 @@
 package es.uji.security.keystore.pkcs11;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
-import java.security.KeyStoreException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import es.uji.security.keystore.IKeyStoreHelper;
+import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.keystore.IKeyStore;
 
-public class PKCS11KeyStore implements IKeyStoreHelper
+public class PKCS11KeyStore implements IKeyStore
 {
     InputStream _isP11Config = null;
     char[] _pin = null;
@@ -111,7 +111,7 @@ public class PKCS11KeyStore implements IKeyStoreHelper
         load(inStream, pin);
     }
 
-    public Enumeration aliases() throws KeyStoreException, Exception
+    public Enumeration<String> aliases() throws KeyStoreException, Exception
     {
 
         if (!privateInitialize)
@@ -138,7 +138,7 @@ public class PKCS11KeyStore implements IKeyStoreHelper
             Vector<Certificate> certs = new Vector<Certificate>();
             Certificate tmp_cert;
 
-            for (Enumeration e = this.aliases(); e.hasMoreElements();)
+            for (Enumeration<String> e = this.aliases(); e.hasMoreElements();)
             {
                 tmp_cert = this.getCertificate((String) e.nextElement());
                 certs.add(tmp_cert);
@@ -153,14 +153,13 @@ public class PKCS11KeyStore implements IKeyStoreHelper
 
     public String getAliasFromCertificate(Certificate cer) throws KeyStoreException
     {
-
         X509Certificate xcer = (X509Certificate) cer, auxCer = null;
         String auxAlias = null;
-        Enumeration e;
 
         if (privateInitialize)
         {
-            e = _p11KeyStore.aliases();
+            Enumeration<String> e = _p11KeyStore.aliases();
+            
             while (e.hasMoreElements())
             {
                 auxAlias = (String) e.nextElement();
@@ -187,9 +186,9 @@ public class PKCS11KeyStore implements IKeyStoreHelper
         return _pk11provider;
     }
 
-    public String getName()
+    public SupportedKeystore getName()
     {
-        return IKeyStoreHelper.PKCS11_KEY_STORE;
+        return SupportedKeystore.PKCS11;
     }
 
     public String getTokenName()
