@@ -20,16 +20,18 @@ public class Test
 {
     public static void main(String[] args) throws Exception
     {
+    	String pwd= "Here your pwd";
+    	
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
 
         // Cargando certificado de aplicaci�n
         KeyStore keystore = KeyStore.getInstance("PKCS12");
-        keystore.load(new FileInputStream("/tmp/x.p12"), "here your pwd".toCharArray());
+        keystore.load(new FileInputStream("/home/paul/tmp/mio.p12"), pwd.toCharArray());
 
         // Recuperando clave privada para firmar
         Certificate certificate = keystore.getCertificate(keystore.aliases().nextElement());
-        Key key = keystore.getKey(keystore.aliases().nextElement(), "here your pwd".toCharArray());
+        Key key = keystore.getKey(keystore.aliases().nextElement(), pwd.toCharArray());
 
         byte[] data = "<root />".getBytes();
 
@@ -44,6 +46,7 @@ public class Test
 
         byte[] signedData = signFormatProvider.formatSignature(signatureOptions);
 
+        
         OS.dumpToFile("/tmp/signed-output.xml", signedData);
         
         OpenXAdESSignatureVerifier verifier = new OpenXAdESSignatureVerifier();

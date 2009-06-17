@@ -22,6 +22,7 @@
 package es.uji.security.crypto.openxades.digidoc.factory;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -72,7 +73,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
 {
     private Stack m_tags;
     private SignedDoc m_doc;
-    private String m_strSigValTs, m_strSigAndRefsTs;
+    private String m_strSigValTs, m_strSigAndRefsTs, m_strRefsTs;
     private StringBuffer m_sbCollectChars;
     private StringBuffer m_sbCollectItem;
     private StringBuffer m_sbCollectSignature;
@@ -92,6 +93,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     private Hashtable m_rootCerts;
     /** calculation of digest */
     private MessageDigest m_digest;
+	
 
     // private ByteArrayOutputStream m_streamCollectChars;
 
@@ -1070,6 +1072,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 CompleteCertificateRefs crefs = new CompleteCertificateRefs();
                 up.setCompleteCertificateRefs(crefs);
                 crefs.setUnsignedProperties(up);
+                //m_strRefsTs= new String(crefs.toXML());
             }
             catch (DigiDocException ex)
             {
@@ -1086,6 +1089,8 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 CompleteRevocationRefs rrefs = new CompleteRevocationRefs();
                 up.setCompleteRevocationRefs(rrefs);
                 rrefs.setUnsignedProperties(up);
+                //m_strRefsTs += new String(rrefs.toXML());
+                
             }
             catch (DigiDocException ex)
             {
@@ -1397,8 +1402,9 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
         {
             if (m_nCollectMode > 0)
                 m_nCollectMode--;
-            if (m_sbCollectChars != null)
-                m_strSigAndRefsTs = m_strSigValTs + m_sbCollectChars.toString();
+            if (m_sbCollectChars != null){
+                m_strSigAndRefsTs = m_strSigValTs + m_sbCollectChars.toString(); 
+            }
             // System.out.println("SigAndRefsTs mode: " + m_nCollectMode + "\n---\n" +
             // m_strSigAndRefsTs + "\n---\n");
             m_sbCollectChars = null; // stop collecting
@@ -1456,6 +1462,50 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 SAXDigiDocException.handleException(ex);
             }
         }
+        
+        // </RefsOnlyTimeStamp>
+        if (qName.equals("RefsOnlyTimeStamp"))
+        {
+        	if (m_logger.isDebugEnabled())
+        		m_logger.debug("End collecting <RefsOnlyTimeStamp>");
+        	try
+        	{
+        		Signature sig = m_doc.getLastSignature();
+        		TimestampInfo ts = sig.getTimestampInfoOfType(TimestampInfo.TIMESTAMP_TYPE_REFS_ONLY);
+        		if (ts != null && m_strSigValTs != null)
+        		{
+
+        			byte[] completeCertificateRefs = sig.getUnsignedProperties()
+        			.getCompleteCertificateRefs().toXML();
+
+        			byte[] completeRevocationRefs = sig.getUnsignedProperties()
+        			.getCompleteRevocationRefs().toXML();
+
+        			CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+
+        			byte[] canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
+        					SignedDoc.CANONICALIZATION_METHOD_20010315);
+
+        			byte[] canCompleteRevocationRefs = canFac.canonicalize(completeRevocationRefs,
+        					SignedDoc.CANONICALIZATION_METHOD_20010315);
+
+        			byte[] refsOnlyData = new byte[canCompleteCertificateRefs.length
+        			                               + canCompleteRevocationRefs.length];
+        			System.arraycopy(canCompleteCertificateRefs, 0, refsOnlyData, 0,
+        					canCompleteCertificateRefs.length);
+        			System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
+        					canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);	
+        			byte[] hash = SignedDoc.digest(refsOnlyData);
+        			ts.setHash(hash);
+
+        		}
+        	}
+        	catch (DigiDocException ex)
+        	{
+        		SAXDigiDocException.handleException(ex);
+        	}
+        }
+
         // </SigAndRefsTimeStamp>
         if (qName.equals("SigAndRefsTimeStamp"))
         {
@@ -1681,7 +1731,6 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 {
                 	byte[] resp= Base64Util.decode(m_sbCollectItem.toString());
                 
-                	
                 	TSResponse response = new TSResponse(resp);
                     ts.setTimeStampResponse(response);
                 }
