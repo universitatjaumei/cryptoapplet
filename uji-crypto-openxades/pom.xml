@@ -13,7 +13,6 @@
     <version>2.1.0</version>
   </parent>
 
-
   <dependencies>
     <dependency>
       <groupId>es.uji.security</groupId>
@@ -26,7 +25,7 @@
       <version>143</version>
     </dependency>    
     <dependency>
-      <groupId>xml-security</groupId>
+      <groupId>org.apache.santuario</groupId>
       <artifactId>xmlsec</artifactId>
       <version>1.4.1</version>
     </dependency>

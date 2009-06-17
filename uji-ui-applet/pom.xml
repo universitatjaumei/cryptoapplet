@@ -12,7 +12,6 @@
     <version>2.1.0</version>
   </parent>
 
-  
   <dependencies>
     <dependency>
       <groupId>es.uji.security</groupId>
