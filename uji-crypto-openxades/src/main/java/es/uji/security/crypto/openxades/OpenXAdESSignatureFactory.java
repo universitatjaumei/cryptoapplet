@@ -8,6 +8,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Properties;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.timestamp.TSResponse;
@@ -20,6 +21,7 @@ import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
+import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.ConfigHandler;
@@ -55,8 +57,9 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
          * for ( Enumeration enu= ksh.aliases(); enu.hasMoreElements(); ){
          * System.out.println("Next elem: " + enu.nextElement()); }
          */
-
-        byte[] toSign = sigOpt.getToSignByteArray();
+    	//Logger.getRootLogger().setLevel(Level.OFF);	
+    	
+    	byte[] toSign = sigOpt.getToSignByteArray();
         X509Certificate sCer = sigOpt.getCertificate();
         PrivateKey pk = sigOpt.getPrivateKey();
         Provider pv = sigOpt.getProvider();
@@ -202,18 +205,28 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             }
 
             String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+           
             byte[] completeCertificateRefs = sig.getUnsignedProperties()
-                    .getCompleteCertificateRefs().toString().getBytes();
+                    .getCompleteCertificateRefs().toXML();
+            
             byte[] completeRevocationRefs = sig.getUnsignedProperties().getCompleteRevocationRefs()
-                    .toString().getBytes();
+                    .toXML();
+            
+            CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+            byte[] 	canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
+            		SignedDoc.CANONICALIZATION_METHOD_20010315);
 
-            byte[] refsOnlyData = new byte[completeCertificateRefs.length
-                    + completeRevocationRefs.length];
-            System.arraycopy(completeCertificateRefs, 0, refsOnlyData, 0,
-                    completeCertificateRefs.length);
-            System.arraycopy(completeRevocationRefs, 0, refsOnlyData,
-                    completeCertificateRefs.length, completeRevocationRefs.length);
+            byte[] 	canCompleteRevocationRefs = canFac.canonicalize(completeRevocationRefs,
+            		SignedDoc.CANONICALIZATION_METHOD_20010315);
 
+
+            byte[] refsOnlyData = new byte[canCompleteCertificateRefs.length
+                    + canCompleteRevocationRefs.length];
+            System.arraycopy(canCompleteCertificateRefs, 0, refsOnlyData, 0,
+                    canCompleteCertificateRefs.length);
+            System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
+                    canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
+                          
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
             TSResponseToken responseToken= new TSResponseToken(response);
             
@@ -224,7 +237,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             sig.addTimestampInfo(ts);
 
-            log.debug("Verificaci�n OCSP completa");
+            log.debug("Verificacion OCSP completa");
 
         }
         catch (DigiDocException e)
