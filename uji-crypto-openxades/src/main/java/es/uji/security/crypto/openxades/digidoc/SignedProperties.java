@@ -649,10 +649,10 @@ public class SignedProperties implements Serializable
                 bos.write(ConvertUtils.str2data(m_certId));
                 bos.write(ConvertUtils.str2data("\">"));
             }
-            bos.write(ConvertUtils.str2data("\n<CertDigest>\n<DigestMethod Algorithm=\""));
+            bos.write(ConvertUtils.str2data("\n<CertDigest>\n<DigestMethod xmlns=\"" + SignedDoc.xmlns_xmldsig + "\" Algorithm=\""));
             bos.write(ConvertUtils.str2data(m_certDigestAlgorithm));
 
-            bos.write(ConvertUtils.str2data("\">\n</DigestMethod>\n<DigestValue>"));
+            bos.write(ConvertUtils.str2data("\">\n</DigestMethod>\n<DigestValue xmlns=\"" + SignedDoc.xmlns_xmldsig + "\">"));
             bos.write(ConvertUtils.str2data(Base64Util.encode(m_certDigestValue, 0)));
             bos.write(ConvertUtils.str2data("</DigestValue>\n</CertDigest>\n"));
             // In version 1.3 we use correct <IssuerSerial> content
