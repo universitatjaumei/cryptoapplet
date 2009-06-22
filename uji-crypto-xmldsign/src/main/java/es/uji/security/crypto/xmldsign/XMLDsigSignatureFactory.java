@@ -44,7 +44,7 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
             PrivateKey pk = sigOpt.getPrivateKey();
 
             // We create DOM XMLSigantureFactory
-            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
 
             // Create the reference element
             Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
