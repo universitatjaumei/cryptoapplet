@@ -1,67 +1,56 @@
 package es.uji.security.crypto.raw.test;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import java.io.*;
-import java.math.BigInteger;
+import java.io.FileInputStream;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.Security;
-import java.security.Signature;
-import java.security.interfaces.RSAPublicKey;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertificateFactory;
 
-import es.uji.security.util.HexDump;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import es.uji.security.crypto.ISignFormatProvider;
+import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.raw.RawSignatureFactory;
+import es.uji.security.crypto.raw.RawSignatureVerifier;
 
 public class RawSignatureTest
 {
-    public static void Mydecrypt(byte[] data, RSAPublicKey key) throws Exception
-    {
-        BigInteger msj = new BigInteger(1, data);
-        BigInteger mod = key.getModulus();
-        BigInteger exp = key.getPublicExponent();
+    public static void main(String[] args) throws Exception
+    {        
+        BouncyCastleProvider bcp = new BouncyCastleProvider();
+        Security.addProvider(bcp);
 
-        BigInteger aux = msj.modPow(exp, mod);
+        // Cargando certificado de aplicacion
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
 
-        System.out.println("Descifrado: " + HexDump.xdump(aux.toByteArray()) + "   len: "
-                + aux.toByteArray().length);
-    }
+        // Recuperando clave privada para firmar
+        X509Certificate certificate = (X509Certificate) keystore.getCertificate(keystore.aliases().nextElement());
+        Key key = keystore.getKey("uji", "cryptoapplet".toCharArray());
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args)
-    {
-        // TODO Auto-generated method stub
-        try
+        byte[] data = "data to sign".getBytes();
+
+        // Firmando documento
+        ISignFormatProvider signFormatProvider = new RawSignatureFactory();
+
+        SignatureOptions signatureOptions = new SignatureOptions();
+        signatureOptions.setToSignByteArray(data);
+        signatureOptions.setCertificate(certificate);
+        signatureOptions.setPrivateKey((PrivateKey) key);
+        signatureOptions.setProvider(bcp);
+
+        byte[] signedData = signFormatProvider.formatSignature(signatureOptions);
+        
+        RawSignatureVerifier rawSignatureVerifier = new RawSignatureVerifier();
+        
+        if (rawSignatureVerifier.verify(data, signedData, certificate))
         {
-            if (Security.getProvider("BC") == null)
-            {
-                BouncyCastleProvider bcp = new BouncyCastleProvider();
-                Security.addProvider(bcp);
-            }
-
-            InputStream inStream = new FileInputStream("/tmp/mio.cer");
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            X509Certificate cert = (X509Certificate) cf.generateCertificate(inStream);
-            inStream.close();
-
-            FileInputStream fis = new FileInputStream("/tmp/sign");
-            byte[] b = new byte[fis.available()];
-            fis.read(b);
-
-            Signature rsa = Signature.getInstance("SHA1withRSA");
-            rsa.initVerify(cert);
-            rsa.initVerify(cert.getPublicKey());
-            System.out.println("Resultado: " + rsa.verify(b));
-
-            Mydecrypt(b, (RSAPublicKey) cert.getPublicKey());
-
+            System.out.println("OK");
         }
-        catch (Exception e)
+        else
         {
-
-            e.printStackTrace();
-
+            System.out.println("BAD SIGNATURE");
         }
     }
-
 }

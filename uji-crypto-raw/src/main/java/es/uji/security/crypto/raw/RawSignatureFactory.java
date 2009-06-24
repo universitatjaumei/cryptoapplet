@@ -3,12 +3,11 @@ package es.uji.security.crypto.raw;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
-import java.security.cert.X509Certificate;
 import java.security.Signature;
+import java.security.cert.X509Certificate;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.util.Base64;
 import es.uji.security.util.i18n.LabelManager;
 
 public class RawSignatureFactory implements ISignFormatProvider
@@ -46,16 +45,13 @@ public class RawSignatureFactory implements ISignFormatProvider
         rsa_vfy.initVerify(sCer);
         rsa_vfy.initVerify(sCer.getPublicKey());
         rsa_vfy.update(datos);
-        System.out.println("La verificaci�n result�:  " + rsa_vfy.verify(res));
 
         if (res == null)
         {
             _strerr = LabelManager.get("ERROR_RAW_SIGNATURE");
         }
 
-        byte[] coded = Base64.encode(res, true);
-
-        return coded;
+        return res;
     }
 
     public String getError()
