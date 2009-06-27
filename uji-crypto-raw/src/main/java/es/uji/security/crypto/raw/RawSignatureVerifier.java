@@ -24,6 +24,11 @@ public class RawSignatureVerifier
         VerificationDetails verificationDetails = new VerificationDetails();
         verificationDetails.setResult(rsa_vfy.verify(signature));       
         
+        if (! verificationDetails.isValid())
+        {
+            verificationDetails.addError("RAW signature can not be verified");
+        }
+        
         return verificationDetails;
     }
 }
