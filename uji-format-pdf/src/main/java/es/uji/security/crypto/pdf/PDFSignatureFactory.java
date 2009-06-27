@@ -1,26 +1,20 @@
 package es.uji.security.crypto.pdf;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 import java.security.SignatureException;
-
+import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.cert.Certificate;
-
 import java.util.HashMap;
 import java.util.Properties;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-
-import java.lang.ClassLoader;
-import java.net.MalformedURLException;
 
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Image;
@@ -36,9 +30,6 @@ import com.lowagie.text.pdf.PdfString;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.cms.pdf.PdfPKCS7TSA;
-import es.uji.security.crypto.cms.pdf.TSAClient;
-import es.uji.security.crypto.cms.pdf.TSAClientBouncyCastle;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -151,7 +142,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         
         byte[] imageData = inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader().getResourceAsStream(prop.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
         Image image = Image.getInstance(imageData);
-        
+         
         sap.setSignatureGraphic(image);
         sap.setRender(PdfSignatureAppearance.SignatureRenderGraphicAndDescription);
     }
