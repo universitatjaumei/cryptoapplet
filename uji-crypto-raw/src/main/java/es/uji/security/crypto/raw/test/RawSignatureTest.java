@@ -11,6 +11,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.VerificationDetails;
 import es.uji.security.crypto.raw.RawSignatureFactory;
 import es.uji.security.crypto.raw.RawSignatureVerifier;
 
@@ -44,7 +45,9 @@ public class RawSignatureTest
         
         RawSignatureVerifier rawSignatureVerifier = new RawSignatureVerifier();
         
-        if (rawSignatureVerifier.verify(data, signedData, certificate))
+        VerificationDetails verificationDetails = rawSignatureVerifier.verify(data, signedData, certificate, new BouncyCastleProvider());
+        
+        if (verificationDetails.isValid())
         {
             System.out.println("OK");
         }
