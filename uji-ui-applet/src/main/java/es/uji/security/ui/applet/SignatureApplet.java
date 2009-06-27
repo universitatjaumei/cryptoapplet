@@ -1,7 +1,10 @@
 package es.uji.security.ui.applet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -15,6 +18,7 @@ import org.apache.log4j.Logger;
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
+import es.uji.security.crypto.VerificationDetails;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.KeyStoreManager;
@@ -25,6 +29,7 @@ import es.uji.security.ui.applet.io.FuncOutputParams;
 import es.uji.security.ui.applet.io.ParamInputData;
 import es.uji.security.ui.applet.io.URLInputParams;
 import es.uji.security.ui.applet.io.URLOutputParams;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 /**
@@ -723,7 +728,25 @@ public class SignatureApplet extends JApplet
             public String[] run()
             {
                 OpenXAdESSignatureVerifier sv = new OpenXAdESSignatureVerifier();
-                return sv.verifyUrl(input);
+                
+                try
+                {
+                    URL url = new URL(input);
+                    URLConnection uc = url.openConnection();
+                    uc.connect();
+                    InputStream in = uc.getInputStream();
+                    
+                    byte[] data = OS.inputStreamToByteArray(in);
+                    
+                    VerificationDetails verificationDetails = sv.verify(data);
+                    
+                    return (String[]) verificationDetails.getErrors().toArray();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    return new String[] { e.getMessage() };
+                }                
             }
         });
         return res;
