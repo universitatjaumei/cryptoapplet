@@ -1,40 +1,40 @@
 package es.uji.security.crypto.xmldsign;
 
-import java.io.FileInputStream;
-import java.util.Iterator;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
+import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import es.uji.security.crypto.VerificationDetails;
 
 public class XMLDsigVerifier
 {
-    /**
-     * @param args
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    public static void main(String[] args) throws Exception
+    public VerificationDetails verify(byte[] signedData) throws SAXException, IOException, ParserConfigurationException, MarshalException, XMLSignatureException
     {
-
-        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
 
         // Instantiate the document to be signed.
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
-        Document doc = dbf.newDocumentBuilder().parse(new FileInputStream("servers_signed.xml"));
+        Document doc = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(signedData));
 
         // Find Signature element.
         NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 
         if (nl.getLength() == 0)
         {
-            throw new Exception("Cannot find Signature element");
+            throw new SAXException("Cannot find Signature element");
         }
 
         // Create a DOMValidateContext and specify a KeySelector
@@ -47,28 +47,28 @@ public class XMLDsigVerifier
         // Validate the XMLSignature.
         boolean coreValidity = signature.validate(valContext);
 
+        VerificationDetails result = new VerificationDetails();
+        result.setResult(coreValidity);
+        
         // Check core validation status.
         if (coreValidity == false)
         {
-            System.err.println("Signature failed core validation");
             boolean sv = signature.getSignatureValue().validate(valContext);
-            System.out.println("signature validation status: " + sv);
+            result.addError("signature validation status: " + sv);
+            
             if (sv == false)
             {
                 // Check the validation status of each Reference.
-                Iterator i = signature.getSignedInfo().getReferences().iterator();
-                for (int j = 0; i.hasNext(); j++)
+                for (Object o : signature.getSignedInfo().getReferences())
                 {
-                    boolean refValid = ((Reference) i.next()).validate(valContext);
-                    System.out.println("ref[" + j + "] validity status: " + refValid);
+                    Reference r = (Reference) o;
+                    
+                    boolean refValid = r.validate(valContext);
+                    result.addError("ref[" + r.getURI() + "] validity status: " + refValid);
                 }
             }
         }
-        else
-        {
-            System.out.println("Document Verification ok!!");
-        }
-
+        
+        return result;
     }
-
 }
