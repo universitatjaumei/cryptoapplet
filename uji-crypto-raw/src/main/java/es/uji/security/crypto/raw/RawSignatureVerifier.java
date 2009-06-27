@@ -22,7 +22,7 @@ public class RawSignatureVerifier
         rsa_vfy.update(data);
 
         VerificationDetails verificationDetails = new VerificationDetails();
-        verificationDetails.setResult(rsa_vfy.verify(signature));       
+        verificationDetails.setValid(rsa_vfy.verify(signature));       
         
         if (! verificationDetails.isValid())
         {
