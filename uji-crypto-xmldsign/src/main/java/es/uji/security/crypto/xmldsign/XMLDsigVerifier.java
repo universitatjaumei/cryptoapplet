@@ -48,7 +48,7 @@ public class XMLDsigVerifier
         boolean coreValidity = signature.validate(valContext);
 
         VerificationDetails result = new VerificationDetails();
-        result.setResult(coreValidity);
+        result.setValid(coreValidity);
         
         // Check core validation status.
         if (coreValidity == false)

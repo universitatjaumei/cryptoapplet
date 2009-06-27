@@ -12,6 +12,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.VerificationDetails;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
 import es.uji.security.util.OS;
@@ -45,16 +46,15 @@ public class Test
         signatureOptions.setProvider(bcp);
 
         byte[] signedData = signFormatProvider.formatSignature(signatureOptions);
-
         
         OS.dumpToFile("/tmp/signed-output.xml", signedData);
         
         OpenXAdESSignatureVerifier verifier = new OpenXAdESSignatureVerifier();
-        String[] result = verifier.verify(new FileInputStream("/tmp/signed-output.xml"));
+        VerificationDetails verificationDetails = verifier.verify(OS.inputStreamToByteArray(new FileInputStream("/tmp/signed-output.xml")));
         
-        if (result != null && result.length > 0)
+        if (! verificationDetails.isValid())
         {
-            for (String r : result)
+            for (String r : verificationDetails.getErrors())
             {
                 System.out.println(r);                
             }

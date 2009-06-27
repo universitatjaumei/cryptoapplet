@@ -35,13 +35,13 @@ public class FacturaeSignatureVerifier
         List<SignatureStatus> st = fileXML.validate();
 
         VerificationDetails verificationDetails = new VerificationDetails();
-        verificationDetails.setResult(true);
+        verificationDetails.setValid(true);
 
         for (SignatureStatus status : st)
         {
             if (status.getValidateResult() != ValidateResult.VALID)
             {
-                verificationDetails.setResult(false);
+                verificationDetails.setValid(false);
                 verificationDetails.addError("Sign validation error: " + status.getReasonsAsText());
             }
         }

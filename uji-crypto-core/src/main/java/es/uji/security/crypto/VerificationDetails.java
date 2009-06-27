@@ -25,7 +25,7 @@ public class VerificationDetails
         return valid;
     }
     
-    public void setResult(boolean valid)
+    public void setValid(boolean valid)
     {
         this.valid = valid;
     }
