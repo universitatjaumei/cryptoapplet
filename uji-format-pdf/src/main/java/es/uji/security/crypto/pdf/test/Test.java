@@ -16,7 +16,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.pdf.PDFSignatureFactory;
-import es.uji.security.util.Base64;
 
 public class Test
 {
@@ -61,8 +60,8 @@ public class Test
 
         byte[] signedData = xsf.formatSignature(signatureOptions);
 
-        FileOutputStream fos = new FileOutputStream("src/main/resources/out.pdf");
-        fos.write(Base64.decode(signedData));
+        FileOutputStream fos = new FileOutputStream("/tmp/out.pdf");
+        fos.write(signedData);
         fos.flush();
         fos.close();
     }
