@@ -26,13 +26,11 @@ import es.uji.security.crypto.CRLResponseDetails;
 
 public class CRLChecker
 {
-    private HashMap<String, X509CRL> crl;
-    private HashMap<String, Long> lastModified;
+    private static HashMap<String, X509CRL> crl = new HashMap<String, X509CRL>();
+    private static HashMap<String, Long> lastModified = new HashMap<String, Long>();
     
     public CRLChecker()
     {
-        this.crl = new HashMap<String, X509CRL>();
-        this.lastModified = new HashMap<String, Long>();
     }
 
     public CRLResponseDetails getCertificateStatus(String crlURL, X509Certificate certificate) throws MalformedURLException, CRLException, CertificateException, IOException
@@ -131,8 +129,14 @@ public class CRLChecker
             InputStream is = conn.getInputStream();
             BufferedInputStream bis = new BufferedInputStream(is);
             
-            crl.put(crlURL, (X509CRL) CertificateFactory.getInstance("X.509").generateCRL(bis));
-            lastModified.put(crlURL, now);
+            synchronized (crl)
+            {
+                synchronized (lastModified)
+                {
+                    crl.put(crlURL, (X509CRL) CertificateFactory.getInstance("X.509").generateCRL(bis));
+                    lastModified.put(crlURL, now);
+                }
+            }            
         }
         
         return crl.get(crlURL);
