@@ -1,6 +1,7 @@
 package es.uji.security.crypto.timestamp;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -30,6 +31,10 @@ public class TSResponseToken
     {
         byte[] tok = response.getToken().getContentInfo().getContentBytes();
 
+        FileOutputStream fos= new FileOutputStream("/tmp/p");
+        fos.write(tok);
+        fos.close();
+        
         try
         {
             int j = 3;
@@ -38,14 +43,14 @@ public class TSResponseToken
             // at position i=3 we must find an integer 0x02
 
             if (tok[j] != 0x02)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be an integer at position " + j);
 
             // Now we must get the length of the integer and skip it
             j += tok[j + 1] + 2;
 
             // An oid with the tsa policy must be found.
             if (tok[j] != 0x06)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be an OID with the TSA policy at position " + j);
 
             // skip tsaPolicy OID length
             j += tok[j + 1] + 2;
@@ -55,14 +60,18 @@ public class TSResponseToken
 
             // And now we point to the hash algorith oid.
             if (tok[j] != 0x06)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be a hash algorith oid at position " + j);
 
             // skip hashalg OID length
             j += tok[j + 1] + 2;
 
-            // And now we point to the hash itself.
+            // We can find a NULL value here:
+            if (tok[j] == 0x05)
+            	j+=2;
+            
+            // And now we point to the hash itself.            
             if (tok[j] != 0x04)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be a hash value at position " + j);
 
             int l = tok[j + 1];
             byte[] hash = new byte[l];
@@ -72,7 +81,7 @@ public class TSResponseToken
         catch (ArrayIndexOutOfBoundsException ai)
         {
             // Parsing failure, null will be returned.
-            throw new ASN1ParseException("xxx");
+            throw new ASN1ParseException("The ASN.1 structure is not well formed, the length tag does not match with its real length.");
         }
     }
 
@@ -91,14 +100,14 @@ public class TSResponseToken
             // at position i=3 we must find an integer 0x02
 
             if (tok[j] != 0x02)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be an integer at position " + j);
 
             // Now we must get the length of the integer and skip it
             j += tok[j + 1] + 2;
 
             // An oid with the tsa policy must be found.
             if (tok[j] != 0x06)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be a tsa policy at position " + j);
 
             // skip tsaPolicy OID length
             j += tok[j + 1] + 2;
@@ -106,16 +115,16 @@ public class TSResponseToken
             // Now four bytes of a double sequence:
             j += 4;
 
-            // And now we point to the hash algorith oid.
+            // And now we point to the hash algorithm oid.
             if (tok[j] != 0x06)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be a hash algorithm oid at position " + j);
 
             // skip hashalg OID length
             j += tok[j + 1] + 2;
 
             // And now we point to the hash itself.
             if (tok[j] != 0x04)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be a hash value at position " + j);
 
             // skip hash length and serial integer
             j += tok[j + 1] + 2;
@@ -123,7 +132,7 @@ public class TSResponseToken
 
             // And now we point to the time.
             if (tok[j] != 0x18)
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be a time value at position " + j);
 
             // The UTC generalized time.
             String genTime = new String(tok, j + 2, tok[j + 1]);
@@ -132,12 +141,12 @@ public class TSResponseToken
         catch (ArrayIndexOutOfBoundsException ai)
         {
             // Parsing failure, null will be returned
-            throw new ASN1ParseException("xxx");
+            throw new ASN1ParseException("The ASN.1 structure is not well formed, the length tag does not match with its real length.");
         }
         catch (ParseException pe)
         {
             // Parsing failure, null will be returned
-            throw new ASN1ParseException("xxx");
+            throw new ASN1ParseException("Unable to parse the time as yyyyMMddHHmmss");
         }
     }
 
@@ -185,7 +194,7 @@ public class TSResponseToken
         }
         catch (Exception e)
         {
-            throw new TokenVerifyException("xxx");
+            throw new TokenVerifyException("Unable to decipher pkcs#9 encoded attributes");
         }
 
         // Parse asn1 deciphered structure:
@@ -197,7 +206,7 @@ public class TSResponseToken
         int i = 4;
         if (deciphdig[i] != 0x06)
         { // OID
-            throw new ASN1ParseException("xxx");
+            throw new ASN1ParseException("Must be an OID at position " + i);
         }
         String oid = DERObjectIdentifier.getOIDasString(deciphdig, i + 2, deciphdig[i + 1]);
         String hashAlg = DERObjectIdentifier.getHashAlgorithFromOID(oid);
@@ -206,7 +215,7 @@ public class TSResponseToken
                 && !hashAlg.equals("SHA512"))
         {
             // Invalid algorithm (not supported)
-            throw new ASN1ParseException("xxx");
+            throw new ASN1ParseException("Signature hash algorithm not supported");
         }
         i += deciphdig[i + 1] + 2;
 
@@ -217,14 +226,14 @@ public class TSResponseToken
             // Now we must point to the hash
             if (deciphdig[i] != 0x04)
             {
-                throw new ASN1ParseException("xxx");
+                throw new ASN1ParseException("Must be a hash value at position " + i);
             }
         }
 
         // The length must be the same:
         if (digest.length != deciphdig[i + 1])
         {
-            throw new ASN1ParseException("xxx");
+            throw new ASN1ParseException("The lenght between the plain and signed hash does not match!");
         }
         i += 2;
 
@@ -233,7 +242,7 @@ public class TSResponseToken
         {
             if (digest[j] != deciphdig[i + j])
             {
-                throw new TokenVerifyException("xxx");
+                throw new TokenVerifyException("Plain and signed hash are different!");
             }
         }
 
@@ -246,14 +255,14 @@ public class TSResponseToken
             byte[] msgImp = getMessageImprint();
             if (oddig.length != msgImp.length)
             {
-                throw new TokenVerifyException("xxx");
+                throw new TokenVerifyException("The lenght between the calculated and signed hash does not match!");
             }
 
             for (int j = 0; j < oddig.length; j++)
             {
                 if (oddig[j] != msgImp[j])
                 {
-                    throw new TokenVerifyException("xxx");
+                    throw new TokenVerifyException("Plain and signed hash are different!");
                 }
             }
         }
