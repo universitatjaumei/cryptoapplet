@@ -60,6 +60,7 @@ public class AppHandler
 
     // Input data encoding format
     private SupportedDataEncoding inputDataEncoding = SupportedDataEncoding.PLAIN;
+    private SupportedDataEncoding outputDataEncoding = SupportedDataEncoding.PLAIN;
     
     // Host navigator
     private SupportedBrowser navigator = SupportedBrowser.MOZILLA;
@@ -566,6 +567,16 @@ public class AppHandler
     {
         return this.inputDataEncoding;
     }
+    
+    /**
+     * It returns the selected output data encoding
+     * 
+     * @return outputDataEncoding the selected input data encoding
+     */
+    public SupportedDataEncoding getOutputDataEncoding()
+    {
+        return this.outputDataEncoding;
+    }
 
     /**
      * A method for get the InputParams class
@@ -590,6 +601,20 @@ public class AppHandler
         log.debug("Setting inputDataEncoding to " + inputDataEncoding);
     }
 
+    
+    /**
+     * A method for setting the encoding type for the output data
+     * 
+     * @param outputDataEncoding
+     *            the encoding name
+     */
+    public void setOutputDataEncoding(SupportedDataEncoding outputDataEncoding)
+    {
+        this.outputDataEncoding = outputDataEncoding;
+        
+        log.debug("Setting inputDataEncoding to " + outputDataEncoding);
+    }
+    
     /**
      * Sets the InputParams for this signature
      * 

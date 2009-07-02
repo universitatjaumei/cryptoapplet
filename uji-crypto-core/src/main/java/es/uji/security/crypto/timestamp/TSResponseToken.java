@@ -30,7 +30,8 @@ public class TSResponseToken
     public byte[] getMessageImprint() throws IOException, ASN1ParseException
     {
         byte[] tok = response.getToken().getContentInfo().getContentBytes();
-        
+
+
         try
         {
             int j = 3;
