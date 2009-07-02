@@ -1,7 +1,7 @@
 package es.uji.security.crypto.ocsp;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -17,6 +17,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -38,6 +39,11 @@ import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
+import sun.security.x509.AccessDescription;
+import sun.security.x509.AuthorityInfoAccessExtension;
+import sun.security.x509.GeneralNameInterface;
+import sun.security.x509.URIName;
+import sun.security.x509.X509CertImpl;
 import es.uji.security.crypto.OCSPResponseDetails;
 import es.uji.security.util.OS;
 
@@ -59,72 +65,192 @@ public class OCSPChecker
     }
 
     private CertificateID generateCertificateID(X509Certificate certificate,
-            X509Certificate caCertificate, Provider provider) throws CertificateEncodingException,
-            NoSuchAlgorithmException
+            X509Certificate caCertificate, Provider provider) throws CryptoCoreOCSPException
     {
-        X509Principal issuerName = PrincipalUtil.getSubjectX509Principal(caCertificate);
+        CertificateID certificateID = null;
 
-        MessageDigest digest = MessageDigest.getInstance("1.3.14.3.2.26", provider);
-        digest.update(issuerName.getEncoded());
+        try
+        {
+            X509Principal issuerName = PrincipalUtil.getSubjectX509Principal(caCertificate);
 
-        ASN1OctetString issuerNameHash = new BERConstructedOctetString(digest.digest());
+            MessageDigest digest = MessageDigest.getInstance("1.3.14.3.2.26", provider);
+            digest.update(issuerName.getEncoded());
 
-        byte[] arr = caCertificate.getExtensionValue("2.5.29.14");
-        byte[] arr2 = new byte[arr.length - 4];
-        System.arraycopy(arr, 4, arr2, 0, arr2.length);
-        ASN1OctetString issuerKeyHash = new BERConstructedOctetString(arr2);
+            ASN1OctetString issuerNameHash = new BERConstructedOctetString(digest.digest());
 
-        CertID cerid = new CertID(new AlgorithmIdentifier("1.3.14.3.2.26"), issuerNameHash,
-                issuerKeyHash, new DERInteger(certificate.getSerialNumber()));
+            byte[] arr = caCertificate.getExtensionValue("2.5.29.14");
+            byte[] arr2 = new byte[arr.length - 4];
+            System.arraycopy(arr, 4, arr2, 0, arr2.length);
+            ASN1OctetString issuerKeyHash = new BERConstructedOctetString(arr2);
 
-        return new CertificateID(cerid);
+            CertID cerid = new CertID(new AlgorithmIdentifier("1.3.14.3.2.26"), issuerNameHash,
+                    issuerKeyHash, new DERInteger(certificate.getSerialNumber()));
+
+            certificateID = new CertificateID(cerid);
+        }
+        catch (CertificateEncodingException cee)
+        {
+            throw new CryptoCoreOCSPException(
+                    "Can not generate a valid certificate ID. CA certificate encoding is not valid",
+                    cee);
+        }
+        catch (NoSuchAlgorithmException nsae)
+        {
+            throw new CryptoCoreOCSPException(
+                    "Can not generate a valid certificate ID. Can not generate an instance of SHA-1 algorithm",
+                    nsae);
+        }
+
+        return certificateID;
     }
 
     private OCSPResp sendOCSPRequest(String ocspURL, CertificateID certificateID,
-            X509Certificate certificate) throws CertificateEncodingException, OCSPException,
-            IOException
+            X509Certificate certificate) throws CryptoCoreOCSPException
     {
-        OCSPReqGenerator ocspRequest = new OCSPReqGenerator();
-        ocspRequest.addRequest(certificateID);
+        OCSPResp ocspResp = null;
 
-        GeneralName name = new GeneralName(PrincipalUtil.getSubjectX509Principal(certificate));
-        ocspRequest.setRequestorName(name);
+        try
+        {
+            OCSPReqGenerator ocspRequest = new OCSPReqGenerator();
+            ocspRequest.addRequest(certificateID);
 
-        OCSPReq req = ocspRequest.generate();
+            GeneralName name = new GeneralName(PrincipalUtil.getSubjectX509Principal(certificate));
+            ocspRequest.setRequestorName(name);
 
-        byte[] breq = req.getEncoded();
-        URL url = new URL(ocspURL);
-        URLConnection con = url.openConnection();
-        con.setReadTimeout(10000);
-        con.setConnectTimeout(10000);
-        con.setAllowUserInteraction(false);
-        con.setUseCaches(false);
-        con.setDoOutput(true);
-        con.setDoInput(true);
+            OCSPReq req = ocspRequest.generate();
 
-        // Send the OCSP request
-        con.setRequestProperty("Content-Type", "application/ocsp-request");
-        OutputStream os = con.getOutputStream();
-        os.write(breq);
-        os.close();
+            byte[] breq = req.getEncoded();
+            URL url = new URL(ocspURL);
+            URLConnection con = url.openConnection();
+            con.setReadTimeout(10000);
+            con.setConnectTimeout(10000);
+            con.setAllowUserInteraction(false);
+            con.setUseCaches(false);
+            con.setDoOutput(true);
+            con.setDoInput(true);
 
-        // Read the response
-        byte[] bresp = OS.inputStreamToByteArray(con.getInputStream());
+            // Send the OCSP request
+            con.setRequestProperty("Content-Type", "application/ocsp-request");
+            OutputStream os = con.getOutputStream();
+            os.write(breq);
+            os.close();
 
-        return new OCSPResp(bresp);
+            // Read the response
+            byte[] bresp = OS.inputStreamToByteArray(con.getInputStream());
+
+            ocspResp = new OCSPResp(bresp);
+        }
+        catch (CertificateEncodingException cee)
+        {
+            throw new CryptoCoreOCSPException(
+                    "Can not send OCSP request. Certificate encoding is not valid", cee);
+        }
+        catch (OCSPException oe)
+        {
+            throw new CryptoCoreOCSPException("Can not generate OCSP request", oe);
+        }
+        catch (IOException ioe)
+        {
+            throw new CryptoCoreOCSPException("Can not recover response from server " + ocspURL,
+                    ioe);
+        }
+
+        return ocspResp;
+    }
+
+    @SuppressWarnings( { "deprecation", "unchecked" })
+    public OCSPResponseDetails getCertificateStatus(X509Certificate certificate,
+            X509Certificate caCertificate, X509Certificate ocspCertificate, Provider provider)
+    {
+        OCSPResponseDetails responseDetails = new OCSPResponseDetails();
+        String ocspURL = null;
+
+        try
+        {
+            X509CertImpl certificateImpl = (X509CertImpl) certificate;
+            AuthorityInfoAccessExtension authorityInfoAccessExtension = certificateImpl
+                    .getAuthorityInfoAccessExtension();
+
+            for (AccessDescription accessDescription : ((List<AccessDescription>) authorityInfoAccessExtension
+                    .get(AuthorityInfoAccessExtension.DESCRIPTIONS)))
+            {
+                if (accessDescription.getAccessMethod().equals(AccessDescription.Ad_OCSP_Id))
+                {
+                    sun.security.x509.GeneralName generalName = accessDescription
+                            .getAccessLocation();
+
+                    if (generalName.getType() == GeneralNameInterface.NAME_URI)
+                    {
+
+                        URIName uri = (URIName) generalName.getName();
+                        ocspURL = uri.getName();
+                        break;
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            responseDetails.setValid(false);
+            responseDetails.addError("Can not recover OCSP URL from certificate");
+        }
+
+        if (ocspURL != null)
+        {
+            responseDetails = getCertificateStatus(ocspURL, certificate, caCertificate,
+                    ocspCertificate, provider);
+        }
+        else
+        {
+            responseDetails.setValid(false);
+            responseDetails.addError("Can not recover OCSP URL from certificate");
+        }
+
+        return responseDetails;
     }
 
     @SuppressWarnings("deprecation")
     public OCSPResponseDetails getCertificateStatus(String ocspURL, X509Certificate certificate,
             X509Certificate caCertificate, X509Certificate ocspCertificate, Provider provider)
-            throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
-            FileNotFoundException, IOException, OCSPException, NoSuchProviderException
     {
-        CertificateID certificateID = generateCertificateID(certificate, caCertificate, provider);
-        OCSPResp resp = sendOCSPRequest(ocspURL, certificateID, certificate);
-
         OCSPResponseDetails responseDetails = new OCSPResponseDetails();
-        responseDetails.setResponseData(resp.getEncoded());
+
+        CertificateID certificateID = null;
+
+        try
+        {
+            certificateID = generateCertificateID(certificate, caCertificate, provider);
+        }
+        catch (CryptoCoreOCSPException ccoe)
+        {
+            responseDetails.setValid(false);
+            responseDetails.addError(ccoe.getMessage());
+            return responseDetails;
+        }
+
+        OCSPResp resp = null;
+
+        try
+        {
+            resp = sendOCSPRequest(ocspURL, certificateID, certificate);
+        }
+        catch (CryptoCoreOCSPException ccoe)
+        {
+            responseDetails.setValid(false);
+            responseDetails.addError(ccoe.getMessage());
+            return responseDetails;
+        }
+
+        try
+        {
+            responseDetails.setResponseData(resp.getEncoded());
+        }
+        catch (IOException ioe)
+        {
+            responseDetails.setValid(false);
+            responseDetails.addError("Can not get encoded content from OCSP respose");
+            return responseDetails;
+        }
 
         if (resp == null)
         {
@@ -162,12 +288,39 @@ public class OCSPChecker
         }
 
         // Read the info from the response
-        BasicOCSPResp basicOCSPResp = (BasicOCSPResp) resp.getResponseObject();
+        BasicOCSPResp basicOCSPResp = null;
 
-        if (!basicOCSPResp.verify(ocspCertificate.getPublicKey(), provider.getName()))
+        try
+        {
+            basicOCSPResp = (BasicOCSPResp) resp.getResponseObject();
+        }
+        catch (OCSPException oe)
         {
             responseDetails.setValid(false);
-            responseDetails.addError("OCSP Signature verification error");
+            responseDetails.addError("Can not retrieve basic reponse object from server response");
+            return responseDetails;
+        }
+
+        try
+        {
+            if (!basicOCSPResp.verify(ocspCertificate.getPublicKey(), provider.getName()))
+            {
+                responseDetails.setValid(false);
+                responseDetails.addError("OCSP Signature verification error");
+                
+                return responseDetails;
+            }
+        }
+        catch (NoSuchProviderException nspe)
+        {
+            responseDetails.setValid(false);
+            responseDetails.addError("OCSP response verification error. Provider not available");
+            return responseDetails;
+        }
+        catch (OCSPException oe)
+        {
+            responseDetails.setValid(false);
+            responseDetails.addError("Can not verify OCSP response");
             return responseDetails;
         }
 
@@ -235,9 +388,8 @@ public class OCSPChecker
         }
     }
 
-    public static void main(String[] args) throws KeyStoreException, CertificateException,
-            NoSuchAlgorithmException, FileNotFoundException, IOException, NoSuchProviderException,
-            OCSPException
+    public static void main(String[] args) throws CertificateException, KeyStoreException,
+            NoSuchAlgorithmException, IOException
     {
         Provider provider = new BouncyCastleProvider();
 
@@ -266,6 +418,8 @@ public class OCSPChecker
                 .toCharArray());
         X509Certificate cagvaFirma = (X509Certificate) ks
                 .getCertificate(ks.aliases().nextElement());
+        oscp.showStatus(oscp.getCertificateStatus(cagvaFirma, cagvaCertificate, ocspCertificate,
+                provider));
         oscp.showStatus(oscp.getCertificateStatus(ocspURL, cagvaFirma, cagvaCertificate,
                 ocspCertificate, provider));
 
