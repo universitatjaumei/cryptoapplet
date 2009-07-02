@@ -30,10 +30,6 @@ public class TSResponseToken
     public byte[] getMessageImprint() throws IOException, ASN1ParseException
     {
         byte[] tok = response.getToken().getContentInfo().getContentBytes();
-
-        FileOutputStream fos= new FileOutputStream("/tmp/p");
-        fos.write(tok);
-        fos.close();
         
         try
         {
