@@ -33,7 +33,7 @@ public class CRLChecker
     {
     }
 
-    public CRLResponseDetails getCertificateStatus(String crlURL, X509Certificate certificate) throws MalformedURLException, CRLException, CertificateException, IOException
+    public CRLResponseDetails getCertificateStatus(String crlURL, X509Certificate certificate)
     {
         CRLResponseDetails responseDetails = new CRLResponseDetails();
 
@@ -66,10 +66,9 @@ public class CRLChecker
     }
 
     @SuppressWarnings("unchecked")
-    public CRLResponseDetails getCertificateStatus(X509Certificate certificate) throws MalformedURLException, CRLException, CertificateException, IOException
+    public CRLResponseDetails getCertificateStatus(X509Certificate certificate)
     {
         CRLResponseDetails responseDetails = new CRLResponseDetails();
-
         String crlURL = null;
         
         // Try to extract CRL URL from the certificate
@@ -78,7 +77,7 @@ public class CRLChecker
         {
             X509CertImpl certificateImpl = (X509CertImpl) certificate;
             CRLDistributionPointsExtension crlDistributionPointsExtension = certificateImpl.getCRLDistributionPointsExtension();
-                 
+
             for (DistributionPoint distributionPoint : ((List<DistributionPoint>) crlDistributionPointsExtension.get(CRLDistributionPointsExtension.POINTS))) 
             {
                 for (GeneralName generalName : distributionPoint.getFullName().names()) 
