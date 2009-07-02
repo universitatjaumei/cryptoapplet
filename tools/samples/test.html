@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>
+ CryptoApplet Test Page. 
+</title>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="urlEncode.js"></script>
+<script type="text/javascript" src=capp.js></script> 
+</head>
+<body style="padding-left: 20px;">
+<br/><br>
+<font style="color: orange; font-size: 16pt; padding-right: 10px;"> Java Plugin 1.6 or greater requiered!</font>
+<button id="gjv" onClick="testJavaVersion();">Test it</button>
+<br/><br/>
+This is the CrytpoApplet test page, it uses some jdk 1.6 features, so it is a requirement to 
+use Java Plugin 1.6 or greater requiered for <br/> this test. Please make sure you have it correctly 
+inistalled.
+<br/><br/>
+<div id="sigContent">
+  <textarea id="ts" onClick="selectText('ts');" style="border: thin solid rgb(50,205,50);" cols="100" rows="10">
+   Write here the content to be signed.
+  </textarea>
+</div>
+<br/><br/>
+<div style="float:left; width: 40%;">
+Select Applet's Language:<br/>
+
+<input id="ES_es" type="radio" name="lang" value="ES_es" checked> <label for="ES_es">Español</label></input>
+<input id="EN_en" type="radio" name="lang" value="EN_en"> <label for="EN_en">English</label></input>
+<input id="CA_ca" type="radio" name="lang" value="CA_ca"> <label for="CA_ca">Català</label></input>
+
+<br/><br/>
+Select Input Encoding:<br/>
+
+<input id="plain" type="radio" name="encoding" value="plain" checked> <label for="plain">PLAIN</label></input> 
+<input id="base64" type="radio" name="encoding" value="base64"> <label for="base64">BASE64</label></input> 
+<input id="hex" type="radio" name="encoding" value="hex"> <label for="hex">HEX</label></input> 
+
+<br/><br/>
+Select Output Signature format:
+<br/>
+<div id="opt">
+<table>
+  <tr>
+    <td>
+      <input id="raw"  onClick="handleRadio('raw');" type="radio" name="format" value="raw" checked> <label for="raw">RAW</label></input>
+    </td>
+    <td>
+      <input id="cms" onClick="handleRadio('cms');" type="radio" name="format" value="cms"> <label for="cms">CMS</label></input>
+    </td>
+    <td>
+     <input id="cms_hash" onClick="handleRadio('cms_hash');" type="radio" name="format" value="cms_hash"> <label for="cms_hash">CMS_HASH</label></input>
+    </td>
+    <td>
+     <input id="facturae" onClick="handleRadio('facturae');" type="radio" name="format" value="facturae"> <label for="facturae">FACTURAE</label></input>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <input id="pdf"  onClick="handleRadio('pdf');" type="radio" name="format" value="pdf"> <label for="pdf">PDF</label> </input>
+    </td>
+    <td>
+      <input id="xmldsig" onClick="handleRadio('xmldsig');" type="radio" name="format" value="xmldsig"> <label for="xmldsig">XMLDSIG</label></input>
+    </td>
+    <td>
+      <input id="xades" onClick="handleRadio('xades');" type="radio" name="format" value="xades"> <label for="xades">XAdES</label> </input>
+    </td>
+  </tr>
+</table>
+</div>
+<div id="xopts"></div>
+<div id="popts"></div>
+<br/><br/>
+<button id="btnl" onClick="loadApplet();" style="width: 100px;">Load Applet</button>
+<button id="btns" onClick="Sign();" disabled style="width: 100px;"> Sign </button>
+<button id="btnvfy" onClick="verifyXAdES();" disabled style="width: 100px;"> Verify </button>
+</div>
+<div id="cappd"> 
+Applet Loading zone.
+</div>
+<textarea id="sigta" style="visibility: hidden;" cols="100" rows="10">
+<textarea>
+</body>
+</html>
