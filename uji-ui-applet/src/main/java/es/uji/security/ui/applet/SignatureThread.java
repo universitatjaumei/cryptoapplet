@@ -289,7 +289,25 @@ public class SignatureThread extends Thread
                     if (sig != null)
                         try
                         {
-                            outputParams.setSignData(sig);
+                        	 encoding = _mw.getAppHandler().getOutputDataEncoding();
+                        	 byte[] res= null;                            
+                        	 if (encoding.equals(SupportedDataEncoding.HEX))
+                             {
+                        		 ByteArrayOutputStream bos= new ByteArrayOutputStream();
+                                 HexEncoder h = new HexEncoder();
+                                 h.encode(sig, 0, sig.length, bos);
+                                 res= bos.toByteArray();
+                             }
+                             else if (encoding.equals(SupportedDataEncoding.BASE64))
+                             {
+                                 res= Base64.encode(sig);
+                             }
+                             else
+                             {
+                                 res= inputParams.getSignData();
+                             }
+                        	
+                            outputParams.setSignData(res);
                         }
                         catch (Exception e)
                         {

@@ -11,7 +11,9 @@ import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.mscapi.MsCapiKeyStore;
+import es.uji.security.keystore.mscapi.SunMsCapiKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class KeyStoreManager
@@ -39,11 +41,17 @@ public class KeyStoreManager
     
     public void initKeyStoresTable(SupportedBrowser navigator)
     {
+    	
         if (navigator.equals(SupportedBrowser.IEXPLORER))
         {
+        	IKeyStore explorerks= null;
             /* Explorer Keystore */
-            IKeyStore explorerks = (IKeyStore) new MsCapiKeyStore();
-
+        	if (OS.isJavaUpperEqualTo6()){
+        		explorerks = (IKeyStore) new SunMsCapiKeyStore();
+        	}
+        	else{
+        		explorerks = (IKeyStore) new MsCapiKeyStore();
+        	}
             try
             {
                 explorerks.load("".toCharArray());

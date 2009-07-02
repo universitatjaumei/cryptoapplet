@@ -15,10 +15,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.SupportedBrowser;
-import es.uji.security.crypto.SupportedDataEncoding;
-import es.uji.security.crypto.SupportedSignatureFormat;
-import es.uji.security.crypto.VerificationDetails;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.KeyStoreManager;
@@ -282,6 +278,26 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setInputDataEncoding(SupportedDataEncoding.valueOf(encoding));
+                return null;
+            }
+        });
+    }
+    
+    /**
+     * Sets the output encoding, if the input is different that plain, the applet will codify the
+     * output after computing the signature
+     * 
+     * @param encoding
+     *            Possible values PLAIN, HEX, BASE64
+     */
+
+    public void setOutputDataEncoding(final String encoding)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+                apph.setOutputDataEncoding(SupportedDataEncoding.valueOf(encoding));
                 return null;
             }
         });
