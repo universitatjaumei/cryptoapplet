@@ -14,7 +14,7 @@ public enum SupportedSignatureFormat
     }, 
     CMS_HASH {
         public String toString() {
-            return "es.uji.security.crypto.cms.CMSHashSignatureFactory"; 
+            return "es.uji.security.crypto.cms.CMSSignatureFactory"; 
         }
     }, 
     XADES {

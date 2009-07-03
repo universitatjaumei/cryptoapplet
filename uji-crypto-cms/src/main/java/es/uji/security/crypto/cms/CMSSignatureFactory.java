@@ -62,6 +62,10 @@ public class CMSSignatureFactory implements ISignFormatProvider
                 certList));
 
         gen.addCertificatesAndCRLs(certst);
+        
+        if (sigOpt.is_hash()){
+            gen.setHash(content);
+        }
 
         CMSSignedData data = gen.generate(cba, pv);
 

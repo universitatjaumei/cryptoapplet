@@ -7,7 +7,8 @@ import java.security.cert.X509Certificate;
 public class SignatureOptions
 {
 
-    private boolean _isByteArray = false;
+	private boolean _isByteArray = false;
+	private boolean _isHash = false;
     private boolean _isLocalFile = false;
     private X509Certificate certificate = null;
     private PrivateKey privateKey = null;
@@ -27,6 +28,16 @@ public class SignatureOptions
     public void set_isbyteArray(boolean isByteArray)
     {
         _isByteArray = isByteArray;
+    }
+    
+    public boolean is_hash()
+    {
+        return _isHash;
+    }
+
+    public void set_ishash(boolean isHash)
+    {
+        _isHash = isHash;
     }
 
     public boolean is_localFile()
