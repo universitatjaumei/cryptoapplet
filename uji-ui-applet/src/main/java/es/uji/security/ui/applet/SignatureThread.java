@@ -261,6 +261,11 @@ public class SignatureThread extends Thread
                         sigOpt.setCertificate(xcert.getCertificate());
                         sigOpt.setPrivateKey((PrivateKey) kAux.getKey(xcert.getAlias()));
                         sigOpt.setProvider(kAux.getProvider());
+                        
+                        if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS_HASH))
+                        {
+                           sigOpt.set_ishash(true);	
+                        }
 
                         sig = signer.formatSignature(sigOpt);
                     }
