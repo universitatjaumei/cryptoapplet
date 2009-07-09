@@ -31,6 +31,7 @@ import com.lowagie.text.pdf.PdfString;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class PDFSignatureFactory implements ISignFormatProvider
@@ -147,11 +148,11 @@ public class PDFSignatureFactory implements ISignFormatProvider
         sap.setRender(PdfSignatureAppearance.SignatureRenderGraphicAndDescription);
     }
 
-    public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
+    public InputStream formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
     {
         try
         {
-            byte[] datos = sigOpt.getToSignByteArray();
+            byte[] datos = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
             X509Certificate sCer = sigOpt.getCertificate();
             this.pk = sigOpt.getPrivateKey();
             this.pv = sigOpt.getProvider();
@@ -233,7 +234,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 stp.close();
             }
             
-            return sout.toByteArray();
+            return new ByteArrayInputStream(sout.toByteArray());
         }
         catch (Exception e)
         {

@@ -1,5 +1,6 @@
 package es.uji.security.crypto.raw.test;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.security.Key;
 import java.security.KeyStore;
@@ -14,6 +15,7 @@ import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.VerificationDetails;
 import es.uji.security.crypto.raw.RawSignatureFactory;
 import es.uji.security.crypto.raw.RawSignatureVerifier;
+import es.uji.security.util.OS;
 
 public class RawSignatureTest
 {
@@ -36,12 +38,12 @@ public class RawSignatureTest
         ISignFormatProvider signFormatProvider = new RawSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignByteArray(data);
+        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
         signatureOptions.setCertificate(certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
 
-        byte[] signedData = signFormatProvider.formatSignature(signatureOptions);
+        byte[] signedData = OS.inputStreamToByteArray(signFormatProvider.formatSignature(signatureOptions));
         
         RawSignatureVerifier rawSignatureVerifier = new RawSignatureVerifier();
         

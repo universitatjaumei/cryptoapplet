@@ -1,5 +1,8 @@
 package es.uji.security.ui.applet.io;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -35,6 +38,36 @@ public class AbstractData
 
         return digest;
     }
+    
+    public static byte[] getMessageDigest(InputStream toHash_is) throws IOException
+    {
+        byte[] digest = null;
+
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+         
+            byte[] buffer = new byte[2048];
+            int length = 0;
+
+            while ((length = toHash_is.read(buffer)) >= 0)
+            {
+                md.update(buffer, 0, length);
+            }
+            
+            digest = md.digest();
+            md.reset();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            // TODO Auto-generated catch block
+            // Null will be returned
+            // e.printStackTrace();
+        }
+
+        return digest;
+    }
+    
 
     public void setmustHash(boolean value)
     {

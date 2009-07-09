@@ -3,6 +3,7 @@ package es.uji.security.crypto.jxades;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
@@ -25,6 +26,7 @@ import org.w3c.dom.Element;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 
@@ -32,9 +34,9 @@ public class FacturaeSignatureFactory implements ISignFormatProvider
 {
 	private String _strerr= "";
 	
-	public byte[] formatSignature(SignatureOptions sopt) throws Exception
+	public InputStream formatSignature(SignatureOptions sopt) throws Exception
 	{		
-		byte[] toSign= sopt.getToSignByteArray();
+		byte[] toSign= OS.inputStreamToByteArray(sopt.getToSignInputStream());
 		X509Certificate sCer= sopt.getCertificate();
 		PrivateKey pk= sopt.getPrivateKey();
 		
@@ -123,7 +125,7 @@ public class FacturaeSignatureFactory implements ISignFormatProvider
 			bos.flush();
 			
 			
-			return out.toString().getBytes(); 
+			return new ByteArrayInputStream(out.toString().getBytes()); 
 		}
 		
 		catch (Exception e ){	

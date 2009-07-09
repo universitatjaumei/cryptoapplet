@@ -1,5 +1,7 @@
 package es.uji.security.crypto.cms;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -22,6 +24,7 @@ import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.Base64;
 import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class CMSSignatureFactory implements ISignFormatProvider
@@ -29,9 +32,9 @@ public class CMSSignatureFactory implements ISignFormatProvider
     private Logger log = Logger.getLogger(CMSSignatureFactory.class);
     private String _strerr = "";
 
-    public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
+    public InputStream formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
     {
-        byte[] content = sigOpt.getToSignByteArray();
+        byte[] content = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
         X509Certificate sCer = sigOpt.getCertificate();
         PrivateKey pk = sigOpt.getPrivateKey();
         Provider pv = sigOpt.getProvider();
@@ -96,16 +99,16 @@ public class CMSSignatureFactory implements ISignFormatProvider
                     log.info("Cannot calculate timestamp from: " + tsaUrl);
                     return null;
                 }
-                return ("<data>\r\n  <cms_signature>\r\n"
+                return new ByteArrayInputStream(("<data>\r\n  <cms_signature>\r\n"
                         + new String(Base64.encode(data.getEncoded(), true))
                         + "\r\n  </cms_signature>\r\n  <cms_timestamp>\r\n"
                         + new String(Base64.encode(ts, true)) + "\r\n  </cms_timestamp>\r\n</data>\r\n")
-                        .getBytes();
+                        .getBytes());
 
             }
             else
             {
-                return Base64.encode(data.getEncoded(), true);
+                return new ByteArrayInputStream(Base64.encode(data.getEncoded(), true));
             }
         }
         else

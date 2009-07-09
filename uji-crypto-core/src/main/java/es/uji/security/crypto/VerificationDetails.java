@@ -35,6 +35,18 @@ public class VerificationDetails
         return errors;
     }
     
+    public String[] getErrorsAsStringArray()
+    {
+    	Object[] obj= errors.toArray();
+        String[] res= new String[obj.length];
+        
+    	for(int i=0; i<obj.length; i++){
+    		res[i] = (String) obj[i]; 
+    	}
+    	
+        return res;
+    }
+        
     public void setErrors(ArrayList<String> errors)
     {
         this.errors = errors;

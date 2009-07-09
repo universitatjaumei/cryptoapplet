@@ -1,5 +1,7 @@
 package es.uji.security.crypto.raw;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -8,15 +10,16 @@ import java.security.cert.X509Certificate;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class RawSignatureFactory implements ISignFormatProvider
 {
     private String _strerr = "";
 
-    public byte[] formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
+    public InputStream formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
     {
-        byte[] datos = sigOpt.getToSignByteArray();
+        byte[] datos = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
         X509Certificate sCer = sigOpt.getCertificate();
         PrivateKey pk = sigOpt.getPrivateKey();
         Provider pv = sigOpt.getProvider();
@@ -51,7 +54,7 @@ public class RawSignatureFactory implements ISignFormatProvider
             _strerr = LabelManager.get("ERROR_RAW_SIGNATURE");
         }
 
-        return res;
+        return new ByteArrayInputStream(res);
     }
 
     public String getError()

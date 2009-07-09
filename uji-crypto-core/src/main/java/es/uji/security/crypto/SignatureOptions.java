@@ -1,5 +1,6 @@
 package es.uji.security.crypto;
 
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
@@ -10,24 +11,16 @@ public class SignatureOptions
 	private boolean _isByteArray = false;
 	private boolean _isHash = false;
     private boolean _isLocalFile = false;
+    private boolean swapToFile= false;
     private X509Certificate certificate = null;
     private PrivateKey privateKey = null;
     private Provider provider = null;
     byte[] toSign = null;
+    InputStream toSign_is = null;
 
     public SignatureOptions()
     {
 
-    }
-
-    public boolean is_byteArray()
-    {
-        return _isByteArray;
-    }
-
-    public void set_isbyteArray(boolean isByteArray)
-    {
-        _isByteArray = isByteArray;
     }
     
     public boolean is_hash()
@@ -80,13 +73,21 @@ public class SignatureOptions
         this.provider = provider;
     }
 
-    public byte[] getToSignByteArray()
+    public InputStream getToSignInputStream()
     {
-        return this.toSign;
+        return this.toSign_is;
     }
 
-    public void setToSignByteArray(byte[] b)
+    public void setToSignInputstream(InputStream is)
     {
-        this.toSign = b;
+        this.toSign_is = is;
+    }
+    
+    public void setSwapToFile(boolean value){
+    	this.swapToFile= value;
+    }
+   
+    public boolean getSwapToFile(){
+    	return this.swapToFile;
     }
 }

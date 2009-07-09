@@ -2,6 +2,7 @@ package es.uji.security.ui.applet.io;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -12,6 +13,7 @@ import netscape.javascript.JSObject;
 import org.apache.log4j.Logger;
 
 import es.uji.security.ui.applet.SignatureApplet;
+import es.uji.security.util.OS;
 
 public class URLOutputParams extends AbstractData implements OutputParams
 {
@@ -44,7 +46,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
         this.outputcount = oCount;
     }
 
-    public void setSignData(byte[] data) throws IOException
+    public void setSignData(InputStream is) throws IOException
     {
         String strAux, var, value, strpost;
 
@@ -58,12 +60,14 @@ public class URLOutputParams extends AbstractData implements OutputParams
         String strUrl = url;
         String urlOk;
 
+        byte[] data= OS.inputStreamToByteArray(is);
+        
         if (strUrl.indexOf('?') > -1)
             urlOk = strUrl.substring(0, strUrl.indexOf('?'));
         else
             urlOk = strUrl;
 
-        log.debug(" Utilizando como url de envío: " + urlOk);
+        log.debug(" Utilizando como url de envÃ­o: " + urlOk);
         URL url = new URL(urlOk);
 
         StringTokenizer strTok = new StringTokenizer(strUrl.substring(strUrl.indexOf('?') + 1), "&");

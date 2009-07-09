@@ -1,15 +1,19 @@
 package es.uji.security.ui.applet.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.log4j.Logger;
+
+import es.uji.security.util.OS;
 
 public class ConsoleOutputParams implements OutputParams
 {
     private Logger log = Logger.getLogger(ConsoleOutputParams.class);
     
-    public void setSignData(byte[] data) throws IOException
+    public void setSignData(InputStream is) throws IOException
     {
+    	byte[] data= OS.inputStreamToByteArray(is);
         System.out.println(new String(data));
     }
 

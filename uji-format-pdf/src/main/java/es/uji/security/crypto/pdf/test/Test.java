@@ -1,5 +1,6 @@
 package es.uji.security.crypto.pdf.test;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,6 +17,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.pdf.PDFSignatureFactory;
+import es.uji.security.util.OS;
 
 public class Test
 {
@@ -39,7 +41,7 @@ public class Test
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
 
-        // Cargando certificado de aplicación
+        // Cargando certificado de aplicaciï¿½n
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
 
@@ -53,12 +55,12 @@ public class Test
         PDFSignatureFactory xsf = new PDFSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignByteArray(data);
+        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
         signatureOptions.setCertificate((X509Certificate) certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
 
-        byte[] signedData = xsf.formatSignature(signatureOptions);
+        byte[] signedData = OS.inputStreamToByteArray(xsf.formatSignature(signatureOptions));
 
         FileOutputStream fos = new FileOutputStream("/tmp/out.pdf");
         fos.write(signedData);

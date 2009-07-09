@@ -44,6 +44,13 @@ public class OS
         is.close();
         return bytes;
     }
+    
+    public static String getSystemTmpDir(){
+    	
+    	System.out.println("Got System.getProperty(java.io.tmpdir): " + System.getProperty("java.io.tmpdir") );
+    	
+    	return System.getProperty("java.io.tmpdir");
+    }
 
     public static byte[] inputStreamToByteArray(InputStream in) throws IOException
     {
@@ -67,6 +74,24 @@ public class OS
             FileOutputStream fos = new FileOutputStream(fileName);
             fos.write(data);
             fos.flush();
+            fos.close();
+        }
+    }
+    
+    public static void dumpToFile(File file, InputStream in) throws IOException
+    {
+        if (file != null && file.length() > 0)
+        {
+        	byte[] buffer = new byte[2048];
+            int length = 0;
+
+            FileOutputStream fos = new FileOutputStream(file);
+
+            while ((length = in.read(buffer)) >= 0)
+            {
+                fos.write(buffer, 0, length);
+            }
+            
             fos.close();
         }
     }

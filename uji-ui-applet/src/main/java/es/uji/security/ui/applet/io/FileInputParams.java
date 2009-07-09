@@ -1,6 +1,8 @@
 package es.uji.security.ui.applet.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -10,7 +12,7 @@ import es.uji.security.util.OS;
 
 public class FileInputParams extends AbstractData implements InputParams
 {
-    public byte[] getSignData() throws Exception
+    public InputStream getSignData() throws Exception
     {
         JFileChooser chooser = new JFileChooser();
         int returnVal = chooser.showOpenDialog(null);
@@ -25,7 +27,7 @@ public class FileInputParams extends AbstractData implements InputParams
 
             if (! selectedFile.exists())
             {
-                JOptionPane.showMessageDialog(null, "No se encontró fichero", "", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "No se encontrÃ³ fichero", "", JOptionPane.ERROR_MESSAGE);
             }
             else
             {
@@ -40,7 +42,7 @@ public class FileInputParams extends AbstractData implements InputParams
             }
         }
         
-        return data;
+        return new ByteArrayInputStream(data);
     }
 
     public String getSignFormat(SignatureApplet base)
@@ -53,7 +55,7 @@ public class FileInputParams extends AbstractData implements InputParams
         return 1;
     }
 
-    public byte[] getSignData(int item) throws Exception
+    public InputStream getSignData(int item) throws Exception
     {
         return null;
     }

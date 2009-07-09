@@ -1,6 +1,10 @@
 package es.uji.security.crypto.openxades;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.CertificateException;
@@ -8,11 +12,8 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Properties;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.timestamp.TSResponse;
-import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
@@ -23,259 +24,287 @@ import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
+import es.uji.security.crypto.timestamp.TSResponse;
+import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class OpenXAdESSignatureFactory implements ISignFormatProvider
 {
-    private Logger log = Logger.getLogger(OpenXAdESSignatureFactory.class);
+	private Logger log = Logger.getLogger(OpenXAdESSignatureFactory.class);
 
-    private String _strerr = "";
-    private String signerRole = "UNSET";
-    private String xadesFileName = "data.xml";
-    private String xadesFileMimeType = "application/binary";
+	private String _strerr = "";
+	private String signerRole = "UNSET";
+	private String xadesFileName = "data.xml";
+	private String xadesFileMimeType = "application/binary";
 
-    public void setSignerRole(String srole)
-    {
-        signerRole = srole;
-    }
+	public void setSignerRole(String srole)
+	{
+		signerRole = srole;
+	}
 
-    public void setXadesFileName(String filename)
-    {
-        xadesFileName = filename;
-    }
+	public void setXadesFileName(String filename)
+	{
+		xadesFileName = filename;
+	}
 
-    public void setXadesFileMimeType(String fmimetype)
-    {
-        xadesFileMimeType = fmimetype;
-    }
+	public void setXadesFileMimeType(String fmimetype)
+	{
+		xadesFileMimeType = fmimetype;
+	}
 
-    public byte[] formatSignature(SignatureOptions sigOpt) throws Exception
-    {
-        /*
-         * for ( Enumeration enu= ksh.aliases(); enu.hasMoreElements(); ){
-         * System.out.println("Next elem: " + enu.nextElement()); }
-         */
-    	//Logger.getRootLogger().setLevel(Level.OFF);	
-    	
-    	byte[] toSign = sigOpt.getToSignByteArray();
-        X509Certificate sCer = sigOpt.getCertificate();
-        PrivateKey pk = sigOpt.getPrivateKey();
-        Provider pv = sigOpt.getProvider();
+	public InputStream formatSignature(SignatureOptions sigOpt) throws Exception
+	{
+		/*
+		 * for ( Enumeration enu= ksh.aliases(); enu.hasMoreElements(); ){
+		 * System.out.println("Next elem: " + enu.nextElement()); }
+		 */
+		//Logger.getRootLogger().setLevel(Level.OFF);	
 
-        log.debug("Using XAdESSignatureFactory");
-        log.debug(pv.getName() + " provider found");
+		String file= "jar://data.xml";
+		X509Certificate sCer = sigOpt.getCertificate();
+		PrivateKey pk = sigOpt.getPrivateKey();
+		Provider pv = sigOpt.getProvider();
+		byte[] toSign= null;
+		File random= new File(OS.getSystemTmpDir() + "/signatureData.dat"); 
 
-        Properties prop = ConfigHandler.getProperties();
-        if (prop != null)
-        {
-            ConfigManager.init(prop);
-        }
-        else
-        {
-            _strerr = LabelManager.get("ERROR_DDOC_NOCONFIGFILE");
-            return null;
-        }
+		log.debug("Using XAdESSignatureFactory");
+		log.debug(pv.getName() + " provider found");
 
-        // Creamos un nuevo SignedDoc XAdES
-        SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
-        // A�adimos una nueva referencia de fichero en base64 ... aunque establecemos el body
-        DataFile df = sdoc.addDataFile(new File("jar://data.xml"), "application/binary",
-                DataFile.CONTENT_EMBEDDED_BASE64);
+		Properties prop = ConfigHandler.getProperties();
+		if (prop != null)
+		{
+			ConfigManager.init(prop);
+		}
+		else
+		{
+			_strerr = LabelManager.get("ERROR_DDOC_NOCONFIGFILE");
+			return null;
+		}
 
-        System.out.println("Seleccionando nombre fichero a: " + xadesFileName);
-        sdoc.getDataFile(0).setFileName(xadesFileName);
-        sdoc.getDataFile(0).setMimeType(xadesFileMimeType);
+		// Here we must to guess whether tmp file is necessary or not.
+		if (sigOpt.getSwapToFile()){
+			OS.dumpToFile(random ,  sigOpt.getToSignInputStream());
+		}
 
-        df.setBody(toSign);
-        df.setSize(toSign.length);
+		// Creamos un nuevo SignedDoc XAdES
+		SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
+		// A�adimos una nueva referencia de fichero en base64 ... aunque establecemos el body
+		DataFile df = sdoc.addDataFile(new File(file), "application/binary",
+				DataFile.CONTENT_EMBEDDED_BASE64);
 
-        return signDoc(sdoc, toSign, sCer, pk, pv);
-    }
+		System.out.println("Seleccionando nombre fichero a: " + xadesFileName);
+		sdoc.getDataFile(0).setFileName(xadesFileName);
+		sdoc.getDataFile(0).setMimeType(xadesFileMimeType);
 
-    protected byte[] signDoc(SignedDoc sdoc, byte[] toSign, X509Certificate sCer, PrivateKey pk,
-            Provider pv) throws Exception
-    {
+		if (!sigOpt.getSwapToFile()){
+			toSign = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());	
+			df.setBody(toSign);
+			df.setSize(toSign.length);
+		}
 
-        if (sCer == null)
-        {
-            _strerr = LabelManager.get("ERROR_DDOC_NOCERT");
-            return null;
-        }
+		InputStream res = signDoc(sdoc, sigOpt);
 
-        if (pk == null)
-        {
-            _strerr = LabelManager.get("ERROR_DDOC_NOKEY");
-            return null;
-        }
+		random.delete();
 
-        // Prepare the signature
-        // TODO: Role support in the signature
-        Signature sig = sdoc.prepareSignature((X509Certificate) sCer, new String[] { signerRole },
-                null);
-        CertValue cval = null;
+		return res;
+	}
 
-        // Do the signature
-        byte[] sidigest = sig.getSignedContent();
-        if (sidigest == null)
-        {
-            _strerr = LabelManager.get("ERROR_DDOC_NODIGEST");
-            return null;
-        }
+	protected InputStream signDoc(SignedDoc sdoc, SignatureOptions sigOpt) throws Exception
+	{
 
-        java.security.Signature rsa = java.security.Signature.getInstance("SHA1withRSA", pv);
-        rsa.initSign(pk);
-        rsa.update(sidigest);
-        byte[] res = rsa.sign();
+		X509Certificate sCer = sigOpt.getCertificate();
+		PrivateKey pk = sigOpt.getPrivateKey();
+		Provider pv = sigOpt.getProvider();
+		File random= new File(OS.getSystemTmpDir() + "/signature.xsig");
 
-        if (res == null)
-        {
-            log.error("No se pudo calcular la firma");
-            _strerr = LabelManager.get("ERROR_DDOC_SIGNATURE");
-            return null;
-        }
+		if (sCer == null)
+		{
+			_strerr = LabelManager.get("ERROR_DDOC_NOCERT");
+			return null;
+		}
 
-        log.debug("Signing XAdES info. XAdES signature length " + res.length);
+		if (pk == null)
+		{
+			_strerr = LabelManager.get("ERROR_DDOC_NOKEY");
+			return null;
+		}
 
-        // Add the signature to the signed doc
-        sig.setSignatureValue(res);
+		// Prepare the signature
+		// TODO: Role support in the signature
+		Signature sig = sdoc.prepareSignature((X509Certificate) sCer, new String[] { signerRole },
+				null);
+		CertValue cval = null;
 
-        // Get the timestamp and add it
+		// Do the signature
+		byte[] sidigest = sig.getSignedContent();
+		if (sidigest == null)
+		{
+			_strerr = LabelManager.get("ERROR_DDOC_NODIGEST");
+			return null;
+		}
 
-        int tsaCount = ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT", 0);
-        if (tsaCount != 0)
-        {
-            String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
-            byte[] signatureValue = sig.getSignatureValue().toString().getBytes();
+		java.security.Signature rsa = java.security.Signature.getInstance("SHA1withRSA", pv);
+		rsa.initSign(pk);
+		rsa.update(sidigest);
+		byte[] res = rsa.sign();
 
-            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue,
-                    true);
+		if (res == null)
+		{
+			log.error("No se pudo calcular la firma");
+			_strerr = LabelManager.get("ERROR_DDOC_SIGNATURE");
+			return null;
+		}
 
-            TSResponseToken responseToken= new TSResponseToken(response);
-            
-            TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
-            ts.setTimeStampResponse(response);
-            ts.setSignature(sig);
-            ts.setHash(responseToken.getMessageImprint());
+		log.debug("Signing XAdES info. XAdES signature length " + res.length);
 
-            sig.addTimestampInfo(ts);
+		// Add the signature to the signed doc
+		sig.setSignatureValue(res);
 
-            String tsa1_ca = ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
+		// Get the timestamp and add it
 
-            if (tsa1_ca == null)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_TSACA");
-                return null;
-            }
+		int tsaCount = ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT", 0);
+		if (tsaCount != 0)
+		{
+			String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+			byte[] signatureValue = sig.getSignatureValue().toString().getBytes();
+			
+			TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue,
+					true);
 
-            X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
+			TSResponseToken responseToken= new TSResponseToken(response);
 
-            cval = new CertValue();
-            cval.setType(CertValue.CERTVAL_TYPE_TSA);
-            cval.setCert(xcaCert);
-            cval.setId(sig.getId() + "-TSA_CERT");
+			TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
+			ts.setTimeStampResponse(response);
+			ts.setSignature(sig);
+			ts.setHash(responseToken.getMessageImprint());
 
-            // Check the certificate validity against the timestamp:
-            Date d = ts.getTime();
+			sig.addTimestampInfo(ts);
 
-            try
-            {
-                sCer.checkValidity(d);
-            }
-            catch (CertificateException cex)
-            {
-                _strerr = LabelManager.get("ERROR_CERTIFICATE_EXPIRED");
-                return null;
-            }
-        }
+			String tsa1_ca = ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
 
-        try
-        {
-            // A�adimos certificado TSA
-            if (tsaCount != 0)
-            {
-                sig.addCertValue(cval);
-            }
+			if (tsa1_ca == null)
+			{
+				_strerr = LabelManager.get("ERROR_DDOC_TSACA");
+				return null;
+			}
 
-            // Verificaci�n OCSP
-            if (ConfigManager.instance().getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
-            {
-                sig.getConfirmation();
-            }
+			X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
 
-            String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
-           
-            byte[] completeCertificateRefs = sig.getUnsignedProperties()
-                    .getCompleteCertificateRefs().toXML();
-            
-            byte[] completeRevocationRefs = sig.getUnsignedProperties().getCompleteRevocationRefs()
-                    .toXML();
-            
-            CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
-            byte[] 	canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
-            		SignedDoc.CANONICALIZATION_METHOD_20010315);
+			cval = new CertValue();
+			cval.setType(CertValue.CERTVAL_TYPE_TSA);
+			cval.setCert(xcaCert);
+			cval.setId(sig.getId() + "-TSA_CERT");
 
-            byte[] 	canCompleteRevocationRefs = canFac.canonicalize(completeRevocationRefs,
-            		SignedDoc.CANONICALIZATION_METHOD_20010315);
+			// Check the certificate validity against the timestamp:
+			Date d = ts.getTime();
+
+			try
+			{
+				sCer.checkValidity(d);
+			}
+			catch (CertificateException cex)
+			{
+				_strerr = LabelManager.get("ERROR_CERTIFICATE_EXPIRED");
+				return null;
+			}
+		}
+
+		try
+		{
+			// Añadimos certificado TSA
+			if (tsaCount != 0)
+			{
+				sig.addCertValue(cval);
+			}
+
+			// Verificación OCSP
+			if (ConfigManager.instance().getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
+			{
+				sig.getConfirmation();
+			}
+
+			String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+
+			byte[] completeCertificateRefs = sig.getUnsignedProperties()
+			.getCompleteCertificateRefs().toXML();
+
+			byte[] completeRevocationRefs = sig.getUnsignedProperties().getCompleteRevocationRefs()
+			.toXML();
+
+			CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+			byte[] 	canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
+					SignedDoc.CANONICALIZATION_METHOD_20010315);
+
+			byte[] 	canCompleteRevocationRefs = canFac.canonicalize(completeRevocationRefs,
+					SignedDoc.CANONICALIZATION_METHOD_20010315);
 
 
-            byte[] refsOnlyData = new byte[canCompleteCertificateRefs.length
-                    + canCompleteRevocationRefs.length];
-            System.arraycopy(canCompleteCertificateRefs, 0, refsOnlyData, 0,
-                    canCompleteCertificateRefs.length);
-            System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
-                    canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
-                          
-            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
-            TSResponseToken responseToken= new TSResponseToken(response);
-            
-            TimestampInfo ts = new TimestampInfo("TS2", TimestampInfo.TIMESTAMP_TYPE_REFS_ONLY);
-            ts.setTimeStampResponse(response);
-            ts.setSignature(sig);
-            ts.setHash(responseToken.getMessageImprint());
+			byte[] refsOnlyData = new byte[canCompleteCertificateRefs.length
+			                               + canCompleteRevocationRefs.length];
+			System.arraycopy(canCompleteCertificateRefs, 0, refsOnlyData, 0,
+					canCompleteCertificateRefs.length);
+			System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
+					canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
 
-            sig.addTimestampInfo(ts);
+			TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
+			TSResponseToken responseToken= new TSResponseToken(response);
 
-            log.debug("Verificacion OCSP completa");
+			TimestampInfo ts = new TimestampInfo("TS2", TimestampInfo.TIMESTAMP_TYPE_REFS_ONLY);
+			ts.setTimeStampResponse(response);
+			ts.setSignature(sig);
+			ts.setHash(responseToken.getMessageImprint());
 
-        }
-        catch (DigiDocException e)
-        {
-            if (e.getCode() == DigiDocException.ERR_CERT_REVOKED)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_CERTREVOKED");
-            }
-            else if (e.getCode() == DigiDocException.ERR_CERT_EXPIRED)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_CERTEXPIRED");
-            }
-            else if (e.getCode() == DigiDocException.ERR_CA_CERT_READ)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED");
-                // _strerr= LabelManager.get("ERROR_DDOC_CACERTREAD");
-            }
-            else if (e.getCode() == DigiDocException.ERR_OCSP_READ_FILE
-                    || e.getCode() == DigiDocException.ERR_OCSP_ISSUER_CA_NOT_FOUND)
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED");
-            }
-            else
-            {
-                _strerr = LabelManager.get("ERROR_DDOC_CERTGENERIC");
-            }
-            log.debug("\n\n" + this.getClass().getName()
-                    + ": No se pudo realizar la confirmacion OCSP" + e.getMessage());
-            // e.printStackTrace();
-            return null;
-        }
+			sig.addTimestampInfo(ts);
 
-        // Devolvemos el documento firmado y codificado
-        return sdoc.toXML().getBytes();
-    }
+			log.debug("Verificacion OCSP completa");
 
-    public String getError()
-    {
-        return _strerr;
-    }
+		}
+		catch (DigiDocException e)
+		{
+			if (e.getCode() == DigiDocException.ERR_CERT_REVOKED)
+			{
+				_strerr = LabelManager.get("ERROR_DDOC_CERTREVOKED");
+			}
+			else if (e.getCode() == DigiDocException.ERR_CERT_EXPIRED)
+			{
+				_strerr = LabelManager.get("ERROR_DDOC_CERTEXPIRED");
+			}
+			else if (e.getCode() == DigiDocException.ERR_CA_CERT_READ)
+			{
+				_strerr = LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED");
+				// _strerr= LabelManager.get("ERROR_DDOC_CACERTREAD");
+			}
+			else if (e.getCode() == DigiDocException.ERR_OCSP_READ_FILE
+					|| e.getCode() == DigiDocException.ERR_OCSP_ISSUER_CA_NOT_FOUND)
+			{
+				_strerr = LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED");
+			}
+			else
+			{
+				_strerr = LabelManager.get("ERROR_DDOC_CERTGENERIC");
+			}
+			log.debug("\n\n" + this.getClass().getName()
+					+ ": No se pudo realizar la confirmacion OCSP" + e.getMessage());
+			// e.printStackTrace();
+			return null;
+		}
+
+		// Return the signed and coded document
+		// If the bigFile mode is set, we write the result ot a file and get back de 
+		// FileInputStream 
+		if (sigOpt.getSwapToFile()){
+			sdoc.writeToFile(random);
+			return new FileInputStream(random);
+		}
+
+		return new ByteArrayInputStream(sdoc.toXML().getBytes());
+	}
+
+	public String getError()
+	{
+		return _strerr;
+	}
 }

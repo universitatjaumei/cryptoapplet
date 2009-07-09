@@ -73,6 +73,8 @@ public class AppHandler
     private String[] signerRole;
     private String xadesFilename;
     private String xadesFileMimeType;
+    
+    private boolean isBigFile= false;
 
     private SSLSocketFactory defaultSocketFactory;
 
@@ -589,6 +591,15 @@ public class AppHandler
     }
 
     /**
+     * A method for get the isBigFile attribute.
+     * 
+     * @return boolean indicating if it is bigFile or not. 
+     */
+	public boolean getIsBigFile() {
+		return this.isBigFile; 
+	}
+    
+    /**
      * A method for setting the encoding type of the input data
      * 
      * @param inputDataEncoding
@@ -703,4 +714,8 @@ public class AppHandler
             }
         }
     }
+
+	public void setIsBigFile(boolean isBigFile) {
+		this.isBigFile= isBigFile; 
+	}
 }

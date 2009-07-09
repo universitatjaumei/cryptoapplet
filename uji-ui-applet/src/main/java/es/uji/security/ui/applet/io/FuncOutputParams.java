@@ -1,9 +1,11 @@
 package es.uji.security.ui.applet.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 
 import es.uji.security.ui.applet.SignatureApplet;
+import es.uji.security.util.OS;
 
 public class FuncOutputParams implements OutputParams
 {
@@ -20,9 +22,11 @@ public class FuncOutputParams implements OutputParams
         this.sap = sap;
     }
 
-    public void setSignData(byte[] data) throws IOException
+    public void setSignData(InputStream is) throws IOException
     {
 
+    	byte[] data= OS.inputStreamToByteArray(is);
+    	
         strSig = new String(data);
 
         if (_count > 1 && (_current != (_count - 1)))

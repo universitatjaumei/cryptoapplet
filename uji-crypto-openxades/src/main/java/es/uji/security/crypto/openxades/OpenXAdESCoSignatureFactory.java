@@ -1,6 +1,7 @@
 package es.uji.security.crypto.openxades;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
@@ -12,6 +13,7 @@ import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.util.ConfigHandler;
+import es.uji.security.util.OS;
 
 public class OpenXAdESCoSignatureFactory implements ISignFormatProvider
 {
@@ -35,12 +37,12 @@ public class OpenXAdESCoSignatureFactory implements ISignFormatProvider
         xadesFileMimeType = fmimetype;
     }
 
-    public byte[] formatSignature(SignatureOptions sigOpt) throws Exception
+    public InputStream formatSignature(SignatureOptions sigOpt) throws Exception
     {
 
-        byte[] res;
+        InputStream res;
 
-        byte[] toSign = sigOpt.getToSignByteArray();
+        byte[] toSign = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
         X509Certificate sCer = sigOpt.getCertificate();
         PrivateKey pk = sigOpt.getPrivateKey();
         Provider pv = sigOpt.getProvider();
@@ -62,8 +64,8 @@ public class OpenXAdESCoSignatureFactory implements ISignFormatProvider
         xsf.setSignerRole(signerRole);
         xsf.setXadesFileName(xadesFileName);
         xsf.setXadesFileMimeType(xadesFileMimeType);
-
-        res = xsf.signDoc(sdoc, toSign, sCer, pk, pv);
+       
+        res = xsf.signDoc(sdoc, sigOpt);
 
         _sterr = xsf.getError();
 
