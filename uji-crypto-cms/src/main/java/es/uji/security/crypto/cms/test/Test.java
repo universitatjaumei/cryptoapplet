@@ -33,7 +33,7 @@ public class Test
             Security.addProvider(bcp);
         }
         
-        // Cargando certificado de aplicación
+        // Cargando certificado de aplicaciï¿½n
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         ks.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
         
@@ -46,12 +46,12 @@ public class Test
         ISignFormatProvider signFormatProvider = new CMSSignatureFactory();
         
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignByteArray(data);
+        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
         signatureOptions.setCertificate(certificate);
         signatureOptions.setPrivateKey(privateKey);
         signatureOptions.setProvider(new BouncyCastleProvider());
         
-        byte[] cmsData = signFormatProvider.formatSignature(signatureOptions);
+        byte[] cmsData = OS.inputStreamToByteArray(signFormatProvider.formatSignature(signatureOptions));
 
         OS.dumpToFile("/tmp/test.txt", cmsData);
         

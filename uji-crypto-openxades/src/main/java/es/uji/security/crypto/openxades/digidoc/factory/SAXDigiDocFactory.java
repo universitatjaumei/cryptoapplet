@@ -1309,7 +1309,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 {
                     try
                     {
-                        // calc digest over end tag
+                    	// calc digest over end tag
                         updateDigest("</DataFile>".getBytes());
                         // System.out.println("Set digest: " + df.getId());
                         df.setDigest(getDigest());

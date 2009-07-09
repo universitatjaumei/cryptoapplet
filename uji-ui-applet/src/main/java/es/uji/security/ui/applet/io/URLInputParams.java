@@ -1,5 +1,6 @@
 package es.uji.security.ui.applet.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -30,7 +31,7 @@ public class URLInputParams extends AbstractData implements InputParams
         return count;
     }
 
-    public byte[] getSignData() throws Exception
+    public InputStream getSignData() throws Exception
     {
 
         URL url = new URL(inputs[current]);
@@ -44,10 +45,10 @@ public class URLInputParams extends AbstractData implements InputParams
 
         current++;
 
-        return OS.inputStreamToByteArray(in);
+        return in;
     }
 
-    public byte[] getSignData(int item) throws Exception
+    public InputStream getSignData(int item) throws Exception
     {
         if (!initialized)
             throw new IOException("Uninitialized Input method");
@@ -67,9 +68,9 @@ public class URLInputParams extends AbstractData implements InputParams
         InputStream in = uc.getInputStream();
 
         if (mustHash)
-            return this.getMessageDigest(OS.inputStreamToByteArray(in));
+            return new ByteArrayInputStream(this.getMessageDigest(in));
 
-        return OS.inputStreamToByteArray(in);
+        return in;
     }
 
     public String getSignFormat(SignatureApplet base)

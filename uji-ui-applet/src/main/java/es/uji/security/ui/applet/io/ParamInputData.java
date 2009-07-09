@@ -1,5 +1,7 @@
 package es.uji.security.ui.applet.io;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Hashtable;
 
 import es.uji.security.ui.applet.SignatureApplet;
@@ -22,10 +24,9 @@ public class ParamInputData extends AbstractData implements InputParams
         return _count;
     }
 
-    public byte[] getSignData() throws Exception
+    public InputStream getSignData() throws Exception
     {
-
-    	System.out.println("Current= " + _current);
+    	
     	byte[] ret = this.str_in[_current].getBytes();
 
         if (mustHash)
@@ -33,10 +34,10 @@ public class ParamInputData extends AbstractData implements InputParams
  
         _current++;
 
-        return ret;
+        return new ByteArrayInputStream(ret);
     }
 
-    public byte[] getSignData(int item) throws Exception
+    public InputStream getSignData(int item) throws Exception
     {
         // TODO Auto-generated method stub
         return null;

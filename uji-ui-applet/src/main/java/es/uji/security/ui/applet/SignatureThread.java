@@ -1,7 +1,9 @@
 package es.uji.security.ui.applet;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.security.PrivateKey;
@@ -24,6 +26,7 @@ import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
 import es.uji.security.util.Base64;
 import es.uji.security.util.HexEncoder;
+import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class SignatureThread extends Thread
@@ -212,7 +215,7 @@ public class SignatureThread extends Thread
                 {
                     ByteArrayOutputStream ot = new ByteArrayOutputStream();
 
-                    byte[] in;
+                    InputStream  in= inputParams.getSignData();
 
                     SupportedDataEncoding encoding = _mw.getAppHandler().getInputDataEncoding();
 
@@ -220,22 +223,19 @@ public class SignatureThread extends Thread
                     if (encoding.equals(SupportedDataEncoding.HEX))
                     {
                         HexEncoder h = new HexEncoder();
-                        h.decode(new String(inputParams.getSignData()), ot);
-                        in = ot.toByteArray();
+                        h.decode(new String(OS.inputStreamToByteArray(in)), ot);
+                        in = new ByteArrayInputStream(ot.toByteArray());
                     }
                     else if (encoding.equals(SupportedDataEncoding.BASE64))
                     {
-                        in = Base64.decode(inputParams.getSignData());
+                        in = new ByteArrayInputStream(Base64.decode(OS.inputStreamToByteArray(in)));
                     }
-                    else
-                    {
-                        in = inputParams.getSignData();
-                    }
+                   
 
-                    if (_mw.isShowSignatureEnabled())
+                    if (_mw.isShowSignatureEnabled() && ! _mw.getAppHandler().getIsBigFile())
                     {
                         int sel = JOptionPane.showConfirmDialog(_mw.getMainFrame(), _mw
-                                .getShowDataScrollPane(in), LabelManager
+                                .getShowDataScrollPane(OS.inputStreamToByteArray(in)), LabelManager
                                 .get("LABEL_SHOW_DATA_WINDOW"), JOptionPane.OK_CANCEL_OPTION);
                         if (sel != JOptionPane.OK_OPTION)
                         {
@@ -247,7 +247,7 @@ public class SignatureThread extends Thread
                         }
                     }
 
-                    byte[] sig = null;
+                    InputStream sig = null;
 
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 6 * inc);
 
@@ -257,7 +257,7 @@ public class SignatureThread extends Thread
                     {
                         // Set up the data for the signature handling.
                         SignatureOptions sigOpt = new SignatureOptions();
-                        sigOpt.setToSignByteArray(in);
+                        sigOpt.setToSignInputstream(in);
                         sigOpt.setCertificate(xcert.getCertificate());
                         sigOpt.setPrivateKey((PrivateKey) kAux.getKey(xcert.getAlias()));
                         sigOpt.setProvider(kAux.getProvider());
@@ -295,21 +295,22 @@ public class SignatureThread extends Thread
                         try
                         {
                         	 encoding = _mw.getAppHandler().getOutputDataEncoding();
-                        	 byte[] res= null;                            
+                        	 InputStream res= null;                            
                         	 if (encoding.equals(SupportedDataEncoding.HEX))
                              {
+                        		 byte[] tmp= OS.inputStreamToByteArray(sig);
                         		 ByteArrayOutputStream bos= new ByteArrayOutputStream();
                                  HexEncoder h = new HexEncoder();
-                                 h.encode(sig, 0, sig.length, bos);
-                                 res= bos.toByteArray();
+                                 h.encode(tmp, 0, tmp.length, bos);
+                                 res= new ByteArrayInputStream(bos.toByteArray());
                              }
                              else if (encoding.equals(SupportedDataEncoding.BASE64))
                              {
-                                 res= Base64.encode(sig);
+                                 res= new ByteArrayInputStream(Base64.encode(OS.inputStreamToByteArray(sig)));
                              }
                              else
                              {
-                                 res= inputParams.getSignData();
+                                 res= sig;
                              }
                         	
                             outputParams.setSignData(res);

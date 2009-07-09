@@ -1,5 +1,6 @@
 package es.uji.security.crypto.openxades.test;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.security.Key;
 import java.security.KeyStore;
@@ -21,7 +22,7 @@ public class Test
 {
     public static void main(String[] args) throws Exception
     {
-    	String pwd= "Here your pwd";
+    	String pwd= args[0];
     	
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
@@ -40,17 +41,19 @@ public class Test
         ISignFormatProvider signFormatProvider = new OpenXAdESSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignByteArray(data);
+        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
         signatureOptions.setCertificate((X509Certificate) certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
 
-        byte[] signedData = signFormatProvider.formatSignature(signatureOptions);
+        byte[] signedData = OS.inputStreamToByteArray(signFormatProvider.formatSignature(signatureOptions));
         
         OS.dumpToFile("/tmp/signed-output.xml", signedData);
         
         OpenXAdESSignatureVerifier verifier = new OpenXAdESSignatureVerifier();
+
         VerificationDetails verificationDetails = verifier.verify(OS.inputStreamToByteArray(new FileInputStream("/tmp/signed-output.xml")));
+
         
         if (! verificationDetails.isValid())
         {

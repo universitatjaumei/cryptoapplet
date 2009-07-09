@@ -380,6 +380,24 @@ public class SignatureApplet extends JApplet
             }
         });
     }
+    
+    /**
+     * JS interface to setting the bigFile support.
+     * It must be set if the file can overflow the memory because of its size. 
+     * 
+     * @param String "true" or "false"
+     */
+    public void setIsBigFile(final String bigfile)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+                apph.setIsBigFile(bigfile.equals("true"));
+                return null;
+            }
+        });
+    }
 
     /* SIGNATURE COMPUTATION FUNCTIONS */
 
@@ -760,7 +778,7 @@ public class SignatureApplet extends JApplet
                     
                     VerificationDetails verificationDetails = sv.verify(data);
                     
-                    return (String[]) verificationDetails.getErrors().toArray();
+                    return (String[]) verificationDetails.getErrorsAsStringArray();
                 }
                 catch (Exception e)
                 {

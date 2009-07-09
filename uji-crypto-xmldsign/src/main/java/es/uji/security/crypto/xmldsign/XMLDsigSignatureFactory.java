@@ -2,6 +2,7 @@ package es.uji.security.crypto.xmldsign;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -32,14 +33,15 @@ import org.w3c.dom.Document;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.util.OS;
 
 public class XMLDsigSignatureFactory implements ISignFormatProvider
 {
-    public byte[] formatSignature(SignatureOptions sigOpt) throws Exception
+    public InputStream formatSignature(SignatureOptions sigOpt) throws Exception
     {
         try
         {
-            byte[] toSign = sigOpt.getToSignByteArray();
+            byte[] toSign = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
             X509Certificate cer = sigOpt.getCertificate();
             PrivateKey pk = sigOpt.getPrivateKey();
 
@@ -86,7 +88,7 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
             Transformer trans = tf.newTransformer();
             trans.transform(new DOMSource(doc), new StreamResult(bos));
 
-            return bos.toByteArray();
+            return new ByteArrayInputStream(bos.toByteArray());
         }
         catch (Exception e)
         {

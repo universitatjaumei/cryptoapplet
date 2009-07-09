@@ -3,20 +3,25 @@ package es.uji.security.ui.applet.io;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.swing.JFileChooser;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.util.OS;
+
 public class FileOutputParams implements OutputParams
 {
     private Logger log = Logger.getLogger(FileOutputParams.class);
     
-    public void setSignData(byte[] data) throws IOException
+    public void setSignData(InputStream is) throws IOException
     {
         JFileChooser chooser = new JFileChooser();
         FileOutputStream fos = null;
 
+        byte[] data=  OS.inputStreamToByteArray(is);
+        
         int returnVal = chooser.showSaveDialog(null);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)
