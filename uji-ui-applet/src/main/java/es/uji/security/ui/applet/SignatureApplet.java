@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
-import es.uji.security.crypto.VerificationDetails;
+import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.KeyStoreManager;
@@ -776,9 +776,9 @@ public class SignatureApplet extends JApplet
                     
                     byte[] data = OS.inputStreamToByteArray(in);
                     
-                    VerificationDetails verificationDetails = sv.verify(data);
+                    VerificationResult verificationDetails = sv.verify(data);
                     
-                    return (String[]) verificationDetails.getErrorsAsStringArray();
+                    return (String[]) verificationDetails.getErrors().toArray();
                 }
                 catch (Exception e)
                 {

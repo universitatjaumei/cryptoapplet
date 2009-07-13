@@ -7,40 +7,46 @@ import java.security.cert.X509Certificate;
 
 public class SignatureOptions
 {
-
-	private boolean _isByteArray = false;
-	private boolean _isHash = false;
-    private boolean _isLocalFile = false;
+	private boolean hash = false;
+    private boolean localFile = false;
     private boolean swapToFile= false;
     private X509Certificate certificate = null;
     private PrivateKey privateKey = null;
     private Provider provider = null;
-    byte[] toSign = null;
-    InputStream toSign_is = null;
+    private InputStream dataToSign = null;
 
     public SignatureOptions()
     {
-
-    }
-    
-    public boolean is_hash()
-    {
-        return _isHash;
     }
 
-    public void set_ishash(boolean isHash)
+    public boolean isHash()
     {
-        _isHash = isHash;
+        return hash;
     }
 
-    public boolean is_localFile()
+    public void setHash(boolean hash)
     {
-        return _isLocalFile;
+        this.hash = hash;
     }
 
-    public void set_localFile(boolean isLocalfile)
+    public boolean isLocalFile()
     {
-        _isLocalFile = isLocalfile;
+        return localFile;
+    }
+
+    public void setLocalFile(boolean localFile)
+    {
+        this.localFile = localFile;
+    }
+
+    public boolean isSwapToFile()
+    {
+        return swapToFile;
+    }
+
+    public void setSwapToFile(boolean swapToFile)
+    {
+        this.swapToFile = swapToFile;
     }
 
     public X509Certificate getCertificate()
@@ -73,21 +79,13 @@ public class SignatureOptions
         this.provider = provider;
     }
 
-    public InputStream getToSignInputStream()
+    public InputStream getDataToSign()
     {
-        return this.toSign_is;
+        return this.dataToSign;
     }
 
-    public void setToSignInputstream(InputStream is)
+    public void setInputStreamToSign(InputStream dataToSign)
     {
-        this.toSign_is = is;
-    }
-    
-    public void setSwapToFile(boolean value){
-    	this.swapToFile= value;
-    }
-   
-    public boolean getSwapToFile(){
-    	return this.swapToFile;
+        this.dataToSign = dataToSign;
     }
 }

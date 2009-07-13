@@ -1,7 +1,6 @@
 package es.uji.security.crypto.raw;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -10,55 +9,62 @@ import java.security.cert.X509Certificate;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.SignatureResult;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class RawSignatureFactory implements ISignFormatProvider
 {
-    private String _strerr = "";
-
-    public InputStream formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
+    public SignatureResult formatSignature(SignatureOptions signatureOptions)
+            throws KeyStoreException, Exception
     {
-        byte[] datos = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
-        X509Certificate sCer = sigOpt.getCertificate();
-        PrivateKey pk = sigOpt.getPrivateKey();
-        Provider pv = sigOpt.getProvider();
+        byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        X509Certificate certificate = signatureOptions.getCertificate();
+        PrivateKey privateKey = signatureOptions.getPrivateKey();
+        Provider provider = signatureOptions.getProvider();
 
-        Signature rsa = Signature.getInstance("SHA1withRSA", pv);
+        Signature rsa = Signature.getInstance("SHA1withRSA", provider);
 
-        if (sCer == null)
+        SignatureResult signatureResult = new SignatureResult();
+
+        if (certificate == null)
         {
-            _strerr = LabelManager.get("ERR_RAW_NOCERT");
-            return null;
+            signatureResult.setValid(false);
+            signatureResult.addError(LabelManager.get("ERR_RAW_NOCERT"));
+
+            return signatureResult;
         }
 
-        if (pk == null)
+        if (privateKey == null)
         {
-            _strerr = LabelManager.get("ERR_RAW_NOKEY");
-            return null;
+            signatureResult.setValid(false);
+            signatureResult.addError(LabelManager.get("ERR_RAW_NOKEY"));
+
+            return signatureResult;
         }
 
-        rsa.initSign(pk);
-        rsa.update(datos);
+        rsa.initSign(privateKey);
+        rsa.update(data);
 
         byte[] res = rsa.sign();
 
-        // Verification:
+        // Verification
         Signature rsa_vfy = Signature.getInstance("SHA1withRSA");
-        rsa_vfy.initVerify(sCer);
-        rsa_vfy.initVerify(sCer.getPublicKey());
-        rsa_vfy.update(datos);
+        rsa_vfy.initVerify(certificate);
+        rsa_vfy.initVerify(certificate.getPublicKey());
+        rsa_vfy.update(data);
 
         if (res == null)
         {
-            _strerr = LabelManager.get("ERROR_RAW_SIGNATURE");
+            signatureResult.setValid(false);
+            signatureResult.addError(LabelManager.get("ERROR_RAW_SIGNATURE"));
+        }
+        else
+        {
+            signatureResult.setValid(true);
+            signatureResult.setSignatureData(new ByteArrayInputStream(res));
         }
 
-        return new ByteArrayInputStream(res);
-    }
-
-    public String getError()
-    {
-        return _strerr;
+        return signatureResult;
     }
 }

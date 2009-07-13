@@ -16,6 +16,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.openxades.OpenXAdESCoSignatureFactory;
@@ -215,7 +216,7 @@ public class SignatureThread extends Thread
                 {
                     ByteArrayOutputStream ot = new ByteArrayOutputStream();
 
-                    InputStream  in= inputParams.getSignData();
+                    InputStream in = inputParams.getSignData();
 
                     SupportedDataEncoding encoding = _mw.getAppHandler().getInputDataEncoding();
 
@@ -247,27 +248,26 @@ public class SignatureThread extends Thread
                         }
                     }
 
-                    InputStream sig = null;
-
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 6 * inc);
 
                     IKeyStore kAux = xcert.getKeyStore();
-
+                    SignatureResult signatureResult = null; 
+                        
                     try
                     {
                         // Set up the data for the signature handling.
                         SignatureOptions sigOpt = new SignatureOptions();
-                        sigOpt.setToSignInputstream(in);
+                        sigOpt.setInputStreamToSign(in);
                         sigOpt.setCertificate(xcert.getCertificate());
                         sigOpt.setPrivateKey((PrivateKey) kAux.getKey(xcert.getAlias()));
                         sigOpt.setProvider(kAux.getProvider());
-                        
+
                         if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS_HASH))
                         {
-                           sigOpt.set_ishash(true);	
+                           sigOpt.setHash(true);	
                         }
 
-                        sig = signer.formatSignature(sigOpt);
+                        signatureResult = signer.formatSignature(sigOpt);
                     }
                     catch (Exception e)
                     {
@@ -276,29 +276,36 @@ public class SignatureThread extends Thread
                         throw new SignatureAppletException("ERROR_COMPUTING_SIGNATURE");
                     }
 
-                    if (sig == null)
+                    if (signatureResult == null || !signatureResult.isValid())
                     {
-                        infoLabelField.setText(LabelManager.get("ERROR_COMPUTING_SIGNATURE") + ": "
-                                + signer.getError());
+                        String errorMessage = LabelManager.get("ERROR_COMPUTING_SIGNATURE");
+                        
+                        for (String msg : signatureResult.getErrors())
+                        {
+                            errorMessage+= (" - " + msg);
+                        }
+                        
+                        infoLabelField.setText(errorMessage);
+                        
                         showSignatureOk = false;
                         guiFinalize(false);
                         _mw.getAppHandler().getInputParams().flush();
-                        throw new SignatureAppletException(LabelManager
-                                .get("ERROR_COMPUTING_SIGNATURE")
-                                + " :: " + signer.getError(), false);
+                        
+                        throw new SignatureAppletException(errorMessage, false);
                     }
 
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 7 * inc);
                     // System.out.println("Setting input data ... ");
 
-                    if (sig != null)
+                    if (signatureResult != null && signatureResult.isValid())
+                    {
                         try
                         {
                         	 encoding = _mw.getAppHandler().getOutputDataEncoding();
                         	 InputStream res= null;                            
                         	 if (encoding.equals(SupportedDataEncoding.HEX))
                              {
-                        		 byte[] tmp= OS.inputStreamToByteArray(sig);
+                        		 byte[] tmp = OS.inputStreamToByteArray(signatureResult.getSignatureData());
                         		 ByteArrayOutputStream bos= new ByteArrayOutputStream();
                                  HexEncoder h = new HexEncoder();
                                  h.encode(tmp, 0, tmp.length, bos);
@@ -306,11 +313,11 @@ public class SignatureThread extends Thread
                              }
                              else if (encoding.equals(SupportedDataEncoding.BASE64))
                              {
-                                 res= new ByteArrayInputStream(Base64.encode(OS.inputStreamToByteArray(sig)));
+                                 res = new ByteArrayInputStream(Base64.encode(OS.inputStreamToByteArray(signatureResult.getSignatureData())));
                              }
                              else
                              {
-                                 res= sig;
+                                 res = signatureResult.getSignatureData();
                              }
                         	
                             outputParams.setSignData(res);
@@ -320,11 +327,16 @@ public class SignatureThread extends Thread
                             System.out.println("Exception launch");
                             throw new SignatureAppletException("ERROR_CANNOT_SET_OUTPUT_DATA");
                         }
+                    }
                     else
+                    {
                         System.out.println("ERROR!!! al calcular la firma");
+                    }
                 }
+                
                 _mw.getGlobalProgressBar().setValue(_ini_percent + 8 * inc);
             }
+            
             _mw.getGlobalProgressBar().setValue(_ini_percent + 10 * inc);
 
             guiFinalize(hideWindow);

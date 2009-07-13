@@ -9,11 +9,11 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import es.uji.security.crypto.VerificationDetails;
+import es.uji.security.crypto.VerificationResult;
 
 public class RawSignatureVerifier
 {
-    public VerificationDetails verify(byte[] data, byte[] signature, X509Certificate caCertificate, Provider provider)
+    public VerificationResult verify(byte[] data, byte[] signature, X509Certificate caCertificate, Provider provider)
             throws CertificateException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, SignatureException
     {
@@ -21,7 +21,7 @@ public class RawSignatureVerifier
         rsa_vfy.initVerify(caCertificate.getPublicKey());
         rsa_vfy.update(data);
 
-        VerificationDetails verificationDetails = new VerificationDetails();
+        VerificationResult verificationDetails = new VerificationResult();
         verificationDetails.setValid(rsa_vfy.verify(signature));       
         
         if (! verificationDetails.isValid())

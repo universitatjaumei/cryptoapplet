@@ -2,7 +2,6 @@ package es.uji.security.crypto.xmldsign;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -33,73 +32,65 @@ import org.w3c.dom.Document;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.SignatureResult;
 import es.uji.security.util.OS;
 
 public class XMLDsigSignatureFactory implements ISignFormatProvider
 {
-    public InputStream formatSignature(SignatureOptions sigOpt) throws Exception
+    public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
     {
-        try
-        {
-            byte[] toSign = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
-            X509Certificate cer = sigOpt.getCertificate();
-            PrivateKey pk = sigOpt.getPrivateKey();
+        byte[] toSign = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        X509Certificate cer = signatureOptions.getCertificate();
+        PrivateKey pk = signatureOptions.getPrivateKey();
 
-            // We create DOM XMLSigantureFactory
-            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+        // We create DOM XMLSigantureFactory
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM",
+                new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
 
-            // Create the reference element
-            Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
-                    Collections.singletonList(fac.newTransform(Transform.ENVELOPED,
-                            (TransformParameterSpec) null)), null, null);
+        // Create the reference element
+        Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
+                Collections.singletonList(fac.newTransform(Transform.ENVELOPED,
+                        (TransformParameterSpec) null)), null, null);
 
-            // Create the SignedInfo.
-            SignedInfo si = fac.newSignedInfo(fac.newCanonicalizationMethod(
-                    CanonicalizationMethod.INCLUSIVE, (C14NMethodParameterSpec) null), fac
-                    .newSignatureMethod(SignatureMethod.RSA_SHA1, null), Collections
-                    .singletonList(ref));
+        // Create the SignedInfo.
+        SignedInfo si = fac
+                .newSignedInfo(fac.newCanonicalizationMethod(CanonicalizationMethod.INCLUSIVE,
+                        (C14NMethodParameterSpec) null), fac.newSignatureMethod(
+                        SignatureMethod.RSA_SHA1, null), Collections.singletonList(ref));
 
-            // Create the KeyInfo containing the X509Data.
-            KeyInfoFactory kif = fac.getKeyInfoFactory();
-            List<Object> x509Content = new ArrayList<Object>();
-            x509Content.add(cer.getSubjectX500Principal().getName());
-            x509Content.add(cer);
-            X509Data xd = kif.newX509Data(x509Content);
-            KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
+        // Create the KeyInfo containing the X509Data.
+        KeyInfoFactory kif = fac.getKeyInfoFactory();
+        List<Object> x509Content = new ArrayList<Object>();
+        x509Content.add(cer.getSubjectX500Principal().getName());
+        x509Content.add(cer);
+        X509Data xd = kif.newX509Data(x509Content);
+        KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
 
-            // Instantiate the document to be signed.
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            Document doc = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(toSign));
+        // Instantiate the document to be signed.
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        Document doc = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(toSign));
 
-            // Create a DOMSignContext and specify the RSA PrivateKey and
-            // location of the resulting XMLSignature's parent element.
-            DOMSignContext dsc = new DOMSignContext(pk, doc.getDocumentElement());
+        // Create a DOMSignContext and specify the RSA PrivateKey and
+        // location of the resulting XMLSignature's parent element.
+        DOMSignContext dsc = new DOMSignContext(pk, doc.getDocumentElement());
 
-            // Create the XMLSignature, but don't sign it yet.
-            XMLSignature signature = fac.newXMLSignature(si, ki);
+        // Create the XMLSignature, but don't sign it yet.
+        XMLSignature signature = fac.newXMLSignature(si, ki);
 
-            // Marshal, generate, and sign the enveloped signature.
-            signature.sign(dsc);
+        // Marshal, generate, and sign the enveloped signature.
+        signature.sign(dsc);
 
-            // Output the resulting document.
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer trans = tf.newTransformer();
-            trans.transform(new DOMSource(doc), new StreamResult(bos));
+        // Output the resulting document.
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer trans = tf.newTransformer();
+        trans.transform(new DOMSource(doc), new StreamResult(bos));
 
-            return new ByteArrayInputStream(bos.toByteArray());
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            throw new Exception(e);
-        }
-    }
+        SignatureResult signatureResult = new SignatureResult();
+        signatureResult.setValid(true);
+        signatureResult.setSignatureData(new ByteArrayInputStream(bos.toByteArray()));
 
-    public String getError()
-    {
-        // TODO Auto-generated method stub
-        return null;
+        return signatureResult;
     }
 }

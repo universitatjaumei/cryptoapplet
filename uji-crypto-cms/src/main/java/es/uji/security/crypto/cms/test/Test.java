@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.cms.CMSSignatureFactory;
 import es.uji.security.crypto.cms.CMSSignatureVerifier;
 import es.uji.security.util.OS;
@@ -46,12 +47,14 @@ public class Test
         ISignFormatProvider signFormatProvider = new CMSSignatureFactory();
         
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
+        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate(certificate);
         signatureOptions.setPrivateKey(privateKey);
         signatureOptions.setProvider(new BouncyCastleProvider());
         
-        byte[] cmsData = OS.inputStreamToByteArray(signFormatProvider.formatSignature(signatureOptions));
+        SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+        
+        byte[] cmsData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
 
         OS.dumpToFile("/tmp/test.txt", cmsData);
         

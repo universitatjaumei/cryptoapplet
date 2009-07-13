@@ -30,34 +30,34 @@ import com.lowagie.text.pdf.PdfString;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.SignatureResult;
 import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class PDFSignatureFactory implements ISignFormatProvider
 {
-    private String _strerr = "";
     private Properties prop;
     private PrivateKey pk;
     private Provider pv;
     private Certificate[] chain;
 
-	public static byte[] inputStreamToByteArray(InputStream in) throws IOException
-	{
-		byte[] buffer = new byte[2048];
-	    int length = 0;
+    public static byte[] inputStreamToByteArray(InputStream in) throws IOException
+    {
+        byte[] buffer = new byte[2048];
+        int length = 0;
 
-	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-	    while ((length = in.read(buffer)) >= 0)
-	    {
-	    	baos.write(buffer, 0, length);
-	    }
+        while ((length = in.read(buffer)) >= 0)
+        {
+            baos.write(buffer, 0, length);
+        }
 
-	    return baos.toByteArray();
-	}
+        return baos.toByteArray();
+    }
 
-	protected byte[] genPKCS7Signature(InputStream data, TSAClient tsc, PrivateKey pk, Provider pv,
+    protected byte[] genPKCS7Signature(InputStream data, TSAClient tsc, PrivateKey pk, Provider pv,
             Certificate[] chain) throws Exception
     {
 
@@ -94,7 +94,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
         sap.setCryptoDictionary(dic);
         sap.setCrypto((PrivateKey) pk, chain, null, null);
 
-        // Estimate signature size, creating a 'fake' one using fake data (SHA1 length does not depend upon the data length)
+        // Estimate signature size, creating a 'fake' one using fake data (SHA1 length does not
+        // depend upon the data length)
         TSAClient tsc = new TSAClientBouncyCastle(prop.getProperty("PDFSIG_TSA_URL"), prop
                 .getProperty("PDFSIG_TSA_ACCOUNT"), prop.getProperty("PDFSIG_TSA_PWD"));
 
@@ -112,9 +113,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         if (contentEst + 2 < encodedSig.length)
         {
-            throw new Exception("Timestamp size estimate " + contentEst +
-            " is too low for actual " +
-            encodedSig.length);
+            throw new Exception("Timestamp size estimate " + contentEst + " is too low for actual "
+                    + encodedSig.length);
         }
 
         // Copy signature into a zero-filled array, padding it up to estimate
@@ -129,39 +129,41 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         sap.close(dic2);
     }
-    
-    private void createVisibleSignature(PdfSignatureAppearance sap) throws BadElementException, MalformedURLException, IOException
+
+    private void createVisibleSignature(PdfSignatureAppearance sap) throws BadElementException,
+            MalformedURLException, IOException
     {
-        sap.setVisibleSignature(new Rectangle(
-        	Float.parseFloat(prop.getProperty("PDFSIG_VISIBLE_AREA_X")), 
-        	Float.parseFloat(prop.getProperty("PDFSIG_VISIBLE_AREA_Y")),
-        	Float.parseFloat(prop.getProperty("PDFSIG_VISIBLE_AREA_X2")),
-        	Float.parseFloat(prop.getProperty("PDFSIG_VISIBLE_AREA_Y2"))), 
-        	Integer.parseInt(prop.getProperty("PDFSIG_VISIBLE_AREA_PAGE")), 
-        	null);
+        sap.setVisibleSignature(new Rectangle(Float.parseFloat(prop
+                .getProperty("PDFSIG_VISIBLE_AREA_X")), Float.parseFloat(prop
+                .getProperty("PDFSIG_VISIBLE_AREA_Y")), Float.parseFloat(prop
+                .getProperty("PDFSIG_VISIBLE_AREA_X2")), Float.parseFloat(prop
+                .getProperty("PDFSIG_VISIBLE_AREA_Y2"))), Integer.parseInt(prop
+                .getProperty("PDFSIG_VISIBLE_AREA_PAGE")), null);
         sap.setAcro6Layers(true);
-        
-        byte[] imageData = inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader().getResourceAsStream(prop.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
+
+        byte[] imageData = inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
+                .getResourceAsStream(prop.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
         Image image = Image.getInstance(imageData);
-         
+
         sap.setSignatureGraphic(image);
         sap.setRender(PdfSignatureAppearance.SignatureRenderGraphicAndDescription);
     }
 
-    public InputStream formatSignature(SignatureOptions sigOpt) throws KeyStoreException, Exception
+    public SignatureResult formatSignature(SignatureOptions signatureOptions)
+            throws KeyStoreException, Exception
     {
         try
         {
-            byte[] datos = OS.inputStreamToByteArray(sigOpt.getToSignInputStream());
-            X509Certificate sCer = sigOpt.getCertificate();
-            this.pk = sigOpt.getPrivateKey();
-            this.pv = sigOpt.getProvider();
+            byte[] datos = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+            X509Certificate sCer = signatureOptions.getCertificate();
+            this.pk = signatureOptions.getPrivateKey();
+            this.pv = signatureOptions.getProvider();
 
             if (Security.getProvider(this.pv.getName()) == null && this.pv != null)
             {
                 Security.addProvider(this.pv);
             }
-            
+
             chain = new Certificate[2];
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
@@ -171,10 +173,15 @@ public class PDFSignatureFactory implements ISignFormatProvider
             ClassLoader cl = PDFSignatureFactory.class.getClassLoader();
 
             prop = ConfigHandler.getProperties();
+
+            SignatureResult signatureResult = new SignatureResult();
+
             if (prop == null)
             {
-                _strerr = LabelManager.get("ERROR_DDOC_NOCONFIGFILE");
-                return null;
+                signatureResult.setValid(false);
+                signatureResult.addError(LabelManager.get("ERROR_DDOC_NOCONFIGFILE"));
+
+                return signatureResult;
             }
 
             // Get the CA certificate list
@@ -201,8 +208,10 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             if (CACert == null)
             {
-                _strerr = LabelManager.get("ERROR_CERTIFICATE_NOT_ALLOWED");
-                return null;
+                signatureResult.setValid(false);
+                signatureResult.addError(LabelManager.get("ERROR_CERTIFICATE_NOT_ALLOWED"));
+
+                return signatureResult;
             }
 
             chain[1] = CACert;
@@ -217,14 +226,15 @@ public class PDFSignatureFactory implements ISignFormatProvider
             PdfSignatureAppearance sap = stp.getSignatureAppearance();
 
             String aux = prop.getProperty("PDFSIG_VISIBLE_SIGNATURE");
-            
-            if (aux != null && aux.trim().equals("true")) 
+
+            if (aux != null && aux.trim().equals("true"))
             {
-            	createVisibleSignature(sap);
+                createVisibleSignature(sap);
             }
-            	
+
             aux = prop.getProperty("PDFSIG_TIMESTAMPING");
-            if (aux != null && aux.trim().equals("true") && prop.getProperty("PDFSIG_TSA_URL") != null)
+            if (aux != null && aux.trim().equals("true")
+                    && prop.getProperty("PDFSIG_TSA_URL") != null)
             {
                 signPdfTsp(sap);
             }
@@ -233,8 +243,11 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 signPdf(sap);
                 stp.close();
             }
-            
-            return new ByteArrayInputStream(sout.toByteArray());
+
+            signatureResult.setValid(true);
+            signatureResult.setSignatureData(new ByteArrayInputStream(sout.toByteArray()));
+
+            return signatureResult;
         }
         catch (Exception e)
         {
@@ -242,10 +255,5 @@ public class PDFSignatureFactory implements ISignFormatProvider
         }
 
         return null;
-    }
-
-    public String getError()
-    {
-        return _strerr;
     }
 }
