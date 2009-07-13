@@ -16,11 +16,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import es.uji.security.crypto.VerificationDetails;
+import es.uji.security.crypto.VerificationResult;
 
 public class XMLDsigVerifier
 {
-    public VerificationDetails verify(byte[] signedData) throws SAXException, IOException, ParserConfigurationException, MarshalException, XMLSignatureException
+    public VerificationResult verify(byte[] signedData) throws SAXException, IOException, ParserConfigurationException, MarshalException, XMLSignatureException
     {
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
 
@@ -47,7 +47,7 @@ public class XMLDsigVerifier
         // Validate the XMLSignature.
         boolean coreValidity = signature.validate(valContext);
 
-        VerificationDetails result = new VerificationDetails();
+        VerificationResult result = new VerificationResult();
         result.setValid(coreValidity);
         
         // Check core validation status.

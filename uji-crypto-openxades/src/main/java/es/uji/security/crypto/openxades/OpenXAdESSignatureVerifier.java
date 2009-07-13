@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import es.uji.security.crypto.VerificationDetails;
+import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
@@ -15,9 +15,9 @@ import es.uji.security.util.ConfigHandler;
 public class OpenXAdESSignatureVerifier
 {
     @SuppressWarnings("unchecked")
-    public VerificationDetails verify(byte[] signedData)
+    public VerificationResult verify(byte[] signedData)
     {
-        VerificationDetails verificationDetails = new VerificationDetails();
+        VerificationResult verificationDetails = new VerificationResult();
 
         try
         {

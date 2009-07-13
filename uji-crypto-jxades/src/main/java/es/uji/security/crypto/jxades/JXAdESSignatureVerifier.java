@@ -17,11 +17,11 @@ import net.java.xades.security.xml.XAdES.XMLAdvancedSignature;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import es.uji.security.crypto.VerificationDetails;
+import es.uji.security.crypto.VerificationResult;
 
-public class FacturaeSignatureVerifier
+public class JXAdESSignatureVerifier
 {
-    public VerificationDetails verify(byte[] signedData) throws ParserConfigurationException,
+    public VerificationResult verify(byte[] signedData) throws ParserConfigurationException,
             SAXException, IOException
     {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -34,7 +34,7 @@ public class FacturaeSignatureVerifier
         XMLAdvancedSignature fileXML = XMLAdvancedSignature.newInstance(xades);
         List<SignatureStatus> st = fileXML.validate();
 
-        VerificationDetails verificationDetails = new VerificationDetails();
+        VerificationResult verificationDetails = new VerificationResult();
         verificationDetails.setValid(true);
 
         for (SignatureStatus status : st)

@@ -3,18 +3,18 @@ package es.uji.security.crypto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VerificationDetails
+public class VerificationResult
 {
     private boolean valid;
     private List<String> errors;
     
-    public VerificationDetails()
+    public VerificationResult()
     {
         this.valid = false;
         this.errors = new ArrayList<String>();
     }
     
-    public VerificationDetails(boolean valid, ArrayList<String> errors)
+    public VerificationResult(boolean valid, List<String> errors)
     {
         this.valid = valid;
         this.errors = errors;
@@ -35,18 +35,6 @@ public class VerificationDetails
         return errors;
     }
     
-    public String[] getErrorsAsStringArray()
-    {
-    	Object[] obj= errors.toArray();
-        String[] res= new String[obj.length];
-        
-    	for(int i=0; i<obj.length; i++){
-    		res[i] = (String) obj[i]; 
-    	}
-    	
-        return res;
-    }
-        
     public void setErrors(ArrayList<String> errors)
     {
         this.errors = errors;

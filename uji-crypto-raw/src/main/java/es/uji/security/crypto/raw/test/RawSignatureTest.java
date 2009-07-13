@@ -12,7 +12,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.VerificationDetails;
+import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.raw.RawSignatureFactory;
 import es.uji.security.crypto.raw.RawSignatureVerifier;
 import es.uji.security.util.OS;
@@ -38,16 +39,18 @@ public class RawSignatureTest
         ISignFormatProvider signFormatProvider = new RawSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
+        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate(certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
 
-        byte[] signedData = OS.inputStreamToByteArray(signFormatProvider.formatSignature(signatureOptions));
+        SignatureResult signatureResult =  signFormatProvider.formatSignature(signatureOptions);
+        
+        byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
         
         RawSignatureVerifier rawSignatureVerifier = new RawSignatureVerifier();
         
-        VerificationDetails verificationDetails = rawSignatureVerifier.verify(data, signedData, certificate, new BouncyCastleProvider());
+        VerificationResult verificationDetails = rawSignatureVerifier.verify(data, signedData, certificate, new BouncyCastleProvider());
         
         if (verificationDetails.isValid())
         {

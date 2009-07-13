@@ -13,7 +13,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.VerificationDetails;
+import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
 import es.uji.security.util.OS;
@@ -41,19 +42,20 @@ public class Test
         ISignFormatProvider signFormatProvider = new OpenXAdESSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
+        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate((X509Certificate) certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
 
-        byte[] signedData = OS.inputStreamToByteArray(signFormatProvider.formatSignature(signatureOptions));
+        SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+        
+        byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
         
         OS.dumpToFile("/tmp/signed-output.xml", signedData);
         
         OpenXAdESSignatureVerifier verifier = new OpenXAdESSignatureVerifier();
 
-        VerificationDetails verificationDetails = verifier.verify(OS.inputStreamToByteArray(new FileInputStream("/tmp/signed-output.xml")));
-
+        VerificationResult verificationDetails = verifier.verify(OS.inputStreamToByteArray(new FileInputStream("/tmp/signed-output.xml")));
         
         if (! verificationDetails.isValid())
         {

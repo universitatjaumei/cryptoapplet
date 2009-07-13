@@ -16,6 +16,7 @@ import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
+import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.pdf.PDFSignatureFactory;
 import es.uji.security.util.OS;
 
@@ -52,15 +53,17 @@ public class Test
         byte[] data = inputStreamToByteArray(new FileInputStream("src/main/resources/in.pdf"));
 
         // Firmando documento
-        PDFSignatureFactory xsf = new PDFSignatureFactory();
+        PDFSignatureFactory pdfSignatureFactory = new PDFSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setToSignInputstream(new ByteArrayInputStream(data));
+        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate((X509Certificate) certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
 
-        byte[] signedData = OS.inputStreamToByteArray(xsf.formatSignature(signatureOptions));
+        SignatureResult signatureResult = pdfSignatureFactory.formatSignature(signatureOptions);
+        
+        byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
 
         FileOutputStream fos = new FileOutputStream("/tmp/out.pdf");
         fos.write(signedData);
