@@ -80,7 +80,9 @@ public class OS
     
     public static void dumpToFile(File file, InputStream in) throws IOException
     {
-        if (file != null && file.length() > 0)
+    	System.out.println("Dumping to file available: " + in.available());
+    	
+        if (file != null /*&& file.length() > 0*/)
         {
         	byte[] buffer = new byte[2048];
             int length = 0;
@@ -90,6 +92,7 @@ public class OS
             while ((length = in.read(buffer)) >= 0)
             {
                 fos.write(buffer, 0, length);
+                System.out.println("Writting length " + length + " bytes to " + file.getAbsolutePath());
             }
             
             fos.close();

@@ -48,6 +48,11 @@ public class SignatureOptions
     {
         this.swapToFile = swapToFile;
     }
+    
+    public boolean getSwapToFile()
+    {
+        return this.swapToFile;
+    }
 
     public X509Certificate getCertificate()
     {
@@ -87,5 +92,10 @@ public class SignatureOptions
     public void setInputStreamToSign(InputStream dataToSign)
     {
         this.dataToSign = dataToSign;
+    }
+    
+    public InputStream getInputStreamToSign()
+    {
+        return this.dataToSign;
     }
 }

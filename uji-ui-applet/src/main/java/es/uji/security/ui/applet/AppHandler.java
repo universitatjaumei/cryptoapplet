@@ -716,6 +716,7 @@ public class AppHandler
     }
 
 	public void setIsBigFile(boolean isBigFile) {
+		System.out.println("SET ISBIGFILE to: " + isBigFile);
 		this.isBigFile= isBigFile; 
 	}
 }
