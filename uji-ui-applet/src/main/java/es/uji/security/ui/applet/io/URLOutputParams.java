@@ -1,6 +1,8 @@
 package es.uji.security.ui.applet.io;
 
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -60,7 +62,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
         String strUrl = url;
         String urlOk;
 
-        byte[] data= OS.inputStreamToByteArray(is);
+        /*byte[] data= OS.inputStreamToByteArray(is);*/
         
         if (strUrl.indexOf('?') > -1)
             urlOk = strUrl.substring(0, strUrl.indexOf('?'));
@@ -85,7 +87,15 @@ public class URLOutputParams extends AbstractData implements OutputParams
         urlConn.setDoInput(true);
 
         DataOutputStream out = new DataOutputStream(urlConn.getOutputStream());
-        out.writeBytes(postVariable + "=" + URLEncoder.encode(new String(data), "ISO-8859-1"));
+        
+        byte[] buffer = new byte[2048];
+        int length = 0;
+        
+        out.writeBytes(postVariable + "=");
+        while ((length = is.read(buffer)) >= 0)
+        {
+            out.writeBytes(URLEncoder.encode(new String(buffer,0,length), "ISO-8859-1"));  
+        }
         out.writeBytes("&item=" + URLEncoder.encode("" + _count, "ISO-8859-1"));
 
         while (strTok.hasMoreTokens())
@@ -114,6 +124,13 @@ public class URLOutputParams extends AbstractData implements OutputParams
          * else { if (outputcount == _count){ signOk(); signOkInvoked=true; } }
          */
         _count++;
+        try{
+        	is.close();
+        	new File(OS.getSystemTmpDir() + "/signature.xsig").delete();
+        }
+        catch(Exception e){
+        
+        }
     }
 
     public void setSignFormat(SignatureApplet base, byte[] signFormat)

@@ -248,6 +248,8 @@ public class SignatureThread extends Thread
                         }
                     }
 
+   					InputStream sig = null;
+
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 6 * inc);
 
                     IKeyStore kAux = xcert.getKeyStore();
@@ -261,7 +263,8 @@ public class SignatureThread extends Thread
                         sigOpt.setCertificate(xcert.getCertificate());
                         sigOpt.setPrivateKey((PrivateKey) kAux.getKey(xcert.getAlias()));
                         sigOpt.setProvider(kAux.getProvider());
-
+ 						sigOpt.setSwapToFile(_mw.getAppHandler().getIsBigFile());
+ 
                         if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS_HASH))
                         {
                            sigOpt.setHash(true);	

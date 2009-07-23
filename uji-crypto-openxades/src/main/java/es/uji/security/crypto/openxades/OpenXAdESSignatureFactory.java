@@ -84,25 +84,31 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         {
             OS.dumpToFile(random, signatureOptions.getDataToSign());
         }
+		File ftoSign= new File("jar://data.xml");
+		
+        // Here we must to guess whether tmp file is necessary or not.
+		if (signatureOptions.getSwapToFile()){
+			OS.dumpToFile(random ,  signatureOptions.getInputStreamToSign());
+			xadesFileName= random.getAbsolutePath();
+			ftoSign= random;
+		}
+
+      
 
         // Creamos un nuevo SignedDoc XAdES
-        SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
-
-        // Añadimos una nueva referencia de fichero en base64 ... aunque establecemos el body
-        DataFile df = sdoc.addDataFile(new File(file), "application/binary",
-                DataFile.CONTENT_EMBEDDED_BASE64);
-
-        System.out.println("Seleccionando nombre fichero a: " + xadesFileName);
-        sdoc.getDataFile(0).setFileName(xadesFileName);
-        sdoc.getDataFile(0).setMimeType(xadesFileMimeType);
-
+		SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
+		// Aï¿½adimos una nueva referencia de fichero en base64 ... aunque establecemos el body
+		DataFile df = sdoc.addDataFile(ftoSign, "application/binary",
+				DataFile.CONTENT_EMBEDDED_BASE64);
         if (!signatureOptions.isSwapToFile())
         {
             byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
-
             df.setBody(data);
             df.setSize(data.length);
         }
+        
+        sdoc.getDataFile(0).setFileName(xadesFileName);
+        sdoc.getDataFile(0).setMimeType(xadesFileMimeType);
 
         signatureResult = signDoc(sdoc, signatureOptions);
         random.delete();
@@ -230,7 +236,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
         try
         {
-            // Añadimos certificado TSA
+            // Aï¿½adimos certificado TSA
             if (tsaCount != 0)
             {
                 signature.addCertValue(certValue);
@@ -318,13 +324,11 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         if (signatureOptions.isSwapToFile())
         {
             signedDoc.writeToFile(random);
-
             signatureResult.setSignatureData(new FileInputStream(random));
         }
         else
         {
-            signatureResult
-                    .setSignatureData(new ByteArrayInputStream(signedDoc.toXML().getBytes()));
+            signatureResult.setSignatureData(new ByteArrayInputStream(signedDoc.toXML().getBytes()));
         }
 
         return signatureResult;
