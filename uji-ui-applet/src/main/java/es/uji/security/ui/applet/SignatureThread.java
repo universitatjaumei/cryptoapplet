@@ -259,7 +259,7 @@ public class SignatureThread extends Thread
                     {
                         // Set up the data for the signature handling.
                         SignatureOptions sigOpt = new SignatureOptions();
-                        sigOpt.setInputStreamToSign(in);
+                        sigOpt.setDataToSign(in);
                         sigOpt.setCertificate(xcert.getCertificate());
                         sigOpt.setPrivateKey((PrivateKey) kAux.getKey(xcert.getAlias()));
                         sigOpt.setProvider(kAux.getProvider());
