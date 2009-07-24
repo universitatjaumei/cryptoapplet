@@ -511,14 +511,15 @@ public class TimestampInfo
             }
             bos.write(ConvertUtils.str2data("<EncapsulatedTimeStamp>"));
             if (m_tsResp != null){
-            	byte[] resp= m_tsResp.getEncodedToken();
-            	byte[] status= {0x30, (byte)0x82, 0x03, (byte)0xA7, 0x30, 0x03, 0x02, 0x01, 0x00};
-                byte[] completeEncodedToken= new byte[resp.length + status.length];
+                // Moved to TSResponse.getEncodedToken
+//            	byte[] resp= m_tsResp.getEncodedToken();
+//            	byte[] status= {0x30, (byte)0x82, 0x03, (byte)0xA7, 0x30, 0x03, 0x02, 0x01, 0x00};
+//                byte[] completeEncodedToken= new byte[resp.length + status.length];
+//            	
+//            	System.arraycopy(status, 0, completeEncodedToken, 0, status.length);
+//            	System.arraycopy(resp, 0, completeEncodedToken, status.length, resp.length);
             	
-            	System.arraycopy(status, 0, completeEncodedToken, 0, status.length);
-            	System.arraycopy(resp, 0, completeEncodedToken, status.length, resp.length);
-            	
-                bos.write(ConvertUtils.str2data(Base64Util.encode(completeEncodedToken, 64)));
+                bos.write(ConvertUtils.str2data(Base64Util.encode(m_tsResp.getEncodedToken(), 64)));
             }
             bos.write(ConvertUtils.str2data("</EncapsulatedTimeStamp>"));
             switch (m_type)
