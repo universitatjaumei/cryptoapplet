@@ -39,11 +39,6 @@ public class SignatureOptions
         this.localFile = localFile;
     }
 
-    public boolean isSwapToFile()
-    {
-        return swapToFile;
-    }
-
     public void setSwapToFile(boolean swapToFile)
     {
         this.swapToFile = swapToFile;
@@ -89,13 +84,8 @@ public class SignatureOptions
         return this.dataToSign;
     }
 
-    public void setInputStreamToSign(InputStream dataToSign)
+    public void setDataToSign(InputStream dataToSign)
     {
         this.dataToSign = dataToSign;
-    }
-    
-    public InputStream getInputStreamToSign()
-    {
-        return this.dataToSign;
     }
 }
