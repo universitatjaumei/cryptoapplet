@@ -58,7 +58,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         String file = "jar://data.xml";
 
         Provider provider = signatureOptions.getProvider();
-        File random = new File(OS.getSystemTmpDir() + "/signatureData.dat");
+        
 
         log.debug("Using XAdESSignatureFactory");
         log.debug(provider.getName() + " provider found");
@@ -80,27 +80,24 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         }
 
         // Here we must to guess whether tmp file is necessary or not.
-        if (signatureOptions.isSwapToFile())
+        
+        File random = null;
+        File ftoSign = new File("jar://data.xml");
+        
+        if (signatureOptions.getSwapToFile())
         {
+            new File(OS.getSystemTmpDir() + "/signatureData.dat");
             OS.dumpToFile(random, signatureOptions.getDataToSign());
-        }
-		File ftoSign= new File("jar://data.xml");
-		
-        // Here we must to guess whether tmp file is necessary or not.
-		if (signatureOptions.getSwapToFile()){
-			OS.dumpToFile(random ,  signatureOptions.getInputStreamToSign());
-			xadesFileName= random.getAbsolutePath();
-			ftoSign= random;
-		}
-
-      
+            xadesFileName= random.getAbsolutePath();
+            ftoSign= random;
+        }		
 
         // Creamos un nuevo SignedDoc XAdES
 		SignedDoc sdoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
 		// A�adimos una nueva referencia de fichero en base64 ... aunque establecemos el body
 		DataFile df = sdoc.addDataFile(ftoSign, "application/binary",
 				DataFile.CONTENT_EMBEDDED_BASE64);
-        if (!signatureOptions.isSwapToFile())
+        if (!signatureOptions.getSwapToFile())
         {
             byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
             df.setBody(data);
@@ -321,7 +318,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
         signatureResult.setValid(true);
 
-        if (signatureOptions.isSwapToFile())
+        if (signatureOptions.getSwapToFile())
         {
             signedDoc.writeToFile(random);
             signatureResult.setSignatureData(new FileInputStream(random));
