@@ -288,7 +288,14 @@ public class TSResponse {
      * @return If null then no token was received.
      */
     public byte[] getEncodedToken() {
-	return encodedTsToken;
+        byte[] resp = encodedTsToken;
+        byte[] status = {0x30, (byte)0x82, 0x03, (byte)0xA7, 0x30, 0x03, 0x02, 0x01, 0x00};
+        byte[] completeEncodedToken = new byte[resp.length + status.length];
+        
+        System.arraycopy(status, 0, completeEncodedToken, 0, status.length);
+        System.arraycopy(resp, 0, completeEncodedToken, status.length, resp.length);
+        
+        return completeEncodedToken;
     }
 
     /*
