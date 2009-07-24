@@ -1,6 +1,7 @@
 package es.uji.security.crypto.timestamp;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.MessageDigest;
@@ -282,13 +283,23 @@ public class TSResponseToken
             X509Certificate cert = (X509Certificate) ks.getCertificate("TSA1_ACCV");
             
             // Works fine
-            //TSResponse r = TimeStampFactory.getTimeStampResponse("http://tss.accv.es:8318/tsa",
-            //        "test".getBytes(), true);
+            TSResponse r = TimeStampFactory.getTimeStampResponse("http://tss.accv.es:8318/tsa",
+                    "test".getBytes(), true);
+            
+            FileOutputStream fos = new FileOutputStream("/tmp/out1.bin");
+            fos.write(r.getEncodedToken());
+            fos.flush();
+            fos.close();
             
             // Fails
             byte[] data = TimeStampFactory.getTimeStamp("http://tss.accv.es:8318/tsa",
-                    "test".getBytes(), true);            
-            TSResponse r = new TSResponse(data);
+                    "test".getBytes(), true);    
+            fos = new FileOutputStream("/tmp/out2.bin");
+            fos.write(data);
+            fos.flush();
+            fos.close();
+            
+            r = new TSResponse(data);
 
             TSResponseToken tsResponseToken = new TSResponseToken(r);
 
