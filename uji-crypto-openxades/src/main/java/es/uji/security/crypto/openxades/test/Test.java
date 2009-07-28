@@ -42,7 +42,7 @@ public class Test
         ISignFormatProvider signFormatProvider = new OpenXAdESSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
+        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate((X509Certificate) certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
