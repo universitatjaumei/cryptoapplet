@@ -93,6 +93,10 @@ public class TSAClientBouncyCastle implements TSAClient
 
     protected byte[] getTimeStampToken(byte[] imprint) throws Exception
     {        
-        return TimeStampFactory.getTimeStampResponse(tsaURL, imprint, false).getEncodedToken();
+        byte[] encoded = TimeStampFactory.getTimeStampResponse(tsaURL, imprint, false).getEncodedToken();
+        
+        this.tokSzEstimate = encoded.length + 32;
+        
+        return encoded;
     }
 }

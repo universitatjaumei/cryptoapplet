@@ -47,7 +47,7 @@ public class Test
         ISignFormatProvider signFormatProvider = new CMSSignatureFactory();
         
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
+        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate(certificate);
         signatureOptions.setPrivateKey(privateKey);
         signatureOptions.setProvider(new BouncyCastleProvider());
