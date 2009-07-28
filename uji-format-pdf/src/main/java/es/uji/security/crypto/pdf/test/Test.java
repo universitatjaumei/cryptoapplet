@@ -56,7 +56,7 @@ public class Test
         PDFSignatureFactory pdfSignatureFactory = new PDFSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
+        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate((X509Certificate) certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
@@ -65,7 +65,7 @@ public class Test
         
         byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
 
-        FileOutputStream fos = new FileOutputStream("/tmp/out.pdf");
+        FileOutputStream fos = new FileOutputStream("src/main/resources/out.pdf");
         fos.write(signedData);
         fos.flush();
         fos.close();
