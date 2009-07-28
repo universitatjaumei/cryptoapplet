@@ -39,7 +39,7 @@ public class RawSignatureTest
         ISignFormatProvider signFormatProvider = new RawSignatureFactory();
 
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setInputStreamToSign(new ByteArrayInputStream(data));
+        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
         signatureOptions.setCertificate(certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
