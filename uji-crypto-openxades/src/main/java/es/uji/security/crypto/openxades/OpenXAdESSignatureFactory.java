@@ -108,7 +108,18 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         sdoc.getDataFile(0).setMimeType(xadesFileMimeType);
 
         signatureResult = signDoc(sdoc, signatureOptions);
-        random.delete();
+
+        if (signatureOptions.getSwapToFile())
+        {
+        	try
+        	{
+        		random.delete();
+        	}
+        	catch (Exception e)
+        	{
+        		e.printStackTrace();
+        	}
+        }
 
         return signatureResult;
     }
