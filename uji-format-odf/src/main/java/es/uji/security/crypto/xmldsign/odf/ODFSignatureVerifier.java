@@ -1,7 +1,6 @@
 package es.uji.security.crypto.xmldsign.odf;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.AccessController;
@@ -60,7 +59,7 @@ public class ODFSignatureVerifier
         });
     }
     
-    public VerificationResult verify(InputStream data, Provider provider) throws FileNotFoundException, IOException, ParserConfigurationException, SAXException, MarshalException, XMLSignatureException
+    public VerificationResult verify(InputStream data, Provider provider) throws IOException, ParserConfigurationException, SAXException, MarshalException, XMLSignatureException
     {   
         // Acceso a los ficheros contenidos en el ODF
         final ODFDocument odt = new ODFDocument(data);
