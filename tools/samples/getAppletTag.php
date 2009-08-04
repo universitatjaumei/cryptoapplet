@@ -39,8 +39,10 @@ case 'CMS':
 <? 
   break;
   case 'FACTURAE':
-             echo $jxades . ",";
-             echo $xalan . ",";
+?>           uji-crypto-jxades-<?echo $av;?>-signed.jar,
+             <?echo $jxades;?>,
+             <?echo $xalan;?> ,
+<?
   break;
   case 'PDF':
 ?>

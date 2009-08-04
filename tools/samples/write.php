@@ -1,5 +1,5 @@
 <?
 
-file_put_contents("signature.xdsig", $_POST['content']);
+file_put_contents("signature.xsig", $_POST['content']);
 
 ?>

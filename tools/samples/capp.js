@@ -1,5 +1,6 @@
 var ch= false;
 var test= false;
+var xadesBigFile=false;
 
 function myconsole(m){
  // if (typeof(console)!="undefined"){
@@ -8,14 +9,19 @@ function myconsole(m){
  alert(m);
 }
 
-function onSignOk(txt){
-
+function onSignOk(txt){ 
+ 
   var fmat= $('input[name="format"]');
   for(i=0; i<fmat.length; i++){
      if (fmat[i].checked){
         outputFor= fmat[i].id.toUpperCase();
-        cp.setSignatureOutputFormat(outputFor);
+        //cp.setSignatureOutputFormat(outputFor);
      }
+  }
+
+  if (outputFor=="XADES" || txt == null){
+    document.location.assign(document.location.href.replace("test.html","signature.xsig"));
+    return;
   }
 
   if (outputFor=="PDF"){
@@ -34,7 +40,7 @@ function verifyXAdES(){
   alert(document.location);
   $.post("write.php","content=" + $.URLEncode(document.getElementById("sigta").value));
   var cp= document.getElementById("CryptoApplet");
-  var r= cp.verifyXAdESDataUrl(document.location.href.replace("test.html","signature.xdsig"));
+  var r= cp.verifyXAdESDataUrl(document.location.href.replace("test.html","signature.xsig"));
   if (r!=null)
     alert(r[0]);
   else
@@ -57,7 +63,7 @@ function Sign(){
   var outputFor="";
 
   var cp= document.getElementById("CryptoApplet");
-
+  var loc= document.location.href;
 
   //Disable sign and load buttons till something happens
   document.getElementById("btns").disabled= true;
@@ -112,9 +118,8 @@ function Sign(){
         cp.setXadesFileMimeType(jQuery.trim(aux.value));  
       }
     }
-
     aux= document.getElementById('ts');
-    if (aux || outputFor=="PDF"){
+    if (aux || outputFor=="PDF" || outputFor=="FACTURAE" || outputFor=="XADES" && xadesBigFile){
       if (outputFor=="XMLDSIG"){
         if (! aux.value.match("^<[^>]+>[^<]*<[^>]+>$")){
           alert("ERROR: The content for XMLDSIG must be an XML, \nplease enclose it with, for example:\n   <data></data> ");
@@ -123,6 +128,11 @@ function Sign(){
           return;
         }
       } 
+      if (outputFor=="XADES" && xadesBigFile){
+         cp.setIsBigFile("true"); 
+         cp.signDataUrlToUrl(loc.replace("test.html","fich/bigf.bin") , loc.replace("test.html","write.php"));
+         return;
+      }
       if (inputEnc=="HEX"){
         if (!aux.value.match("^([0-9a-fA-F][0-9a-fA-F])+$")){
           alert("ERROR: The input data is not a valid HEX value");
@@ -133,14 +143,16 @@ function Sign(){
       }
 
       if (outputFor=="PDF"){
-         var loc= document.location.href;
-         
          myconsole("Let's invoke the function cp.signUrlToUrl for a PDF");
          myconsole("input:" + loc.replace("test.html","fich/f1.pdf"));
          myconsole("output:" + loc.replace("test.html","write_pdf.php"));
 
          cp.setOutputDataEncoding("BASE64");
          cp.signDataUrlToUrl(loc.replace("test.html","fich/f1.pdf") , loc.replace("test.html","write_pdf.php"));
+      }
+      else if(outpurFor="FACTURAE"){
+         alert("amono");
+         cp.signDataUrlToFunc(loc.replace("test.html","factura.xml") , "onSignOk");
       }
       else{
          myconsole("Let's invoke the function cp.signDataParamToFunc: " + jQuery.trim(aux.value));
@@ -179,7 +191,22 @@ function selectText(v){
   x.select();
 }
 
+function handleCheck(v){
+//  document.getElementById('xopts').innerHTML="";
+  if (document.getElementById(v).checked){
+    document.getElementById('sigContent').innerHTML="";
+    ch=true;
+    xadesBigFile=true;
+  }
+  else{
+    xadesBigFile=false;
+  }
+}
+
 function handleRadio(v){
+
+  xadesBigFile=false;
+
   if ( v=='xades' && document.getElementById('xades').checked )
   {
     $("#xopts").load("xopts.html");
@@ -200,8 +227,11 @@ function handleRadio(v){
     ch=true;
   }
   else if (v=='facturae'){
-     alert("Format not implemented yet, please try another one");
-     document.getElementById('raw').checked=true;
+     document.getElementById('xopts').innerHTML="";
+     document.getElementById('sigContent').innerHTML='<div id="info" style="width: 60%; border: thin solid rgb(50,205,50);">You can download the invoice it is going to be signed from here: <a href="factura.xml"> INVOICE</a></div>';
+     ch=true;
+     //alert("Format not implemented yet, please try another one");
+     //document.getElementById('raw').checked=true;
   }
   else
   {
