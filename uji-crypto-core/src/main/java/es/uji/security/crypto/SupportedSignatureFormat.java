@@ -34,7 +34,7 @@ public enum SupportedSignatureFormat
     }, 
     FACTURAE {
         public String toString() {
-            return "es.uji.security.crypto.jxades.FacturaeSignatureFactory"; 
+            return "es.uji.security.crypto.jxades.JXAdESSignatureFactory"; 
         }
     }, 
     XMLDSIG {
