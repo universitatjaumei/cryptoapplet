@@ -14,6 +14,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.log4j.Logger;
+
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
@@ -28,7 +30,8 @@ import es.uji.security.util.i18n.LabelManager;
  */
 public class EventActionHandler
 {
-
+	private Logger log = Logger.getLogger(EventActionHandler.class);
+	
     private MainWindow mw;
     private AppHandler aph;
     private KeyStoreManager keyStoreManager;
@@ -75,10 +78,9 @@ public class EventActionHandler
         {
             public void actionPerformed(java.awt.event.ActionEvent e)
             {
-                /*
-                 * for (Provider p: Security.getProviders()){ Security.removeProvider(p.getName());
-                 * }
-                 */
+            	log.debug("OnClose action called");
+            	log.debug("Invoked funtion: " + aph.getJsSignCancel());
+            	
                 mw.mainFrame.setVisible(false);
                 aph.getSignatureHandler().stop();
                 aph.callJavaScriptCallbackFunction(aph.getJsSignCancel(), null);

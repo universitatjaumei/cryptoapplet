@@ -14,6 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.log4j.Logger;
+
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
@@ -32,6 +34,8 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class SignatureThread extends Thread
 {
+	private Logger log = Logger.getLogger(SignatureThread.class);
+	
     private MainWindow _mw = null;
     private int _end_percent = 0;
     private int _ini_percent = 0, _step = 0;
@@ -63,7 +67,6 @@ public class SignatureThread extends Thread
 
     public void run()
     {
-
         IKeyStore iksh;
         guiInitialize();
         JLabel infoLabelField = _mw.getInformationLabelField();
@@ -75,10 +78,15 @@ public class SignatureThread extends Thread
         try
         {
             X509CertificateHandler selectedNode;
+
+            log.debug("Getting selected certificate");
+            
             try
             {
                 selectedNode = (X509CertificateHandler) ((DefaultMutableTreeNode) _mw.jTree
                         .getLastSelectedPathComponent()).getUserObject();
+                
+                log.debug("Selected certificate:" + selectedNode.getCertificate().getSubjectDN());
             }
             catch (NullPointerException e)
             {
@@ -92,9 +100,14 @@ public class SignatureThread extends Thread
                 guiFinalize(false);
                 throw new SignatureAppletException("ERROR_CERTIFICATE_USE");
             }
+            
+            log.debug("Validating certificate");
+            
             try
             {
                 selectedNode.getCertificate().checkValidity();
+                
+                log.debug("The certificate is valid");
             }
             catch (CertificateException cex)
             {
@@ -111,12 +124,17 @@ public class SignatureThread extends Thread
             }
 
             iksh = selectedNode.getKeyStore();
+            
             if (iksh != null)
             {
+                log.debug("Loading certificate store");
+            	
                 try
                 {
                     iksh.load(_mw.getPasswordTextField().getText().toCharArray());
 
+                    log.debug("Certificate store loaded");
+                    
                     // TODO: Research: Some problems of codification with 1.6 jvm and
                     // JPasswordField.
                     // iksh.load(_mw.getPasswordField().getPassword());
@@ -157,6 +175,8 @@ public class SignatureThread extends Thread
 
             _mw.getGlobalProgressBar().setValue(_ini_percent + 3 * inc);
 
+            log.debug("Loading signature format: " + _mw.getAppHandler().getSignatureFormat().toString());
+            
             // Creating an instance of the signature formater: CMS, XAdES, etc
             Class<?> sf = Class.forName(_mw.getAppHandler().getSignatureFormat().toString());
             ISignFormatProvider signer = (ISignFormatProvider) sf.newInstance();
@@ -172,11 +192,16 @@ public class SignatureThread extends Thread
                     sr = roles[this._step];
                 }
                 
+                log.debug("Signer Role: " + sr);                
+                
                 String fname = (_mw.getAppHandler().getXadesFileName() != null) ? _mw
                         .getAppHandler().getXadesFileName() : "UNSET";
                 String fmimetype = (_mw.getAppHandler().getXadesFileMimeType() != null) ? _mw
                         .getAppHandler().getXadesFileMimeType() : "application/binary";
 
+                log.debug("File Name: " + fname);
+                log.debug("Content Type:" + fmimetype);                
+                        
                 if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES))
                 {
                     OpenXAdESSignatureFactory xs = (OpenXAdESSignatureFactory) signer;
@@ -214,13 +239,18 @@ public class SignatureThread extends Thread
                     (xcert.isEmailProtectionCertificate() && 
                      _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS)))
                 {
+                    log.debug("Selected a digital signature certificate");
+
                     ByteArrayOutputStream ot = new ByteArrayOutputStream();
 
                     InputStream in = inputParams.getSignData();
 
                     SupportedDataEncoding encoding = _mw.getAppHandler().getInputDataEncoding();
+                    
+                    log.debug("Encoding: " + encoding);                    
 
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 5 * inc);
+                    
                     if (encoding.equals(SupportedDataEncoding.HEX))
                     {
                         HexEncoder h = new HexEncoder();
@@ -230,8 +260,7 @@ public class SignatureThread extends Thread
                     else if (encoding.equals(SupportedDataEncoding.BASE64))
                     {
                         in = new ByteArrayInputStream(Base64.decode(OS.inputStreamToByteArray(in)));
-                    }
-                   
+                    }                   
 
                     if (_mw.isShowSignatureEnabled() && ! _mw.getAppHandler().getIsBigFile())
                     {
@@ -270,6 +299,8 @@ public class SignatureThread extends Thread
                            sigOpt.setHash(true);	
                         }
 
+                        log.debug("Signing data");
+                        
                         signatureResult = signer.formatSignature(sigOpt);
                     }
                     catch (Exception e)
@@ -282,11 +313,13 @@ public class SignatureThread extends Thread
                     if (signatureResult == null || !signatureResult.isValid())
                     {
                         String errorMessage = LabelManager.get("ERROR_COMPUTING_SIGNATURE");
-                        
+
                         for (String msg : signatureResult.getErrors())
                         {
                             errorMessage+= (" - " + msg);
                         }
+                        
+                        log.error(errorMessage);
                         
                         infoLabelField.setText(errorMessage);
                         
@@ -302,6 +335,8 @@ public class SignatureThread extends Thread
 
                     if (signatureResult != null && signatureResult.isValid())
                     {
+                        log.debug("The signature is valid");
+                        
                         try
                         {
                         	 encoding = _mw.getAppHandler().getOutputDataEncoding();
