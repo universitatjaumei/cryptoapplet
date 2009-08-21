@@ -17,6 +17,16 @@ public enum SupportedSignatureFormat
             return "es.uji.security.crypto.cms.CMSSignatureFactory"; 
         }
     }, 
+    XMLSIGNATURE {
+        public String toString() {
+            return "es.uji.security.crypto.xmldsign.XMLDsigSignatureFactory"; 
+        }
+    }, 
+    JXADES {
+        public String toString() {
+            return "es.uji.security.crypto.jxades.JXAdESSignatureFactory"; 
+        }
+    }, 
     XADES {
         public String toString() {
             return "es.uji.security.crypto.openxades.OpenXAdESSignatureFactory"; 
@@ -32,14 +42,9 @@ public enum SupportedSignatureFormat
             return "es.uji.security.crypto.pdf.PDFSignatureFactory"; 
         }
     }, 
-    FACTURAE {
+    ODF {
         public String toString() {
-            return "es.uji.security.crypto.jxades.JXAdESSignatureFactory"; 
+            return "es.uji.security.crypto.xmldsign.odf.ODFSignatureFactory"; 
         }
-    }, 
-    XMLDSIG {
-        public String toString() {
-            return "es.uji.security.crypto.xmldsign.XMLDsigSignatureFactory"; 
-        }
-    } 
+    }
 }
