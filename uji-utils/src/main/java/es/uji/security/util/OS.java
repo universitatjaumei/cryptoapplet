@@ -119,6 +119,16 @@ public class OS
         return (getOS().indexOf("windows 2003") > -1);
     }
 
+    public static boolean isWindowsVista()
+    {
+        return (getOS().indexOf("vista") > -1);
+    }
+
+    public static boolean isWindows7()
+    {
+        return (getOS().indexOf("windows 7") > -1);
+    }
+
     public static boolean isWindowsNT()
     {
         return (getOS().indexOf("nt") > -1);
@@ -136,10 +146,14 @@ public class OS
 
     public static boolean isWindowsUpperEqualToNT()
     {
-        return (getOS().indexOf("vista") > -1 || getOS().indexOf("nt") > -1
-                || getOS().indexOf("windows 2000") > -1 || getOS().indexOf("windows xp") > -1 || getOS()
-                .indexOf("windows 2003") > -1);
+        return (isWindowsNT() ||
+                isWindows2000() || 
+                isWindowsXP()|| 
+                isWindows2003() ||
+                isWindowsVista() ||
+                isWindows7());
     }
+    
     public static boolean isJavaUpperEqualTo6(){
     	
     	 String version = System.getProperty("java.version");
