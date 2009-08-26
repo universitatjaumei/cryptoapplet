@@ -16,6 +16,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.log4j.Logger;
 
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
@@ -27,7 +30,6 @@ import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
-import es.uji.security.util.Base64;
 import es.uji.security.util.HexEncoder;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
@@ -253,13 +255,21 @@ public class SignatureThread extends Thread
                     
                     if (encoding.equals(SupportedDataEncoding.HEX))
                     {
+                        byte[] inData = OS.inputStreamToByteArray(in);
+                        log.debug("Data from Hex is " + inData.length + " bytes long");
+                        
                         HexEncoder h = new HexEncoder();
-                        h.decode(new String(OS.inputStreamToByteArray(in)), ot);
+                        h.decode(new String(inData), ot);
                         in = new ByteArrayInputStream(ot.toByteArray());
                     }
                     else if (encoding.equals(SupportedDataEncoding.BASE64))
                     {
-                        in = new ByteArrayInputStream(Base64.decode(OS.inputStreamToByteArray(in)));
+                        byte[] inData = OS.inputStreamToByteArray(in);
+                        log.debug("Data from Base64 is " + inData.length + " bytes long");
+
+                        BASE64Decoder decoder = new BASE64Decoder();
+                        
+                        in = new ByteArrayInputStream(decoder.decodeBuffer(new ByteArrayInputStream(inData)));
                     }                   
 
                     if (_mw.isShowSignatureEnabled() && ! _mw.getAppHandler().getIsBigFile())
@@ -305,17 +315,19 @@ public class SignatureThread extends Thread
                     }
                     catch (Exception e)
                     {
-                        e.printStackTrace();
-                        System.out.println("Message: " + e.getMessage());
-                        throw new SignatureAppletException("ERROR_COMPUTING_SIGNATURE");
+                        log.error(LabelManager.get("ERROR_COMPUTING_SIGNATURE"), e);
+                        throw new SignatureAppletException(LabelManager.get("ERROR_COMPUTING_SIGNATURE"));
                     }
 
                     if (signatureResult == null || !signatureResult.isValid())
                     {
+                        log.debug("The signature is not valid");
+                        
                         String errorMessage = LabelManager.get("ERROR_COMPUTING_SIGNATURE");
 
                         for (String msg : signatureResult.getErrors())
                         {
+                            log.debug("Signature validation error: " + msg);
                             errorMessage+= (" - " + msg);
                         }
                         
@@ -340,18 +352,23 @@ public class SignatureThread extends Thread
                         try
                         {
                         	 encoding = _mw.getAppHandler().getOutputDataEncoding();
-                        	 InputStream res= null;                            
+                        	 InputStream res= null;      
+                        	 
+                        	 log.debug("Encoding for output " + encoding);
+                        	 
                         	 if (encoding.equals(SupportedDataEncoding.HEX))
                              {
                         		 byte[] tmp = OS.inputStreamToByteArray(signatureResult.getSignatureData());
                         		 ByteArrayOutputStream bos= new ByteArrayOutputStream();
                                  HexEncoder h = new HexEncoder();
                                  h.encode(tmp, 0, tmp.length, bos);
-                                 res= new ByteArrayInputStream(bos.toByteArray());
+                                 res = new ByteArrayInputStream(bos.toByteArray());
                              }
                              else if (encoding.equals(SupportedDataEncoding.BASE64))
                              {
-                                 res = new ByteArrayInputStream(Base64.encode(OS.inputStreamToByteArray(signatureResult.getSignatureData())));
+                                 BASE64Encoder encoder = new BASE64Encoder();
+                                 
+                                 res = new ByteArrayInputStream(encoder.encode(OS.inputStreamToByteArray(signatureResult.getSignatureData())).getBytes());
                              }
                              else
                              {
@@ -362,13 +379,13 @@ public class SignatureThread extends Thread
                         }
                         catch (Exception e)
                         {
-                            System.out.println("Exception launch");
+                            log.error("Exception decoding data", e);
                             throw new SignatureAppletException("ERROR_CANNOT_SET_OUTPUT_DATA");
                         }
                     }
                     else
                     {
-                        System.out.println("ERROR!!! al calcular la firma");
+                        log.error("The signature is NOT valid");
                     }
                 }
                 

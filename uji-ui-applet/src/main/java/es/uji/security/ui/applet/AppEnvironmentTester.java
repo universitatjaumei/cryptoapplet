@@ -36,6 +36,12 @@ public class AppEnvironmentTester extends Thread
     int nerror = 0, ninfo = 0, nwarn = 0, delay = 1000;
     private Properties prop;
     private KeyStoreManager keyStoreManager;
+    private SignatureApplet signatureApplet;
+    
+    public AppEnvironmentTester(SignatureApplet signatureApplet)
+    {
+        this.signatureApplet = signatureApplet;
+    }
     
     private void caption(String str)
     {
@@ -234,8 +240,10 @@ public class AppEnvironmentTester extends Thread
     private void testJavaVersion()
     {
         caption("Version");
-        String version = _apph.getSignatureApplet().getJavaVersion();
+        String version =  this.signatureApplet.getJavaVersion();
+        
         info("Got java version: " + version);
+        
         if (!(version.startsWith("1.6") || version.startsWith("1.5") || version.startsWith("1.7")))
         {
 
@@ -250,7 +258,7 @@ public class AppEnvironmentTester extends Thread
     private void testAppletTag()
     {
         caption("Applet Tag");
-        URL codebase = _apph.getSignatureApplet().getCodeBase();
+        URL codebase =  this.signatureApplet.getCodeBase();
 
         info("Got codebase: " + codebase.toString());
         testConnect(codebase);

@@ -2,7 +2,6 @@ package es.uji.security.ui.applet.io;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -14,33 +13,32 @@ import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.ui.applet.JSCommands;
 import es.uji.security.ui.applet.SignatureApplet;
 import es.uji.security.util.OS;
 
 public class URLOutputParams extends AbstractData implements OutputParams
 {
-
     private Logger log = Logger.getLogger(URLOutputParams.class);
 
-    String url = null;
-    boolean _initialized = false, signOkInvoked = false;
-    int _count = 1, outputcount = 0, conn_timeout = 10000, read_timeout = 60000;
-    String[] _inputs;
-    String postVariable = "content";
-    SignatureApplet _base = null;
+    private String[] urls = null;
+    private int current = 0;
+    private boolean signOkInvoked = false;
+    private int _count = 1;
+    private int outputcount = 0;
+    private int conn_timeout = 10000;
+    private int read_timeout = 60000;
+    private String postVariable = "content";
 
-    public URLOutputParams(SignatureApplet sa, String url)
+    public URLOutputParams(String[] urls)
     {
-        _base = sa;
-        this.postVariable = "content";
-        this.url = url;
+        this(urls, "content");
     }
 
-    public URLOutputParams(SignatureApplet sa, String url, String postVariable)
+    public URLOutputParams(String[] urls, String postVariable)
     {
-        _base = sa;
-        this.postVariable = this.postVariable;
-        this.url = url;
+        this.urls = urls;
+        this.postVariable = postVariable;
     }
 
     public void setOutputCount(int oCount)
@@ -50,29 +48,36 @@ public class URLOutputParams extends AbstractData implements OutputParams
 
     public void setSignData(InputStream is) throws IOException
     {
-        String strAux, var, value, strpost;
-
-        JSObject browser = (JSObject) JSObject.getWindow(_base);
-        JSObject document = (JSObject) browser.getMember("document");
-
-        // We must obtain the cookies:
-        String cookie = (String) document.getMember("cookie");
-        // log.debug("COOKIES: " + cookie);
-
-        String strUrl = url;
-        String urlOk;
-
-        /*byte[] data= OS.inputStreamToByteArray(is);*/
+        String cookies = "";
         
-        if (strUrl.indexOf('?') > -1)
-            urlOk = strUrl.substring(0, strUrl.indexOf('?'));
+        // Try to obtain and configure Cookies
+        try
+        {
+            log.debug("Recover JavaScript member: document");              
+            JSObject document = (JSObject) JSCommands.getWindow().getMember("document");
+
+            cookies = (String) document.getMember("cookie");
+            log.debug("Cookies: " + cookies);
+        }
+        catch (Exception e)
+        {
+            log.debug("Cookies can not be obtained", e);            
+        }
+
+        String urlOk = this.urls[current];
+        
+        if (this.urls[current].indexOf('?') > -1)
+        {
+            urlOk = this.urls[current].substring(0, this.urls[current].indexOf('?'));
+        }
         else
-            urlOk = strUrl;
+        {
+            urlOk = this.urls[current];
+        }
 
-        log.debug(" Utilizando como url de envío: " + urlOk);
+        log.debug("Posting data to " + urlOk + ", with post parameter variable " + postVariable);
+        
         URL url = new URL(urlOk);
-
-        StringTokenizer strTok = new StringTokenizer(strUrl.substring(strUrl.indexOf('?') + 1), "&");
 
         HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
 
@@ -92,68 +97,73 @@ public class URLOutputParams extends AbstractData implements OutputParams
         int length = 0;
         
         out.writeBytes(postVariable + "=");
+        
         while ((length = is.read(buffer)) >= 0)
         {
             out.writeBytes(URLEncoder.encode(new String(buffer,0,length), "ISO-8859-1"));  
         }
+        
         out.writeBytes("&item=" + URLEncoder.encode("" + _count, "ISO-8859-1"));
 
+        StringTokenizer strTok = new StringTokenizer(this.urls[current].substring(this.urls[current].indexOf('?') + 1), "&");
+        
         while (strTok.hasMoreTokens())
         {
-            strAux = strTok.nextToken();
+            String strAux = strTok.nextToken();
             log.debug("PROCESANDO TOKEN: " + strAux);
+            
             if (strAux.indexOf("=") > -1)
             {
-                var = strAux.substring(0, strAux.indexOf("="));
-                value = strAux.substring(strAux.indexOf("=") + 1);
+                String var = strAux.substring(0, strAux.indexOf("="));
+                String value = strAux.substring(strAux.indexOf("=") + 1);
                 log.debug("ENVIANDO EN EL POST : " + var + "=" + value);
-                out
-                        .writeBytes("&" + var + "="
-                                + URLEncoder.encode(new String(value), "ISO-8859-1"));
+                
+                out.writeBytes("&" + var + "=" + URLEncoder.encode(new String(value), "ISO-8859-1"));
             }
         }
 
         out.flush();
         out.close();
 
-        if (urlConn.getResponseCode() != HttpURLConnection.HTTP_OK)
+        if (urlConn.getResponseCode() >= 400)
         {
-            System.out.println("Error en el post " + urlConn.getResponseCode());
+            log.error("Error en el post: " + urlConn.getResponseCode());            
+            throw new IOException("Error en el post: " + urlConn.getResponseCode());
         }
-        /*
-         * else { if (outputcount == _count){ signOk(); signOkInvoked=true; } }
-         */
+
         _count++;
-        try{
+        current++;
+        
+        try
+        {
         	is.close();
         	new File(OS.getSystemTmpDir() + "/signature.xsig").delete();
         }
-        catch(Exception e){
-        
+        catch(Exception e)
+        {        
         }
     }
 
     public void setSignFormat(SignatureApplet base, byte[] signFormat)
     {
-
-        // TODO Auto-generated method stub
     }
 
     public void setSignFormat(byte[] signFormat) throws IOException
     {
-        // TODO Auto-generated method stub
-
     }
 
     public void signOk()
     {
         if (!signOkInvoked)
-            netscape.javascript.JSObject.getWindow(_base).call("onSignOk", new String[] { "" });
+        {
+            log.debug("Call JavaScript method: onSignOk");            
+            JSCommands.getWindow().call("onSignOk", new String[] { "" });
+        }
     }
 
     public void flush()
     {
         _count = 1;
-
+        current = 0;
     }
 }

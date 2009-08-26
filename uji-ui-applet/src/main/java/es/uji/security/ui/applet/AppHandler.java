@@ -19,6 +19,8 @@ import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
+import sun.plugin.javascript.JSContext;
+
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
@@ -42,9 +44,6 @@ public class AppHandler
 
     /* The Applet or Application Main window who is referencing to */
     private MainWindow _mw = null;
-
-    /* Parent applet reference */
-    private SignatureApplet _parent = null;
 
     // This object interacts with the signature thread and wraps all the multisignature complexity
     public SignatureHandler sigh = null;
@@ -77,6 +76,7 @@ public class AppHandler
     private boolean isBigFile= false;
 
     private SSLSocketFactory defaultSocketFactory;
+    private String downloadURL;
 
     public AppHandler() throws SignatureAppletException
     {
@@ -93,40 +93,37 @@ public class AppHandler
      * class object.
      **/
     
-    public AppHandler(SignatureApplet parent) throws SignatureAppletException
+    public AppHandler(String downloadURL) throws SignatureAppletException
     {
-        if (parent != null)
+        try
         {
-            _parent = parent;
-
-            try
+            log.debug("Recover JavaScript member: navigator");            
+            JSObject document = (JSObject) JSCommands.getWindow().getMember("navigator");
+            
+            log.debug("Recover JavaScript member: userAgent");
+            String userAgent = (String) document.getMember("userAgent");        
+            
+            if (userAgent != null)
             {
-                JSObject win = (JSObject) netscape.javascript.JSObject.getWindow(_parent);
-                JSObject doc = (JSObject) win.getMember("navigator");
-                String userAgent = (String) doc.getMember("userAgent");        
-                
-                if (userAgent != null)
+                userAgent = userAgent.toLowerCase();
+
+                log.debug("Detected user agent " + userAgent);
+
+                if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
                 {
-                    userAgent = userAgent.toLowerCase();
-    
-                    log.debug("Detected user agent " + userAgent);
-    
-                    if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
-                    {
-                        this.navigator = SupportedBrowser.IEXPLORER;
-                    }
-                    else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1 || 
-                             userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1 || 
-                             userAgent.indexOf("netscape") > -1)
-                    {
-                        this.navigator = SupportedBrowser.MOZILLA;
-                    }
+                    this.navigator = SupportedBrowser.IEXPLORER;
+                }
+                else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1 || 
+                         userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1 || 
+                         userAgent.indexOf("netscape") > -1)
+                {
+                    this.navigator = SupportedBrowser.MOZILLA;
                 }
             }
-            catch (Exception exc)
-            {
-                log.error("Error accesing web browser window", exc);
-            }
+        }
+        catch (Exception exc)
+        {
+            log.error("Error accesing web browser window", exc);
         }
 
         log.debug("Navigator variable set to " + this.navigator);
@@ -146,11 +143,11 @@ public class AppHandler
      * 
      * @return AppHandler The application handler object.
      **/
-    public static AppHandler getInstance(SignatureApplet parent) throws SignatureAppletException
+    public static AppHandler getInstance(String downloadURL) throws SignatureAppletException
     {
         if (singleton == null)
         {
-            singleton = new AppHandler(parent);
+            singleton = new AppHandler(downloadURL);
         }
 
         return singleton;
@@ -341,8 +338,6 @@ public class AppHandler
     {
         if (this.navigator.equals(SupportedBrowser.IEXPLORER) && ! OS.isJavaUpperEqualTo6())
         {
-            String downloadUrl = (_parent.getParameter("downloadUrl") != null) ? _parent
-                    .getParameter("downloadUrl") : _parent.getCodeBase().toString();
             String destAbsolutePath = System.getenv("TEMP");
 
             String completeDllPath = destAbsolutePath + File.separator
@@ -352,7 +347,7 @@ public class AppHandler
 
             if (!dllFile.exists())
             {
-                installDLL(downloadUrl, completeDllPath);
+                installDLL(this.downloadURL, completeDllPath);
             }
             else
             {
@@ -381,7 +376,7 @@ public class AppHandler
                     {
                         if (origHash[i] != digest[i])
                         {
-                            installDLL(downloadUrl, completeDllPath);
+                            installDLL(this.downloadURL, completeDllPath);
                             break;
                         }
                     }
@@ -420,14 +415,8 @@ public class AppHandler
      */
     public void callJavaScriptCallbackFunction(String func, String[] params)
     {
-        if (_parent != null)
-        {
-            netscape.javascript.JSObject.getWindow(_parent).call(func, params);
-        }
-        else
-        {
-            System.out.println("Parent is null called ok");
-        }
+        log.debug("Call JavaScript method: " + func);
+        JSCommands.getWindow().call(func, params);
     }
 
     /**
@@ -662,11 +651,6 @@ public class AppHandler
     protected SignatureHandler getSignatureHandler()
     {
         return sigh;
-    }
-
-    public SignatureApplet getSignatureApplet()
-    {
-        return _parent;
     }
 
     /**
