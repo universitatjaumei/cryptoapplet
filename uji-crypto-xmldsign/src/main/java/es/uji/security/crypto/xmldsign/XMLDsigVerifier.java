@@ -2,6 +2,8 @@ package es.uji.security.crypto.xmldsign;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.Security;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.Reference;
@@ -20,9 +22,31 @@ import es.uji.security.crypto.VerificationResult;
 
 public class XMLDsigVerifier
 {
+    static
+    {
+        AccessController.doPrivileged(new java.security.PrivilegedAction<Void>()
+        {
+            public Void run()
+            {
+                if (System.getProperty("java.version").startsWith("1.5"))
+                {
+                    try
+                    {
+                        Security.addProvider(new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+                    }
+                    catch (Throwable e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                return null;
+            }
+        });
+    }
+    
     public VerificationResult verify(byte[] signedData) throws SAXException, IOException, ParserConfigurationException, MarshalException, XMLSignatureException
     {
-        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM", new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
         // Instantiate the document to be signed.
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
