@@ -6,11 +6,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.apache.log4j.Logger;
+
 import es.uji.security.ui.applet.SignatureApplet;
-import es.uji.security.util.OS;
 
 public class URLInputParams extends AbstractData implements InputParams
 {
+    private Logger log = Logger.getLogger(URLInputParams.class);
+    
     boolean initialized = false;
     int count = 0, current = 0;
     String[] inputs;
@@ -33,7 +36,8 @@ public class URLInputParams extends AbstractData implements InputParams
 
     public InputStream getSignData() throws Exception
     {
-
+        log.debug("Retrieving data from " + inputs[current]);
+        
         URL url = new URL(inputs[current]);
         URLConnection uc = url.openConnection();
 
@@ -41,6 +45,9 @@ public class URLInputParams extends AbstractData implements InputParams
         uc.setReadTimeout(timeout);
 
         uc.connect();
+        
+        log.debug("Retrieved " + uc.getHeaderField("Content-Length") + " bytes");
+        
         InputStream in = uc.getInputStream();
 
         current++;
@@ -51,12 +58,16 @@ public class URLInputParams extends AbstractData implements InputParams
     public InputStream getSignData(int item) throws Exception
     {
         if (!initialized)
+        {
             throw new IOException("Uninitialized Input method");
+        }
 
         if (item >= count)
+        {
             throw new IOException("Item count length exceeded");
+        }
 
-        System.out.println("INPUTS: " + inputs[item]);
+        log.debug("Retrieving data from " + inputs[current]);
 
         URL url = new URL(inputs[item]);
         URLConnection uc = url.openConnection();
@@ -68,15 +79,16 @@ public class URLInputParams extends AbstractData implements InputParams
         InputStream in = uc.getInputStream();
 
         if (mustHash)
-            return new ByteArrayInputStream(this.getMessageDigest(in));
+        {
+            return new ByteArrayInputStream(AbstractData.getMessageDigest(in));
+        }
 
         return in;
     }
 
     public String getSignFormat(SignatureApplet base)
     {
-        return (base.getParameter("signFormat") != null) ? base.getParameter("signFormat")
-                : "es.uji.dsign.crypto.CMSSignatureFactory";
+        return base.getParameter("signFormat");
     }
 
     public void flush()

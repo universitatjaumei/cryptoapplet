@@ -57,10 +57,9 @@ public class MainWindow
     private EventActionHandler _evthandler = null;
     protected JTree jTree = null;
     private JScrollPane showDataScrollPane;
-    private JLabel showSignatureLabel;
     
     private KeyStoreManager keyStoreManager;
-
+    
     public MainWindow(KeyStoreManager keyStoreManager, AppHandler aph) throws Exception
     {        
         this.keyStoreManager = keyStoreManager;
@@ -69,6 +68,16 @@ public class MainWindow
         _aph.setMainWindow(this);
         _evthandler = new EventActionHandler(this);
         getMainFrame();
+        
+        // Bring to front
+        java.awt.EventQueue.invokeLater(new Runnable()
+        {
+            public void run()
+            {
+                mainFrame.toFront();
+                mainFrame.repaint();
+            }
+        });        
     }
 
     /**

@@ -13,6 +13,8 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import netscape.javascript.JSException;
+
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
@@ -52,62 +54,85 @@ public class SignatureApplet extends JApplet
     private AppHandler apph;
     private MainWindow window;
     private String _separator = "\\|";
-    private String appletTag, appletInput, appletOutput;
+    private String appletTag;
+    private String appletInput;
+    private String appletOutput;
 
     private KeyStoreManager keyStoreManager;
-    
+
     public String recvHash; // compatibility issues
 
     /**
      * Init method. Installs the applet on client side. Downloads MicrosoftCryptoApi dll and loads
      * it in case of Internet Explorer
      */
-     
 
     public void init()
     {
-        // Init Nimbus Look&Feel if available (JDK1.6u10 or higher)
-        try 
+        try
         {
-            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) 
+            JSCommands.clearInstance();
+            JSCommands.getInstance(this);
+        }
+        catch (Exception e)
+        {
+        }
+
+        // Init Nimbus Look&Feel if available (JDK1.6u10 or higher)
+        try
+        {
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
             {
-                if ("Nimbus".equals(info.getName())) 
+                if ("Nimbus".equals(info.getName()))
                 {
-                    UIManager.setLookAndFeel(info.getClassName());                    
+                    UIManager.setLookAndFeel(info.getClassName());
                     log.debug("Nimbus Look&Feel loaded");
-                    
+
                     break;
                 }
             }
-        } 
-        catch (Exception e) 
-        {
-        	log.debug("Nimbus Look&Feel is not present. Using default Look&Feel");            
         }
-         
+        catch (Exception e)
+        {
+            log.debug("Nimbus Look&Feel is not present. Using default Look&Feel");
+        }
+
         try
         {
-            this.apph = AppHandler.getInstance(this);
-            
+            String downloadURL = "";
+
+            if (this.getParameter("downloadUrl") != null)
+            {
+                downloadURL = this.getParameter("downloadUrl");
+            }
+            else
+            {
+                downloadURL = this.getCodeBase().toString();
+            }
+
+            this.apph = AppHandler.getInstance(downloadURL);
+
             this.keyStoreManager = new KeyStoreManager();
             this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
-            
-            netscape.javascript.JSObject.getWindow(this).call("onInitOk", new String[] {});
-            log.debug("onInintOk JavaScript function has been invoked");            
+
+            log.debug("Call JavaScript method: onInitOk");
+            JSCommands.getWindow().call("onInitOk", new String[] {});
         }
         catch (SignatureAppletException e)
         {
             log.error(e);
-            
             JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-            netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
+
+            log.debug("Call JavaScript method: onSignError");
+            JSCommands.getWindow().call("onSignError", new String[] {});
         }
         catch (Exception e)
         {
             log.error(e);
-
             JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-            netscape.javascript.JSObject.getWindow(this).call("onSignError", new String[] {});
+
+            log.debug("Call JavaScript method: onSignError");
+            JSCommands.getWindow().call("onSignError", new String[] {});
         }
     }
 
@@ -115,91 +140,100 @@ public class SignatureApplet extends JApplet
     {
         return this.keyStoreManager;
     }
-    
+
     private void initializeWindow()
     {
-    	try
-    	{
-    		if (window == null)
-    		{
-    			if (! this.apph.getNavigator().equals(SupportedBrowser.IEXPLORER))
-    			{
-    			
-    				Dnie dnie = new Dnie();
-    				if (dnie.isPresent()){
-    					PasswordPrompt pp = new PasswordPrompt(null, LabelManager.get("DNIE_PASSWORD_TITLE"), 
-    							LabelManager.get("DNIE_PIN"));
+        try
+        {
+            if (window == null)
+            {
+                if (!this.apph.getNavigator().equals(SupportedBrowser.IEXPLORER))
+                {
 
-    					try
-    					{
-    						IKeyStore keystoreDNIe = dnie.initDnie(pp.getPassword());
-    						this.keyStoreManager.addP11KeyStore(keystoreDNIe);                
-    					}
-    					catch (Exception e)
-    					{
-    						ByteArrayOutputStream os = new ByteArrayOutputStream();
-    						PrintStream ps = new PrintStream(os);
-    						e.printStackTrace(ps);
-    						String stk = new String(os.toByteArray()).toLowerCase();
+                    Dnie dnie = new Dnie();
+                    if (dnie.isPresent())
+                    {
+                        PasswordPrompt pp = new PasswordPrompt(null, LabelManager
+                                .get("DNIE_PASSWORD_TITLE"), LabelManager.get("DNIE_PIN"));
 
-    						e.printStackTrace();
+                        try
+                        {
+                            IKeyStore keystoreDNIe = dnie.initDnie(pp.getPassword());
+                            this.keyStoreManager.addP11KeyStore(keystoreDNIe);
+                        }
+                        catch (Exception e)
+                        {
+                            ByteArrayOutputStream os = new ByteArrayOutputStream();
+                            PrintStream ps = new PrintStream(os);
+                            e.printStackTrace(ps);
+                            String stk = new String(os.toByteArray()).toLowerCase();
 
-    						if (stk.indexOf("incorrect") > -1)
-    						{
-    							JOptionPane.showMessageDialog(null, LabelManager
-    									.get("ERROR_INCORRECT_DNIE_PWD"), "",
-    									JOptionPane.ERROR_MESSAGE);
-    						}
-    						else
-    						{
-    							JOptionPane.showMessageDialog(null, LabelManager
-    									.get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
-    						}
-    					}
-    				}
-    			}
+                            e.printStackTrace();
 
-    			window = new MainWindow(this.keyStoreManager, this.apph);
-    		}
-    		else
-    		{
-    			window.getPasswordTextField().setText("");
-    			window.getGlobalProgressBar().setValue(0);
-    			window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
+                            if (stk.indexOf("incorrect") > -1)
+                            {
+                                JOptionPane.showMessageDialog(null, LabelManager
+                                        .get("ERROR_INCORRECT_DNIE_PWD"), "",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                            else
+                            {
+                                JOptionPane.showMessageDialog(null, LabelManager
+                                        .get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                }
 
-    			this.keyStoreManager.flushKeyStoresTable();
-    			this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
+                window = new MainWindow(this.keyStoreManager, this.apph);
+            }
+            else
+            {
+                window.getPasswordTextField().setText("");
+                window.getGlobalProgressBar().setValue(0);
+                window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
 
-    			window.reloadCertificateJTree();
-    			window.getMainFrame().setVisible(true);
-    			window.getShowSignatureCheckBox().setVisible(true);
-    		}
-    	}
-    	catch (SignatureAppletException ex)
-    	{
-    		ex.printStackTrace();
-    		JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-    		netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(),
-    				new String[] { "" });
-    	}
-    	catch (Exception ex)
-    	{
-    		ex.printStackTrace();
-    		JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-    		netscape.javascript.JSObject.getWindow(this).call(apph.getJsSignError(),
-    				new String[] { "" });
-    	}
+                this.keyStoreManager.flushKeyStoresTable();
+                this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
 
-    	try
-    	{
+                window.reloadCertificateJTree();
+                window.getMainFrame().setVisible(true);
+                window.getShowSignatureCheckBox().setVisible(true);
+            }
+        }
+        catch (SignatureAppletException ex)
+        {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 
-    		netscape.javascript.JSObject.getWindow(this).call(apph.getJsWindowShow(),
-    				new String[] { "" });
-    	}
-    	catch (netscape.javascript.JSException e)
-    	{
-    		// Perhaps the function does not exists
-    	}
+            log.debug("Call JavaScript method: " + apph.getJsSignError());
+            JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+
+            try
+            {
+                log.debug("Call JavaScript method: " + apph.getJsSignError());
+                JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
+            }
+            catch (JSException e)
+            {
+                log.error("Error calling " + apph.getJsSignError(), e);
+            }
+        }
+
+        try
+        {
+            log.debug("Call JavaScript method: " + apph.getJsWindowShow());
+            JSCommands.getWindow().call(apph.getJsWindowShow(), new String[] { "" });
+        }
+        catch (JSException e)
+        {
+            log.error("Error calling " + apph.getJsWindowShow(), e);
+        }
     }
 
     /**
@@ -286,7 +320,7 @@ public class SignatureApplet extends JApplet
             }
         });
     }
-    
+
     /**
      * Sets the output encoding, if the input is different that plain, the applet will codify the
      * output after computing the signature
@@ -380,12 +414,13 @@ public class SignatureApplet extends JApplet
             }
         });
     }
-    
+
     /**
-     * JS interface to setting the bigFile support.
-     * It must be set if the file can overflow the memory because of its size. 
+     * JS interface to setting the bigFile support. It must be set if the file can overflow the
+     * memory because of its size.
      * 
-     * @param String "true" or "false"
+     * @param String
+     *            "true" or "false"
      */
     public void setIsBigFile(final String bigfile)
     {
@@ -490,16 +525,12 @@ public class SignatureApplet extends JApplet
 
     public void signDataParamToURL(final String toSign, final String outputURL)
     {
-        final SignatureApplet sa = this;
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-
-                String[] arr = new String[] { toSign };
-
-                ParamInputData input = new ParamInputData(arr);
-                URLOutputParams output = new URLOutputParams(sa, outputURL);
+                ParamInputData input = new ParamInputData(new String[] { toSign });
+                URLOutputParams output = new URLOutputParams(new String[] { outputURL });
 
                 apph.setInput(input);
                 apph.setOutput(output);
@@ -527,7 +558,6 @@ public class SignatureApplet extends JApplet
     public void signDataParamToURL(final String toSign, final String outputURL,
             final String postVariableName)
     {
-        final SignatureApplet sa = this;
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
@@ -535,7 +565,8 @@ public class SignatureApplet extends JApplet
                 String[] arr = new String[] { toSign };
 
                 ParamInputData input = new ParamInputData(arr);
-                URLOutputParams output = new URLOutputParams(sa, outputURL, postVariableName);
+                URLOutputParams output = new URLOutputParams(new String[] { outputURL },
+                        postVariableName);
 
                 apph.setInput(input);
                 apph.setOutput(output);
@@ -559,16 +590,17 @@ public class SignatureApplet extends JApplet
      *            the URL where the data must be POSTed
      */
 
-    public void signDataUrlToUrl(final String inputURLs, final String outputURL)
+    public void signDataUrlToUrl(final String inputURLs, final String outputURLs)
     {
-        final SignatureApplet sa = this;
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
                 String[] in = inputURLs.split(_separator);
-                URLInputParams input = new URLInputParams(inputURLs.split(_separator));
-                URLOutputParams output = new URLOutputParams(sa, outputURL);
+                String[] out = outputURLs.split(_separator);
+
+                URLInputParams input = new URLInputParams(in);
+                URLOutputParams output = new URLOutputParams(out);
 
                 output.setOutputCount(in.length);
 
@@ -597,17 +629,18 @@ public class SignatureApplet extends JApplet
      *            the name of the post variable to use, content by default.
      */
 
-    public void signDataUrlToUrl(final String inputURLs, final String outputURL,
+    public void signDataUrlToUrl(final String inputURLs, final String outputURLs,
             final String postVariableName)
     {
-        final SignatureApplet sa = this;
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
                 String[] in = inputURLs.split(_separator);
-                URLInputParams input = new URLInputParams(inputURLs.split(_separator));
-                URLOutputParams output = new URLOutputParams(sa, outputURL, postVariableName);
+                String[] out = outputURLs.split(_separator);
+
+                URLInputParams input = new URLInputParams(in);
+                URLOutputParams output = new URLOutputParams(out, postVariableName);
 
                 output.setOutputCount(in.length);
 
@@ -637,7 +670,9 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                URLInputParams input = new URLInputParams(inputURLs.split(_separator));
+                String[] in = inputURLs.split(_separator);
+                
+                URLInputParams input = new URLInputParams(in);
                 FuncOutputParams output = new FuncOutputParams(sa, funcOut);
 
                 apph.setInput(input);
@@ -766,25 +801,25 @@ public class SignatureApplet extends JApplet
             public String[] run()
             {
                 OpenXAdESSignatureVerifier sv = new OpenXAdESSignatureVerifier();
-                
+
                 try
                 {
                     URL url = new URL(input);
                     URLConnection uc = url.openConnection();
                     uc.connect();
                     InputStream in = uc.getInputStream();
-                    
+
                     byte[] data = OS.inputStreamToByteArray(in);
-                    
+
                     VerificationResult verificationDetails = sv.verify(data);
-                    
+
                     return (String[]) verificationDetails.getErrors().toArray();
                 }
                 catch (Exception e)
                 {
                     e.printStackTrace();
                     return new String[] { e.getMessage() };
-                }                
+                }
             }
         });
         return res;
@@ -796,13 +831,13 @@ public class SignatureApplet extends JApplet
      */
     public void doTest()
     {
+        final SignatureApplet signatureApplet = this;
 
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-
-                AppEnvironmentTester aen = new AppEnvironmentTester();
+                AppEnvironmentTester aen = new AppEnvironmentTester(signatureApplet);
                 aen.setAppletHandler(apph);
                 aen.setup(appletTag, appletInput, appletOutput);
                 aen.start();
@@ -822,7 +857,7 @@ public class SignatureApplet extends JApplet
     {
         super.destroy();
         Runtime.getRuntime().gc();
-        
+
         log.debug("Applet destoy called. Executing garbage collection");
     }
 
@@ -840,30 +875,30 @@ public class SignatureApplet extends JApplet
     {
         return System.getProperty("java.version");
     }
-    
+
     public static void main(String args[])
     {
-         try
-         {
-             new SignatureApplet();
-             AppHandler apph = AppHandler.getInstance();
-         
-             apph.setInput(new FileInputParams());
-             apph.setOutput(new ConsoleOutputParams());
-             apph.setInputDataEncoding(SupportedDataEncoding.PLAIN);
-             apph.setSignatureOutputFormat(SupportedSignatureFormat.XADES);
-             
-             KeyStoreManager keyStoreManager = new KeyStoreManager();
-             keyStoreManager.initKeyStoresTable(apph.getNavigator());
-             
-             MainWindow window = new MainWindow(keyStoreManager, apph);
-             window.getMainFrame().setSize(590, 520);
-             window.getMainFrame().setResizable(true);
-             window.repaint();             
-         }
-         catch (Exception ee)
-         {
-             ee.printStackTrace();
-         }
+        try
+        {
+            new SignatureApplet();
+            AppHandler apph = AppHandler.getInstance();
+
+            apph.setInput(new FileInputParams());
+            apph.setOutput(new ConsoleOutputParams());
+            apph.setInputDataEncoding(SupportedDataEncoding.PLAIN);
+            apph.setSignatureOutputFormat(SupportedSignatureFormat.XADES);
+
+            KeyStoreManager keyStoreManager = new KeyStoreManager();
+            keyStoreManager.initKeyStoresTable(apph.getNavigator());
+
+            MainWindow window = new MainWindow(keyStoreManager, apph);
+            window.getMainFrame().setSize(590, 520);
+            window.getMainFrame().setResizable(true);
+            window.repaint();
+        }
+        catch (Exception ee)
+        {
+            ee.printStackTrace();
+        }
     }
 }
