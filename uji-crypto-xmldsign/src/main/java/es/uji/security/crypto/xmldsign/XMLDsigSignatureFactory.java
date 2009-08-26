@@ -2,7 +2,9 @@ package es.uji.security.crypto.xmldsign;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.security.AccessController;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +39,28 @@ import es.uji.security.util.OS;
 
 public class XMLDsigSignatureFactory implements ISignFormatProvider
 {
+    static
+    {
+        AccessController.doPrivileged(new java.security.PrivilegedAction<Void>()
+        {
+            public Void run()
+            {
+                if (System.getProperty("java.version").startsWith("1.5"))
+                {
+                    try
+                    {
+                        Security.addProvider(new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+                    }
+                    catch (Throwable e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                return null;
+            }
+        });
+    }
+    
     public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
     {
         byte[] toSign = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
@@ -44,8 +68,7 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
         PrivateKey pk = signatureOptions.getPrivateKey();
 
         // We create DOM XMLSigantureFactory
-        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM",
-                new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
+        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
         // Create the reference element
         Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
