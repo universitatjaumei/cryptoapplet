@@ -1,6 +1,6 @@
-package es.uji.security.crypto.jxades;
+package es.uji.security.crypto.jxades.test;
 
-public class Test
+public class TestPolicy
 {
     public static void main(String[] args)
     {
