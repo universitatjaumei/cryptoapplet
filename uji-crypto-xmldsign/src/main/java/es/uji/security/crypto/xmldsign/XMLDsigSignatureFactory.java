@@ -23,7 +23,7 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
-import javax.xml.crypto.dsig.spec.TransformParameterSpec;
+import javax.xml.crypto.dsig.spec.XPathFilterParameterSpec;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -71,10 +71,22 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
         // Create the reference element
-        Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
-                Collections.singletonList(fac.newTransform(Transform.ENVELOPED,
-                        (TransformParameterSpec) null)), null, null);
+//        Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
+//                Collections.singletonList(fac.newTransform(Transform.ENVELOPED,
+//                        (TransformParameterSpec) null)), null, null);
 
+//        <Transform Algorithm="http://www.w3.org/TR/1999/REC-xpath-19991116">
+//        <XPath xmlns:dsig="&dsig;">
+//        not(ancestor-or-self::dsig:Signature)
+//        </XPath>
+//      </Transform>
+
+        
+        Transform transform = fac.newTransform(Transform.XPATH, new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
+                Collections.singletonMap("dsig", XMLSignature.XMLNS)));
+        Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
+                Collections.singletonList(transform), null, null);
+        
         // Create the SignedInfo.
         SignedInfo si = fac
                 .newSignedInfo(fac.newCanonicalizationMethod(CanonicalizationMethod.INCLUSIVE,
