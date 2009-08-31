@@ -39,12 +39,33 @@ public class Test
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
         
-        ODFSignatureFactory aodSigner = new ODFSignatureFactory();
-        SignatureResult signatureResult = aodSigner.formatSignature(signatureOptions);
+        ODFSignatureFactory odfSignatureFactory = new ODFSignatureFactory();
+        SignatureResult signatureResult = odfSignatureFactory.formatSignature(signatureOptions);
         
         if (signatureResult.isValid())
         {
             OS.dumpToFile(new File("src/main/resources/signed-cryptoapplet.odt"), signatureResult.getSignatureData());
+            
+            signatureOptions = new SignatureOptions();
+            signatureOptions.setDataToSign(new FileInputStream("src/main/resources/signed-cryptoapplet.odt"));
+            signatureOptions.setCertificate(certificate);
+            signatureOptions.setPrivateKey((PrivateKey) key);
+            signatureOptions.setProvider(bcp);
+            
+            odfSignatureFactory = new ODFSignatureFactory();
+            signatureResult = odfSignatureFactory.formatSignature(signatureOptions);
+            
+            if (signatureResult.isValid())
+            {
+                OS.dumpToFile(new File("src/main/resources/signed2-cryptoapplet.odt"), signatureResult.getSignatureData());
+            }
+            else
+            {
+                for (String error : signatureResult.getErrors())
+                {
+                    System.out.println(error);
+                }
+            }            
         }
         else
         {
@@ -52,29 +73,6 @@ public class Test
             {
                 System.out.println(error);
             }
-        }
-        
-        ODFSignatureVerifier odtVerifier = new ODFSignatureVerifier();
-        
-        for (String fileName : new String[] { "src/main/resources/signed-openoffice.odt", "src/main/resources/signed-cryptoapplet.odt" })
-        {
-            System.out.println("Verifying " + fileName);
-            
-            VerificationResult verificationResult = odtVerifier.verify(new FileInputStream(fileName), bcp);
-            
-            if (verificationResult.isValid())
-            {
-                System.out.println("OK");
-            }
-            else
-            {
-                System.out.println("ERROR");
-                
-                for (String error : verificationResult.getErrors())
-                {
-                    System.out.println(error);
-                }
-            }
-        }
+        }        
     }
 }
