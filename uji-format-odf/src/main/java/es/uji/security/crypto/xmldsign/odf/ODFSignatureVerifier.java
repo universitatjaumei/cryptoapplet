@@ -75,76 +75,79 @@ public class ODFSignatureVerifier
         // Recuperamos el nodo Signature
         NodeList nl = d.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 
-        // Establecemos el contexto de validacion
-        DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(0));
-        valContext.setURIDereferencer(new URIDereferencer() {
-
-            public Data dereference(URIReference uriReference, XMLCryptoContext context) throws URIReferenceException
-            {                
-                Data result = null;
-                
-                // El elemento es una referencia interna dentro del documento
-                if (uriReference.getURI().startsWith("#"))
-                {
-                    Document document = d;
-                    Node node;
-                    
-                    try
-                    {
-                        node = XPathAPI.selectSingleNode(document.getDocumentElement(), "//*[@Id='" + uriReference.getURI().substring(1) + "']");
-                        result = new DOMSubTreeData(node, true); 
-                    }
-                    catch (TransformerException e)
-                    {
-                        throw new URIReferenceException(e.getMessage(), e);
-                    }
-                }
-                // El elemento es un fichero del ODF
-                else
-                {                    
-                    try
-                    {
-                        byte[] resourceData = odt.getEntry(uriReference.getURI());
-                        result = new OctetStreamData(new ByteArrayInputStream(resourceData));
-                    }
-                    catch (Exception e)
-                    {
-                        throw new URIReferenceException(e.getMessage(), e);
-                    }
-                }
-
-                return result; 
-            }            
-        });
-        
-        // Validamos la firma
-        XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
-        XMLSignature signature = fac.unmarshalXMLSignature(valContext);
-        
         VerificationResult verificationResult = new VerificationResult();
-        
-        if (signature.validate(valContext))
+                
+        // Establecemos el contexto de validacion
+        for (int i=0 ; i<nl.getLength() ; i++)
         {
-            verificationResult.setValid(true);
-        }
-        else
-        {
-            verificationResult.setValid(false);
-            
-            boolean sv = signature.getSignatureValue().validate(valContext);
-
-            if (sv == false) 
-            {
-                for (Object o : signature.getSignedInfo().getReferences()) 
-                {
-                    Reference reference  = (Reference) o;
+            DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(i));
+            valContext.setURIDereferencer(new URIDereferencer() {
+    
+                public Data dereference(URIReference uriReference, XMLCryptoContext context) throws URIReferenceException
+                {                
+                    Data result = null;
                     
-                    boolean refValid = reference.validate(valContext);
-                    verificationResult.addError(reference.getURI() + " - validity status: " + refValid);
+                    // El elemento es una referencia interna dentro del documento
+                    if (uriReference.getURI().startsWith("#"))
+                    {
+                        Document document = d;
+                        Node node;
+                        
+                        try
+                        {
+                            node = XPathAPI.selectSingleNode(document.getDocumentElement(), "//*[@Id='" + uriReference.getURI().substring(1) + "']");
+                            result = new DOMSubTreeData(node, true); 
+                        }
+                        catch (TransformerException e)
+                        {
+                            throw new URIReferenceException(e.getMessage(), e);
+                        }
+                    }
+                    // El elemento es un fichero del ODF
+                    else
+                    {                    
+                        try
+                        {
+                            byte[] resourceData = odt.getEntry(uriReference.getURI());
+                            result = new OctetStreamData(new ByteArrayInputStream(resourceData));
+                        }
+                        catch (Exception e)
+                        {
+                            throw new URIReferenceException(e.getMessage(), e);
+                        }
+                    }
+    
+                    return result; 
+                }            
+            });
+        
+            // Validamos la firma
+            XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+            XMLSignature signature = fac.unmarshalXMLSignature(valContext);
+            
+            if (signature.validate(valContext))
+            {
+                verificationResult.setValid(true);
+            }
+            else
+            {
+                verificationResult.setValid(false);
+                
+                boolean sv = signature.getSignatureValue().validate(valContext);
+    
+                if (sv == false) 
+                {
+                    for (Object o : signature.getSignedInfo().getReferences()) 
+                    {
+                        Reference reference  = (Reference) o;
+                        
+                        boolean refValid = reference.validate(valContext);
+                        verificationResult.addError(reference.getURI() + " - validity status: " + refValid);
+                    }
                 }
             }
         }
-        
+            
         return verificationResult;
     }
 }

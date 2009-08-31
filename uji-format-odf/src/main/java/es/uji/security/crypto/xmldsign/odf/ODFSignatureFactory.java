@@ -138,10 +138,10 @@ public class ODFSignatureFactory implements ISignFormatProvider
                 Reference reference;
 
                 // Solo procesamos los ficheros
-                if (!fullPath.endsWith("/"))
+                if (!fullPath.endsWith("/") && !fullPath.equals("META-INF/documentsignatures.xml"))
                 {
-                    if (fullPath.equals("content.xml") || fullPath.equals("meta.xml")
-                            || fullPath.equals("styles.xml") || fullPath.equals("settings.xml"))
+                    if (fullPath.equals("content.xml") || fullPath.equals("meta.xml") || 
+                         fullPath.equals("styles.xml") || fullPath.equals("settings.xml"))
                     {
                         // Obtenemos el fichero, canonizamos y calculamos el digest
                         InputStream xmlFile = new ByteArrayInputStream(odt.getEntry(fullPath));
