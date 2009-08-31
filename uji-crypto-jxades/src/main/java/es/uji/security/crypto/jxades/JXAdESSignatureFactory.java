@@ -8,6 +8,7 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.UUID;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
@@ -94,7 +95,9 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
 
         try
         {
-            xmlSignature.sign(certificate, privateKey, Arrays.asList(new String[] { "" }), "S0",
+            String id = UUID.randomUUID().toString();
+            
+            xmlSignature.sign(certificate, privateKey, Arrays.asList(new String[] { "" }), id,
                     "http://tss.accv.es:8318/tsa");
         }
         catch (MarshalException me)
