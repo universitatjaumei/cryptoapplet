@@ -63,33 +63,39 @@ public class XMLDsigVerifier
 
         // Create a DOMValidateContext and specify a KeySelector
         // and document context.
-        DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(0));
-
-        // Unmarshal the XMLSignature.
-        XMLSignature signature = fac.unmarshalXMLSignature(valContext);
-
-        // Validate the XMLSignature.
-        boolean coreValidity = signature.validate(valContext);
 
         VerificationResult result = new VerificationResult();
-        result.setValid(coreValidity);
         
-        // Check core validation status.
-        if (coreValidity == false)
+        for (int i=0 ; i<nl.getLength() ; i++)
         {
-            boolean sv = signature.getSignatureValue().validate(valContext);
-            result.addError("signature validation status: " + sv);
+            DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(i));
+    
+            // Unmarshal the XMLSignature.
+            XMLSignature signature = fac.unmarshalXMLSignature(valContext);
+    
+            // Validate the XMLSignature.
+            boolean coreValidity = signature.validate(valContext);
+            result.setValid(coreValidity);
             
-            if (sv == false)
+            // Check core validation status.
+            if (coreValidity == false)
             {
-                // Check the validation status of each Reference.
-                for (Object o : signature.getSignedInfo().getReferences())
+                boolean sv = signature.getSignatureValue().validate(valContext);
+                result.addError("signature validation status: " + sv);
+                
+                if (sv == false)
                 {
-                    Reference r = (Reference) o;
-                    
-                    boolean refValid = r.validate(valContext);
-                    result.addError("ref[" + r.getURI() + "] validity status: " + refValid);
+                    // Check the validation status of each Reference.
+                    for (Object o : signature.getSignedInfo().getReferences())
+                    {
+                        Reference r = (Reference) o;
+                        
+                        boolean refValid = r.validate(valContext);
+                        result.addError("ref[" + r.getURI() + "] validity status: " + refValid);
+                    }
                 }
+                
+                break;
             }
         }
         
