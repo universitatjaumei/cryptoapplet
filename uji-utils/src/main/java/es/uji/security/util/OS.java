@@ -92,7 +92,6 @@ public class OS
             while ((length = in.read(buffer)) >= 0)
             {
                 fos.write(buffer, 0, length);
-                System.out.println("Writting length " + length + " bytes to " + file.getAbsolutePath());
             }
             
             fos.close();
