@@ -18,13 +18,11 @@ import org.apache.log4j.Logger;
 
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
-
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
-import es.uji.security.crypto.openxades.OpenXAdESCoSignatureFactory;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.X509CertificateHandler;
@@ -183,8 +181,7 @@ public class SignatureThread extends Thread
             Class<?> sf = Class.forName(_mw.getAppHandler().getSignatureFormat().toString());
             ISignFormatProvider signer = (ISignFormatProvider) sf.newInstance();
 
-            if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES) || 
-                _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES_COSIGN))
+            if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES))
             {
                 String[] roles = _mw.getAppHandler().getSignerRole();
                 String sr = "UNSET";
@@ -204,20 +201,10 @@ public class SignatureThread extends Thread
                 log.debug("File Name: " + fname);
                 log.debug("Content Type:" + fmimetype);                
                         
-                if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES))
-                {
-                    OpenXAdESSignatureFactory xs = (OpenXAdESSignatureFactory) signer;
-                    xs.setSignerRole(sr);
-                    xs.setXadesFileName(fname);
-                    xs.setXadesFileMimeType(fmimetype);
-                }
-                else
-                {
-                    OpenXAdESCoSignatureFactory xs = (OpenXAdESCoSignatureFactory) signer;
-                    xs.setSignerRole(sr);
-                    xs.setXadesFileName(fname);
-                    xs.setXadesFileMimeType(fmimetype);
-                }
+                OpenXAdESSignatureFactory xs = (OpenXAdESSignatureFactory) signer;
+                xs.setSignerRole(sr);
+                xs.setXadesFileName(fname);
+                xs.setXadesFileMimeType(fmimetype);
             }
 
             _mw.getGlobalProgressBar().setValue(_ini_percent + 4 * inc);
