@@ -32,11 +32,6 @@ public enum SupportedSignatureFormat
             return "es.uji.security.crypto.openxades.OpenXAdESSignatureFactory"; 
         }
     }, 
-    XADES_COSIGN {
-        public String toString() {
-            return "es.uji.security.crypto.openxades.OpenXAdESCoSignatureFactory"; 
-        }
-    }, 
     PDF {
         public String toString() {
             return "es.uji.security.crypto.pdf.PDFSignatureFactory"; 
