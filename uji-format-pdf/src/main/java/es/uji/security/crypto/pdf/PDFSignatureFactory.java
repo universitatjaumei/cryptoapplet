@@ -222,7 +222,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             PdfReader reader = new PdfReader(datos);
             ByteArrayOutputStream sout = new ByteArrayOutputStream();
 
-            PdfStamper stp = PdfStamper.createSignature(reader, sout, '\0');
+            PdfStamper stp = PdfStamper.createSignature(reader, sout, '\0', null, true);
 
             PdfSignatureAppearance sap = stp.getSignatureAppearance();
 
