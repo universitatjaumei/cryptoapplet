@@ -1,41 +1,72 @@
 package es.uji.security.crypto.pdf;
 
-/**
- * iText is used, documentation is: How to verify
- * 
- * Verifying is a three step process:
- * 
- * Was the document changed? What revision does the signature cover? Does the signature cover all
- * the document? Can the signature certificates be verified in your trusted identities store?
- * 
- * Here's an example on how to do it:
- * 
- * KeyStore kall = PdfPKCS7.loadCacertsKeyStore(); PdfReader reader = new
- * PdfReader("my_signed_doc.pdf"); AcroFields af = reader.getAcroFields(); ArrayList names =
- * af.getSignatureNames(); for (int k = 0; k < names.size(); ++k) { String name =
- * (String)names.get(k); System.out.println("Signature name: " + name);
- * System.out.println("Signature covers whole document: " + af.signatureCoversWholeDocument(name));
- * System.out.println("Document revision: " + af.getRevision(name) + " of " +
- * af.getTotalRevisions()); // Start revision extraction FileOutputStream out = new
- * FileOutputStream("revision_" + af.getRevision(name) + ".pdf"); byte bb[] = new byte[8192];
- * InputStream ip = af.extractRevision(name); int n = 0; while ((n = ip.read(bb)) > 0) out.write(bb,
- * 0, n); out.close(); ip.close(); // End revision extraction PdfPKCS7 pk =
- * af.verifySignature(name); Calendar cal = pk.getSignDate(); Certificate pkc[] =
- * pk.getCertificates(); System.out.println("Subject: " +
- * PdfPKCS7.getSubjectFields(pk.getSigningCertificate())); System.out.println("Document modified: "
- * + !pk.verify()); Object fails[] = PdfPKCS7.verifyCertificates(pkc, kall, null, cal); if (fails ==
- * null) System.out.println("Certificates verified against the KeyStore"); else
- * System.out.println("Certificate failed: " + fails[1]); }
- * 
- * 
- * @author paul
- * 
- */
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Properties;
+
+import com.lowagie.text.pdf.AcroFields;
+import com.lowagie.text.pdf.PdfPKCS7;
+import com.lowagie.text.pdf.PdfReader;
+
+import es.uji.security.crypto.VerificationResult;
+import es.uji.security.util.ConfigHandler;
 
 public class PDFSignatureVerifier
 {
-    public static void main(String[] args)
+    @SuppressWarnings("unchecked")
+    public VerificationResult verify(byte[] pdfData) throws CertificateException, KeyStoreException, IOException
     {
+        KeyStore kall = PdfPKCS7.loadCacertsKeyStore();
+        
+        // Add all configured certificates to the main keystore
+        
+        Properties prop = ConfigHandler.getProperties();
+        
+        int numCertificates = Integer.parseInt(prop.getProperty("PDFSIG_CA_CERTS"));
+        
+        ClassLoader classLoader = PDFSignatureVerifier.class.getClassLoader();
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        
+        for (int i=1; i<=numCertificates; i++)
+        {
+            Certificate certificate = certificateFactory.generateCertificate(classLoader.getResourceAsStream(prop
+                    .getProperty("PDFSIG_CA_CERT" + i)));
+          
+            kall.setCertificateEntry("host ca " + i, certificate);
+        }
+        
+        PdfReader reader = new PdfReader("src/main/resources/out.pdf");
+        
+        AcroFields acroFields = reader.getAcroFields();
+        ArrayList<String> signatureNameList = acroFields.getSignatureNames();
+        
+        for (String name : signatureNameList)
+        {
+            PdfPKCS7 pdfPKCS7 = acroFields.verifySignature(name);
+            Calendar cal = pdfPKCS7.getSignDate();
+            Certificate pkc[] = pdfPKCS7.getCertificates();
 
+            Object fails[] = PdfPKCS7.verifyCertificates(pkc, kall, null, cal);
+            
+            if (fails == null)
+            {
+                System.out.println("Certificates verified against the KeyStore");
+            }
+            else
+            {
+                System.out.println("Certificate failed: " + fails[1]);
+            }
+        }
+        
+        VerificationResult verificationResult = new VerificationResult();
+        verificationResult.setValid(true);
+        
+        return verificationResult;
     }
 }
