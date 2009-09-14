@@ -23,13 +23,14 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger; //import org.bouncycastle.util.encoders.Base64;
 
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.factory.SignatureFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
 import javax.crypto.Cipher;
@@ -138,6 +139,8 @@ public class EncryptedData
     public static final String FORMAT_ENCDOC_XML = "ENCDOC-XML";
     /** supported version is 1.0 */
     public static final String VERSION_1_0 = "1.0";
+
+    private ConfigManager conf = ConfigManager.getInstance();
 
     /**
      * Constructor for EncryptedData
@@ -968,8 +971,7 @@ public class EncryptedData
         try
         {
             Security.addProvider((Provider) Class.forName(
-                    ConfigManager.instance().getProperty("DIGIDOC_SECURITY_PROVIDER"))
-                    .newInstance());
+                    conf.getProperty("DIGIDOC_SECURITY_PROVIDER")).newInstance());
         }
         catch (Exception ex)
         {
@@ -981,11 +983,11 @@ public class EncryptedData
                     "Transport key allready initialized!", null);
         try
         {
-            SecureRandom random = SecureRandom.getInstance(ConfigManager.instance().getProperty(
-                    "DIGIDOC_SECRANDOM_ALGORITHM"));
-            KeyGenerator keygen = KeyGenerator.getInstance(ConfigManager.instance().getProperty(
-                    "DIGDOC_ENCRYPT_KEY_ALG"), ConfigManager.instance().getProperty(
-                    "DIGIDOC_SECURITY_PROVIDER_NAME"));
+            SecureRandom random = SecureRandom.getInstance(conf
+                    .getProperty("DIGIDOC_SECRANDOM_ALGORITHM"));
+            KeyGenerator keygen = KeyGenerator.getInstance(conf
+                    .getProperty("DIGDOC_ENCRYPT_KEY_ALG"), conf
+                    .getProperty("DIGIDOC_SECURITY_PROVIDER_NAME"));
             if (m_logger.isDebugEnabled())
                 m_logger.debug("Keygen:" + keygen.getClass().getName() + " algorithm: "
                         + keygen.getAlgorithm());
@@ -1027,9 +1029,8 @@ public class EncryptedData
                     "Transport key has not been initialized!", null);
         try
         {
-            cip = Cipher.getInstance(ConfigManager.instance().getProperty(
-                    "DIGIDOC_ENCRYPTION_ALOGORITHM"), ConfigManager.instance().getProperty(
-                    "DIGIDOC_SECURITY_PROVIDER_NAME"));
+            cip = Cipher.getInstance(conf.getProperty("DIGIDOC_ENCRYPTION_ALOGORITHM"), conf
+                    .getProperty("DIGIDOC_SECURITY_PROVIDER_NAME"));
             if (mode == Cipher.DECRYPT_MODE)
             {
                 IvParameterSpec ivSpec = new IvParameterSpec(iv);
@@ -1164,11 +1165,11 @@ public class EncryptedData
         try
         {
             // decrypt transport key
-            SignatureFactory sfac = ConfigManager.instance().getSignatureFactory();
+            SignatureFactory sfac = ConfigHandler.getSignatureFactory();
             if (m_logger.isDebugEnabled())
                 m_logger.debug("Decrypting key: " + nKey + " with token: " + token);
             byte[] decdata = sfac.decrypt(ekey.getTransportKeyData(), token, pin);
-            m_transportKey = (SecretKey) new SecretKeySpec(decdata, ConfigManager.instance()
+            m_transportKey = (SecretKey) new SecretKeySpec(decdata, conf
                     .getProperty("DIGIDOC_ENCRYPTION_ALOGORITHM"));
             // decrypt data
             Cipher cipher = getCipher(Cipher.DECRYPT_MODE, m_transportKey, ivdata);

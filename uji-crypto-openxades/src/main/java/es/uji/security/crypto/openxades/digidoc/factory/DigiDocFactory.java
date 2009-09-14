@@ -21,11 +21,11 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-import es.uji.security.crypto.openxades.digidoc.SignedDoc;
-
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
+
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
+import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 
 /**
  * Interface for reading and writing DigiDoc files

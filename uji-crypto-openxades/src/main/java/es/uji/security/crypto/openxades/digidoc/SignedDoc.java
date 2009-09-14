@@ -42,8 +42,8 @@ import javax.crypto.Cipher;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
-import es.uji.security.util.ConfigHandler;
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 
 /**
  * Represents an instance of signed doc in DIGIDOC format. Contains one or more DataFile -s and zero
@@ -95,6 +95,8 @@ public class SignedDoc implements Serializable
 
     private static Logger log = Logger.getLogger(SignedDoc.class);
 
+    private static ConfigManager conf = ConfigManager.getInstance();
+    
     /**
      * Creates new SignedDoc Initializes everything to null
      */
@@ -769,7 +771,7 @@ public class SignedDoc implements Serializable
              * sig.initVerify((java.security.interfaces.RSAPublicKey)cert.getPublicKey());
              * sig.update(digest); rc = sig.verify(signature);
              */
-            Cipher cryptoEngine = Cipher.getInstance(ConfigManager.instance().getProperty(
+            Cipher cryptoEngine = Cipher.getInstance(conf.getProperty(
                     "DIGIDOC_VERIFY_ALGORITHM"), "BC");
             cryptoEngine.init(Cipher.DECRYPT_MODE, cert);
             byte[] decryptedDigestValue = cryptoEngine.doFinal(signature);
@@ -986,13 +988,13 @@ public class SignedDoc implements Serializable
             }
             else if (certLocation.startsWith("jar://"))
             {
-                ClassLoader cl = ConfigManager.instance().getClass().getClassLoader();
+                ClassLoader cl = SignedDoc.class.getClassLoader();
                 isCert = cl.getResourceAsStream(certLocation.substring(6));
             }
             else if (certLocation.startsWith("keystore://"))
             {
-                ClassLoader cl = ConfigManager.instance().getClass().getClassLoader();
-                isCert = cl.getResourceAsStream(ConfigHandler.getProperty("DEFAULT_KEYSTORE"));
+                ClassLoader cl = SignedDoc.class.getClassLoader();
+                isCert = cl.getResourceAsStream(conf.getProperty("DEFAULT_KEYSTORE"));
                 
                 String str_cert= certLocation.substring(11);
                 KeyStore ks= KeyStore.getInstance("JKS");

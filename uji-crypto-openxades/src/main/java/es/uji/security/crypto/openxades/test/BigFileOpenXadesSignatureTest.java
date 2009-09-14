@@ -8,16 +8,16 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Properties;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
@@ -26,13 +26,9 @@ import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
-import es.uji.security.util.ConfigHandler;
-import es.uji.security.util.OS;
-import es.uji.security.util.i18n.LabelManager;
 
 public class BigFileOpenXadesSignatureTest {
 
@@ -53,18 +49,12 @@ public class BigFileOpenXadesSignatureTest {
 		fos.close();
 	}
 
-	public void signAndVerify(String file, String pwd) throws Exception{
+	public void signAndVerify(String file, String pwd) throws Exception
+	{
+        ConfigManager conf = ConfigManager.getInstance();
+        
 		CertValue cval= null;
-		Properties prop = ConfigHandler.getProperties();
-		if (prop != null)
-		{
-			ConfigManager.init(prop);
-		}
-		else
-		{
-			System.err.println("Config Error.");
-			System.exit(-1);
-		}
+
 		BouncyCastleProvider bcp = new BouncyCastleProvider();
 		Security.addProvider(bcp);
 	
@@ -104,10 +94,10 @@ public class BigFileOpenXadesSignatureTest {
 		// Add the signature to the signed doc
 		sig.setSignatureValue(res);
 
-		int tsaCount = ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT", 0);
+		int tsaCount = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);
 		if (tsaCount != 0)
 		{
-			String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+			String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
 			byte[] signatureValue = sig.getSignatureValue().toString().getBytes();
 
 			TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue,
@@ -122,8 +112,7 @@ public class BigFileOpenXadesSignatureTest {
 
 			sig.addTimestampInfo(ts);
 
-			String tsa1_ca = ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
-
+			String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
 
 			X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
 
@@ -134,8 +123,6 @@ public class BigFileOpenXadesSignatureTest {
 
 			// Check the certificate validity against the timestamp:
 			Date d = ts.getTime();
-
-
 		}
 		
 		if (tsaCount != 0)
@@ -143,12 +130,12 @@ public class BigFileOpenXadesSignatureTest {
 			sig.addCertValue(cval);
 		}
 
-		if (ConfigManager.instance().getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
+		if (conf.getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
 		{
 			sig.getConfirmation();
 		}
 
-		String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+		String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
 
 		byte[] completeCertificateRefs = sig.getUnsignedProperties()
 		.getCompleteCertificateRefs().toXML();
@@ -156,12 +143,13 @@ public class BigFileOpenXadesSignatureTest {
 		byte[] completeRevocationRefs = sig.getUnsignedProperties().getCompleteRevocationRefs()
 		.toXML();
 
-		CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
-		byte[] 	canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
-				SignedDoc.CANONICALIZATION_METHOD_20010315);
+		CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
+		
+		byte[] canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
+			   SignedDoc.CANONICALIZATION_METHOD_20010315);
 
-		byte[] 	canCompleteRevocationRefs = canFac.canonicalize(completeRevocationRefs,
-				SignedDoc.CANONICALIZATION_METHOD_20010315);
+		byte[] canCompleteRevocationRefs = canFac.canonicalize(completeRevocationRefs,
+			   SignedDoc.CANONICALIZATION_METHOD_20010315);
 
 
 		byte[] refsOnlyData = new byte[canCompleteCertificateRefs.length
@@ -183,10 +171,10 @@ public class BigFileOpenXadesSignatureTest {
 
 		sdoc.writeToFile(new File("/tmp/signed-output.xml"));
 
-		DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
+		DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
 		SignedDoc r_sdoc = digFac.readSignedDoc(new FileInputStream("/tmp/signed-output.xml"));
 
-		boolean confirmation = ConfigManager.instance().getProperty(
+		boolean confirmation = conf.getProperty(
 		"DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY").equals("true");
 
 		ArrayList<String> allErrors = new ArrayList<String>();

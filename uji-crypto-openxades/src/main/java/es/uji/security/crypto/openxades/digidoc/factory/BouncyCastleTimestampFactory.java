@@ -28,12 +28,13 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
@@ -49,6 +50,8 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
     /** log4j logger object */
     private Logger m_logger = null;
 
+    private ConfigManager conf = ConfigManager.getInstance();
+    
     /**
      * Creates new BouncyCastleTimestampFactory
      */
@@ -131,10 +134,10 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
         // hack - just look at first TSA
         if (m_logger.isDebugEnabled())
             m_logger.debug("Cearch index for: " + cn);
-        int nTsas = ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT", 0);
+        int nTsas = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);
         for (int i = 0; i < nTsas; i++)
         {
-            String s1 = ConfigManager.instance().getProperty("DIGIDOC_TSA" + (i + 1) + "_CN");
+            String s1 = conf.getProperty("DIGIDOC_TSA" + (i + 1) + "_CN");
             if (s1 != null && s1.equals(cn))
                 return i + 1;
         }
@@ -143,13 +146,13 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
 
     private X509Certificate findTSACert(int idx) throws DigiDocException
     {
-        return SignedDoc.readCertificate(ConfigManager.instance().getProperty(
+        return SignedDoc.readCertificate(conf.getProperty(
                 "DIGIDOC_TSA" + idx + "_CERT"));
     }
 
     private X509Certificate findTSACACert(int idx) throws DigiDocException
     {
-        String fname = ConfigManager.instance().getProperty("DIGIDOC_TSA" + idx + "_CA_CERT");
+        String fname = conf.getProperty("DIGIDOC_TSA" + idx + "_CA_CERT");
         if (m_logger.isDebugEnabled())
             m_logger.debug("Read ca cert: " + fname);
         return SignedDoc.readCertificate(fname);

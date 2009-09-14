@@ -1,11 +1,9 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLCanonicalizerHandler;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser;
-import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.RandomAccessFile;
+
+import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 
 public class TinyXMLCanonicalizer implements CanonicalizationFactory
 {

@@ -24,19 +24,17 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 
-import es.uji.security.crypto.openxades.digidoc.Base64Util;
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
-import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import javax.crypto.Cipher;
 
 import org.apache.log4j.Logger;
+
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
+import es.uji.security.crypto.openxades.digidoc.Base64Util;
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
+import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
 /**
  * Contains the data of an <EncryptedKey> subelement of an <EncryptedData> object
@@ -44,6 +42,7 @@ import org.apache.log4j.Logger;
  * @author Veiko Sinivee
  * @version 1.0
  */
+@SuppressWarnings("serial")
 public class EncryptedKey implements Serializable
 {
     /** Id atribute value (optional) */
@@ -350,9 +349,10 @@ public class EncryptedKey implements Serializable
         // now try to encrypt the key and keep only the encrypted data
         try
         {
-            Cipher alg = Cipher.getInstance(ConfigManager.instance().getProperty(
-                    "DIGIDOC_KEY_ALOGORITHM"), ConfigManager.instance().getProperty(
-                    "DIGIDOC_SECURITY_PROVIDER_NAME"));
+            ConfigManager conf = ConfigManager.getInstance();
+
+            Cipher alg = Cipher.getInstance(conf.getProperty("DIGIDOC_KEY_ALOGORITHM"), conf
+                    .getProperty("DIGIDOC_SECURITY_PROVIDER_NAME"));
             if (m_logger.isDebugEnabled())
                 m_logger.debug("EncryptKey - algorithm: " + alg.getAlgorithm());
             // alg.init(Cipher.ENCRYPT_MODE, m_recipientsCert.getPublicKey());
@@ -437,15 +437,23 @@ public class EncryptedKey implements Serializable
      * 
      * @return a possibly empty list of DigiDocException objects
      */
-    public ArrayList validate()
+    public ArrayList<DigiDocException> validate()
     {
-        ArrayList errs = new ArrayList();
+        ArrayList<DigiDocException> errs = new ArrayList<DigiDocException>();        
         DigiDocException ex = validateEncryptionMethod(m_encryptionMethod);
+        
         if (ex != null)
+        {
             errs.add(ex);
+        }
+        
         ex = validateRecipientsCertificate(m_recipientsCert);
+        
         if (ex != null)
+        {
             errs.add(ex);
+        }
+        
         return errs;
     }
 

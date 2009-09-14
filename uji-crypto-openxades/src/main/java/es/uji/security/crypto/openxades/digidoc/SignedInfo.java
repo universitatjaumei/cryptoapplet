@@ -23,8 +23,10 @@ package es.uji.security.crypto.openxades.digidoc;
 
 import java.io.Serializable;
 import java.util.ArrayList; //import ee.sk.utils.ConvertUtils;
+
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -355,7 +357,7 @@ public class SignedInfo implements Serializable
     {
         if (m_origDigest == null)
         {
-            CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+            CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
             byte[] tmp = canFac.canonicalize(toXML(), SignedDoc.CANONICALIZATION_METHOD_20010315);
             return SignedDoc.digest(tmp);
         }
@@ -372,7 +374,7 @@ public class SignedInfo implements Serializable
 
     public byte[] getSignedContent() throws DigiDocException
     {
-        CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+        CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
         byte[] tmp = canFac.canonicalize(toXML(), SignedDoc.CANONICALIZATION_METHOD_20010315);
         return tmp;
     }

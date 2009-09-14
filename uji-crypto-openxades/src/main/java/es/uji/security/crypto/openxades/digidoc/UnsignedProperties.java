@@ -21,16 +21,15 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateEncodingException;
-import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
-import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+
+import es.uji.security.crypto.openxades.ConfigHandler;
+import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
+import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
 /**
  * Models the unsigned properties of a signature.
@@ -296,7 +295,7 @@ public class UnsignedProperties implements Serializable
         // verify notary status
         try
         {
-            NotaryFactory notFac = ConfigManager.instance().getNotaryFactory();
+            NotaryFactory notFac = ConfigHandler.getNotaryFactory();
             notFac.parseAndVerifyResponse(m_signature, m_notary);
         }
         catch (DigiDocException ex)
