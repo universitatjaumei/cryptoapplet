@@ -19,11 +19,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import es.uji.security.crypto.SupportedSignatureFormat;
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.KeyStoreManager;
-import es.uji.security.util.ConfigHandler;
 
 public class AppEnvironmentTester extends Thread
 {
@@ -34,9 +35,10 @@ public class AppEnvironmentTester extends Thread
     private JTextArea _jta = new JTextArea();
     private String appletTag, strerror = "", strwarn = "", inputUrl, outputUrl;
     int nerror = 0, ninfo = 0, nwarn = 0, delay = 1000;
-    private Properties prop;
     private KeyStoreManager keyStoreManager;
     private SignatureApplet signatureApplet;
+    
+    private ConfigManager conf = ConfigManager.getInstance();
     
     public AppEnvironmentTester(SignatureApplet signatureApplet)
     {
@@ -126,23 +128,16 @@ public class AppEnvironmentTester extends Thread
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             ClassLoader cl = AppEnvironmentTester.class.getClassLoader();
 
-            prop = ConfigHandler.getProperties();
-            if (prop == null)
-            {
-                error("DDOC config file not found.");
-                return;
-            }
-
             // Get the CA certificate list
             String strinfo = "Certificates allowed to sign in this site: \n\n";
-            Integer n = new Integer(prop.getProperty(property + "S"));
+            Integer n = new Integer(conf.getProperty(property + "S"));
             Certificate CACert = null;
 
             for (int i = 1; i <= n; i++)
             {
                 try
                 {
-                    CACert = cf.generateCertificate(cl.getResourceAsStream(prop.getProperty(
+                    CACert = cf.generateCertificate(cl.getResourceAsStream(conf.getProperty(
                             property + i).replaceFirst("jar://", "")));
                     strinfo += "        Issuer: "
                             + ((X509Certificate) CACert).getIssuerDN().toString()
@@ -152,7 +147,7 @@ public class AppEnvironmentTester extends Thread
                 catch (CertificateException e)
                 {
                     error("Cannot parse certificate file  " + property + i + "="
-                            + prop.getProperty(property + i) + " Exception: " + e.getMessage());
+                            + conf.getProperty(property + i) + " Exception: " + e.getMessage());
                 }
             }
             info(strinfo);
@@ -172,7 +167,7 @@ public class AppEnvironmentTester extends Thread
         {
             caption(" TSA (Time Stamp Authority)");
 
-            String tsaUrl = prop.getProperty("DIGIDOC_TSA1_URL");
+            String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
 
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, tst.getBytes(), true);
         }
@@ -186,20 +181,14 @@ public class AppEnvironmentTester extends Thread
     public void testOCSP()
     {
         caption("OCSP");
-        prop = ConfigHandler.getProperties();
-        if (prop == null)
-        {
-            error("DDOC config file not found.");
-            return;
-        }
 
-        Integer n = new Integer(prop.getProperty("DIGIDOC_OCSP_RESPONDER_COUNT"));
+        Integer n = new Integer(conf.getProperty("DIGIDOC_OCSP_RESPONDER_COUNT"));
 
         for (int i = 1; i <= n; i++)
         {
             try
             {
-                testConnect(new URL(prop.getProperty("DIGIDOC_OCSP_RESPONDER_URL" + i)));
+                testConnect(new URL(conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL" + i)));
             }
             catch (Exception e)
             {
