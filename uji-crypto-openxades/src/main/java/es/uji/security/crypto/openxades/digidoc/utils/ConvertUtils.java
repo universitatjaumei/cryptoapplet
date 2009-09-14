@@ -21,11 +21,13 @@
 
 package es.uji.security.crypto.openxades.digidoc.utils;
 
-import java.util.Date;
-import java.util.TimeZone;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 
@@ -223,6 +225,7 @@ public class ConvertUtils
     public static String utf82str(String data) throws DigiDocException
     {
         String str = null;
+        
         try
         {
             byte[] bdata = data.getBytes();
@@ -232,6 +235,7 @@ public class ConvertUtils
         {
             DigiDocException.handleException(ex, DigiDocException.ERR_UTF8_CONVERT);
         }
+        
         return str;
     }
 
@@ -244,13 +248,20 @@ public class ConvertUtils
      */
     public static boolean isKnownOCSPCert(String cn)
     {
-        int nOcsps = ConfigManager.instance().getIntProperty("DIGIDOC_OCSP_COUNT", 0);
+        ConfigManager conf = ConfigManager.getInstance();
+        
+        int nOcsps = conf.getIntProperty("DIGIDOC_OCSP_COUNT", 0);
+        
         for (int i = 0; i < nOcsps; i++)
         {
-            String s = ConfigManager.instance().getProperty("DIGIDOC_OCSP" + (i + 1) + "_CN");
+            String s = conf.getProperty("DIGIDOC_OCSP" + (i + 1) + "_CN");
+            
             if (s != null && s.equals(cn))
+            {
                 return true;
+            }
         }
+        
         return false;
     }
 
@@ -263,13 +274,20 @@ public class ConvertUtils
      */
     public static boolean isKnownTSACert(String cn)
     {
-        int nTsas = ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT", 0);
+        ConfigManager conf = ConfigManager.getInstance();
+        
+        int nTsas = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);
+        
         for (int i = 0; i < nTsas; i++)
         {
-            String s = ConfigManager.instance().getProperty("DIGIDOC_TSA" + (i + 1) + "_CN");
+            String s = conf.getProperty("DIGIDOC_TSA" + (i + 1) + "_CN");
+            
             if (s != null && s.equals(cn))
+            {
                 return true;
+            }
         }
+        
         return false;
     }
 

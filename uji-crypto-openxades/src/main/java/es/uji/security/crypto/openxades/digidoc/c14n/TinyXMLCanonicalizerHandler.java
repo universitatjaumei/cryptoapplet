@@ -22,7 +22,7 @@ public class TinyXMLCanonicalizerHandler implements TinyXMLParser_Handler
     public ByteArrayOutputStream BaseStream;
     public boolean AppendNewlineAfterDocumentElement;
     public boolean IsWithComments;
-
+ 
     public TinyXMLCanonicalizerHandler()
     {
         this.BaseStream = new ByteArrayOutputStream();

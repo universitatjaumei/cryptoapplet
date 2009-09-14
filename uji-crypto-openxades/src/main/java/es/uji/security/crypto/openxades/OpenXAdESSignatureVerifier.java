@@ -2,15 +2,13 @@ package es.uji.security.crypto.openxades;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
-import java.util.Properties;
 
 import es.uji.security.crypto.VerificationResult;
+import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
-import es.uji.security.util.ConfigHandler;
 
 public class OpenXAdESSignatureVerifier
 {
@@ -21,21 +19,9 @@ public class OpenXAdESSignatureVerifier
 
         try
         {
-            Properties prop = ConfigHandler.getProperties();
+            ConfigManager conf = ConfigManager.getInstance();
 
-            if (prop != null)
-            {
-                ConfigManager.init(prop);
-            }
-            else
-            {
-                verificationDetails.setValid(false);
-                verificationDetails.addError("Invalid OpenXAdES configuration");
-
-                return verificationDetails;
-            }
-
-            DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
+            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
             SignedDoc sdoc = digFac.readSignedDoc(new ByteArrayInputStream(signedData));
 
             if (sdoc.countSignatures() == 0)
@@ -46,8 +32,8 @@ public class OpenXAdESSignatureVerifier
                 return verificationDetails;
             }
 
-            boolean confirmation = ConfigManager.instance().getProperty(
-                    "DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY").equals("true");
+            boolean confirmation = conf.getProperty("DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY")
+                    .equals("true");
 
             ArrayList<String> allErrors = new ArrayList<String>();
 
@@ -85,7 +71,7 @@ public class OpenXAdESSignatureVerifier
         {
             verificationDetails.setValid(false);
             verificationDetails.addError(e.getMessage());
-            
+
             return verificationDetails;
         }
     }

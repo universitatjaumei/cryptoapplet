@@ -24,7 +24,7 @@ package es.uji.security.crypto.openxades.digidoc;
 //import java.io.StringWriter;
 //import java.io.PrintWriter;
 import org.apache.log4j.Logger;
-
+ 
 /**
  * JDigiDoc specific exception
  * 

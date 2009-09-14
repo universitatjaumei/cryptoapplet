@@ -22,34 +22,34 @@
  */
 package es.uji.security.crypto.openxades.digidoc.xmlenc.factory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.zip.Inflater;
-import java.util.Stack;
 import java.security.cert.X509Certificate;
+import java.util.Stack;
+import java.util.zip.Inflater;
 
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.SAXParser;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.log4j.Logger;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocException;
 import es.uji.security.crypto.openxades.digidoc.factory.SignatureFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.xmlenc.EncryptedData;
 import es.uji.security.crypto.openxades.digidoc.xmlenc.EncryptedKey;
 import es.uji.security.crypto.openxades.digidoc.xmlenc.EncryptionProperty;
-
-import org.xml.sax.SAXException;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.apache.log4j.Logger;
 
 /**
  * Implementation class for reading and writing encrypted files using a SAX parser
@@ -509,13 +509,15 @@ public class EncryptedStreamSAXParser extends DefaultHandler implements Encrypte
                     // decrypt transport key
                     try
                     {
-                        SignatureFactory sfac = ConfigManager.instance().getSignatureFactory();
+                        ConfigManager conf = ConfigManager.getInstance();
+
+                        SignatureFactory sfac = ConfigHandler.getSignatureFactory();
                         if (m_logger.isDebugEnabled())
                             m_logger.debug("Decrypting key: " + m_recvName + " with token: "
                                     + m_token);
                         byte[] decdata = sfac.decrypt(ekey.getTransportKeyData(), m_token, m_pin);
-                        m_transportKey = (SecretKey) new SecretKeySpec(decdata, ConfigManager
-                                .instance().getProperty("DIGIDOC_ENCRYPTION_ALOGORITHM"));
+                        m_transportKey = (SecretKey) new SecretKeySpec(decdata, conf
+                                .getProperty("DIGIDOC_ENCRYPTION_ALOGORITHM"));
                         if (m_logger.isDebugEnabled())
                             m_logger.debug("Transport key: "
                                     + ((m_transportKey == null) ? "ERROR" : "OK") + " len: "

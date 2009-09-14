@@ -8,13 +8,13 @@ import java.security.Provider;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
@@ -23,11 +23,9 @@ import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
-import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -84,20 +82,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         }        
 
         // Retrieve DigiDoc configuration        
-        Properties prop = ConfigHandler.getProperties();
-
-        if (prop != null)
-        {
-            ConfigManager.init(prop);
-        }
-        else
-        {
-            signatureResult.setValid(false);
-            signatureResult.addError(LabelManager.get("ERROR_DDOC_NOCONFIGFILE"));
-
-            return signatureResult;
-        }
-
+        ConfigManager conf = ConfigManager.getInstance();  
+        
         // If the file to sign is big, prepare temporal files        
         File temporal = null;
         File ftoSign = new File("jar://data.xml");
@@ -121,7 +107,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         
         try
         {
-            DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
+            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
             signedDoc = digFac.readSignedDoc(new ByteArrayInputStream(data));            
         }
         catch (DigiDocException dde)
@@ -189,11 +175,11 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         signature.setSignatureValue(res);
 
         // Get the timestamp and add it
-        int tsaCount = ConfigManager.instance().getIntProperty("DIGIDOC_TSA_COUNT", 0);
+        int tsaCount = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);
 
         if (tsaCount != 0)
         {
-            String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+            String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
             byte[] signatureValue = signature.getSignatureValue().toString().getBytes();
 
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true);
@@ -207,7 +193,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             signature.addTimestampInfo(ts);
 
-            String tsa1_ca = ConfigManager.instance().getProperty("DIGIDOC_TSA1_CA_CERT");
+            String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
 
             if (tsa1_ca == null)
             {
@@ -249,12 +235,12 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             }
 
             // OCSP validation
-            if (ConfigManager.instance().getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
+            if (conf.getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
             {
                 signature.getConfirmation();
             }
 
-            String tsaUrl = ConfigManager.instance().getProperty("DIGIDOC_TSA1_URL");
+            String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
 
             byte[] completeCertificateRefs = signature.getUnsignedProperties()
                     .getCompleteCertificateRefs().toXML();
@@ -262,7 +248,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             byte[] completeRevocationRefs = signature.getUnsignedProperties()
                     .getCompleteRevocationRefs().toXML();
 
-            CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+            CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
             byte[] canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
                     SignedDoc.CANONICALIZATION_METHOD_20010315);
 

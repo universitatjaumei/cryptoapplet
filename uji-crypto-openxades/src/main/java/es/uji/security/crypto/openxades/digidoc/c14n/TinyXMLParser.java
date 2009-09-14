@@ -1,20 +1,11 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
 import java.util.Stack;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_CData;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Comment;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Document;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Element;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Fragment;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Handler;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_NestedElement;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Tag;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_TextNode;
+
 import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 
 public class TinyXMLParser
 {
-
     public TinyXMLParser()
     {
     }

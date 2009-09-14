@@ -21,25 +21,24 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
-import java.io.Serializable;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 
-import java.security.cert.X509Certificate;
-import es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleNotaryFactory;
+import org.apache.log4j.Logger;
+
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.TimestampFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-
-import org.apache.log4j.Logger;
 
 /**
  * Models an XML-DSIG/ETSI Signature. A signature can contain references SignedInfo (truly signed
@@ -75,6 +74,8 @@ public class Signature implements Serializable
     /** Logger */
     private Logger m_logger = Logger.getLogger(Signature.class);
 
+    private ConfigManager conf = ConfigManager.getInstance();
+    
     /**
      * Creates new Signature
      */
@@ -689,7 +690,7 @@ public class Signature implements Serializable
      */
     public void getConfirmation() throws DigiDocException
     {
-        NotaryFactory notFac = ConfigManager.instance().getNotaryFactory();
+        NotaryFactory notFac = ConfigHandler.getNotaryFactory();
         X509Certificate cert = m_keyInfo.getSignersCertificate();
 
         X509Certificate caCert = null;
@@ -697,7 +698,7 @@ public class Signature implements Serializable
 
         try
         {
-            ddocFac = ConfigManager.instance().getDigiDocFactory();
+            ddocFac = ConfigHandler.getDigiDocFactory();
             caCert = ddocFac.findCAforCertificate(cert);
         }
         catch (DigiDocException dex)
@@ -895,7 +896,7 @@ public class Signature implements Serializable
         // check certificates CA
         try
         {
-            DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
+            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
             digFac.verifyCertificate(m_keyInfo.getSignersCertificate());
         }
         catch (DigiDocException ex)
@@ -903,13 +904,13 @@ public class Signature implements Serializable
             errs.add(ex);
         }
         // if we check signatures using CRL
-        String verifier = ConfigManager.instance().getStringProperty("DIGIDOC_SIGNATURE_VERIFIER",
+        String verifier = conf.getStringProperty("DIGIDOC_SIGNATURE_VERIFIER",
                 "OCSP");
         if (verifier != null && verifier.equals("CRL"))
         {
             try
             {
-                CRLFactory crlFac = ConfigManager.instance().getCRLFactory();
+                CRLFactory crlFac = ConfigHandler.getCRLFactory();
                 crlFac.checkCertificate(m_keyInfo.getSignersCertificate(), new Date());
             }
             catch (DigiDocException ex)
@@ -939,7 +940,7 @@ public class Signature implements Serializable
             TimestampFactory tsFac = null;
             try
             {
-                tsFac = ConfigManager.instance().getTimestampFactory();
+                tsFac = ConfigHandler.getTimestampFactory();
             }
             catch (DigiDocException ex)
             {
@@ -967,7 +968,7 @@ public class Signature implements Serializable
             // System.out.println("OCSP time: " + do1);
             // System.out.println("SignatureTimeStamp time: " + dt1);
             // System.out.println("SigAndRefsTimeStamp time: " + dt2);
-            int nMaxTsTimeErrSecs = ConfigManager.instance().getIntProperty(
+            int nMaxTsTimeErrSecs = conf.getIntProperty(
                     "DIGIDOC_MAX_TSA_TIME_ERR_SECS", 0);
 
             if (dt1 == null)
@@ -1147,7 +1148,7 @@ public class Signature implements Serializable
         // check certificates CA
         try
         {
-            DigiDocFactory digFac = ConfigManager.instance().getDigiDocFactory();
+            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
             digFac.verifyCertificate(m_keyInfo.getSignersCertificate());
         }
         catch (DigiDocException ex)
@@ -1176,7 +1177,7 @@ public class Signature implements Serializable
                 TimestampFactory tsFac = null;
                 try
                 {
-                    tsFac = ConfigManager.instance().getTimestampFactory();
+                    tsFac = ConfigHandler.getTimestampFactory();
                 }
                 catch (DigiDocException ex)
                 {
@@ -1197,7 +1198,7 @@ public class Signature implements Serializable
                 // System.out.println("OCSP time: " + do1);
                 // System.out.println("SignatureTimeStamp time: " + dt1);
                 // System.out.println("SigAndRefsTimeStamp time: " + dt2);
-                int nMaxTsTimeErrSecs = ConfigManager.instance().getIntProperty(
+                int nMaxTsTimeErrSecs = conf.getIntProperty(
                         "DIGIDOC_MAX_TSA_TIME_ERR_SECS", 0);
 
                 if (dt1 == null)
@@ -1240,7 +1241,7 @@ public class Signature implements Serializable
         {
             try
             {
-                CRLFactory crlFac = ConfigManager.instance().getCRLFactory();
+                CRLFactory crlFac = ConfigHandler.getCRLFactory();
                 crlFac.checkCertificate(m_keyInfo.getSignersCertificate(), new Date());
             }
             catch (DigiDocException ex)

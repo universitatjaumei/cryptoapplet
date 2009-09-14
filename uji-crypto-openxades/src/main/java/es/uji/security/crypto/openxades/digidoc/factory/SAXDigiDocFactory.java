@@ -22,7 +22,6 @@
 package es.uji.security.crypto.openxades.digidoc.factory;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -39,6 +38,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.CertID;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
@@ -59,7 +60,6 @@ import es.uji.security.crypto.openxades.digidoc.SignedInfo;
 import es.uji.security.crypto.openxades.digidoc.SignedProperties;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.UnsignedProperties;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 import es.uji.security.crypto.timestamp.TSResponse;
 
@@ -93,6 +93,8 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     private Hashtable m_rootCerts;
     /** calculation of digest */
     private MessageDigest m_digest;
+    
+    private ConfigManager conf = ConfigManager.getInstance();
 	
 
     // private ByteArrayOutputStream m_streamCollectChars;
@@ -170,21 +172,34 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     {
         try
         {
-            m_rootCerts = new Hashtable();
+            m_rootCerts = new Hashtable<String, X509Certificate>();
+            
             if (m_logger.isDebugEnabled())
+            {
                 m_logger.info("Loading CA certs");
-            int nCerts = ConfigManager.instance().getIntProperty("DIGIDOC_CA_CERTS", 0);
+            }
+            
+            int nCerts = conf.getIntProperty("DIGIDOC_CA_CERTS", 0);
+            
             for (int i = 0; i < nCerts; i++)
             {
-                String certFile = ConfigManager.instance().getProperty("DIGIDOC_CA_CERT" + (i + 1));
+                String certFile = conf.getProperty("DIGIDOC_CA_CERT" + (i + 1));
+                
                 if (m_logger.isDebugEnabled())
+                {
                     m_logger.info("CA: " + ("DIGIDOC_CA_CERT" + (i + 1)) + " file: " + certFile);
+                }
+                
                 X509Certificate cert = SignedDoc.readCertificate(certFile);
+                
                 if (cert != null)
                 {
                     if (m_logger.isDebugEnabled())
+                    {
                         m_logger.info("CA subject: " + cert.getSubjectDN() + " issuer: "
                                 + cert.getIssuerDN());
+                    }
+                    
                     m_rootCerts.put(cert.getSubjectDN().getName(), cert);
                 }
             }
@@ -326,7 +341,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     {
         try
         {
-            CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+            CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
             byte[] tmp = canFac.canonicalize(xml.getBytes("UTF-8"),
                     SignedDoc.CANONICALIZATION_METHOD_20010315);
             return new String(tmp);
@@ -1341,8 +1356,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 Signature sig = m_doc.getLastSignature();
                 SignedInfo si = sig.getSignedInfo();
                 // debugWriteFile("SigInfo1.xml", m_sbCollectChars.toString());
-                CanonicalizationFactory canFac = ConfigManager.instance()
-                        .getCanonicalizationFactory();
+                CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
                 byte[] bCanSI = canFac.canonicalize(ConvertUtils.str2data(m_sbCollectChars
                         .toString(), "UTF-8"), SignedDoc.CANONICALIZATION_METHOD_20010315);
                 si.setOrigDigest(SignedDoc.digest(bCanSI));
@@ -1371,8 +1385,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 // debugWriteFile("SigProp1.xml", sigProp);
                 // System.out.println("SigProp1: " + sigProp.length()
                 // + " digest: " + Base64Util.encode(SignedDoc.digest(sigProp.getBytes())));
-                CanonicalizationFactory canFac = ConfigManager.instance()
-                        .getCanonicalizationFactory();
+                CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
                 byte[] bCanProp = canFac.canonicalize(ConvertUtils.str2data(sigProp, "UTF-8"),
                         SignedDoc.CANONICALIZATION_METHOD_20010315);
                 // debugWriteFile("SigProp2.xml", new String(bCanProp));
@@ -1447,8 +1460,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 if (ts != null && m_strSigValTs != null)
                 {
                     // System.out.println("SigValTS \n---\n" + m_strSigValTs + "\n---\n");
-                    CanonicalizationFactory canFac = ConfigManager.instance()
-                            .getCanonicalizationFactory();
+                    CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
                     byte[] bCanXml = canFac.canonicalize(ConvertUtils.str2data(m_strSigValTs,
                             "UTF-8"), SignedDoc.CANONICALIZATION_METHOD_20010315);
                     byte[] hash = SignedDoc.digest(bCanXml);
@@ -1481,7 +1493,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
         			byte[] completeRevocationRefs = sig.getUnsignedProperties()
         			.getCompleteRevocationRefs().toXML();
 
-        			CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+        			CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
 
         			byte[] canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
         					SignedDoc.CANONICALIZATION_METHOD_20010315);
@@ -1520,8 +1532,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 {
                     String canXml = "<a>" + m_strSigAndRefsTs + "</a>";
                     // System.out.println("SigAndRefsTS \n---\n" + m_strSigAndRefsTs + "\n---\n");
-                    CanonicalizationFactory canFac = ConfigManager.instance()
-                            .getCanonicalizationFactory();
+                    CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
                     byte[] bCanXml = canFac.canonicalize(ConvertUtils.str2data(canXml, "UTF-8"),
                             SignedDoc.CANONICALIZATION_METHOD_20010315);
                     canXml = new String(bCanXml, "UTF-8");
@@ -1843,7 +1854,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 UnsignedProperties up = sig.getUnsignedProperties();
                 Notary not = up.getNotary();
                 not.setOcspResponseData(Base64Util.decode(m_sbCollectItem.toString()));
-                NotaryFactory notFac = ConfigManager.instance().getNotaryFactory();
+                NotaryFactory notFac = ConfigHandler.getNotaryFactory();
                 notFac.parseAndVerifyResponse(sig, not);
                 // in 1.1 we had bad OCPS digest
                 if (m_doc.getVersion().equals(SignedDoc.VERSION_1_1))

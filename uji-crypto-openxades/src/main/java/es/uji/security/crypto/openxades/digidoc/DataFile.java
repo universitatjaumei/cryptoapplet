@@ -28,8 +28,10 @@ import java.security.MessageDigest;
 import java.io.FileInputStream;
 import java.io.File;
 import java.io.OutputStream; //import ee.sk.digidoc.factory.SAXDigiDocFactory;
+
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
 import org.w3c.dom.Node;
@@ -686,7 +688,7 @@ public class DataFile implements Serializable
     {
         try
         {
-            CanonicalizationFactory canFac = ConfigManager.instance().getCanonicalizationFactory();
+            CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
             byte[] tmp = canFac.canonicalize(data, SignedDoc.CANONICALIZATION_METHOD_20010315);
             return tmp;
         }
@@ -790,10 +792,12 @@ public class DataFile implements Serializable
      */
     public void calculateFileSizeAndDigest(OutputStream os) throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
+        
         if (m_logger.isDebugEnabled())
             m_logger.debug("calculateFileSizeAndDigest(" + getId() + ")");
         boolean bUse64ByteLines = true;
-        String use64Flag = ConfigManager.instance().getProperty("DATAFILE_USE_64BYTE_LINES");
+        String use64Flag = conf.getProperty("DATAFILE_USE_64BYTE_LINES");
         if (use64Flag != null && use64Flag.equalsIgnoreCase("FALSE"))
             bUse64ByteLines = false;
         try

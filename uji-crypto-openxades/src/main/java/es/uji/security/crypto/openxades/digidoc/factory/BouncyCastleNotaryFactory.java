@@ -23,6 +23,8 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Notary;
@@ -31,7 +33,6 @@ import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -98,6 +99,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     private Hashtable m_ocspCACerts;
     private boolean m_useNonce = true;
 
+    private ConfigManager conf = ConfigManager.getInstance();
+
     /** Creates new BouncyCastleNotaryFactory */
     public BouncyCastleNotaryFactory()
     {
@@ -108,7 +111,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         m_bSignRequests = false;
         m_logger = Logger.getLogger(BouncyCastleNotaryFactory.class);
 
-        String aux = ConfigManager.instance().getProperty("DIGIDOC_USE_NONCE");
+        String aux = conf.getProperty("DIGIDOC_USE_NONCE");
         if (aux != null)
             m_useNonce = aux.toLowerCase().equals("true");
     }
@@ -289,18 +292,16 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 m_logger.debug("REQUEST:\n" + Base64Util.encode(req.getEncoded(), 0));
             // send it
 
-            Integer nResps = new Integer(ConfigManager.instance().getProperty(
-                    "DIGIDOC_OCSP_RESPONDER_COUNT"));
+            Integer nResps = new Integer(conf.getProperty("DIGIDOC_OCSP_RESPONDER_COUNT"));
             // System.out.println("COUNT: " +
-            // ConfigManager.instance().getProperty("DIGIDOC_OCSP_RESPONDER_COUNT"));
+            // conf.getProperty("DIGIDOC_OCSP_RESPONDER_COUNT"));
             // System.out.println("nResps: " + nResps );
             for (int i = 1; i <= nResps; i++)
             {
                 try
                 {
 
-                    String ocspResponder = ConfigManager.instance().getProperty(
-                            "DIGIDOC_OCSP_RESPONDER_URL" + i);
+                    String ocspResponder = conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL" + i);
 
                     OCSPResp resp = sendRequest(req, ocspResponder);
                     // debugWriteFile("resp.der", resp.getEncoded());
@@ -433,12 +434,11 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
         try
         {
-            String verifier = ConfigManager.instance().getStringProperty("DIGIDOC_CERT_VERIFIER",
-                    "OCSP");
+            String verifier = conf.getStringProperty("DIGIDOC_CERT_VERIFIER", "OCSP");
             if (verifier != null && verifier.equals("OCSP"))
             {
                 // create the request
-                DigiDocFactory ddocFac = ConfigManager.instance().getDigiDocFactory();
+                DigiDocFactory ddocFac = ConfigHandler.getDigiDocFactory();
                 X509Certificate caCert = ddocFac.findCAforCertificate(cert);
                 if (m_logger.isDebugEnabled())
                 {
@@ -457,8 +457,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                     m_logger.debug("REQUEST:\n" + Base64Util.encode(req.getEncoded(), 0));
                 }
                 // send it
-                String ocspResponder = ConfigManager.instance().getProperty(
-                        "DIGIDOC_OCSP_RESPONDER_URL1");
+                String ocspResponder = conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL1");
 
                 OCSPResp resp = sendRequest(req, ocspResponder);
                 // debugWriteFile("resp1.der", resp.getEncoded());
@@ -497,7 +496,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
             else if (verifier != null && verifier.equals("CRL"))
             {
-                CRLFactory crlFac = ConfigManager.instance().getCRLFactory();
+                CRLFactory crlFac = ConfigHandler.getCRLFactory();
                 crlFac.checkCertificate(cert, new Date());
             }
         }
@@ -529,7 +528,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             if (bUseOcsp)
             {
                 // create the request
-                DigiDocFactory ddocFac = ConfigManager.instance().getDigiDocFactory();
+                DigiDocFactory ddocFac = ConfigHandler.getDigiDocFactory();
                 X509Certificate caCert = ddocFac.findCAforCertificate(cert);
                 if (m_logger.isDebugEnabled())
                 {
@@ -549,8 +548,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 }
 
                 // send it
-                String ocspResponder = ConfigManager.instance().getProperty(
-                        "DIGIDOC_OCSP_RESPONDER_URL1");
+                String ocspResponder = conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL1");
                 OCSPResp resp = sendRequest(req, ocspResponder);
 
                 // debugWriteFile("resp1.der", resp.getEncoded());
@@ -588,7 +586,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
             else
             {
-                CRLFactory crlFac = ConfigManager.instance().getCRLFactory();
+                CRLFactory crlFac = ConfigHandler.getCRLFactory();
                 crlFac.checkCertificate(cert, new Date());
             }
         }
@@ -615,11 +613,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
      *            notarys own cert
      * @returns Notary object
      */
-    private Notary parseAndVerifyResponse(Signature sig, OCSPResp resp, byte[] nonce1/*
-                                                                                      * ,
-                                                                                      * X509Certificate
-                                                                                      * notaryCert
-                                                                                      */)
+    private Notary parseAndVerifyResponse(Signature sig, OCSPResp resp, byte[] nonce1)
             throws DigiDocException
     {
         String notId = sig.getId().replace('S', 'N');
@@ -768,7 +762,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 m_logger.debug("Checking response status, CERT: " + cert.getSubjectDN().getName()
                         + " SEARCH: " + SignedDoc.getCommonName(cert.getIssuerDN().getName()));
             // check the response on our cert
-            DigiDocFactory ddocFac = ConfigManager.instance().getDigiDocFactory();
+            DigiDocFactory ddocFac = ConfigHandler.getDigiDocFactory();
             X509Certificate caCert = ddocFac.findCAforCertificate(cert);
             // X509Certificate caCert = (X509Certificate)m_ocspCACerts.
             // get(SignedDoc.getCommonName(cert.getIssuerDN().getName()));
@@ -1173,8 +1167,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             byte[] breq = req.getEncoded();
             // debugWriteFile("request-bc.req", breq);
             String responderUrl = ocspResponder;/*
-                                                 * ConfigManager.instance().
-                                                 * getProperty("DIGIDOC_OCSP_RESPONDER_URL");
+                                                 * conf. getProperty("DIGIDOC_OCSP_RESPONDER_URL");
                                                  */
             URL url = new URL(responderUrl);
             URLConnection con = url.openConnection();
@@ -1241,18 +1234,17 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
         try
         {
-            String proxyHost = ConfigManager.instance().getProperty("DIGIDOC_PROXY_HOST");
-            String proxyPort = ConfigManager.instance().getProperty("DIGIDOC_PROXY_PORT");
+            String proxyHost = conf.getProperty("DIGIDOC_PROXY_HOST");
+            String proxyPort = conf.getProperty("DIGIDOC_PROXY_PORT");
             if (proxyHost != null && proxyPort != null)
             {
                 System.setProperty("http.proxyHost", proxyHost);
                 System.setProperty("http.proxyPort", proxyPort);
             }
-            String sigFlag = ConfigManager.instance().getProperty("SIGN_OCSP_REQUESTS");
+            String sigFlag = conf.getProperty("SIGN_OCSP_REQUESTS");
             m_bSignRequests = (sigFlag != null && sigFlag.equals("true"));
             // only need this if we must sign the requests
-            Provider prv = (Provider) Class.forName(
-                    ConfigManager.instance().getProperty("DIGIDOC_SECURITY_PROVIDER"))
+            Provider prv = (Provider) Class.forName(conf.getProperty("DIGIDOC_SECURITY_PROVIDER"))
                     .newInstance();
             // System.out.println("Provider");
             // prv.list(System.out);
@@ -1261,12 +1253,11 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             if (m_bSignRequests)
             {
                 // load the cert & private key for OCSP signing
-                String p12file = ConfigManager.instance().getProperty("DIGIDOC_PKCS12_CONTAINER");
-                String p12paswd = ConfigManager.instance().getProperty("DIGIDOC_PKCS12_PASSWD");
+                String p12file = conf.getProperty("DIGIDOC_PKCS12_CONTAINER");
+                String p12paswd = conf.getProperty("DIGIDOC_PKCS12_PASSWD");
                 // PKCS#12 container has 2 certs
                 // so use this serial to find the necessary one
-                String p12serial = ConfigManager.instance().getProperty(
-                        "DIGIDOC_OCSP_SIGN_CERT_SERIAL");
+                String p12serial = conf.getProperty("DIGIDOC_OCSP_SIGN_CERT_SERIAL");
                 // System.out.println("Looking for cert: " + p12serial);
 
                 if (p12file != null && p12paswd != null)
@@ -1303,16 +1294,13 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
 
             // OCSP certs
-            int nCerts = ConfigManager.instance().getIntProperty("DIGIDOC_OCSP_COUNT", 0);
+            int nCerts = conf.getIntProperty("DIGIDOC_OCSP_COUNT", 0);
             for (int i = 1; i <= nCerts; i++)
             {
-                String ocspCN = ConfigManager.instance().getProperty("DIGIDOC_OCSP" + i + "_CN");
-                String ocspCertFile = ConfigManager.instance().getProperty(
-                        "DIGIDOC_OCSP" + i + "_CERT");
-                String ocspCAFile = ConfigManager.instance().getProperty(
-                        "DIGIDOC_OCSP" + i + "_CA_CERT");
-                String ocspCACN = ConfigManager.instance().getProperty(
-                        "DIGIDOC_OCSP" + i + "_CA_CN");
+                String ocspCN = conf.getProperty("DIGIDOC_OCSP" + i + "_CN");
+                String ocspCertFile = conf.getProperty("DIGIDOC_OCSP" + i + "_CERT");
+                String ocspCAFile = conf.getProperty("DIGIDOC_OCSP" + i + "_CA_CERT");
+                String ocspCACN = conf.getProperty("DIGIDOC_OCSP" + i + "_CA_CN");
                 if (m_logger.isDebugEnabled())
                     m_logger.debug("Responder: " + ocspCN + " cert: " + ocspCertFile + " ca-cert: "
                             + ocspCAFile);
@@ -1325,8 +1313,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 String certFile = null;
                 do
                 {
-                    certFile = ConfigManager.instance().getProperty(
-                            "DIGIDOC_OCSP" + i + "_CERT_" + j);
+                    certFile = conf.getProperty("DIGIDOC_OCSP" + i + "_CERT_" + j);
                     if (certFile != null)
                     {
                         if (m_logger.isDebugEnabled())

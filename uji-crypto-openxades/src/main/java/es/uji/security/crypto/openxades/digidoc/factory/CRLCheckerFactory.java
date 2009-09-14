@@ -22,10 +22,11 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.factory.CRLCheckerFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConfigManager;
 
 import javax.naming.Context;
 import javax.naming.ldap.InitialLdapContext;
@@ -100,20 +101,21 @@ public class CRLCheckerFactory implements CRLFactory
      */
     public void init() throws DigiDocException
     {
-
+        ConfigManager conf = ConfigManager.getInstance();
+        
         try
         {
-            m_useLdap = ConfigManager.instance().getStringProperty("CRL_USE_LDAP", "false").equals(
+            m_useLdap = conf.getStringProperty("CRL_USE_LDAP", "false").equals(
                     "true");
-            m_crlFile = ConfigManager.instance().getProperty("CRL_FILE");
-            m_crlUrl = ConfigManager.instance().getProperty("CRL_URL");
-            m_crlSearchBase = ConfigManager.instance().getProperty("CRL_SEARCH_BASE");
-            m_crlFilter = ConfigManager.instance().getProperty("CRL_FILTER");
-            m_ldapDriver = ConfigManager.instance().getProperty("CRL_LDAP_DRIVER");
-            m_ldapUrl = ConfigManager.instance().getProperty("CRL_LDAP_URL");
-            m_ldapAttr = ConfigManager.instance().getProperty("CRL_LDAP_ATTR");
-            m_proxyHost = ConfigManager.instance().getProperty("CRL_PROXY_HOST");
-            m_proxyPort = ConfigManager.instance().getProperty("CRL_PROXY_PORT");
+            m_crlFile = conf.getProperty("CRL_FILE");
+            m_crlUrl = conf.getProperty("CRL_URL");
+            m_crlSearchBase = conf.getProperty("CRL_SEARCH_BASE");
+            m_crlFilter = conf.getProperty("CRL_FILTER");
+            m_ldapDriver = conf.getProperty("CRL_LDAP_DRIVER");
+            m_ldapUrl = conf.getProperty("CRL_LDAP_URL");
+            m_ldapAttr = conf.getProperty("CRL_LDAP_ATTR");
+            m_proxyHost = conf.getProperty("CRL_PROXY_HOST");
+            m_proxyPort = conf.getProperty("CRL_PROXY_PORT");
         }
         catch (Exception ex)
         {
