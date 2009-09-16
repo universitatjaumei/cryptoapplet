@@ -12,9 +12,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.jxades.JXAdESSignatureFactory;
-import es.uji.security.crypto.jxades.JXAdESSignatureVerifier;
 import es.uji.security.util.OS;
 
 public class Test
@@ -31,7 +29,7 @@ public class Test
         // Recuperando clave privada para firmar
         X509Certificate certificate = (X509Certificate) keystore.getCertificate(keystore.aliases()
                 .nextElement());
-        Key key = keystore.getKey("uji", "cryptoapplet".toCharArray());
+        Key key = keystore.getKey(keystore.aliases().nextElement(), "cryptoapplet".toCharArray());
     
         SignatureOptions signatureOptions = new SignatureOptions();
         signatureOptions.setDataToSign(new FileInputStream("src/main/resources/in.xml"));
