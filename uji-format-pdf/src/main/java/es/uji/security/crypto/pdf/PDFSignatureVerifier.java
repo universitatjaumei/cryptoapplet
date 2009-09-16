@@ -7,7 +7,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -16,7 +15,7 @@ import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
 
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.util.ConfigHandler;
+import es.uji.security.crypto.config.ConfigManager;
 
 public class PDFSignatureVerifier
 {
@@ -35,13 +34,13 @@ public class PDFSignatureVerifier
         
         // Add all configured certificates to the main keystore
         
-        Properties prop = ConfigHandler.getProperties();
+        ConfigManager conf = ConfigManager.getInstance();
         
         int numCertificates = 0;
         
         try
         {
-            numCertificates = Integer.parseInt(prop.getProperty("PDFSIG_CA_CERTS"));
+            numCertificates = Integer.parseInt(conf.getProperty("PDFSIG_CA_CERTS"));
             log.debug(numCertificates + " certificates configured in PDFSIG_CA_CERTS property");
         }
         catch (Exception e)
@@ -79,7 +78,7 @@ public class PDFSignatureVerifier
             {
                 log.debug("Adding certificate PDFSIG_CA_CERT" + i + " to the global keystore");
                 
-                Certificate certificate = certificateFactory.generateCertificate(classLoader.getResourceAsStream(prop
+                Certificate certificate = certificateFactory.generateCertificate(classLoader.getResourceAsStream(conf
                         .getProperty("PDFSIG_CA_CERT" + i)));
               
                 kall.setCertificateEntry("host ca " + i, certificate);

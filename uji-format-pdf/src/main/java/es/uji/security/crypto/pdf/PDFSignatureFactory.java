@@ -14,7 +14,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.Properties;
 
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Image;
@@ -31,16 +30,17 @@ import com.lowagie.text.pdf.PdfString;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.util.ConfigHandler;
+import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class PDFSignatureFactory implements ISignFormatProvider
 {
-    private Properties prop;
     private PrivateKey pk;
     private Provider pv;
     private Certificate[] chain;
+
+    private ConfigManager conf = ConfigManager.getInstance();
 
     public static byte[] inputStreamToByteArray(InputStream in) throws IOException
     {
@@ -79,25 +79,25 @@ public class PDFSignatureFactory implements ISignFormatProvider
     {
         sap.setProvider(pv.getName());
         sap.setCrypto(pk, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
-        sap.setReason(prop.getProperty("PDFSIG_REASON"));
-        sap.setLocation(prop.getProperty("PDFSIG_REASON"));
-        sap.setContact(prop.getProperty("PDFSIG_CONTACT"));
+        sap.setReason(conf.getProperty("PDFSIG_REASON"));
+        sap.setLocation(conf.getProperty("PDFSIG_REASON"));
+        sap.setContact(conf.getProperty("PDFSIG_CONTACT"));
     }
 
     private void signPdfTsp(PdfSignatureAppearance sap) throws Exception
     {
         PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKMS, PdfName.ADBE_PKCS7_SHA1);
-        dic.setReason(prop.getProperty("PDFSIG_REASON"));
-        dic.setLocation(prop.getProperty("PDFSIG_LOCATION"));
-        dic.setContact(prop.getProperty("PDFSIG_CONTACT"));
+        dic.setReason(conf.getProperty("PDFSIG_REASON"));
+        dic.setLocation(conf.getProperty("PDFSIG_LOCATION"));
+        dic.setContact(conf.getProperty("PDFSIG_CONTACT"));
         dic.setDate(new PdfDate(sap.getSignDate())); // time-stamp will over-rule this
         sap.setCryptoDictionary(dic);
         sap.setCrypto((PrivateKey) pk, chain, null, null);
 
         // Estimate signature size, creating a 'fake' one using fake data (SHA1 length does not
         // depend upon the data length)
-        TSAClient tsc = new TSAClientBouncyCastle(prop.getProperty("PDFSIG_TSA_URL"), prop
-                .getProperty("PDFSIG_TSA_ACCOUNT"), prop.getProperty("PDFSIG_TSA_PWD"));
+        TSAClient tsc = new TSAClientBouncyCastle(conf.getProperty("PDFSIG_TSA_URL"), conf
+                .getProperty("PDFSIG_TSA_ACCOUNT"), conf.getProperty("PDFSIG_TSA_PWD"));
 
         byte[] estSignature = genPKCS7Signature(new ByteArrayInputStream("fake".getBytes()), null,
                 pk, pv, chain);
@@ -133,16 +133,16 @@ public class PDFSignatureFactory implements ISignFormatProvider
     private void createVisibleSignature(PdfSignatureAppearance sap) throws BadElementException,
             MalformedURLException, IOException
     {
-        sap.setVisibleSignature(new Rectangle(Float.parseFloat(prop
-                .getProperty("PDFSIG_VISIBLE_AREA_X")), Float.parseFloat(prop
-                .getProperty("PDFSIG_VISIBLE_AREA_Y")), Float.parseFloat(prop
-                .getProperty("PDFSIG_VISIBLE_AREA_X2")), Float.parseFloat(prop
-                .getProperty("PDFSIG_VISIBLE_AREA_Y2"))), Integer.parseInt(prop
+        sap.setVisibleSignature(new Rectangle(Float.parseFloat(conf
+                .getProperty("PDFSIG_VISIBLE_AREA_X")), Float.parseFloat(conf
+                .getProperty("PDFSIG_VISIBLE_AREA_Y")), Float.parseFloat(conf
+                .getProperty("PDFSIG_VISIBLE_AREA_X2")), Float.parseFloat(conf
+                .getProperty("PDFSIG_VISIBLE_AREA_Y2"))), Integer.parseInt(conf
                 .getProperty("PDFSIG_VISIBLE_AREA_PAGE")), null);
         sap.setAcro6Layers(true);
 
         byte[] imageData = inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
-                .getResourceAsStream(prop.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
+                .getResourceAsStream(conf.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
         Image image = Image.getInstance(imageData);
 
         sap.setSignatureGraphic(image);
@@ -172,26 +172,16 @@ public class PDFSignatureFactory implements ISignFormatProvider
             // chain[2]= level_n-1_cert, ...
             ClassLoader cl = PDFSignatureFactory.class.getClassLoader();
 
-            prop = ConfigHandler.getProperties();
-
             SignatureResult signatureResult = new SignatureResult();
 
-            if (prop == null)
-            {
-                signatureResult.setValid(false);
-                signatureResult.addError(LabelManager.get("ERROR_DDOC_NOCONFIGFILE"));
-
-                return signatureResult;
-            }
-
             // Get the CA certificate list
-            Integer n = new Integer(prop.getProperty("PDFSIG_CA_CERTS"));
+            Integer n = new Integer(conf.getProperty("PDFSIG_CA_CERTS"));
             Certificate cert = sCer;
             Certificate CACert = null;
 
             for (int i = 1; i <= n; i++)
             {
-                CACert = cf.generateCertificate(cl.getResourceAsStream(prop
+                CACert = cf.generateCertificate(cl.getResourceAsStream(conf
                         .getProperty("PDFSIG_CA_CERT" + i)));
                 try
                 {
@@ -225,16 +215,16 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             PdfSignatureAppearance sap = stp.getSignatureAppearance();
 
-            String aux = prop.getProperty("PDFSIG_VISIBLE_SIGNATURE");
+            String aux = conf.getProperty("PDFSIG_VISIBLE_SIGNATURE");
 
             if (aux != null && aux.trim().equals("true"))
             {
                 createVisibleSignature(sap);
             }
 
-            aux = prop.getProperty("PDFSIG_TIMESTAMPING");
+            aux = conf.getProperty("PDFSIG_TIMESTAMPING");
             if (aux != null && aux.trim().equals("true")
-                    && prop.getProperty("PDFSIG_TSA_URL") != null)
+                    && conf.getProperty("PDFSIG_TSA_URL") != null)
             {
                 signPdfTsp(sap);
             }
