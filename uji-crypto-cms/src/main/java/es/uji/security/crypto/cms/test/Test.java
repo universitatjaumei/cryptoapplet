@@ -8,14 +8,7 @@ import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
@@ -54,24 +47,7 @@ public class Test
         
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
         
-        byte[] cmsData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
-
-        OS.dumpToFile("/tmp/test.txt", cmsData);
-        
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        
-        Document d = db.parse(new ByteArrayInputStream(cmsData));
-        
-        NodeList nl = d.getElementsByTagName("cms_signature");
-        Node n = nl.item(0);
-
-        OS.dumpToFile("/tmp/test-pre.bin", n.getFirstChild().getNodeValue().trim().getBytes());
-        
-        byte[] signedData = Base64.decode(n.getFirstChild().getNodeValue().trim().getBytes());
-        
-        OS.dumpToFile("/tmp/test.bin", signedData);
+        byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
         
         CMSSignatureVerifier signatureVerifier = new CMSSignatureVerifier();
                 

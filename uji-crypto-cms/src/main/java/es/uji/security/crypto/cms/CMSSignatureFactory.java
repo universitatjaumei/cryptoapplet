@@ -10,7 +10,6 @@ import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.cms.CMSProcessableByteArray;
@@ -21,9 +20,7 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
-import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.Base64;
-import es.uji.security.util.ConfigHandler;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -80,56 +77,10 @@ public class CMSSignatureFactory implements ISignFormatProvider
 
         if (data != null)
         {
-            // Now we must check if a timestamp must be calculated
-            // reading the configuration file.
+            signatureResult.setValid(true);
+            signatureResult.setSignatureData(new ByteArrayInputStream(cmsSignedData.getEncoded()));
 
-            Properties prop = ConfigHandler.getProperties();
-
-            if (prop == null)
-            {
-                signatureResult.setValid(false);
-                signatureResult.addError(LabelManager.get("ERROR_CMS_CONFIG_NOT_FOUND"));
-
-                return signatureResult;
-            }
-
-            String doTs = prop.getProperty("CMS_TIMESTAMPING");
-            String tsaUrl = prop.getProperty("CMS_TSA_URL");
-
-            if (doTs != null && doTs.toLowerCase().equals("true"))
-            {
-                byte[] ts = TimeStampFactory.getTimeStamp(tsaUrl, cmsSignedData.getEncoded(), true);
-
-                if (ts == null)
-                {
-                    log.info("Cannot calculate timestamp from: " + tsaUrl);
-
-                    signatureResult.setValid(false);
-                    signatureResult.addError(LabelManager.get("ERROR_CMS_CALCULATING_TS"));
-
-                    return signatureResult;
-                }
-
-                signatureResult.setValid(true);
-                signatureResult
-                        .setSignatureData(new ByteArrayInputStream(
-                                ("<data>\r\n  <cms_signature>\r\n"
-                                        + new String(Base64
-                                                .encode(cmsSignedData.getEncoded(), true))
-                                        + "\r\n  </cms_signature>\r\n  <cms_timestamp>\r\n"
-                                        + new String(Base64.encode(ts, true)) + "\r\n  </cms_timestamp>\r\n</data>\r\n")
-                                        .getBytes()));
-
-                return signatureResult;
-            }
-            else
-            {
-                signatureResult.setValid(true);
-                signatureResult.setSignatureData(new ByteArrayInputStream(Base64.encode(
-                        cmsSignedData.getEncoded(), true)));
-
-                return signatureResult;
-            }
+            return signatureResult;
         }
         else
         {
