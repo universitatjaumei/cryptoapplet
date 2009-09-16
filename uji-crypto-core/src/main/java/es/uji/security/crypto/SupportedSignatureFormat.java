@@ -41,5 +41,10 @@ public enum SupportedSignatureFormat
         public String toString() {
             return "es.uji.security.crypto.xmldsign.odf.ODFSignatureFactory"; 
         }
-    }
+    },
+    FACTURAE {
+        public String toString() {
+            return "es.uji.security.crypto.facturae.FacturaeSignatureFactory"; 
+        }
+    }  
 }
