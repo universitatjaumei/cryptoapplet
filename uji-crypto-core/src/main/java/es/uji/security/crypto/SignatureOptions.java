@@ -9,7 +9,8 @@ public class SignatureOptions
 {
 	private boolean hash = false;
     private boolean localFile = false;
-    private boolean swapToFile= false;
+    private boolean swapToFile = false;
+    private boolean coSignEnabled = true;
     private X509Certificate certificate = null;
     private PrivateKey privateKey = null;
     private Provider provider = null;
@@ -87,5 +88,15 @@ public class SignatureOptions
     public void setDataToSign(InputStream dataToSign)
     {
         this.dataToSign = dataToSign;
+    }
+
+    public boolean isCoSignEnabled()
+    {
+        return coSignEnabled;
+    }
+
+    public void setCoSignEnabled(boolean coSignEnabled)
+    {
+        this.coSignEnabled = coSignEnabled;
     }
 }
