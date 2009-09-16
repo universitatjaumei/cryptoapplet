@@ -47,6 +47,7 @@
     <module>uji-crypto-mityc</module>
     <module>uji-format-pdf</module>
     <module>uji-format-odf</module>
+    <module>uji-format-facturae</module>
     <module>uji-keystore</module>
     <module>uji-ui-applet</module>
   </modules>
