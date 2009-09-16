@@ -8,10 +8,16 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.UUID;
+import java.util.Collections;
 
 import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.DigestMethod;
+import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.Transform;
+import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
+import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.spec.XPathFilterParameterSpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -23,10 +29,12 @@ import net.java.xades.security.xml.XAdES.XMLAdvancedSignature;
 import net.java.xades.util.XMLUtils;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -82,23 +90,61 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
 
         xades.setSigningCertificate(certificate);
 
-        SignaturePolicyIdentifier spi = new SignaturePolicyIdentifierImpl(false);
-
-        // Set SignaturePolicyIdentifier
-        spi.setIdentifier("http://www.facturae.es/politica_de_firma_formato_facturae/politica_de_firma_formato_facturae_v3_1.pdf");
-        spi.setDescription("Pol\u00edtica de firma electr\u00f3nica para facturaci\u00f3n electr\u00f3nica con formato Facturae");
+        SignaturePolicyIdentifier spi;
+        
+        if (signatureOptions.getPolicyIdentifier() != null)
+        {
+            spi = new SignaturePolicyIdentifierImpl(false);
+            spi.setIdentifier(signatureOptions.getPolicyIdentifier());
+            spi.setDescription(signatureOptions.getPolicyDescription());
+        }
+        else
+        {
+            spi = new SignaturePolicyIdentifierImpl(true);
+        }
 
         xades.setSignaturePolicyIdentifier(spi);
 
+        ConfigManager conf = ConfigManager.getInstance();
+        int tsaCount = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);
+
+        String tsaUrl = null;
+        
+        if (tsaCount != 0)
+        {
+            tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
+        }
+        
         // Sign data
         XMLAdvancedSignature xmlSignature = XMLAdvancedSignature.newInstance(xades);
 
         try
         {
-            String id = UUID.randomUUID().toString();
-            
-            xmlSignature.sign(certificate, privateKey, Arrays.asList(new String[] { "" }), id,
-                    "http://tss.accv.es:8318/tsa");
+            NodeList result = element.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
+                    "Signature");
+            int numSignature = result.getLength();
+
+            if (signatureOptions.isCoSignEnabled())
+            {
+                XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
+                DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(DigestMethod.SHA1,
+                        null);
+
+                Transform transform = xmlSignatureFactory.newTransform(Transform.XPATH,
+                        new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
+                                Collections.singletonMap("dsig", XMLSignature.XMLNS)));
+
+                Reference reference = xmlSignatureFactory.newReference("", digestMethod,
+                        Collections.singletonList(transform), null, null);
+
+                xmlSignature.sign(certificate, privateKey, Arrays
+                        .asList(new Object[] { reference }), "S" + numSignature, tsaUrl);
+            }
+            else
+            {
+                xmlSignature.sign(certificate, privateKey, Arrays.asList(new Object[] { "" }), "S"
+                        + numSignature, tsaUrl);
+            }
         }
         catch (MarshalException me)
         {
