@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>es.uji.security</groupId>
+  <artifactId>uji-format-facturae</artifactId>
+  <version>2.1.0</version>
+  <name>uji-format-facturae</name>
+
+  <parent>
+    <groupId>es.uji.security</groupId>
+    <artifactId>CryptoApplet</artifactId>
+    <version>2.1.0</version>
+  </parent>
+  
+  <dependencies>
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-jxades</artifactId>
+      <version>2.1.0</version>    
+    </dependency>    
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <keystore>${uji.keytool.keystore}</keystore>
+          <alias>${uji.keytool.alias}</alias>
+          <storepass>${uji.keytool.password}</storepass>
+          <signedjar>target/${project.build.finalName}-signed.jar</signedjar>
+          <verify>true</verify>
+        </configuration>
+      </plugin>      
+    </plugins>
+  </build>
+</project>
