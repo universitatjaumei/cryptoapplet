@@ -7,14 +7,18 @@ import java.security.cert.X509Certificate;
 
 public class SignatureOptions
 {
-	private boolean hash = false;
+    private X509Certificate certificate;
+    private PrivateKey privateKey;
+    private Provider provider;
+    private InputStream dataToSign;
+
+    private boolean hash = false;
     private boolean localFile = false;
     private boolean swapToFile = false;
     private boolean coSignEnabled = true;
-    private X509Certificate certificate = null;
-    private PrivateKey privateKey = null;
-    private Provider provider = null;
-    private InputStream dataToSign = null;
+    
+    private String policyIdentifier;
+    private String policyDescription;
 
     public SignatureOptions()
     {
@@ -98,5 +102,25 @@ public class SignatureOptions
     public void setCoSignEnabled(boolean coSignEnabled)
     {
         this.coSignEnabled = coSignEnabled;
+    }
+
+    public String getPolicyIdentifier()
+    {
+        return policyIdentifier;
+    }
+
+    public void setPolicyIdentifier(String policyIdentifier)
+    {
+        this.policyIdentifier = policyIdentifier;
+    }
+
+    public String getPolicyDescription()
+    {
+        return policyDescription;
+    }
+
+    public void setPolicyDescription(String policyDescription)
+    {
+        this.policyDescription = policyDescription;
     }
 }
