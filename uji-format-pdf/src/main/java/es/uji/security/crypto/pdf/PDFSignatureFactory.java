@@ -80,7 +80,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         sap.setProvider(pv.getName());
         sap.setCrypto(pk, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
         sap.setReason(conf.getProperty("PDFSIG_REASON"));
-        sap.setLocation(conf.getProperty("PDFSIG_REASON"));
+        sap.setLocation(conf.getProperty("PDFSIG_LOCATION"));
         sap.setContact(conf.getProperty("PDFSIG_CONTACT"));
     }
 
