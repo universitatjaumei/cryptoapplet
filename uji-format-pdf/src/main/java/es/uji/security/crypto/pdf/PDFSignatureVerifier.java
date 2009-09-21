@@ -95,7 +95,7 @@ public class PDFSignatureVerifier
         {
             log.debug("Parsing input PDF document");
             
-            reader = new PdfReader("src/main/resources/out.pdf");
+            reader = new PdfReader(pdfData);
         }
         catch (IOException ioe)
         {
