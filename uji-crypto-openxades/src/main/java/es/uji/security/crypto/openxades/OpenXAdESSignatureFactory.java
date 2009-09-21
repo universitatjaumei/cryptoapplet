@@ -9,7 +9,12 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
@@ -107,8 +112,22 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         
         try
         {
-            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
-            signedDoc = digFac.readSignedDoc(new ByteArrayInputStream(data));            
+        	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        	documentBuilderFactory.setNamespaceAware(true);
+        	DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        	Document current = documentBuilder.parse(new ByteArrayInputStream(data));
+        	
+        	NodeList docs = current.getElementsByTagNameNS("http://www.sk.ee/DigiDoc/v1.3.0#", "SignedDoc");
+        	
+        	if (docs.getLength() == 1)
+        	{        	
+        		DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
+        		signedDoc = digFac.readSignedDoc(new ByteArrayInputStream(data));
+        	}
+        	else
+        	{
+        		throw new DigiDocException(-1, "", null);
+        	}
         }
         catch (DigiDocException dde)
         {
