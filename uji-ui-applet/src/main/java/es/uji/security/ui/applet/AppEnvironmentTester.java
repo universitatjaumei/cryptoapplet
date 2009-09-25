@@ -12,7 +12,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -20,7 +19,6 @@ import javax.swing.JTextArea;
 
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.keystore.IKeyStore;
