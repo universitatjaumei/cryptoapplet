@@ -1,7 +1,10 @@
 package es.uji.security.crypto.xmldsign;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.security.AccessController;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -31,6 +34,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
+
+import com.sun.org.apache.xerces.internal.dom.DOMOutputImpl;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
@@ -108,10 +115,19 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
 
         // Output the resulting document.
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer trans = tf.newTransformer();
-        trans.transform(new DOMSource(doc), new StreamResult(bos));
+//        TransformerFactory tf = TransformerFactory.newInstance();
+//        Transformer trans = tf.newTransformer();
+//        trans.transform(new DOMSource(doc), new StreamResult(bos));
 
+        DOMImplementationLS domImplLS = (DOMImplementationLS) doc.getImplementation();
+        LSSerializer serializer = domImplLS.createLSSerializer();
+        serializer.getDomConfig().setParameter("namespaces", false);
+
+        DOMOutputImpl output = new DOMOutputImpl();
+        output.setCharacterStream(new PrintWriter(bos));
+
+        serializer.write(doc, output);
+        
         SignatureResult signatureResult = new SignatureResult();
         signatureResult.setValid(true);
         signatureResult.setSignatureData(new ByteArrayInputStream(bos.toByteArray()));

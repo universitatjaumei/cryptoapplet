@@ -33,7 +33,6 @@ import org.xml.sax.SAXException;
 import com.sun.org.apache.xpath.internal.XPathAPI;
 
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.xmldsign.X509KeySelector;
 
 public class ODFSignatureVerifier
 {
