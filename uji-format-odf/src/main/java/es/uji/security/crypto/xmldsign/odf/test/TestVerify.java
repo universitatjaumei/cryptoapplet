@@ -20,7 +20,7 @@ public class TestVerify
     {
         ODFSignatureVerifier odtVerifier = new ODFSignatureVerifier();
 
-        for (String fileName : new String[] { "src/main/resources/signed2-cryptoapplet.odt" })
+        for (String fileName : new String[] { "src/main/resources/signed-cryptoapplet.odt" })
         {
             System.out.println("Verifying " + fileName);
 
