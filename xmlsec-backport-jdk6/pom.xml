@@ -4,6 +4,7 @@
   <groupId>es.uji.security</groupId>
   <artifactId>xmlsec-backport-jdk6</artifactId>
   <version>1.6.0_15</version>
+  <name>xmlsec-backport-jdk6</name>
 
   <build>
     <plugins>
