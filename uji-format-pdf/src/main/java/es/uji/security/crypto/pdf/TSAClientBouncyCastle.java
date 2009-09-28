@@ -15,6 +15,8 @@ import org.bouncycastle.tsp.TimeStampResponse;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.bouncycastle.tsp.TimeStampTokenInfo;
 
+import com.lowagie.text.pdf.codec.Base64;
+
 /**
  * 
  * Time Stamp Authority Client interface implementation using Bouncy Castle
@@ -247,12 +249,9 @@ public class TSAClientBouncyCastle implements TSAClient
 
             String userPassword = tsaUsername + ":" + tsaPassword;
 
-            tsaConnection.setRequestProperty("Authorization", "Basic " +
-
-            new String(new sun.misc.BASE64Encoder().encode(userPassword.getBytes())));
-
+            tsaConnection.setRequestProperty("Authorization", "Basic "
+                    + Base64.encodeBytes(userPassword.getBytes()));
         }
-        ;
 
         OutputStream out = tsaConnection.getOutputStream();
 
@@ -293,5 +292,4 @@ public class TSAClientBouncyCastle implements TSAClient
         return respBytes;
 
     }
-
 }

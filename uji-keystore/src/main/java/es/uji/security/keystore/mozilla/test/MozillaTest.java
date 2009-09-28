@@ -27,7 +27,7 @@ public class MozillaTest
             ByteArrayOutputStream ot = new ByteArrayOutputStream();
             System.out.println("Decoding: ");
             h.decode("731bd7d6d530298467c7648d8939128e33a2b39d", ot);
-            System.out.println("res= " + new String(Base64.encode(ot.toByteArray())));
+            System.out.println("res= " + Base64.encodeBytes(ot.toByteArray()));
         }
         catch (Exception e)
         {

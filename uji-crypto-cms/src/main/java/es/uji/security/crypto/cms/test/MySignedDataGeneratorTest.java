@@ -1,9 +1,5 @@
 package es.uji.security.crypto.cms.test;
 
-
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Security;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
@@ -15,25 +11,23 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedGenerator;
 
-
 import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
 import es.uji.security.util.Base64;
-
-
 
 /**
  * A simple example that generates an attribute certificate.
  */
+
 public class MySignedDataGeneratorTest
 {
-    public static void main(String[] args){
-        byte[] hash= "01234567890123456789".getBytes();  
+    public static void main(String[] args)
+    {
+        byte[] hash = "01234567890123456789".getBytes();
 
         MyCMSSignedDataGenerator gen = new MyCMSSignedDataGenerator();
-        
-        gen.addSigner(X509TestHelper.getClientPrivateKey(), 
-                      X509TestHelper.getClientCert(), 
-                      CMSSignedGenerator.DIGEST_SHA1);
+
+        gen.addSigner(X509TestHelper.getClientPrivateKey(), X509TestHelper.getClientCert(),
+                CMSSignedGenerator.DIGEST_SHA1);
 
         CMSProcessableByteArray cba = new CMSProcessableByteArray(hash);
 
@@ -44,18 +38,19 @@ public class MySignedDataGeneratorTest
 
         try
         {
-            CertStore certst = CertStore.getInstance("Collection", new CollectionCertStoreParameters(certList), "BC");
+            CertStore certst = CertStore.getInstance("Collection",
+                    new CollectionCertStoreParameters(certList), "BC");
             gen.addCertificatesAndCRLs(certst);
             gen.setHash(hash);
 
             CMSSignedData data = gen.generate(cba, Security.getProvider("BC"));
-            
-            System.out.println("Base 64 Result: " + new String(Base64.encode(data.getEncoded(), true)));
+
+            System.out.println("Base 64 Result: " + Base64.encodeBytes(data.getEncoded()));
         }
         catch (Exception e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }    
+    }
 }
