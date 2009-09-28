@@ -14,7 +14,7 @@ import org.xml.sax.SAXException;
 import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.xmldsign.odf.ODFSignatureVerifier;
 
-public class TestVerify
+public class TestODFSignatureVerifier
 {
     public static void main(String[] args) throws FileNotFoundException, IOException, ParserConfigurationException, SAXException, MarshalException, XMLSignatureException
     {

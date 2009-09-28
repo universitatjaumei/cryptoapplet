@@ -12,7 +12,7 @@ import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.jxades.JXAdESSignatureVerifier;
 import es.uji.security.util.OS;
 
-public class TestVerify
+public class TestJXAdESSignatureVerifier
 {
     public static void main(String[] args) throws FileNotFoundException, IOException,
             ParserConfigurationException, SAXException
