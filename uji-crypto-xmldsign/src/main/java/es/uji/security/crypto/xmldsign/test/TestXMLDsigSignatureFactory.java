@@ -15,7 +15,7 @@ import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.xmldsign.XMLDsigSignatureFactory;
 import es.uji.security.util.OS;
 
-public class Test
+public class TestXMLDsigSignatureFactory
 {
     public static void main(String[] args) throws Exception
     {
