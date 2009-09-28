@@ -14,7 +14,7 @@ import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.xmldsign.XMLDsigVerifier;
 import es.uji.security.util.OS;
 
-public class TestVerify
+public class TestXMLDsigVerifier
 {
     public static void main(String[] args) throws FileNotFoundException, IOException, SAXException, ParserConfigurationException, MarshalException, XMLSignatureException
     {
