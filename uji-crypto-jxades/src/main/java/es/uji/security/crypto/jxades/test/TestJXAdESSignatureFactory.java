@@ -1,4 +1,4 @@
-package es.uji.security.crypto.xmldsign.odf.test;
+package es.uji.security.crypto.jxades.test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,52 +12,50 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.xmldsign.odf.ODFSignatureFactory;
-import es.uji.security.crypto.xmldsign.odf.ODFSignatureVerifier;
+import es.uji.security.crypto.jxades.JXAdESSignatureFactory;
 import es.uji.security.util.OS;
 
-public class Test
+public class TestJXAdESSignatureFactory
 {
     public static void main(String[] args) throws Exception
     {
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
-
+    
         // Cargando certificado de aplicacion
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
-
+    
         // Recuperando clave privada para firmar
         X509Certificate certificate = (X509Certificate) keystore.getCertificate(keystore.aliases()
                 .nextElement());
-        Key key = keystore.getKey("uji", "cryptoapplet".toCharArray());
-
+        Key key = keystore.getKey(keystore.aliases().nextElement(), "cryptoapplet".toCharArray());
+    
         SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setDataToSign(new FileInputStream("src/main/resources/original.odt"));
+        signatureOptions.setDataToSign(new FileInputStream("src/main/resources/in.xml"));
         signatureOptions.setCertificate(certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
         
-        ODFSignatureFactory odfSignatureFactory = new ODFSignatureFactory();
-        SignatureResult signatureResult = odfSignatureFactory.formatSignature(signatureOptions);
+        JXAdESSignatureFactory jxSignatureFactory = new JXAdESSignatureFactory();
+        SignatureResult signatureResult = jxSignatureFactory.formatSignature(signatureOptions);
         
         if (signatureResult.isValid())
         {
-            OS.dumpToFile(new File("src/main/resources/signed-cryptoapplet.odt"), signatureResult.getSignatureData());
+            OS.dumpToFile(new File("src/main/resources/out1.xml"), signatureResult.getSignatureData());
             
             signatureOptions = new SignatureOptions();
-            signatureOptions.setDataToSign(new FileInputStream("src/main/resources/signed-cryptoapplet.odt"));
+            signatureOptions.setDataToSign(new FileInputStream("src/main/resources/out1.xml"));
             signatureOptions.setCertificate(certificate);
             signatureOptions.setPrivateKey((PrivateKey) key);
             signatureOptions.setProvider(bcp);
             
-            odfSignatureFactory = new ODFSignatureFactory();
-            signatureResult = odfSignatureFactory.formatSignature(signatureOptions);
+            jxSignatureFactory = new JXAdESSignatureFactory();
+            signatureResult = jxSignatureFactory.formatSignature(signatureOptions);
             
             if (signatureResult.isValid())
             {
-                OS.dumpToFile(new File("src/main/resources/signed2-cryptoapplet.odt"), signatureResult.getSignatureData());
+                OS.dumpToFile(new File("src/main/resources/out2.xml"), signatureResult.getSignatureData());
             }
             else
             {
