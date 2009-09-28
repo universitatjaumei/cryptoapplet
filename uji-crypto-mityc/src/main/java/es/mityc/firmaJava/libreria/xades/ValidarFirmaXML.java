@@ -702,51 +702,55 @@ public class ValidarFirmaXML implements ConstantesXADES
 			int nodosCertSize = nodosCert.getLength();
 			for(int i = 0; i < nodosCertSize; ++i) {
 				Node nodoCert = nodosCert.item(i);
-				Element certDigest = (Element)((Element)nodoCert).getElementsByTagNameNS(esquema, LIBRERIAXADES_CERTDIGEST).item(0);
-				if (certDigest != null) {
-					NodeList digAlgs = certDigest.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_DIGEST_METHOD);
-					if (digAlgs != null) {
-						Element certDigestAlgElement = (Element)digAlgs.item(0);
-						datos.setAlgMethod(certDigestAlgElement.getAttributes().getNamedItem(ALGORITHM).getNodeValue());
-					}
-					NodeList digValues = certDigest.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_DIGESTVALUE);
-					if (digValues != null) {
-						Element certDigestValElement = (Element)digValues.item(0);
-						datos.setDigestValue(certDigestValElement.getFirstChild().getNodeValue());
-					}
+				
+				if (nodoCert.getNodeType() == Node.ELEMENT_NODE)
+				{
+    				Element certDigest = (Element)((Element)nodoCert).getElementsByTagNameNS(esquema, LIBRERIAXADES_CERTDIGEST).item(0);
+    				if (certDigest != null) {
+    					NodeList digAlgs = certDigest.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_DIGEST_METHOD);
+    					if (digAlgs != null) {
+    						Element certDigestAlgElement = (Element)digAlgs.item(0);
+    						datos.setAlgMethod(certDigestAlgElement.getAttributes().getNamedItem(ALGORITHM).getNodeValue());
+    					}
+    					NodeList digValues = certDigest.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_DIGESTVALUE);
+    					if (digValues != null) {
+    						Element certDigestValElement = (Element)digValues.item(0);
+    						datos.setDigestValue(certDigestValElement.getFirstChild().getNodeValue());
+    					}
+    				}
+    				Element issuerSerial = (Element)((Element)nodoCert).getElementsByTagNameNS(esquema, LIBRERIAXADES_ISSUER_SERIAL).item(0);
+    				if (issuerSerial != null) {
+    					NodeList issuerVals = issuerSerial.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_X_509_ISSUER_NAME);
+    					if (issuerVals != null) {
+    						Element issuerValElement = (Element)issuerVals.item(0);
+    						String issuerName = issuerValElement.getFirstChild().getNodeValue();
+    						try {
+    							X500Principal prin = new X500Principal(issuerName);
+    							datos.setIssuer(prin.getName());
+    						} catch (IllegalArgumentException ex) {
+    							esValido = false;
+    							// Error en la validación. No se pudo obtener el certificado firmante
+    							resultado.setLog(I18n.getResource(LIBRERIAXADES_FIRMAXML_ERROR_3));
+    							// Error al instanciar la factoría de certificados
+    							log.error(I18n.getResource(LIBRERIAXADES_VALIDARFIRMA_ERROR23), ex);
+    							return false;
+    						} catch (NullPointerException ex) {
+    							esValido = false;
+    							// Error en la validación. No se pudo obtener el certificado firmante
+    							resultado.setLog(I18n.getResource(LIBRERIAXADES_FIRMAXML_ERROR_3));
+    							// Error al instanciar la factoría de certificados
+    							log.error(I18n.getResource(LIBRERIAXADES_VALIDARFIRMA_ERROR23), ex);
+    							return false;
+    						}
+    					}
+    					NodeList serialVals = issuerSerial.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_X_509_SERIAL_NUMBER);
+    					if (serialVals != null) {
+    						Element serialValElement = (Element)serialVals.item(0);
+    						datos.setSerial(new BigInteger(serialValElement.getFirstChild().getNodeValue()));
+    					}
+    				}
+                    certificadosSigning.add(datos);
 				}
-				Element issuerSerial = (Element)((Element)nodoCert).getElementsByTagNameNS(esquema, LIBRERIAXADES_ISSUER_SERIAL).item(0);
-				if (issuerSerial != null) {
-					NodeList issuerVals = issuerSerial.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_X_509_ISSUER_NAME);
-					if (issuerVals != null) {
-						Element issuerValElement = (Element)issuerVals.item(0);
-						String issuerName = issuerValElement.getFirstChild().getNodeValue();
-						try {
-							X500Principal prin = new X500Principal(issuerName);
-							datos.setIssuer(prin.getName());
-						} catch (IllegalArgumentException ex) {
-							esValido = false;
-							// Error en la validación. No se pudo obtener el certificado firmante
-							resultado.setLog(I18n.getResource(LIBRERIAXADES_FIRMAXML_ERROR_3));
-							// Error al instanciar la factoría de certificados
-							log.error(I18n.getResource(LIBRERIAXADES_VALIDARFIRMA_ERROR23), ex);
-							return false;
-						} catch (NullPointerException ex) {
-							esValido = false;
-							// Error en la validación. No se pudo obtener el certificado firmante
-							resultado.setLog(I18n.getResource(LIBRERIAXADES_FIRMAXML_ERROR_3));
-							// Error al instanciar la factoría de certificados
-							log.error(I18n.getResource(LIBRERIAXADES_VALIDARFIRMA_ERROR23), ex);
-							return false;
-						}
-					}
-					NodeList serialVals = issuerSerial.getElementsByTagNameNS(SCHEMA_DSIG, LIBRERIAXADES_X_509_SERIAL_NUMBER);
-					if (serialVals != null) {
-						Element serialValElement = (Element)serialVals.item(0);
-						datos.setSerial(new BigInteger(serialValElement.getFirstChild().getNodeValue()));
-					}
-				}
-				certificadosSigning.add(datos);
 			}
 		} 
 

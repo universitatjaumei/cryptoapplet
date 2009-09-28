@@ -36,6 +36,7 @@
   </build>
 
   <modules>
+    <module>xmlsec-backport-jdk6</module>
     <module>uji-config</module>
     <module>uji-utils</module>
     <module>uji-crypto-core</module>
