@@ -16,8 +16,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.log4j.Logger;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
@@ -28,6 +26,7 @@ import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
+import es.uji.security.util.Base64;
 import es.uji.security.util.HexEncoder;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
@@ -254,9 +253,7 @@ public class SignatureThread extends Thread
                         byte[] inData = OS.inputStreamToByteArray(in);
                         log.debug("Data from Base64 is " + inData.length + " bytes long");
 
-                        BASE64Decoder decoder = new BASE64Decoder();
-                        
-                        in = new ByteArrayInputStream(decoder.decodeBuffer(new ByteArrayInputStream(inData)));
+                        in = new ByteArrayInputStream(Base64.decode(inData));
                     }                   
 
                     if (_mw.isShowSignatureEnabled() && ! _mw.getAppHandler().getIsBigFile())
@@ -353,9 +350,7 @@ public class SignatureThread extends Thread
                              }
                              else if (encoding.equals(SupportedDataEncoding.BASE64))
                              {
-                                 BASE64Encoder encoder = new BASE64Encoder();
-                                 
-                                 res = new ByteArrayInputStream(encoder.encode(OS.inputStreamToByteArray(signatureResult.getSignatureData())).getBytes());
+                                 res = new ByteArrayInputStream(Base64.encodeBytesToBytes(OS.inputStreamToByteArray(signatureResult.getSignatureData())));
                              }
                              else
                              {
