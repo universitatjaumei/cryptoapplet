@@ -7,29 +7,26 @@
 
 package es.uji.security.crypto.timestamp;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import sun.security.pkcs.PKCS7;
 import sun.security.util.DerValue;
 
 /**
- * This class provides the response corresponding to a timestamp request,
- * as defined in
- * <a href="http://www.ietf.org/rfc/rfc3161.txt">RFC 3161</a>.
- *
+ * This class provides the response corresponding to a timestamp request, as defined in <a
+ * href="http://www.ietf.org/rfc/rfc3161.txt">RFC 3161</a>.
+ * 
  * The TimeStampResp ASN.1 type has the following definition:
+ * 
  * <pre>
- *
+ * 
  *     TimeStampResp ::= SEQUENCE {
  *         status            PKIStatusInfo,
  *         timeStampToken    TimeStampToken OPTIONAL ]
- *
  *     PKIStatusInfo ::= SEQUENCE {
  *         status        PKIStatus,
  *         statusString  PKIFreeText OPTIONAL,
  *         failInfo      PKIFailureInfo OPTIONAL }
- *
  *     PKIStatus ::= INTEGER {
  *         granted                (0),
  *           -- when the PKIStatus contains the value zero a TimeStampToken, as
@@ -44,12 +41,10 @@ import sun.security.util.DerValue;
  *           -- imminent
  *         revocationNotification (5)
  *           -- notification that a revocation has occurred }
- *
  *     PKIFreeText ::= SEQUENCE SIZE (1..MAX) OF UTF8String
  *           -- text encoded as UTF-8 String (note:  each UTF8String SHOULD
  *           -- include an RFC 1766 language tag to indicate the language
  *           -- of the contained text)
- *
  *     PKIFailureInfo ::= BIT STRING {
  *         badAlg              (0),
  *           -- unrecognized or unsupported Algorithm Identifier
@@ -74,17 +69,17 @@ import sun.security.util.DerValue;
  *         -- content is SignedData
  *         -- eContentType within SignedData is id-ct-TSTInfo
  *         -- eContent within SignedData is TSTInfo
- *
+ * 
  * </pre>
- *
+ * 
  * @since 1.5
  * @version 1.4, 11/17/05
  * @author Vincent Ryan
  * @see Timestamper
  */
 
-public class TSResponse {
-
+public class TSResponse
+{
     // Status codes (from RFC 3161)
 
     /**
@@ -150,8 +145,7 @@ public class TSResponse {
     public static final int UNACCEPTED_EXTENSION = 16;
 
     /**
-     * The additional information requested could not be understood or is not
-     * available.
+     * The additional information requested could not be understood or is not available.
      */
     public static final int ADD_INFO_NOT_AVAILABLE = 17;
 
@@ -169,201 +163,236 @@ public class TSResponse {
     private int failureInfo = -1;
 
     private byte[] encodedTsToken = null;
+    private byte[] fullToken = null;
 
     private PKCS7 tsToken = null;
 
     /**
      * Constructs an object to store the response to a timestamp request.
-     *
-     * @param status A buffer containing the ASN.1 BER encoded response.
-     * @throws IOException The exception is thrown if a problem is encountered 
-     *         parsing the timestamp response.
+     * 
+     * @param status
+     *            A buffer containing the ASN.1 BER encoded response.
+     * @throws IOException
+     *             The exception is thrown if a problem is encountered parsing the timestamp
+     *             response.
      */
-    public TSResponse(byte[] tsReply) throws IOException {
-	parse(tsReply);
+    public TSResponse(byte[] tsReply) throws IOException
+    {
+        this.fullToken = tsReply;
+        
+        parse(tsReply);
     }
 
     /**
      * Retrieve the status code returned by the TSA.
      */
-    public int getStatusCode() {
-	return status;
+    public int getStatusCode()
+    {
+        return status;
     }
 
     /**
      * Retrieve the status messages returned by the TSA.
-     *
+     * 
      * @return If null then no status messages were received.
      */
-    public String[] getStatusMessages() {
-	return statusString;
+    public String[] getStatusMessages()
+    {
+        return statusString;
     }
 
     /**
      * Retrieve the failure code returned by the TSA.
-     *
+     * 
      * @return If -1 then no failure code was received.
      */
-    public int getFailureCode() {
-	return failureInfo;
+    public int getFailureCode()
+    {
+        return failureInfo;
     }
 
-    public String getStatusCodeAsText() {
-
-        switch (status)  {
-        case GRANTED:
-            return "the timestamp request was granted.";
-
-        case GRANTED_WITH_MODS:
-            return 
-		"the timestamp request was granted with some modifications.";
-
-        case REJECTION:
-	    return "the timestamp request was rejected.";
-
-        case WAITING:
-	    return "the timestamp request has not yet been processed.";
-
-        case REVOCATION_WARNING:
-            return "warning: a certificate revocation is imminent.";
-
-        case REVOCATION_NOTIFICATION:
-            return "notification: a certificate revocation has occurred.";
-
-        default:
-            return ("unknown status code " + status + ".");
+    public String getStatusCodeAsText()
+    {
+        switch (status)
+        {
+            case GRANTED:
+                return "the timestamp request was granted.";
+    
+            case GRANTED_WITH_MODS:
+                return "the timestamp request was granted with some modifications.";
+    
+            case REJECTION:
+                return "the timestamp request was rejected.";
+    
+            case WAITING:
+                return "the timestamp request has not yet been processed.";
+    
+            case REVOCATION_WARNING:
+                return "warning: a certificate revocation is imminent.";
+    
+            case REVOCATION_NOTIFICATION:
+                return "notification: a certificate revocation has occurred.";
+    
+            default:
+                return ("unknown status code " + status + ".");
         }
     }
 
-    public String getFailureCodeAsText() {
+    public String getFailureCodeAsText()
+    {
 
-	if (failureInfo == -1) {
-	    return null;
-	}
+        if (failureInfo == -1)
+        {
+            return null;
+        }
 
-        switch (failureInfo)  {
-
-	case BAD_ALG:
-            return "Unrecognized or unsupported alrorithm identifier.";
-
-	case BAD_REQUEST:
-	    return "The requested transaction is not permitted or supported.";
-
-	case BAD_DATA_FORMAT:
-	    return "The data submitted has the wrong format.";
-
-	case TIME_NOT_AVAILABLE:
-	    return "The TSA's time source is not available.";
-
-	case UNACCEPTED_POLICY:
-	    return "The requested TSA policy is not supported by the TSA.";
-
-	case UNACCEPTED_EXTENSION:
-	    return "The requested extension is not supported by the TSA.";
-
-	case ADD_INFO_NOT_AVAILABLE:
-	    return "The additional information requested could not be " +
-		"understood or is not available.";
-
-	case SYSTEM_FAILURE:
-	    return "The request cannot be handled due to system failure.";
-
-        default:
-            return ("unknown status code " + status);
+        switch (failureInfo)
+        {
+            case BAD_ALG:
+                return "Unrecognized or unsupported alrorithm identifier.";
+    
+            case BAD_REQUEST:
+                return "The requested transaction is not permitted or supported.";
+    
+            case BAD_DATA_FORMAT:
+                return "The data submitted has the wrong format.";
+    
+            case TIME_NOT_AVAILABLE:
+                return "The TSA's time source is not available.";
+    
+            case UNACCEPTED_POLICY:
+                return "The requested TSA policy is not supported by the TSA.";
+    
+            case UNACCEPTED_EXTENSION:
+                return "The requested extension is not supported by the TSA.";
+    
+            case ADD_INFO_NOT_AVAILABLE:
+                return "The additional information requested could not be "
+                        + "understood or is not available.";
+    
+            case SYSTEM_FAILURE:
+                return "The request cannot be handled due to system failure.";
+    
+            default:
+                return ("unknown status code " + status);
         }
     }
 
     /**
      * Retrieve the timestamp token returned by the TSA.
-     *
+     * 
      * @return If null then no token was received.
      */
-    public PKCS7 getToken() {
-	return tsToken;
+    public PKCS7 getToken()
+    {
+        return tsToken;
     }
 
     /**
      * Retrieve the ASN.1 BER encoded timestamp token returned by the TSA.
-     *
+     * 
      * @return If null then no token was received.
      */
-    public byte[] getEncodedToken() {
-        byte[] resp = encodedTsToken;
-        byte[] status = {0x30, (byte)0x82, 0x03, (byte)0xA7, 0x30, 0x03, 0x02, 0x01, 0x00};
-        byte[] completeEncodedToken = new byte[resp.length + status.length];
-        
-        System.arraycopy(status, 0, completeEncodedToken, 0, status.length);
-        System.arraycopy(resp, 0, completeEncodedToken, status.length, resp.length);
-        
-        return completeEncodedToken;
+    public byte[] getEncodedToken()
+    {
+        // byte[] resp = encodedTsToken;
+        // byte[] status = {0x30, (byte)0x82, 0x03, (byte) 0xA7, 0x30, 0x03, 0x02, 0x01, 0x00};
+        // byte[] completeEncodedToken = new byte[resp.length + status.length];
+        //        
+        // System.arraycopy(status, 0, completeEncodedToken, 0, status.length);
+        // System.arraycopy(resp, 0, completeEncodedToken, status.length, resp.length);
+        //        
+        // return completeEncodedToken;
+
+        return fullToken;
     }
 
     /*
      * Parses the timestamp response.
-     *
+     * 
      * @param status A buffer containing the ASN.1 BER encoded response.
-     * @throws IOException The exception is thrown if a problem is encountered 
-     *         parsing the timestamp response.
+     * 
+     * @throws IOException The exception is thrown if a problem is encountered parsing the timestamp
+     * response.
      */
-    private void parse(byte[] tsReply) throws IOException {
+    private void parse(byte[] tsReply) throws IOException
+    {
         // Decode TimeStampResp
+        DerValue derValue = new DerValue(tsReply);
+        
+        if (derValue.tag != DerValue.tag_Sequence)
+        {
+            throw new IOException("Bad encoding for timestamp response");
+        }
 
-	DerValue derValue = new DerValue(tsReply);
-	if (derValue.tag != DerValue.tag_Sequence) {
-	    throw new IOException("Bad encoding for timestamp response");
-	}
+        // Parse status
+        DerValue status = derValue.data.getDerValue();
 
-    // Parse status
-	DerValue status = derValue.data.getDerValue();
-	
-	// Parse status
-	this.status = status.data.getInteger();
-	if (DEBUG) {
-	    System.out.println("timestamp response: status=" + this.status);
-	}
-	// Parse statusString, if present
-	if (status.data.available() > 0) {
-	    DerValue[] strings = status.data.getSequence(1);
-	    statusString = new String[strings.length];
-	    for (int i = 0; i < strings.length; i++) {
-		statusString[i] = strings[i].data.getUTF8String();
-	    }
-	}
-	// Parse failInfo, if present
-	if (status.data.available() > 0) {
-	    byte[] failInfo = status.data.getBitString();
-	    int failureInfo = (new Byte(failInfo[0])).intValue();
-	    if (failureInfo < 0 || failureInfo > 25 || failInfo.length != 1) {
-		throw new IOException("Bad encoding for timestamp response: " +
-		    "unrecognized value for the failInfo element"); 
-	    }
-	    this.failureInfo = failureInfo;
-	}
+        // Parse status
+        this.status = status.data.getInteger();
+        
+        if (DEBUG)
+        {
+            System.out.println("timestamp response: status=" + this.status);
+        }
+        
+        // Parse statusString, if present
+        if (status.data.available() > 0)
+        {
+            DerValue[] strings = status.data.getSequence(1);
+            statusString = new String[strings.length];
+            
+            for (int i = 0; i < strings.length; i++)
+            {
+                statusString[i] = strings[i].data.getUTF8String();
+            }
+        }
+        
+        // Parse failInfo, if present
+        if (status.data.available() > 0)
+        {
+            byte[] failInfo = status.data.getBitString();
+            int failureInfo = (new Byte(failInfo[0])).intValue();
+            
+            if (failureInfo < 0 || failureInfo > 25 || failInfo.length != 1)
+            {
+                throw new IOException("Bad encoding for timestamp response: "
+                        + "unrecognized value for the failInfo element");
+            }
+            
+            this.failureInfo = failureInfo;
+        }
 
-	// Parse timeStampToken, if present
-	if (derValue.data.available() > 0) {
-	    DerValue timestampToken = derValue.data.getDerValue();
-	    encodedTsToken = timestampToken.toByteArray();
-	    tsToken = new PKCS7(encodedTsToken);
-	}
+        // Parse timeStampToken, if present
+        if (derValue.data.available() > 0)
+        {
+            DerValue timestampToken = derValue.data.getDerValue();
+            encodedTsToken = timestampToken.toByteArray();
+            tsToken = new PKCS7(encodedTsToken);
+        }
 
-	// Check the format of the timestamp response
-	if (this.status == 0 || this.status == 1) {
-	    if (tsToken == null) {
-		throw new TimestampException(
-		    "Bad encoding for timestamp response: " +
-		    "expected a timeStampToken element to be present");
-	    }
-	} else if (tsToken != null) {
-	    throw new TimestampException(
-		"Bad encoding for timestamp response: " +
-		"expected no timeStampToken element to be present");
-	}
+        // Check the format of the timestamp response
+        if (this.status == 0 || this.status == 1)
+        {
+            if (tsToken == null)
+            {
+                throw new TimestampException("Bad encoding for timestamp response: "
+                        + "expected a timeStampToken element to be present");
+            }
+        }
+        else if (tsToken != null)
+        {
+            throw new TimestampException("Bad encoding for timestamp response: "
+                    + "expected no timeStampToken element to be present");
+        }
     }
 
-final static class TimestampException extends IOException {
-    TimestampException(String message) {
-	super(message);
+    @SuppressWarnings("serial")
+    final static class TimestampException extends IOException
+    {
+        TimestampException(String message)
+        {
+            super(message);
+        }
     }
-}
 }
