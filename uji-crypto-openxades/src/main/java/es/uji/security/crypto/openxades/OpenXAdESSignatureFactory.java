@@ -31,6 +31,7 @@ import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
+import es.uji.security.util.Base64;
 import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -199,12 +200,25 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         if (tsaCount != 0)
         {
             String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
+            String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
+            
             byte[] signatureValue = signature.getSignatureValue().toString().getBytes();
 
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true);
 
+            X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
             TSResponseToken responseToken = new TSResponseToken(response);
-
+            
+            TSResponse mmm = new TSResponse(Base64.decode(Base64.encodeBytes(response.getEncodedToken())));
+            
+            if (! responseToken.verify(xcaCert, signatureValue))
+            {
+                signatureResult.setValid(false);
+                signatureResult.addError("Obtained timestamp is not valid");
+                
+                return signatureResult;                
+            }
+            
             TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
             ts.setTimeStampResponse(response);
             ts.setSignature(signature);
@@ -212,7 +226,6 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             signature.addTimestampInfo(ts);
 
-            String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
 
             if (tsa1_ca == null)
             {
@@ -221,8 +234,6 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
                 return signatureResult;
             }
-
-            X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
 
             certValue = new CertValue();
             certValue.setType(CertValue.CERTVAL_TYPE_TSA);
@@ -260,7 +271,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             }
 
             String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
-
+            String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
+            
             byte[] completeCertificateRefs = signature.getUnsignedProperties()
                     .getCompleteCertificateRefs().toXML();
 
@@ -281,9 +293,18 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
                     canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
 
+            X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
-            TSResponseToken responseToken = new TSResponseToken(response);
+            TSResponseToken responseToken = new TSResponseToken(response);            
 
+            if (! responseToken.verify(xcaCert, refsOnlyData))
+            {
+                signatureResult.setValid(false);
+                signatureResult.addError("Obtained timestamp is not valid");
+
+                return signatureResult;                
+            }
+            
             TimestampInfo ts = new TimestampInfo("TS2", TimestampInfo.TIMESTAMP_TYPE_REFS_ONLY);
             ts.setTimeStampResponse(response);
             ts.setSignature(signature);
