@@ -1,12 +1,13 @@
 package es.uji.security.crypto.timestamp;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -31,10 +32,15 @@ public class TSResponseToken
     {
         byte[] tok = response.getToken().getContentInfo().getContentBytes();
 
-
         try
         {
-            int j = 3;
+            int j = 0;
+            
+            while (tok[j] != 0x02 && j < tok.length)
+            {
+                j++;
+            }
+            
             // Tok is the der encoded array
             // First a 30 81 TAM sequence and tam is indicated so
             // at position i=3 we must find an integer 0x02
@@ -64,9 +70,9 @@ public class TSResponseToken
 
             // We can find a NULL value here:
             if (tok[j] == 0x05)
-            	j+=2;
-            
-            // And now we point to the hash itself.            
+                j += 2;
+
+            // And now we point to the hash itself.
             if (tok[j] != 0x04)
                 throw new ASN1ParseException("Must be a hash value at position " + j);
 
@@ -78,7 +84,8 @@ public class TSResponseToken
         catch (ArrayIndexOutOfBoundsException ai)
         {
             // Parsing failure, null will be returned.
-            throw new ASN1ParseException("The ASN.1 structure is not well formed, the length tag does not match with its real length.");
+            throw new ASN1ParseException(
+                    "The ASN.1 structure is not well formed, the length tag does not match with its real length.");
         }
     }
 
@@ -91,7 +98,13 @@ public class TSResponseToken
 
         try
         {
-            int j = 3;
+            int j = 0;
+            
+            while (tok[j] != 0x02 && j < tok.length)
+            {
+                j++;
+            }
+
             // Tok is the der encoded array
             // First a 30 81 TAM sequence and tam is indicated so
             // at position i=3 we must find an integer 0x02
@@ -119,6 +132,10 @@ public class TSResponseToken
             // skip hashalg OID length
             j += tok[j + 1] + 2;
 
+            // We can find a NULL value here:
+            if (tok[j] == 0x05)
+                j += 2;
+            
             // And now we point to the hash itself.
             if (tok[j] != 0x04)
                 throw new ASN1ParseException("Must be a hash value at position " + j);
@@ -138,7 +155,8 @@ public class TSResponseToken
         catch (ArrayIndexOutOfBoundsException ai)
         {
             // Parsing failure, null will be returned
-            throw new ASN1ParseException("The ASN.1 structure is not well formed, the length tag does not match with its real length.");
+            throw new ASN1ParseException(
+                    "The ASN.1 structure is not well formed, the length tag does not match with its real length.");
         }
         catch (ParseException pe)
         {
@@ -151,17 +169,20 @@ public class TSResponseToken
      * 
      * Verify the timeStamp token, this function is not enought verification, the certificate passed
      * here must be checked against the ca trust anchor.
-     * @throws ASN1ParseException 
-     * @throws TokenVerifyException 
+     * 
+     * @throws ASN1ParseException
+     * @throws TokenVerifyException
      * 
      * */
 
-    public boolean verify(X509Certificate cert) throws IOException, TokenVerifyException, ASN1ParseException
+    public boolean verify(X509Certificate cert) throws IOException, TokenVerifyException,
+            ASN1ParseException
     {
         return verify(cert, null, false, "SHA-1");
     }
 
-    public boolean verify(X509Certificate cert, byte[] origData) throws IOException, TokenVerifyException, ASN1ParseException
+    public boolean verify(X509Certificate cert, byte[] origData) throws IOException,
+            TokenVerifyException, ASN1ParseException
     {
         return verify(cert, origData, true, "SHA-1");
     }
@@ -178,16 +199,16 @@ public class TSResponseToken
         byte[] deciphdig = null;
         MessageDigest messageDigest = null;
         byte[] digest = null;
-        
+
         try
         {
             ciph = Cipher.getInstance("RSA");
             ciph.init(Cipher.DECRYPT_MODE, cert);
-            
+
             deciphdig = ciph.doFinal(ciphdig);
 
             messageDigest = MessageDigest.getInstance(signatureDigestAlgorithm);
-            digest = messageDigest.digest(pk9enc);            
+            digest = messageDigest.digest(pk9enc);
         }
         catch (Exception e)
         {
@@ -230,7 +251,8 @@ public class TSResponseToken
         // The length must be the same:
         if (digest.length != deciphdig[i + 1])
         {
-            throw new ASN1ParseException("The lenght between the plain and signed hash does not match!");
+            throw new ASN1ParseException(
+                    "The lenght between the plain and signed hash does not match!");
         }
         i += 2;
 
@@ -252,7 +274,8 @@ public class TSResponseToken
             byte[] msgImp = getMessageImprint();
             if (oddig.length != msgImp.length)
             {
-                throw new TokenVerifyException("The lenght between the calculated and signed hash does not match!");
+                throw new TokenVerifyException(
+                        "The lenght between the calculated and signed hash does not match!");
             }
 
             for (int j = 0; j < oddig.length; j++)
@@ -268,53 +291,40 @@ public class TSResponseToken
     }
 
     public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException,
-            IOException
-    {        
+            IOException, CertificateException, KeyStoreException, TokenVerifyException, ASN1ParseException
+    {
+        String tsaURL = "http://tss.accv.es:8318/tsa";
+        
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        // get user password and file input stream
+        char[] password = "cryptoapplet".toCharArray();
+        FileInputStream fis = new FileInputStream("../uji.keystore");
+        ks.load(fis, password);
+        fis.close();
+
+        X509Certificate cert = (X509Certificate) ks.getCertificate("TSA1_ACCV");
+        
+        TSResponse r = TimeStampFactory.getTimeStampResponse(tsaURL, "test"
+                .getBytes(), true);
+
+        TSResponseToken tsResponseToken = new TSResponseToken(r);
+
+        System.out.print("Successful verification: ");
+        System.out.println(" " + tsResponseToken.verify(cert, "test".getBytes()));
+
+        System.out.print("Bad data digest verification: ");
+
         try
         {
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-
-            // get user password and file input stream
-            char[] password = "cryptoapplet".toCharArray();
-            FileInputStream fis = new FileInputStream("../uji.keystore");
-            ks.load(fis, password);
-            fis.close();
-
-            X509Certificate cert = (X509Certificate) ks.getCertificate("TSA1_ACCV");
-            
-            // Works fine
-            TSResponse r = TimeStampFactory.getTimeStampResponse("http://tss.accv.es:8318/tsa",
-                    "test".getBytes(), true);
-            
-            FileOutputStream fos = new FileOutputStream("/tmp/out1.bin");
-            fos.write(r.getEncodedToken());
-            fos.flush();
-            fos.close();
-            
-            // Fails
-            byte[] data = TimeStampFactory.getTimeStamp("http://tss.accv.es:8318/tsa",
-                    "test".getBytes(), true);    
-            fos = new FileOutputStream("/tmp/out2.bin");
-            fos.write(data);
-            fos.flush();
-            fos.close();
-            
-            r = new TSResponse(data);
-
-            TSResponseToken tsResponseToken = new TSResponseToken(r);
-
-            System.out.print("Successful verification: ");
-            System.out.println(" " + tsResponseToken.verify(cert, "test".getBytes()));
-
-            System.out.print("Bad data digest verification: ");
             System.out.println(" " + tsResponseToken.verify(cert, "testx".getBytes()));
-
-            System.out.print("No original data check verification: ");
-            System.out.println(" " + tsResponseToken.verify(cert, null, false, "SHA-1"));
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            System.out.println(e.getLocalizedMessage());
         }
+
+        System.out.print("No original data check verification: ");
+        System.out.println(" " + tsResponseToken.verify(cert, null, false, "SHA-1"));
     }
 }
