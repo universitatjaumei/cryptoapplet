@@ -16,6 +16,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 
+import es.uji.security.util.OS;
+
 /**
  * A timestamper that communicates with a Timestamping Authority (TSA) over HTTP. It supports the
  * Time-Stamp Protocol defined in: <a href="http://www.ietf.org/rfc/rfc3161.txt">RFC 3161</a>.
@@ -98,6 +100,7 @@ public class HttpTimestamper implements Timestamper
 
         // Receive the reply
         BufferedInputStream input = new BufferedInputStream(connection.getInputStream());
+
         if (DEBUG)
         {
             String header = connection.getHeaderField(0);
@@ -111,21 +114,11 @@ public class HttpTimestamper implements Timestamper
             }
             System.out.println();
         }
-        int contentLength = connection.getContentLength();
-        if (contentLength == -1)
-        {
-            contentLength = Integer.MAX_VALUE;
-        }
+        
         verifyMimeType(connection.getContentType());
 
-        byte[] replyBuffer = new byte[contentLength];
-        int total = 0;
-        int count = 0;
-        while (count != -1 && total < contentLength)
-        {
-            count = input.read(replyBuffer, total, replyBuffer.length - total);
-            total += count;
-        }
+        byte[] replyBuffer = OS.inputStreamToByteArray(input);
+
         if (DEBUG)
         {
             System.out.println("received timestamp response (length=" + replyBuffer.length + ")");
@@ -150,9 +143,9 @@ public class HttpTimestamper implements Timestamper
      */
     private static void verifyMimeType(String contentType) throws IOException
     {
-        if (!TS_REPLY_MIME_TYPE.equalsIgnoreCase(contentType))
-        {
-            throw new IOException("MIME Content-Type is not " + TS_REPLY_MIME_TYPE);
-        }
+//        if (!TS_REPLY_MIME_TYPE.equalsIgnoreCase(contentType))
+//        {
+//            throw new IOException("MIME Content-Type is not " + TS_REPLY_MIME_TYPE);
+//        }
     }
 }
