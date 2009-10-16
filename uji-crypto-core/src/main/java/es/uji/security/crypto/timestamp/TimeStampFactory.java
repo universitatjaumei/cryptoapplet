@@ -46,12 +46,10 @@
 
 package es.uji.security.crypto.timestamp;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.util.Date;
 
 public class TimeStampFactory
 {
@@ -64,7 +62,6 @@ public class TimeStampFactory
         HttpTimestamper httpTimestamper = new HttpTimestamper(strUrl);
         
         byte[] digest = data;
-        Date d= new Date();
       
         if (calculateDigest)
         {
