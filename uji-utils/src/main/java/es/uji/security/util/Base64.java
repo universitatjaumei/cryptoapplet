@@ -1104,7 +1104,7 @@ public class Base64
         byte[] decoded = null;
         try {
             decoded = decode( source, 0, source.length, Base64.NO_OPTIONS );
-        } catch( java.io.IOException ex ) {
+        } catch( RuntimeException ex ) {
             assert false : "IOExceptions only come from GZipping, which is turned off: " + ex.getMessage();
         }
         return decoded;
@@ -1129,8 +1129,7 @@ public class Base64
      * @throws java.io.IOException If bogus characters exist in source data
      * @since 1.3
      */
-    public static byte[] decode( byte[] source, int off, int len, int options )
-    throws java.io.IOException {
+    public static byte[] decode( byte[] source, int off, int len, int options ) {
         
         // Lots of error checking and exception throwing
         if( source == null ){
@@ -1184,7 +1183,7 @@ public class Base64
             }   // end if: white space, equals sign or better
             else {
                 // There's a bad input character in the Base64 stream.
-                throw new java.io.IOException( String.format(
+                throw new RuntimeException( String.format(
                 "Bad Base64 input character '%c' in array position %d", source[i], i ) );
             }   // end else: 
         }   // each input character
@@ -1206,7 +1205,7 @@ public class Base64
      * @throws java.io.IOException If there is a problem
      * @since 1.4
      */
-    public static byte[] decode( String s ) throws java.io.IOException {
+    public static byte[] decode( String s ) {
         return decode( s, NO_OPTIONS );
     }
 
@@ -1223,7 +1222,7 @@ public class Base64
      * @throws NullPointerException if <tt>s</tt> is null
      * @since 1.4
      */
-    public static byte[] decode( String s, int options ) throws java.io.IOException {
+    public static byte[] decode( String s, int options ) {
         
         if( s == null ){
             throw new NullPointerException( "Input string was null." );
