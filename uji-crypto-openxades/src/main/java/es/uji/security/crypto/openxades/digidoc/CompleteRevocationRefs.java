@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.ArrayList;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -428,7 +429,7 @@ public class CompleteRevocationRefs implements Serializable
                             .str2data("</ProducedAt>\n</OCSPIdentifier>\n<DigestAlgAndValue>\n<DigestMethod Algorithm=\""));
             bos.write(ConvertUtils.str2data(m_digestAlgorithm));
             bos.write(ConvertUtils.str2data("\"></DigestMethod>\n<DigestValue>"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(m_digestValue, 0)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_digestValue)));
             bos.write(ConvertUtils.str2data("</DigestValue>\n</DigestAlgAndValue>"));
             bos.write(ConvertUtils.str2data("</OCSPRef>\n</OCSPRefs>\n"));
             bos.write(ConvertUtils.str2data("</CompleteRevocationRefs>"));

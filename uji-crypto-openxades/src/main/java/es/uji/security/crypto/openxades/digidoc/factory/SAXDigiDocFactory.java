@@ -40,7 +40,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.ConfigHandler;
-import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.CertID;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.CompleteCertificateRefs;
@@ -62,6 +61,8 @@ import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.UnsignedProperties;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 import es.uji.security.crypto.timestamp.TSResponse;
+import es.uji.security.util.Base64;
+import es.uji.security.util.OS;
 
 /**
  * SAX implementation of DigiDocFactory Provides methods for reading a DigiDoc file
@@ -71,6 +72,8 @@ import es.uji.security.crypto.timestamp.TSResponse;
  */
 public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
 {
+    private static int i = 1;
+    
     private Stack m_tags;
     private SignedDoc m_doc;
     private String m_strSigValTs, m_strSigAndRefsTs, m_strRefsTs;
@@ -589,7 +592,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 }
                 else if (key.equals("DigestValue"))
                 {
-                    DigestValue = Base64Util.decode(attrs.getValue(i));
+                    DigestValue = Base64.decode(attrs.getValue(i));
                 }
                 else
                 {
@@ -1634,14 +1637,14 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     Signature sig = m_doc.getLastSignature();
                     SignedInfo si = sig.getSignedInfo();
                     Reference ref = si.getLastReference();
-                    ref.setDigestValue(Base64Util.decode(m_sbCollectItem.toString()));
+                    ref.setDigestValue(Base64.decode(m_sbCollectItem.toString()));
                     m_sbCollectItem = null; // stop collecting
                 }
                 else if (m_tags.search("SigningCertificate") != -1)
                 {
                     Signature sig = m_doc.getLastSignature();
                     SignedProperties sp = sig.getSignedProperties();
-                    sp.setCertDigestValue(Base64Util.decode(m_sbCollectItem.toString()));
+                    sp.setCertDigestValue(Base64.decode(m_sbCollectItem.toString()));
                     m_sbCollectItem = null; // stop collecting
                 }
                 else if (m_tags.search("CompleteCertificateRefs") != -1)
@@ -1651,7 +1654,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     CompleteCertificateRefs crefs = up.getCompleteCertificateRefs();
                     CertID cid = crefs.getLastCertId();
                     if (cid != null)
-                        cid.setDigestValue(Base64Util.decode(m_sbCollectItem.toString()));
+                        cid.setDigestValue(Base64.decode(m_sbCollectItem.toString()));
                     // System.out.println("CertID: " + cid.getId() + " digest: " +
                     // m_sbCollectItem.toString());
                     m_sbCollectItem = null; // stop collecting
@@ -1661,7 +1664,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     Signature sig = m_doc.getLastSignature();
                     UnsignedProperties up = sig.getUnsignedProperties();
                     CompleteRevocationRefs rrefs = up.getCompleteRevocationRefs();
-                    rrefs.setDigestValue(Base64Util.decode(m_sbCollectItem.toString()));
+                    rrefs.setDigestValue(Base64.decode(m_sbCollectItem.toString()));
                     m_sbCollectItem = null; // stop collecting
                 }
             }
@@ -1740,7 +1743,9 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 
                 try
                 {
-                	byte[] resp= Base64Util.decode(m_sbCollectItem.toString());
+                	byte[] resp= Base64.decode(m_sbCollectItem.toString());
+                    OS.dumpToFile("/tmp/kk" + i + "-verify.bin", resp);
+                    i++;
                 
                 	TSResponse response = new TSResponse(resp);
                     ts.setTimeStampResponse(response);
@@ -1803,7 +1808,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 // debugWriteFile("SigVal.txt", m_sbCollectItem.toString());
                 // System.out.println("SIGVAL mode: " + m_nCollectMode + ":\n--\n" +
                 // (m_sbCollectItem != null ? m_sbCollectItem.toString() : "NULL"));
-                sv.setValue(Base64Util.decode(m_sbCollectItem.toString()));
+                sv.setValue(Base64.decode(m_sbCollectItem.toString()));
                 m_sbCollectItem = null; // stop collecting
             }
             catch (DigiDocException ex)
@@ -1818,7 +1823,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
             {
                 Signature sig = m_doc.getLastSignature();
                 CertValue cval = sig.getLastCertValue();
-                cval.setCert(SignedDoc.readCertificate(Base64Util
+                cval.setCert(SignedDoc.readCertificate(Base64
                         .decode(m_sbCollectItem.toString())));
                 m_sbCollectItem = null; // stop collecting
             }
@@ -1834,7 +1839,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
             {
                 Signature sig = m_doc.getLastSignature();
                 CertValue cval = sig.getLastCertValue();
-                cval.setCert(SignedDoc.readCertificate(Base64Util
+                cval.setCert(SignedDoc.readCertificate(Base64
                         .decode(m_sbCollectItem.toString())));
                 m_sbCollectItem = null; // stop collecting
             }
@@ -1852,8 +1857,8 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 // first we have to find correct certid and certvalue types
                 findCertIDandCertValueTypes(sig);
                 UnsignedProperties up = sig.getUnsignedProperties();
-                Notary not = up.getNotary();
-                not.setOcspResponseData(Base64Util.decode(m_sbCollectItem.toString()));
+                Notary not = up.getNotary(); 
+                not.setOcspResponseData(Base64.decode(m_sbCollectItem.toString()));
                 NotaryFactory notFac = ConfigHandler.getNotaryFactory();
                 notFac.parseAndVerifyResponse(sig, not);
                 // in 1.1 we had bad OCPS digest

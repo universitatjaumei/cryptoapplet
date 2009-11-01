@@ -28,6 +28,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.util.Base64;
 
 /**
  * Models the ETSI <Cert> element Holds info about a certificate but not the certificate itself.
@@ -464,7 +465,7 @@ public class CertID implements Serializable
             bos.write(ConvertUtils.str2data("\n<CertDigest>\n<DigestMethod Algorithm=\""));
             bos.write(ConvertUtils.str2data(m_digestAlgorithm));
             bos.write(ConvertUtils.str2data("\">\n</DigestMethod>\n<DigestValue>"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(m_digestValue, 0)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_digestValue)));
             bos.write(ConvertUtils.str2data("</DigestValue>\n</CertDigest>\n"));
             // In version 1.3 we use correct <IssuerSerial> content
             // e.g. subelements <X509IssuerName> and <X509SerialNumber>

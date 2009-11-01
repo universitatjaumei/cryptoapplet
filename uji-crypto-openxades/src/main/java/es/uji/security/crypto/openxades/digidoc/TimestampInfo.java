@@ -28,6 +28,7 @@ import java.util.Date;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TimestampToken;
+import es.uji.security.util.Base64;
 
 //import org.bouncycastle.cms.SignerId;
 //import org.bouncycastle.cms.CMSSignedData;
@@ -519,7 +520,7 @@ public class TimestampInfo
 //            	System.arraycopy(status, 0, completeEncodedToken, 0, status.length);
 //            	System.arraycopy(resp, 0, completeEncodedToken, status.length, resp.length);
             	
-                bos.write(ConvertUtils.str2data(Base64Util.encode(m_tsResp.getEncodedToken(), 64)));
+                bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_tsResp.getEncodedToken())));
             }
             bos.write(ConvertUtils.str2data("</EncapsulatedTimeStamp>"));
             switch (m_type)
