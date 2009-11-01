@@ -21,20 +21,18 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
 import java.math.BigInteger;
-import java.util.ArrayList; //import java.util.TimeZone;
-//import java.util.Calendar;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
 
-import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import es.uji.security.util.Base64;
 
 /**
  * Models the SignedProperties element of an XML-DSIG/ETSI Signature.
@@ -655,7 +653,7 @@ public class SignedProperties implements Serializable
             bos.write(ConvertUtils.str2data(m_certDigestAlgorithm));
 
             bos.write(ConvertUtils.str2data("\">\n</DigestMethod>\n<DigestValue xmlns=\"" + SignedDoc.xmlns_xmldsig + "\">"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(m_certDigestValue, 0)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_certDigestValue)));
             bos.write(ConvertUtils.str2data("</DigestValue>\n</CertDigest>\n"));
             // In version 1.3 we use correct <IssuerSerial> content
             // e.g. subelements <X509IssuerName> and <X509SerialNumber>

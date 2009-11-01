@@ -21,17 +21,16 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.interfaces.RSAPublicKey;
-import java.math.BigInteger;
-
-import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
+
+import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.util.Base64;
 
 /**
  * Models the KeyInfo block of an XML-DSIG signature. In DigiDoc library the key info allways
@@ -256,11 +255,9 @@ public class KeyInfo implements Serializable
         {
             bos.write(ConvertUtils.str2data("<KeyInfo>\n"));
             bos.write(ConvertUtils.str2data("<KeyValue>\n<RSAKeyValue>\n<Modulus>"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(getSignerKeyModulus().toByteArray(),
-                    64)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(getSignerKeyModulus().toByteArray())));
             bos.write(ConvertUtils.str2data("</Modulus>\n<Exponent>"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(getSignerKeyExponent().toByteArray(),
-                    64)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(getSignerKeyExponent().toByteArray())));
             bos.write(ConvertUtils.str2data("</Exponent>\n</RSAKeyValue>\n</KeyValue>\n"));
             bos.write(ConvertUtils.str2data("<X509Data>"));
             CertValue cval = null;

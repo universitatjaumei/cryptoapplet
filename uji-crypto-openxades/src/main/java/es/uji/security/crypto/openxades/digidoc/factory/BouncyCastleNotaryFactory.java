@@ -23,34 +23,25 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
-import es.uji.security.crypto.openxades.digidoc.Base64Util;
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-import es.uji.security.crypto.openxades.digidoc.Notary;
-import es.uji.security.crypto.openxades.digidoc.Signature;
-import es.uji.security.crypto.openxades.digidoc.SignedDoc;
-import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
-import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
-import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
-
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.cert.CertificateEncodingException;
-
-import java.security.cert.X509Certificate;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
-import java.security.KeyStore;
-
-import java.math.BigInteger;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Hashtable;
-import java.net.*;
-import java.io.*;
 
+import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERConstructedOctetString;
@@ -72,12 +63,18 @@ import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.OCSPRespStatus;
-import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.RevokedStatus;
+import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
-// Logging classes
-import org.apache.log4j.Logger;
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.ConfigHandler;
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
+import es.uji.security.crypto.openxades.digidoc.Notary;
+import es.uji.security.crypto.openxades.digidoc.Signature;
+import es.uji.security.crypto.openxades.digidoc.SignedDoc;
+import es.uji.security.util.Base64;
+import es.uji.security.util.OS;
 
 /**
  * Implements the NotaryFactory by using BouncyCastle JCE toolkit
@@ -289,7 +286,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             // debugWriteFile("req.der", req.getEncoded());
 
             if (m_logger.isDebugEnabled())
-                m_logger.debug("REQUEST:\n" + Base64Util.encode(req.getEncoded(), 0));
+                m_logger.debug("REQUEST:\n" + Base64.encodeBytes(req.getEncoded()));
             // send it
 
             Integer nResps = new Integer(conf.getProperty("DIGIDOC_OCSP_RESPONDER_COUNT"));
@@ -306,7 +303,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                     OCSPResp resp = sendRequest(req, ocspResponder);
                     // debugWriteFile("resp.der", resp.getEncoded());
                     if (m_logger.isDebugEnabled())
-                        m_logger.debug("RESPONSE:\n" + Base64Util.encode(resp.getEncoded(), 0));
+                        m_logger.debug("RESPONSE:\n" + Base64.encodeBytes(resp.getEncoded()));
                     // check response status
                     verifyRespStatus(resp);
 
@@ -454,7 +451,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 if (m_logger.isDebugEnabled())
                 {
                     m_logger.debug("Sending ocsp request: " + req.getEncoded().length + " bytes");
-                    m_logger.debug("REQUEST:\n" + Base64Util.encode(req.getEncoded(), 0));
+                    m_logger.debug("REQUEST:\n" + Base64.encodeBytes(req.getEncoded()));
                 }
                 // send it
                 String ocspResponder = conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL1");
@@ -464,7 +461,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 if (m_logger.isDebugEnabled())
                 {
                     m_logger.debug("Got ocsp response: " + resp.getEncoded().length + " bytes");
-                    m_logger.debug("RESPONSE:\n" + Base64Util.encode(resp.getEncoded(), 0));
+                    m_logger.debug("RESPONSE:\n" + Base64.encodeBytes(resp.getEncoded()));
                 }
                 // check response status
                 verifyRespStatus(resp);
@@ -544,7 +541,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 if (m_logger.isDebugEnabled())
                 {
                     m_logger.debug("Sending ocsp request: " + req.getEncoded().length + " bytes");
-                    m_logger.debug("REQUEST:\n" + Base64Util.encode(req.getEncoded(), 0));
+                    m_logger.debug("REQUEST:\n" + Base64.encodeBytes(req.getEncoded()));
                 }
 
                 // send it
@@ -555,7 +552,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 if (m_logger.isDebugEnabled())
                 {
                     m_logger.debug("Got ocsp response: " + resp.getEncoded().length + " bytes");
-                    m_logger.debug("RESPONSE:\n" + Base64Util.encode(resp.getEncoded(), 0));
+                    m_logger.debug("RESPONSE:\n" + Base64.encodeBytes(resp.getEncoded()));
                 }
                 // check response status
                 verifyRespStatus(resp);
@@ -639,7 +636,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
         Notary not = null;
         X509Certificate notaryCert = null;
-
+        
         // check the result
         if (resp == null || resp.getStatus() != OCSPRespStatus.SUCCESSFUL)
             throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
@@ -780,8 +777,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             if (m_logger.isDebugEnabled())
                 m_logger.debug("Search alg: " + rc.getHashAlgOID() + " serial: "
                         + rc.getSerialNumber() + " issuer: "
-                        + Base64Util.encode(rc.getIssuerKeyHash()) + " subject: "
-                        + Base64Util.encode(rc.getIssuerNameHash()));
+                        + Base64.encodeBytes(rc.getIssuerKeyHash()) + " subject: "
+                        + Base64.encodeBytes(rc.getIssuerNameHash()));
             boolean ok = false;
             for (int i = 0; i < sresp.length; i++)
             {
@@ -791,8 +788,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                     if (m_logger.isDebugEnabled())
                         m_logger.debug("Got alg: " + id.getHashAlgOID() + " serial: "
                                 + id.getSerialNumber() + " issuer: "
-                                + Base64Util.encode(id.getIssuerKeyHash()) + " subject: "
-                                + Base64Util.encode(id.getIssuerNameHash()));
+                                + Base64.encodeBytes(id.getIssuerKeyHash()) + " subject: "
+                                + Base64.encodeBytes(id.getIssuerNameHash()));
                     if (rc.getHashAlgOID().equals(id.getHashAlgOID())
                             && rc.getSerialNumber().equals(id.getSerialNumber())
                             && SignedDoc.compareDigests(rc.getIssuerKeyHash(), id
@@ -947,11 +944,32 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         {
             ResponderID respid = basResp.getResponseData().getResponderId().toASN1Object();
             Object o = ((DERTaggedObject) respid.toASN1Object()).getObject();
-            X509Name name = new X509Name((ASN1Sequence) o);
-            return "byName: " + name.toString();
+
+            if (o instanceof ASN1Sequence)
+            {
+                X509Name name = new X509Name((ASN1Sequence) o);
+                return "byName: " + name.toString();    
+            }
+            else
+            {
+                X509Certificate[] result = null;
+            
+                try
+                {
+                    result = basResp.getCerts("BC");
+                }
+                catch (Exception e)
+                {                    
+                }
+                
+                if (result != null && result.length > 0)
+                {
+                    return "byName: " + result[0].getSubjectDN().getName();
+                }            
+            }
         }
-        else
-            return null;
+
+        return null;
     }
 
     /**
@@ -1085,8 +1103,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             if (m_logger.isDebugEnabled())
                 m_logger.debug("Request for: " + certId.getHashAlgOID() + " serial: "
                         + certId.getSerialNumber() + " issuer: "
-                        + Base64Util.encode(certId.getIssuerKeyHash()) + " subject: "
-                        + Base64Util.encode(certId.getIssuerNameHash()));
+                        + Base64.encodeBytes(certId.getIssuerKeyHash()) + " subject: "
+                        + Base64.encodeBytes(certId.getIssuerNameHash()));
             ocspRequest.addRequest(certId);
 
             if (nonce != null)

@@ -33,6 +33,7 @@ import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.util.Base64;
 
 import org.w3c.dom.Node;
 import javax.xml.transform.Transformer;
@@ -165,7 +166,7 @@ public class DataFile implements Serializable
         if (m_contentType.equals(CONTENT_EMBEDDED))
             str = ConvertUtils.data2str(m_body, m_codepage);
         if (m_contentType.equals(CONTENT_EMBEDDED_BASE64))
-            str = ConvertUtils.data2str(Base64Util.decode(m_body), m_codepage);
+            str = ConvertUtils.data2str(Base64.decode(m_body), m_codepage);
         return str;
     }
 
@@ -720,68 +721,68 @@ public class DataFile implements Serializable
      * @return length of leftover bytes from this block
      * @throws DigiDocException
      */
-    private int calculateAndWriteBase64Block(OutputStream os, MessageDigest digest,
-            byte[] b64leftover, int b64left, byte[] data, int dLen, boolean bLastBlock)
-            throws DigiDocException
-    {
-        byte[] b64input = null;
-        int b64Used, nLeft = 0, nInLen = 0;
-        StringBuffer b64data = new StringBuffer();
-
-        if (m_logger.isDebugEnabled())
-            m_logger.debug("os: " + ((os != null) ? "Y" : "N") + " b64left: " + b64left
-                    + " input: " + dLen + " last: " + (bLastBlock ? "Y" : "N"));
-        try
-        {
-            // use data from the last block
-            if (b64left > 0)
-            {
-                if (dLen > 0)
-                {
-                    b64input = new byte[dLen + b64left];
-                    nInLen = b64input.length;
-                    System.arraycopy(b64leftover, 0, b64input, 0, b64left);
-                    System.arraycopy(data, 0, b64input, b64left, dLen);
-                    if (m_logger.isDebugEnabled())
-                        m_logger.debug("use left: " + b64left + " from 0 and add " + dLen);
-                }
-                else
-                {
-                    b64input = b64leftover;
-                    nInLen = b64left;
-                    if (m_logger.isDebugEnabled())
-                        m_logger.debug("use left: " + b64left + " with no new data");
-                }
-            }
-            else
-            {
-                b64input = data;
-                nInLen = dLen;
-                if (m_logger.isDebugEnabled())
-                    m_logger.debug("use: " + nInLen + " from 0");
-            }
-            // encode full rows
-            b64Used = Base64Util.encodeToBlock(b64input, nInLen, b64data, bLastBlock);
-            nLeft = nInLen - b64Used;
-            // use the encoded data
-            byte[] encdata = b64data.toString().getBytes();
-            if (os != null)
-                os.write(encdata);
-            digest.update(encdata);
-            // now copy not encoded data back to buffer
-            if (m_logger.isDebugEnabled())
-                m_logger.debug("Leaving: " + nLeft + " of: " + b64input.length);
-            if (nLeft > 0)
-                System.arraycopy(b64input, b64input.length - nLeft, b64leftover, 0, nLeft);
-        }
-        catch (Exception ex)
-        {
-            DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
-        }
-        if (m_logger.isDebugEnabled())
-            m_logger.debug("left: " + nLeft + " bytes for the next run");
-        return nLeft;
-    }
+//    private int calculateAndWriteBase64Block(OutputStream os, MessageDigest digest,
+//            byte[] b64leftover, int b64left, byte[] data, int dLen, boolean bLastBlock)
+//            throws DigiDocException
+//    {
+//        byte[] b64input = null;
+//        int b64Used, nLeft = 0, nInLen = 0;
+//        StringBuffer b64data = new StringBuffer();
+//
+//        if (m_logger.isDebugEnabled())
+//            m_logger.debug("os: " + ((os != null) ? "Y" : "N") + " b64left: " + b64left
+//                    + " input: " + dLen + " last: " + (bLastBlock ? "Y" : "N"));
+//        try
+//        {
+//            // use data from the last block
+//            if (b64left > 0)
+//            {
+//                if (dLen > 0)
+//                {
+//                    b64input = new byte[dLen + b64left];
+//                    nInLen = b64input.length;
+//                    System.arraycopy(b64leftover, 0, b64input, 0, b64left);
+//                    System.arraycopy(data, 0, b64input, b64left, dLen);
+//                    if (m_logger.isDebugEnabled())
+//                        m_logger.debug("use left: " + b64left + " from 0 and add " + dLen);
+//                }
+//                else
+//                {
+//                    b64input = b64leftover;
+//                    nInLen = b64left;
+//                    if (m_logger.isDebugEnabled())
+//                        m_logger.debug("use left: " + b64left + " with no new data");
+//                }
+//            }
+//            else
+//            {
+//                b64input = data;
+//                nInLen = dLen;
+//                if (m_logger.isDebugEnabled())
+//                    m_logger.debug("use: " + nInLen + " from 0");
+//            }
+//            // encode full rows
+//            b64Used = Base64Util.encodeToBlock(b64input, nInLen, b64data, bLastBlock);
+//            nLeft = nInLen - b64Used;
+//            // use the encoded data
+//            byte[] encdata = b64data.toString().getBytes();
+//            if (os != null)
+//                os.write(encdata);
+//            digest.update(encdata);
+//            // now copy not encoded data back to buffer
+//            if (m_logger.isDebugEnabled())
+//                m_logger.debug("Leaving: " + nLeft + " of: " + b64input.length);
+//            if (nLeft > 0)
+//                System.arraycopy(b64input, b64input.length - nLeft, b64leftover, 0, nLeft);
+//        }
+//        catch (Exception ex)
+//        {
+//            DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
+//        }
+//        if (m_logger.isDebugEnabled())
+//            m_logger.debug("left: " + nLeft + " bytes for the next run");
+//        return nLeft;
+//    }
 
     /**
      * Calculates the DataFiles size and digest Since it calculates the digest of the external file
@@ -866,15 +867,15 @@ public class DataFile implements Serializable
                         m_logger.debug("read: " + fRead + " bytes of input data");
                     if (m_contentType.equals(CONTENT_EMBEDDED_BASE64))
                     {
-                        if (bUse64ByteLines)
-                        { // 1 line base64 optimization
-                            b64left = calculateAndWriteBase64Block(os, sha, b64leftover, b64left,
-                                    buf, fRead, fRead < block_size);
-                        }
-                        else
-                        { // no optimization
+//                        if (bUse64ByteLines)
+//                        { // 1 line base64 optimization
+//                            b64left = calculateAndWriteBase64Block(os, sha, b64leftover, b64left,
+//                                    buf, fRead, fRead < block_size);
+//                        }
+//                        else
+//                        { // no optimization
                             content.write(buf, 0, fRead);
-                        }
+//                        }
                     }
                     else
                     {
@@ -892,7 +893,7 @@ public class DataFile implements Serializable
                 if (m_contentType.equals(CONTENT_EMBEDDED_BASE64))
                 {
                     if (!bUse64ByteLines)
-                        sbDig.write(Base64Util.encode(content.toByteArray(), 0).getBytes());
+                        sbDig.write(Base64.encodeBytesToBytes(content.toByteArray()));
                     content = null;
                 }
             }
@@ -900,19 +901,19 @@ public class DataFile implements Serializable
             { // content allready in memeory
                 if (m_body != null)
                 {
-                    if (bUse64ByteLines && m_contentType.equals(CONTENT_EMBEDDED_BASE64))
-                    {
-                        calculateAndWriteBase64Block(os, sha, null, 0, m_body, m_body.length, true);
-                        m_body = Base64Util.encode(m_body).getBytes();
-                    }
-                    else
-                    {
+//                    if (bUse64ByteLines && m_contentType.equals(CONTENT_EMBEDDED_BASE64))
+//                    {
+//                        calculateAndWriteBase64Block(os, sha, null, 0, m_body, m_body.length, true);
+//                        m_body = Base64Util.encode(m_body).getBytes();
+//                    }
+//                    else
+//                    {
                         if (m_contentType.equals(CONTENT_EMBEDDED_BASE64))
-                            tmp1 = Base64Util.encode(m_body).getBytes();
+                            tmp1 = Base64.encodeBytesToBytes(m_body);
                         else
                             tmp1 = ConvertUtils.data2utf8(m_body, m_codepage);
                         sbDig.write(tmp1);
-                    }
+//                    }
                 }
             }
             tmp1 = null;
@@ -961,7 +962,7 @@ public class DataFile implements Serializable
             setDigest(digest);
             if (m_logger.isDebugEnabled())
                 m_logger.debug("DataFile: \'" + getId() + "\' length: " + getSize() + " digest: "
-                        + Base64Util.encode(digest));
+                        + Base64.encodeBytes(digest));
             m_fileName = longFileName;
         }
         catch (Exception ex)
@@ -1083,7 +1084,7 @@ public class DataFile implements Serializable
             sb.append(" DigestType=\"");
             sb.append(m_digestType);
             sb.append("\" DigestValue=\"");
-            sb.append(Base64Util.encode(m_digestValue, 0));
+            sb.append(Base64.encodeBytes(m_digestValue));
             sb.append("\"");
         }
         for (int i = 0; i < countAttributes(); i++)

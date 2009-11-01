@@ -26,6 +26,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.util.Base64;
 
 /**
  * Models the ETSI <X509Certificate> and <EncapsulatedX509Certificate> elements. Holds certificate
@@ -182,7 +183,7 @@ public class CertValue
                 bos.write(ConvertUtils.str2data("<X509Certificate>"));
                 try
                 {
-                    bos.write(ConvertUtils.str2data(Base64Util.encode(m_cert.getEncoded(), 64)));
+                    bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_cert.getEncoded())));
                 }
                 catch (CertificateEncodingException ex)
                 {
@@ -197,7 +198,7 @@ public class CertValue
                 bos.write(ConvertUtils.str2data("\">\n"));
                 try
                 {
-                    bos.write(ConvertUtils.str2data(Base64Util.encode(m_cert.getEncoded(), 64)));
+                    bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_cert.getEncoded())));
                 }
                 catch (CertificateEncodingException ex)
                 {

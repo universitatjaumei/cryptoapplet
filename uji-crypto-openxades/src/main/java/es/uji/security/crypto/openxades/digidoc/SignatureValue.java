@@ -21,13 +21,13 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import es.uji.security.util.Base64;
 
 /**
  * Models the SignatureValue element of XML-DSIG
@@ -200,7 +200,7 @@ public class SignatureValue implements Serializable
             bos.write(ConvertUtils.str2data("<SignatureValue Id=\""));
             bos.write(ConvertUtils.str2data(m_id));
             bos.write(ConvertUtils.str2data("\">"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(m_value, 64)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_value)));
             bos.write(ConvertUtils.str2data("</SignatureValue>"));
         }
         catch (IOException ex)

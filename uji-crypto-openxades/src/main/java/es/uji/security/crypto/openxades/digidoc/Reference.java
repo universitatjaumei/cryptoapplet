@@ -21,13 +21,13 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import es.uji.security.util.Base64;
 
 /**
  * Represents and XML-DSIG reference block that referrs to a particular piece of signed XML data and
@@ -381,7 +381,7 @@ public class Reference implements Serializable
             bos.write(ConvertUtils.str2data(m_digestAlgorithm));
             bos.write(ConvertUtils.str2data("\">\n</DigestMethod>\n"));
             bos.write(ConvertUtils.str2data("<DigestValue>"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(m_digestValue, 0)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_digestValue)));
             bos.write(ConvertUtils.str2data("</DigestValue>\n"));
             bos.write(ConvertUtils.str2data("</Reference>"));
         }

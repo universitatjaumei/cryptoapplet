@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -216,7 +217,7 @@ public class Notary implements Serializable
             bos.write(ConvertUtils.str2data("<EncapsulatedOCSPValue Id=\""));
             bos.write(ConvertUtils.str2data(m_id));
             bos.write(ConvertUtils.str2data("\">\n"));
-            bos.write(ConvertUtils.str2data(Base64Util.encode(m_ocspResponseData, 64)));
+            bos.write(ConvertUtils.str2data(Base64.encodeBytes(m_ocspResponseData)));
             bos.write(ConvertUtils.str2data("</EncapsulatedOCSPValue>\n"));
             if (ver.equals(SignedDoc.VERSION_1_3))
                 bos.write(ConvertUtils.str2data("</OCSPValues>"));

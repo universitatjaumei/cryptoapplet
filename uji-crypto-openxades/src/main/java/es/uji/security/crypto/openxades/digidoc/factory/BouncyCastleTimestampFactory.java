@@ -20,8 +20,6 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,15 +27,13 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
-import es.uji.security.crypto.openxades.digidoc.Base64Util;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
-import es.uji.security.crypto.timestamp.TimeStampFactory;
+import es.uji.security.util.Base64;
 
 /**
  * Implements the TimestampFactory by using BouncyCastle JCE toolkit
@@ -91,8 +87,8 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
                 m_logger.debug("Verifying TS: " + ts.getId() + " nr: " + ts.getSerialNumber());
             if (!SignedDoc.compareDigests(messageImp, ts.getHash()))
             {
-                m_logger.error("TS digest: " + Base64Util.encode(messageImp) + " real digest: "
-                        + Base64Util.encode(ts.getHash()));
+                m_logger.error("TS digest: " + Base64.encodeBytes(messageImp) + " real digest: "
+                        + Base64.encodeBytes(ts.getHash()));
                 throw new DigiDocException(DigiDocException.ERR_TIMESTAMP_VERIFY,
                         "Bad digest for timestamp: " + ts.getId(), null);
             }
