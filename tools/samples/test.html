@@ -4,9 +4,10 @@
 <title>
  CryptoApplet Test Page. 
 </title>
-<script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="urlEncode.js"></script>
-<script type="text/javascript" src=capp.js></script> 
+<script type="text/javascript" src="jquery.js" charset="UTF-8"></script>
+<script type="text/javascript" src="jquery.base64.js" charset="UTF-8"></script>
+<script type="text/javascript" src="urlEncode.js" charset="UTF-8"></script>
+<script type="text/javascript" src="capp.js" charset="UTF-8"></script> 
 </head>
 <body style="padding-left: 20px;">
 <br/><br>
@@ -15,7 +16,7 @@
 <br/><br/>
 This is the CrytpoApplet test page, it uses some jdk 1.6 features, so it is a requirement to 
 use Java Plugin 1.6 or greater requiered for <br/> this test. Please make sure you have it correctly 
-inistalled.
+installed.
 <br/><br/>
 <div id="sigContent">
   <textarea id="ts" onClick="selectText('ts');" style="border: thin solid rgb(50,205,50);" cols="100" rows="10">
@@ -75,7 +76,9 @@ Select Output Signature format:
 <button id="btnl" onClick="loadApplet();" style="width: 100px;">Load Applet</button>
 <button id="btns" onClick="Sign();" disabled style="width: 100px;"> Sign </button>
 <button id="btnvfy" onClick="verifyXAdES();" disabled style="width: 100px;"> Verify </button>
+<button id="btndwn" onClick="downloadTextArea();" disabled style="visibility:hidden; width: 100px;"> Download </button>
 </div>
+<div id="info" style="font-color:red;"></div>
 <div id="cappd"> 
 Applet Loading zone.
 </div>
