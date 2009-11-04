@@ -9,6 +9,10 @@ function myconsole(m){
  alert(m);
 }
 
+function onSignCancel() {
+  alert('Signature process cancelled');
+}
+
 function onSignOk(txt){ 
  
   var fmat= $('input[name="format"]');
@@ -23,9 +27,10 @@ function onSignOk(txt){
     document.location.assign(document.location.href.replace("test.html","signature.xsig"));
     return;
   }
-
+ 
   if (outputFor=="PDF"){
     document.location.assign(document.location.href.replace("test.html","signed.pdf"));  
+    document.getElementById("btndwn").disabled= false;
   }
   else{
     document.getElementById("sigta").value=txt;
@@ -33,12 +38,21 @@ function onSignOk(txt){
     document.getElementById("btnl").disabled= false;
     document.getElementById("btnvfy").disabled= false;
   }
+  
+  if ( outputFor=="FACTURAE" ){
+    document.getElementById("btndwn").style.visibility="visible";
+
+    document.getElementById("btndwn").disabled= false;
+    document.getElementById("btnvfy").disabled= true;
+    document.getElementById("info").innerHTML="<img align='left' src='img/alerticon.jpg' />You can verify the invoice by downloading it and uploading to <a target='_blank' href='http://www11.mityc.es/FacturaE/index.jsp'> mityc e-invoice validation service </a>";
+  }
+ 
+
 }
 
 //TODO: Correct that function, the url must be calculated from the document.location.
 function verifyXAdES(){
-  alert(document.location);
-  $.post("write.php","content=" + $.URLEncode(document.getElementById("sigta").value));
+  $.post("write.php","content=" + $.base64Encode(document.getElementById("sigta").value));
   var cp= document.getElementById("CryptoApplet");
   var r= cp.verifyXAdESDataUrl(document.location.href.replace("test.html","signature.xsig"));
   if (r!=null)
@@ -46,6 +60,17 @@ function verifyXAdES(){
   else
     alert("OK");
 }
+
+function downloadTextArea(){
+ $.post(
+         "write.php",
+         "content=" + $.URLEncode($.base64Encode(document.getElementById("sigta").value)),
+         function(data){
+           document.location="get.php";
+         }
+       );
+}
+
 
 function onSignError(txt){
   alert("Error:  " + txt);
