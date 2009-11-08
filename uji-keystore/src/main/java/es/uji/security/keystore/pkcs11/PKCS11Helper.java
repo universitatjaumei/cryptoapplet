@@ -1,21 +1,19 @@
 package es.uji.security.keystore.pkcs11;
 
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.Vector;
 import java.lang.reflect.Method;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Vector;
 
-import sun.security.pkcs11.wrapper.PKCS11;
-import sun.security.pkcs11.wrapper.PKCS11Exception;
+import sun.security.pkcs11.wrapper.CK_ATTRIBUTE;
 import sun.security.pkcs11.wrapper.CK_C_INITIALIZE_ARGS;
 import sun.security.pkcs11.wrapper.CK_TOKEN_INFO;
-import sun.security.pkcs11.wrapper.CK_ATTRIBUTE;
-import static sun.security.pkcs11.wrapper.PKCS11Constants.*;
-
-import es.uji.security.keystore.pkcs11.PKCS11HelperException;
+import sun.security.pkcs11.wrapper.PKCS11;
+import sun.security.pkcs11.wrapper.PKCS11Constants;
+import sun.security.pkcs11.wrapper.PKCS11Exception;
 
 public class PKCS11Helper
 {
@@ -133,15 +131,15 @@ public class PKCS11Helper
 
             try
             {
-                hSession = p11.C_OpenSession(k, CKF_SERIAL_SESSION, null, null);
+                hSession = p11.C_OpenSession(k, PKCS11Constants.CKF_SERIAL_SESSION, null, null);
             }
             catch (Exception e)
             {
                 throw new PKCS11HelperException("Opening a new Session::" + e.getMessage(),
                         PKCS11HelperException.errorType.ERR_OPEN_SESSION);
             }
-            attr.type = CKA_CLASS;
-            attr.pValue = CKO_CERTIFICATE;
+            attr.type = PKCS11Constants.CKA_CLASS;
+            attr.pValue = PKCS11Constants.CKO_CERTIFICATE;
             attrs[0] = attr;
 
             try
@@ -158,11 +156,12 @@ public class PKCS11Helper
                     CK_ATTRIBUTE attrPriv = new CK_ATTRIBUTE();
                     CK_ATTRIBUTE[] attrsP = new CK_ATTRIBUTE[2];
 
-                    attrPriv.type = CKA_CLASS;
-                    attrPriv.pValue = CKA_PRIVATE;
+                    attrPriv.type = PKCS11Constants.CKA_CLASS;
+                    attrPriv.pValue = PKCS11Constants.CKO_PRIVATE_KEY;
 
-                    attr.type = CKA_ID;
+                    attr.type = PKCS11Constants.CKA_ID;
                     attr.pValue = getID(hSession, i, p11);
+
                     if (attr.pValue != null)
                     {
                         attrsP[0] = attrPriv;
@@ -221,7 +220,7 @@ public class PKCS11Helper
             throws PKCS11Exception, CertificateException
     {
 
-        CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(CKA_VALUE) };
+        CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(PKCS11Constants.CKA_VALUE) };
         p11.C_GetAttributeValue(session, oHandle, attrs);
 
         byte[] bytes = attrs[0].getByteArray();
@@ -238,7 +237,7 @@ public class PKCS11Helper
     {
 
         byte[] bytes = null;
-        CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(CKA_ID) };
+        CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(PKCS11Constants.CKA_ID) };
 
         p11.C_GetAttributeValue(session, oHandle, attrs);
 
