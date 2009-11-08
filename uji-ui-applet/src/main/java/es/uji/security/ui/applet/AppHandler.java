@@ -19,8 +19,6 @@ import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
-import sun.plugin.javascript.JSContext;
-
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
@@ -336,7 +334,7 @@ public class AppHandler
      */
     public void install() throws SignatureAppletException
     {
-        if (this.navigator.equals(SupportedBrowser.IEXPLORER) && ! OS.isJavaUpperEqualTo6())
+        if (this.navigator.equals(SupportedBrowser.IEXPLORER))
         {
             String destAbsolutePath = System.getenv("TEMP");
 
@@ -389,14 +387,7 @@ public class AppHandler
             
             try
             {
-                // Must check if the dll is already loaded here.
-            	// If the java versión is greater than 1.6, the load 
-            	// is not necessary.
-            	 String version = System.getProperty("java.version");
-            	 if (version.indexOf("1.5") > -1)
-                 {
-                	 System.load(completeDllPath);
-                 }
+              	 System.load(completeDllPath);
             }
             catch (Throwable e)
             {
