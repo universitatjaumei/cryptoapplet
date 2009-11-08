@@ -11,26 +11,23 @@ import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.mscapi.MsCapiKeyStore;
-import es.uji.security.keystore.mscapi.SunMsCapiKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
-import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class KeyStoreManager
 {
     public Hashtable<SupportedKeystore, IKeyStore> keystores = new Hashtable<SupportedKeystore, IKeyStore>();
-    
+
     /**
      * Flushes the KeyStore Hashtable
      * 
      *@throws SignatureAppletException
      */
-    
+
     public void flushKeyStoresTable()
     {
         keystores.clear();
-    }    
-
+    }
 
     /**
      * Initializes the KeyStore Hashtable with the store/s that must be used depending on the
@@ -38,20 +35,14 @@ public class KeyStoreManager
      * 
      *@throws SignatureAppletException
      */
-    
+
     public void initKeyStoresTable(SupportedBrowser navigator)
     {
-    	
+
         if (navigator.equals(SupportedBrowser.IEXPLORER))
         {
-        	IKeyStore explorerks= null;
-            /* Explorer Keystore */
-        	if (OS.isJavaUpperEqualTo6()){
-        		explorerks = (IKeyStore) new SunMsCapiKeyStore();
-        	}
-        	else{
-        		explorerks = (IKeyStore) new MsCapiKeyStore();
-        	}
+            IKeyStore explorerks = (IKeyStore) new MsCapiKeyStore();
+
             try
             {
                 explorerks.load("".toCharArray());
@@ -72,7 +63,7 @@ public class KeyStoreManager
             try
             {
                 Mozilla mozilla = new Mozilla();
-                
+
                 if (mozilla.isInitialized())
                 {
                     IKeyStore p11mozillaks = (IKeyStore) new PKCS11KeyStore(mozilla
@@ -132,7 +123,7 @@ public class KeyStoreManager
      *            posible input values are: explorer,mozilla,clauer
      * @return the IkeyStoreHelper object
      */
-    
+
     public IKeyStore getKeyStore(SupportedKeystore keystore)
     {
         return this.keystores.get(keystore);
@@ -145,7 +136,7 @@ public class KeyStoreManager
      *            posible input values are: explorer,mozilla,clauer
      * @return the IkeyStoreHelper object
      */
-    
+
     public Hashtable<SupportedKeystore, IKeyStore> getKeyStoreTable()
     {
         return this.keystores;
@@ -154,20 +145,20 @@ public class KeyStoreManager
     /**
      * Add a new loaded and authenticated PKCS12 keyStore to the hash table
      */
-    
+
     public void addP12KeyStore(IKeyStore pkcs12Store)
     {
         keystores.put(SupportedKeystore.PKCS12, pkcs12Store);
-    }    
-    
+    }
+
     /**
      * Add a new loaded and authenticated PKCS11 keyStore to the hash table. That function will be
      * implemented in a near future, a Load PKCS#11 entry will appear to the applets main window
      * that will allow to load pkcs#11
      */
-    
+
     public void addP11KeyStore(IKeyStore pkcs11Store)
     {
         keystores.put(SupportedKeystore.PKCS11, pkcs11Store);
-    }    
+    }
 }
