@@ -49,7 +49,7 @@ public class RawSignatureFactory implements ISignFormatProvider
         byte[] res = rsa.sign();
 
         // Verification
-        Signature rsa_vfy = Signature.getInstance("SHA1withRSA");
+        Signature rsa_vfy = Signature.getInstance("SHA1withRSA", provider);
         rsa_vfy.initVerify(certificate);
         rsa_vfy.initVerify(certificate.getPublicKey());
         rsa_vfy.update(data);
