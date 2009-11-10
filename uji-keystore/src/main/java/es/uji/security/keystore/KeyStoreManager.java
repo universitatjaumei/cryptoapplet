@@ -2,14 +2,18 @@ package es.uji.security.keystore;
 
 import java.net.ConnectException;
 import java.security.KeyStoreException;
+import java.security.Security;
 import java.util.Hashtable;
 
 import javax.swing.JOptionPane;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
+import es.uji.security.keystore.mscapi.MSCAPIProvider;
 import es.uji.security.keystore.mscapi.MsCapiKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 import es.uji.security.util.i18n.LabelManager;
@@ -38,7 +42,6 @@ public class KeyStoreManager
 
     public void initKeyStoresTable(SupportedBrowser navigator)
     {
-
         if (navigator.equals(SupportedBrowser.IEXPLORER))
         {
             IKeyStore explorerks = (IKeyStore) new MsCapiKeyStore();
@@ -47,6 +50,8 @@ public class KeyStoreManager
             {
                 explorerks.load("".toCharArray());
                 keystores.put(SupportedKeystore.MSCAPI, explorerks);
+                
+                Security.insertProviderAt(new MSCAPIProvider(), 0);
             }
             catch (Exception ex)
             {
