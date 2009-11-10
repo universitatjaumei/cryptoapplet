@@ -42,22 +42,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
     private ConfigManager conf = ConfigManager.getInstance();
 
-    public static byte[] inputStreamToByteArray(InputStream in) throws IOException
-    {
-        byte[] buffer = new byte[2048];
-        int length = 0;
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        while ((length = in.read(buffer)) >= 0)
-        {
-            baos.write(buffer, 0, length);
-        }
-
-        return baos.toByteArray();
-    }
-
-    protected byte[] genPKCS7Signature(InputStream data, TSAClient tsc, PrivateKey pk, Provider pv,
+    protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk, Provider pv,
             Certificate[] chain) throws Exception
     {
 
@@ -70,8 +55,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
         {
             sgn.update(buff, 0, len);
         }
-
-        return sgn.getEncodedPKCS7(null, null, tsc);
+        
+        return sgn.getEncodedPKCS7(null, null, tsaUrl, null);
 
     }
 
@@ -83,33 +68,27 @@ public class PDFSignatureFactory implements ISignFormatProvider
         sap.setLocation(conf.getProperty("PDFSIG_LOCATION"));
         sap.setContact(conf.getProperty("PDFSIG_CONTACT"));
     }
-
+    
+    // Take a look at http://itextpdf.sourceforge.net/howtosign.html#signtsocspjava
     private void signPdfTsp(PdfSignatureAppearance sap) throws Exception
     {
         PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKMS, PdfName.ADBE_PKCS7_SHA1);
-        dic.setReason(conf.getProperty("PDFSIG_REASON"));
+    	
+    	dic.setReason(conf.getProperty("PDFSIG_REASON"));
         dic.setLocation(conf.getProperty("PDFSIG_LOCATION"));
         dic.setContact(conf.getProperty("PDFSIG_CONTACT"));
         dic.setDate(new PdfDate(sap.getSignDate())); // time-stamp will over-rule this
         sap.setCryptoDictionary(dic);
+        
         sap.setCrypto((PrivateKey) pk, chain, null, null);
-
-        // Estimate signature size, creating a 'fake' one using fake data (SHA1 length does not
-        // depend upon the data length)
-        TSAClient tsc = new TSAClientBouncyCastle(conf.getProperty("PDFSIG_TSA_URL"), conf
-                .getProperty("PDFSIG_TSA_ACCOUNT"), conf.getProperty("PDFSIG_TSA_PWD"));
-
-        byte[] estSignature = genPKCS7Signature(new ByteArrayInputStream("fake".getBytes()), null,
-                pk, pv, chain);
-        int contentEst = estSignature.length + ((tsc == null) ? 0 : tsc.getTokenSizeEstimate());
-
-        // Preallocate excluded byte-range for the signature content (hex encoded)
-        HashMap<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
+        
+        int contentEst = 15000;
+        HashMap exc = new HashMap();
         exc.put(PdfName.CONTENTS, new Integer(contentEst * 2 + 2));
         sap.preClose(exc);
-
+        
         // Get the true data signature, including a true time stamp token
-        byte[] encodedSig = genPKCS7Signature(sap.getRangeStream(), tsc, pk, pv, chain);
+        byte[] encodedSig = genPKCS7Signature(sap.getRangeStream(), conf.getProperty("PDFSIG_TSA_URL"), pk, pv, chain);
 
         if (contentEst + 2 < encodedSig.length)
         {
@@ -118,7 +97,6 @@ public class PDFSignatureFactory implements ISignFormatProvider
         }
 
         // Copy signature into a zero-filled array, padding it up to estimate
-
         byte[] paddedSig = new byte[contentEst];
 
         System.arraycopy(encodedSig, 0, paddedSig, 0, encodedSig.length);
@@ -141,7 +119,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 .getProperty("PDFSIG_VISIBLE_AREA_PAGE")), null);
         sap.setAcro6Layers(true);
 
-        byte[] imageData = inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
+        byte[] imageData = OS.inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
                 .getResourceAsStream(conf.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
         Image image = Image.getInstance(imageData);
 

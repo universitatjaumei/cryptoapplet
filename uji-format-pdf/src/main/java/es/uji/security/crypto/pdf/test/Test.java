@@ -17,6 +17,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.pdf.PDFSignatureFactory;
 import es.uji.security.util.OS;
 
@@ -42,7 +43,14 @@ public class Test
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
 
-        // Cargando certificado de aplicaci�n
+        //Enable TSA 
+        ConfigManager conf = ConfigManager.getInstance();
+        conf.setProperty("PDFSIG_TIMESTAMPING", "true");
+        conf.setProperty("PDFSIG_TSA_URL", "http://tss.accv.es:8318/tsa");
+        
+        
+        
+        // Cargando certificado de aplicacion
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
 
@@ -60,7 +68,7 @@ public class Test
         signatureOptions.setCertificate((X509Certificate) certificate);
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
-
+        
         SignatureResult signatureResult = pdfSignatureFactory.formatSignature(signatureOptions);
         
         byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
