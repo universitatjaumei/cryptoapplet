@@ -21,13 +21,13 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
+import com.sun.org.apache.xml.internal.security.Init;
+import com.sun.org.apache.xml.internal.security.c14n.Canonicalizer;
 
-import org.apache.log4j.Level;
-import org.apache.xml.security.c14n.Canonicalizer;
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 
 /**
  * Canonicalizes XML using DOM and XPath
@@ -53,7 +53,7 @@ public class DOMCanonicalizationFactory implements CanonicalizationFactory
     {
         try
         {
-            org.apache.xml.security.Init.init();
+            Init.init();
             // Canonicalizer.register(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS,
             // "org.apache.xml.security.c14n.implementations.Canonicalizer20010315OmitComments");
         }
@@ -81,7 +81,7 @@ public class DOMCanonicalizationFactory implements CanonicalizationFactory
         byte[] result = null;
         try
         {
-            org.apache.xml.security.Init.init();
+            Init.init();
             Canonicalizer c14n = Canonicalizer
                     .getInstance("http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
             result = c14n.canonicalize(data);
