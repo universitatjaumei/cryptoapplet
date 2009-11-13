@@ -111,26 +111,7 @@ public class CMSSignatureVerifier
 
             if (result)
             {
-                result = verifyAgainstCA(caCertificates, certs, provider);
-
-                if (result)
-                {
-                    Signature sig = Signature.getInstance("Sha1withRSAEncryption");
-
-                    try
-                    {
-                        sig.initVerify(cert.getPublicKey());
-                        sig.update(signer.getEncodedSignedAttributes());
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                else
-                {
-                    return false;
-                }
+                result = verifyAgainstCA(caCertificates, certs, provider); 
             }
             else
             {
