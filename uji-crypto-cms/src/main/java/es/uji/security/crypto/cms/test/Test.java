@@ -27,7 +27,7 @@ public class Test
             Security.addProvider(bcp);
         }
         
-        // Cargando certificado de aplicaci�n
+        // Cargando certificado de aplicacion
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         ks.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
         
