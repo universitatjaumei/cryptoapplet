@@ -31,7 +31,7 @@ public final class MSCAPIProvider extends Provider
                 put("Alg.Alias.Signature.OID.1.2.840.113549.1.1.5", "SHA1withRSA");
                 put("Alg.Alias.Signature.1.2.840.113549.1.1.5", "SHA1withRSA");
 
-                put("MessageDigest.SHA", "es.uji.dsign.crypto.SHA1Digest");
+                put("MessageDigest.SHA", "es.uji.security.crypto.SHA1Digest");
 
                 // Format "Alias", "Actual Name"
                 put("Alg.Alias.MessageDigest.SHA1", "SHA");
