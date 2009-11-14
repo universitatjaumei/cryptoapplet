@@ -28,19 +28,12 @@ public class MsCapiKeyStore implements IKeyStore
 
     public MsCapiKeyStore()
     {
-        // log.debug("Instantiating new MicrosoftCryptoApi wrapper ... ");
         _mscapi = new MicrosoftCryptoApi();
-        // log.debug("New MSCAPI wrapper successfully loaded!");
     }
 
     public String getAliasFromCertificate(javax.security.cert.X509Certificate cer)
     {
-
-        String strAux = "";
-        strAux += cer.getIssuerDN();
-        strAux += " Serial=" + cer.getSerialNumber();
-
-        return strAux;
+        return cer.getIssuerDN() + " Serial=" + cer.getSerialNumber();
     }
 
     public String getAliasFromCertificate(Certificate cer)
@@ -58,25 +51,22 @@ public class MsCapiKeyStore implements IKeyStore
     public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
             CertificateException
     {
-        /* Do nothing */
-        // log.debug("loading .load(), doing nothing");
     }
 
     public Enumeration aliases() throws KeyStoreException, Exception
     {
+        log.debug("Loading aliases from keystore");
+        
         String strAux = "";
         byte[][] rs = null;
 
-        // log.debug("Enumerating aliases, getting certificates ...");
-
         try
-        {
+        { 
             rs = _mscapi.getCertificatesInSystemStore("My");
-            // log.debug("getCertificatesInSystemStore successfylly executed ...");
         }
         catch (Exception e)
         {
-            // log.debug("ERROR getCertificatesInSystemStore Exception message: " + e.getMessage());
+            log.error("Error loading the certificate list from the keystore", e);
         }
 
         Vector<String> vcerts = new Vector<String>();
@@ -94,27 +84,26 @@ public class MsCapiKeyStore implements IKeyStore
             {
                 ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i]);
 
-                javax.security.cert.X509Certificate c = javax.security.cert.X509Certificate
-                        .getInstance(bIn);
-
-                // log.debug("Got certificate: " + c.getSubjectDN().toString() );
-
+                javax.security.cert.X509Certificate c = javax.security.cert.X509Certificate.getInstance(bIn);
                 strAux = getAliasFromCertificate(c);
 
                 vcerts.add(strAux);
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                return null;
+                log.error("Error extracting alias from a certificate", e);
             }
         }
 
+        log.debug(vcerts.size() + " aliases loaded");
+        
         return Collections.enumeration(vcerts);
     }
 
     public Certificate getCertificate(String alias) throws KeyStoreException, Exception
     {
+        log.debug("Loading certificate with alias " + alias);
+        
         String strAux = "";
 
         byte[][] rs = _mscapi.getCertificatesInSystemStore("My");
@@ -155,12 +144,16 @@ public class MsCapiKeyStore implements IKeyStore
 
     public Certificate[] getUserCertificates() throws KeyStoreException, Exception
     {
-
+        log.debug("Loading user certificates from keystore " + getName());
+        
         Vector<Certificate> certs = new Vector<Certificate>();
 
-        for (Enumeration e = aliases(); e.hasMoreElements();)
+        for (Enumeration<?> e = aliases(); e.hasMoreElements();)
         {
-            certs.add(getCertificate((String) e.nextElement()));
+            String alias = (String) e.nextElement();
+            
+            log.debug("Found certificate whith alias " + alias);
+            certs.add(getCertificate(alias));
         }
 
         Certificate[] res = new Certificate[certs.size()];
