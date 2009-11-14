@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
@@ -93,6 +94,8 @@ public class AppHandler
     
     public AppHandler(String downloadURL) throws SignatureAppletException
     {
+        this.downloadURL = downloadURL;
+        
         try
         {
             log.debug("Recover JavaScript member: navigator");            
@@ -110,6 +113,15 @@ public class AppHandler
                 if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
                 {
                     this.navigator = SupportedBrowser.IEXPLORER;
+
+                    try
+                    {
+                        this.install();
+                    }
+                    catch (Throwable e)
+                    {
+                        log.error("Error installing or loading the DLL file", e);
+                    }                    
                 }
                 else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1 || 
                          userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1 || 
@@ -128,8 +140,6 @@ public class AppHandler
         
         // Keep a copy to restore its value
         defaultSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
-
-        this.install();        
     }
 
     /**
@@ -314,15 +324,14 @@ public class AppHandler
     {
         try
         {
-            log.debug("Performing a dumpfile from URL " + downloadUrl + ". Complete DLL path is "
-                    + completeDllPath);
-            dumpFile(downloadUrl + "MicrosoftCryptoApi_0_3.dll", completeDllPath);
+            log.debug("Downloading " + downloadUrl + ". Complete DLL path is " + completeDllPath);
+            dumpFile(downloadUrl + "MicrosoftCryptoApi_0_3.dll", completeDllPath);                        
         }
-        catch (IOException e)
+        catch (Throwable e)
         {
             log.error(LabelManager.get("ERROR_CAPI_DLL_INSTALL"), e);
             throw new SignatureAppletException(LabelManager.get("ERROR_CAPI_DLL_INSTALL"));
-        }
+        }        
     }
 
     /**
@@ -334,68 +343,71 @@ public class AppHandler
      */
     public void install() throws SignatureAppletException
     {
-        if (this.navigator.equals(SupportedBrowser.IEXPLORER))
+        String destAbsolutePath = System.getenv("TEMP");
+
+        String completeDllPath = destAbsolutePath + File.separator + "MicrosoftCryptoApi_0_3.dll";
+        File dllFile = new File(completeDllPath);
+
+        if (!dllFile.exists())
         {
-            String destAbsolutePath = System.getenv("TEMP");
-
-            String completeDllPath = destAbsolutePath + File.separator
-                    + "MicrosoftCryptoApi_0_3.dll";
-            System.out.println("PATH: " + completeDllPath);
-            File dllFile = new File(completeDllPath);
-
-            if (!dllFile.exists())
-            {
-                installDLL(this.downloadURL, completeDllPath);
-            }
-            else
-            {
-                try
-                {
-                    byte[] digest = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
-                            (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35,
-                            0x71, (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
-
-                    FileInputStream fis = new FileInputStream(dllFile);
-
-                    MessageDigest dig = MessageDigest.getInstance("SHA1");
-                    byte[] readed = new byte[fis.available()];
-
-                    fis.read(readed);
-                    dig.update(readed);
-
-                    byte[] origHash = dig.digest();
-
-                    System.out.println(HexDump.xdump(digest));
-                    System.out.println("\n---\n");
-                    System.out.println(HexDump.xdump(origHash));
-
-                    // Compare it.
-                    for (int i = 0; i < origHash.length; i++)
-                    {
-                        if (origHash[i] != digest[i])
-                        {
-                            installDLL(this.downloadURL, completeDllPath);
-                            break;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    throw new SignatureAppletException(e.getMessage(), false);
-                }
-            }
+            log.debug("MicrosoftCryptoApi_0_3.dll not found. Downloading DLL file");
+            
+            installDLL(this.downloadURL, completeDllPath);                
+        }
+        else
+        {
+            log.debug("MicrosoftCryptoApi_0_3.dll already exists. Verifying existing DLL file");
             
             try
             {
-              	 System.load(completeDllPath);
+                byte[] digest = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
+                        (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35,
+                        0x71, (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
+
+                FileInputStream fis = new FileInputStream(dllFile);
+
+                MessageDigest dig = MessageDigest.getInstance("SHA1");
+                byte[] readed = new byte[fis.available()];
+
+                fis.read(readed);
+                dig.update(readed);
+
+                byte[] origHash = dig.digest();
+
+                System.out.println(HexDump.xdump(digest));
+                System.out.println("\n---\n");
+                System.out.println(HexDump.xdump(origHash));
+
+                // Compare it.
+                for (int i = 0; i < origHash.length; i++)
+                {
+                    if (origHash[i] != digest[i])
+                    {
+                        log.debug("DLL not valid. Download orginal DLL file");
+                        
+                        installDLL(this.downloadURL, completeDllPath);
+                        break;
+                    }
+                }
             }
-            catch (Throwable e)
+            catch (Exception e)
             {
-                // We should go on here
-                e.printStackTrace();
+                throw new SignatureAppletException(e.getMessage(), false);
             }
         }
+        
+        try
+        {
+            log.debug("Executing System.load");
+            
+            System.load(completeDllPath);
+        }
+        catch (Throwable e)
+        {
+            log.error("Error loading " + completeDllPath, e);
+        }        
     }
+    
     /**
      * Calls the javascript function indicated as func with params arguments
      * 
