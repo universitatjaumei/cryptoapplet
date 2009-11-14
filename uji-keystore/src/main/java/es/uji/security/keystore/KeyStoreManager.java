@@ -7,7 +7,7 @@ import java.util.Hashtable;
 
 import javax.swing.JOptionPane;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedKeystore;
@@ -20,6 +20,8 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class KeyStoreManager
 {
+    private Logger log = Logger.getLogger(KeyStoreManager.class);
+    
     public Hashtable<SupportedKeystore, IKeyStore> keystores = new Hashtable<SupportedKeystore, IKeyStore>();
 
     /**
@@ -51,15 +53,16 @@ public class KeyStoreManager
                 explorerks.load("".toCharArray());
                 keystores.put(SupportedKeystore.MSCAPI, explorerks);
                 
-                Security.insertProviderAt(new MSCAPIProvider(), 0);
+                Security.insertProviderAt(new MSCAPIProvider(), 1);
+                
+                log.debug("Inserted provider MSCAPI at position 0");
             }
             catch (Exception ex)
             {
-                ex.printStackTrace();
-                System.out.println("ERR_MS_KEYSTORE_LOAD");
-                JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                        .get("ERR_MS_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-                // throw new SignatureAppletException(LabelManager.get("ERR_MS_KEYSTORE_LOAD"));
+                String error = LabelManager.get("ERR_MS_KEYSTORE_LOAD");
+                
+                log.error(error, ex);
+                JOptionPane.showMessageDialog(null, ex.getMessage(), error, JOptionPane.WARNING_MESSAGE);
             }
         }
         else
