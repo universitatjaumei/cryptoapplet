@@ -65,6 +65,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CRL;
@@ -145,7 +146,7 @@ public class PdfPKCS7TSA {
     private boolean verifyResult;                             
     private byte externalDigest[];                            
     private byte externalRSAdata[];                           
-    private String provider;                                  
+    private Provider provider;                                  
                                                               
     private static final String ID_PKCS7_DATA = "1.2.840.113549.1.7.1";
     private static final String ID_PKCS7_SIGNED_DATA = "1.2.840.113549.1.7.2";
@@ -284,7 +285,7 @@ public class PdfPKCS7TSA {
      * @param certsKey the /Cert key                                          
      * @param provider the provider or <code>null</code> for the default provider
      */                                                                          
-    public PdfPKCS7TSA(byte[] contentsKey, byte[] certsKey, String provider) {      
+    public PdfPKCS7TSA(byte[] contentsKey, byte[] certsKey, Provider provider) {      
         try {                                                                    
             this.provider = provider;                                            
             X509CertParser cr = new X509CertParser();                            
@@ -358,7 +359,7 @@ public class PdfPKCS7TSA {
      * @param contentsKey the /Contents key                                                                                    
      * @param provider the provider or <code>null</code> for the default provider                                              
      */                                                                                                                        
-    public PdfPKCS7TSA(byte[] contentsKey, String provider) {                                                                     
+    public PdfPKCS7TSA(byte[] contentsKey, Provider provider) {                                                                     
         try {                                                                                                                  
             this.provider = provider;                                                                                          
             ASN1InputStream din = new ASN1InputStream(new ByteArrayInputStream(contentsKey));                                  
@@ -490,7 +491,7 @@ public class PdfPKCS7TSA {
                 }                                                                                                              
             }                                                                                                                  
             if (RSAdata != null || digestAttr != null) {                                                                       
-                if (provider == null || provider.startsWith("SunPKCS11"))                                                      
+                if (provider == null || provider.getName().startsWith("SunPKCS11"))                                                      
                     messageDigest = MessageDigest.getInstance(getHashAlgorithm());                                             
                 else                                                                                                           
                     messageDigest = MessageDigest.getInstance(getHashAlgorithm(), provider);                                   
@@ -519,7 +520,7 @@ public class PdfPKCS7TSA {
      * @throws NoSuchAlgorithmException on error                                 
      */                                                                          
     public PdfPKCS7TSA(PrivateKey privKey, Certificate[] certChain, CRL[] crlList,  
-                    String hashAlgorithm, String provider, boolean hasRSAdata)   
+                    String hashAlgorithm, Provider provider, boolean hasRSAdata)   
       throws InvalidKeyException, NoSuchProviderException,                       
       NoSuchAlgorithmException                                                   
     {                                                                            
@@ -567,7 +568,7 @@ public class PdfPKCS7TSA {
         }                                                                                              
         if (hasRSAdata) {                                                                              
             RSAdata = new byte[0];                                                                     
-            if (provider == null || provider.startsWith("SunPKCS11"))                                  
+            if (provider == null || provider.getName().startsWith("SunPKCS11"))                                  
                 messageDigest = MessageDigest.getInstance(getHashAlgorithm());                         
             else                                                                                       
                 messageDigest = MessageDigest.getInstance(getHashAlgorithm(), provider);               
@@ -663,7 +664,7 @@ public class PdfPKCS7TSA {
                     if (provider == null)                                                            
                         v.verify(((X509Certificate)oc.get(k)).getPublicKey());                       
                     else                                                                             
-                        v.verify(((X509Certificate)oc.get(k)).getPublicKey(), provider);             
+                        v.verify(((X509Certificate)oc.get(k)).getPublicKey(), provider.getName());             
                     found = true;                                                                    
                     cc.add(oc.get(k));                                                               
                     oc.remove(k);                                                                    

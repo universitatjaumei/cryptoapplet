@@ -42,11 +42,11 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
     private ConfigManager conf = ConfigManager.getInstance();
 
-    protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk, Provider pv,
+    protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk, Provider provider,
             Certificate[] chain) throws Exception
     {
 
-        PdfPKCS7TSA sgn = new PdfPKCS7TSA(pk, chain, null, "SHA1", pv.getName(), true);
+        PdfPKCS7TSA sgn = new PdfPKCS7TSA(pk, chain, null, "SHA1", provider, true);
 
         byte[] buff = new byte[2048];
         int len = 0;
