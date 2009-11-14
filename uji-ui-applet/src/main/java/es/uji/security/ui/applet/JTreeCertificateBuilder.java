@@ -7,6 +7,8 @@ import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.log4j.Logger;
+
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.X509CertificateHandler;
@@ -14,14 +16,17 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class JTreeCertificateBuilder
 {
+    private Logger log = Logger.getLogger(JTreeCertificateBuilder.class);
+    
     public JTreeCertificateBuilder()
     {
     }
 
     public DefaultMutableTreeNode build(Hashtable<SupportedKeystore, IKeyStore> ksh) throws Exception
     {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(LabelManager
-                .get("LABEL_TREE_ROOT"));
+        log.debug("Building certificate tree");
+        
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(LabelManager.get("LABEL_TREE_ROOT"));
 
         if (ksh == null)
         {
@@ -38,8 +43,9 @@ public class JTreeCertificateBuilder
         for (IKeyStore keystore : ksh.values())
         {
             try
-            {
+            {                               
                 Certificate[] certs = keystore.getUserCertificates();
+                
                 if (certs != null)
                 {
 
