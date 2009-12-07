@@ -17,13 +17,12 @@ import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
 import java.security.PrivateKey;
 import java.security.Security;
-	import java.security.cert.CertificateFactory; 
+import java.security.cert.CertificateFactory; 
 
 import java.security.KeyPair;
 
 
-
-import org.bouncycastle.util.encoders.HexEncoder;
+import es.uji.security.util.HexEncoder;
 import org.bouncycastle.openssl.*;
 
 import es.uji.security.keystore.clauer.ClauerRunTime;
