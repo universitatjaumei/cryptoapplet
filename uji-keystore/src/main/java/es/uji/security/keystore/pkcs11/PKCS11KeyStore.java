@@ -186,6 +186,13 @@ public class PKCS11KeyStore implements IKeyStore
         return _pk11provider;
     }
 
+    public void setProvider(Provider provider) throws Exception
+    {
+        //Does nothing, seems non sense by this time.
+    	throw new Exception("Method not implemented");
+    }
+
+
     public SupportedKeystore getName()
     {
         return SupportedKeystore.PKCS11;
