@@ -73,6 +73,13 @@ public class PKCS12KeyStore implements IKeyStore
     {
         return new BouncyCastleProvider();
     }
+    
+    public void setProvider(Provider provider) throws Exception
+    {
+        //Does nothing, seems non sense by this time.
+    	throw new Exception("Method not implemented");
+    }
+
 
     public SupportedKeystore getName()
     {

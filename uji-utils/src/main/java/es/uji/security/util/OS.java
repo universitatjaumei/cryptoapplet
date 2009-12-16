@@ -47,7 +47,7 @@ public class OS
     
     public static String getSystemTmpDir(){
     	
-    	System.out.println("Got System.getProperty(java.io.tmpdir): " + System.getProperty("java.io.tmpdir") );
+    	//System.out.println("Got System.getProperty(java.io.tmpdir): " + System.getProperty("java.io.tmpdir") );
     	
     	return System.getProperty("java.io.tmpdir");
     }

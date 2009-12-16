@@ -23,6 +23,8 @@ import java.security.KeyPair;
 
 
 import es.uji.security.util.HexEncoder;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.*;
 
 import es.uji.security.keystore.clauer.ClauerRunTime;
@@ -45,11 +47,12 @@ public class Clauer
     public Clauer()
     {
         // Install BC Provider
-        //if (Security.getProvider("BC") == null)
-        //{
-        //    BouncyCastleProvider bcp = new BouncyCastleProvider();
-        //    Security.addProvider(bcp);
-        //}
+    	// We need it for the PEMReader Object.
+        if (Security.getProvider("BC") == null)
+        {
+            BouncyCastleProvider bcp = new BouncyCastleProvider();
+            Security.addProvider(bcp);
+        }
     }
 
     public void open(String device) throws IOException, Exception

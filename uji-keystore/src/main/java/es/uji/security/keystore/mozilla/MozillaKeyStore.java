@@ -218,6 +218,12 @@ public class MozillaKeyStore implements IKeyStore
     {
         return _mozillaKeyStore.getProvider(); // _pk11provider;
     }
+    
+    public void setProvider(Provider provider) throws Exception
+    {
+        //Does nothing, seems non sense by this time.
+    	throw new Exception("Method not implemented");
+    }
 
     public void cleanUp()
     {

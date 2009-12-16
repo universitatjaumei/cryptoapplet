@@ -71,7 +71,7 @@ public class TimeStampFactory
         
         
         TSRequest request = new TSRequest(digest, digestAlgorithm );
-        request.requestCertificate(false);
+        request.requestCertificate(true);
         
         TSResponse response = httpTimestamper.generateTimestamp(request); 
         

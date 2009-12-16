@@ -23,9 +23,14 @@ public class ClauerKeyStore implements IKeyStore
     private ClauerRunTime clr = new ClauerRunTime();
     private String passwd = null;
     private String device = null;
+    Provider _provider;
 
     public ClauerKeyStore() throws Exception
     {
+    	_provider= Security.getProvider("BC");
+    	if (_provider==null){
+    		throw new Exception("Provider BC is mandatory.");
+    	}
     }
 
     public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
@@ -153,8 +158,12 @@ public class ClauerKeyStore implements IKeyStore
 
     public Provider getProvider()
     {
-    	//System.out.println("Security.getProviders()[0]: " + Security.getProviders()[0]);
-        return Security.getProviders()[0];
+    	return _provider;
+    }
+    
+    public void setProvider(Provider provider)
+    {
+    	provider= _provider;
     }
 
     public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,

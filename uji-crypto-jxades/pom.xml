@@ -29,7 +29,7 @@
     <dependency>
       <groupId>net.java.xades</groupId>
       <artifactId>jxades</artifactId>
-      <version>0.0.1</version> 
+      <version>1.0</version> 
     </dependency>
     <dependency>
       <groupId>es.uji.security</groupId>

@@ -1,34 +1,38 @@
-//package es.uji.security.keystore.pkcs11.test;
-//
-//import java.security.PrivateKey;
-//import java.security.Security;
-//import java.security.cert.CertStore;
-//import java.security.cert.Certificate;
-//import java.security.cert.CollectionCertStoreParameters;
-//import java.security.cert.X509Certificate;
-//import java.util.ArrayList;
-//import java.util.Collection;
-//import java.util.Enumeration;
-//import java.util.Iterator;
-//import java.util.List;
-//
-//import java.io.ByteArrayInputStream;
-//import java.io.File;
-//import java.io.FileOutputStream;
-//
-//import org.bouncycastle.cms.CMSProcessableByteArray;
-//import org.bouncycastle.cms.CMSSignedData;
-//import org.bouncycastle.cms.CMSSignedGenerator;
-//import org.bouncycastle.cms.SignerInformation;
-//import org.bouncycastle.cms.SignerInformationStore;
-//import org.bouncycastle.jce.provider.BouncyCastleProvider;
-//
-//public class PKCS11KeyStoreTest {
-//
-//	public static void main(String[] args) {
-//
-//		
-//		
+package es.uji.security.keystore.pkcs11.test;
+
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+
+import es.uji.security.keystore.IKeyStore;
+import es.uji.security.keystore.mozilla.Mozilla;
+import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
+
+public class PKCS11KeyStoreTest {
+
+	public static void main(String[] args) {
+		//Testing mozilla keystore for ffox 3.5.5
+
+		try{
+			Mozilla mozilla = new Mozilla();
+
+			if (mozilla.isInitialized())
+			{
+				IKeyStore p11mozillaks = (IKeyStore) new PKCS11KeyStore(mozilla
+						.getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(), mozilla
+						.getPkcs11InitArgsString());
+				p11mozillaks.load(null);
+			
+				for (Certificate cert: p11mozillaks.getUserCertificates()){
+					System.out.println(((X509Certificate)cert).getSubjectDN());					
+				}
+			}
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+}
+		
 //		if (Security.getProvider("BC") == null)
 //		{
 //			BouncyCastleProvider bcp = new BouncyCastleProvider();
