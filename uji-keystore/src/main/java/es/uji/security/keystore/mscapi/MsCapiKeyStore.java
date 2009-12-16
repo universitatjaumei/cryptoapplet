@@ -171,6 +171,12 @@ public class MsCapiKeyStore implements IKeyStore
     {
         return new MSCAPIProvider(); // Security.getProvider("UJI-MSCAPI");
     }
+    
+    public void setProvider(Provider provider) throws Exception
+    {
+        //Does nothing, seems non sense by this time.
+    	throw new Exception("Method not implemented");
+    }
 
     public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,
             Exception

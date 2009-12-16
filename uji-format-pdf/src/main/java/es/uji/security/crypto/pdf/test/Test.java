@@ -12,6 +12,7 @@ import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -47,9 +48,7 @@ public class Test
         ConfigManager conf = ConfigManager.getInstance();
         conf.setProperty("PDFSIG_TIMESTAMPING", "true");
         conf.setProperty("PDFSIG_TSA_URL", "http://tss.accv.es:8318/tsa");
-        
-        
-        
+       
         // Cargando certificado de aplicacion
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
@@ -71,11 +70,18 @@ public class Test
         
         SignatureResult signatureResult = pdfSignatureFactory.formatSignature(signatureOptions);
         
-        byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
-
-        FileOutputStream fos = new FileOutputStream("src/main/resources/out.pdf");
-        fos.write(signedData);
-        fos.flush();
-        fos.close();
-    }
+        if (signatureResult.getSignatureData() == null){
+        	List<String> errs= signatureResult.getErrors();
+        	for (String i:errs){
+        		System.out.println("Error: " + i);
+        	}
+        }
+        else{
+        	byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
+        	FileOutputStream fos = new FileOutputStream("src/main/resources/out.pdf");
+        	fos.write(signedData);
+        	fos.flush();
+        	fos.close();
+        }
+       }
 }

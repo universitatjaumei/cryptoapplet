@@ -300,7 +300,10 @@ public class SignatureThread extends Thread
                     catch (Exception e)
                     {
                         log.error(LabelManager.get("ERROR_COMPUTING_SIGNATURE"), e);
-                        throw new SignatureAppletException(LabelManager.get("ERROR_COMPUTING_SIGNATURE"));
+                        _mw.getAppHandler().callJavaScriptCallbackFunction(
+                      		  _mw.getAppHandler().getJsSignError(),
+                      		  new String[]{LabelManager.get("ERROR_COMPUTING_SIGNATURE") + ":" + e.getMessage()});
+                         throw new SignatureAppletException(LabelManager.get("ERROR_COMPUTING_SIGNATURE"));
                     }
 
                     if (signatureResult == null || !signatureResult.isValid())
@@ -362,7 +365,10 @@ public class SignatureThread extends Thread
                         catch (Exception e)
                         {
                             log.error("Exception decoding data", e);
-                            throw new SignatureAppletException("ERROR_CANNOT_SET_OUTPUT_DATA");
+                            _mw.getAppHandler().callJavaScriptCallbackFunction(
+                            		  _mw.getAppHandler().getJsSignError(),
+                            		  new String[]{LabelManager.get("ERROR_CANNOT_SET_OUTPUT_DATA") + e.getMessage()});
+                            throw new SignatureAppletException(LabelManager.get("ERROR_CANNOT_SET_OUTPUT_DATA"));
                         }
                     }
                     else

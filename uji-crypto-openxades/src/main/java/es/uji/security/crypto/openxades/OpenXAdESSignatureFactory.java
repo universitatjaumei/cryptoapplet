@@ -130,7 +130,9 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         		throw new DigiDocException(-1, "", null);
         	}
         }
-        catch (DigiDocException dde)
+        // Here we can get also SaxParseException. 
+       // catch (Exception dde)
+        catch (Exception dde)
         {
             signedDoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
             
@@ -164,6 +166,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
         // Sign
         byte[] sidigest = signature.getSignedContent();
+        
+        //System.out.println("Contenido a firmar: " + new String(sidigest));
 
         if (sidigest == null)
         {

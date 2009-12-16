@@ -295,7 +295,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setSignatureOutputFormat(SupportedSignatureFormat.valueOf(format));
+                apph.setSignatureOutputFormat(SupportedSignatureFormat.valueOf(format.toUpperCase()));
                 return null;
             }
         });
@@ -335,7 +335,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setOutputDataEncoding(SupportedDataEncoding.valueOf(encoding));
+                apph.setOutputDataEncoding(SupportedDataEncoding.valueOf(encoding.toUpperCase()));
                 return null;
             }
         });
@@ -529,14 +529,13 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
+            	
                 ParamInputData input = new ParamInputData(new String[] { toSign });
                 URLOutputParams output = new URLOutputParams(new String[] { outputURL });
-
                 apph.setInput(input);
                 apph.setOutput(output);
-
                 initializeWindow();
-
+                
                 return null;
             }
         });
@@ -796,24 +795,25 @@ public class SignatureApplet extends JApplet
      */
     public String[] verifyXAdESDataUrl(final String input)
     {
-        String[] res = AccessController.doPrivileged(new PrivilegedAction<String[]>()
+       String[] res = AccessController.doPrivileged(new PrivilegedAction<String[]>()
         {
             public String[] run()
             {
+            	
                 OpenXAdESSignatureVerifier sv = new OpenXAdESSignatureVerifier();
-
+                
                 try
-                {
+                {                    	
                     URL url = new URL(input);
+                              
                     URLConnection uc = url.openConnection();
                     uc.connect();
                     InputStream in = uc.getInputStream();
-
-                    byte[] data = OS.inputStreamToByteArray(in);
+                    
+                    byte[] data = OS.inputStreamToByteArray(in);                
 
                     VerificationResult verificationDetails = sv.verify(data);
-
-                    return (String[]) verificationDetails.getErrors().toArray();
+                    return verificationDetails.getErrorsAsStringArray();
                 }
                 catch (Exception e)
                 {
@@ -822,7 +822,7 @@ public class SignatureApplet extends JApplet
                 }
             }
         });
-        return res;
+        return (String[]) res;
     }
 
     /**

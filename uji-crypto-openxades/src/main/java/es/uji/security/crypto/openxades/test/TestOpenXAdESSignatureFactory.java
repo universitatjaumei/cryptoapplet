@@ -8,6 +8,8 @@ import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.ISignFormatProvider;
@@ -24,15 +26,18 @@ public class TestOpenXAdESSignatureFactory
     {
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
-
+        Logger.getRootLogger().setLevel(Level.OFF);
+        
+        String pin="";
+        	
         // Cargando certificado de aplicaci�n
         KeyStore keystore = KeyStore.getInstance("PKCS12");
-        keystore.load(new FileInputStream("/home/borillo/Dropbox/docs/ca-x509/all.p12"), "komun14"
+        keystore.load(new FileInputStream("/home/paul/tmp/mio.p12"), pin
                 .toCharArray());
         X509Certificate certificate = (X509Certificate) keystore.getCertificate(keystore.aliases().nextElement());
         
         // Recuperando clave privada para firmar
-        Key key = keystore.getKey(keystore.aliases().nextElement(), "komun14".toCharArray());
+        Key key = keystore.getKey(keystore.aliases().nextElement(), pin.toCharArray());
 
         byte[] data = "<root />".getBytes();
 

@@ -27,6 +27,8 @@ public interface IKeyStore
     public String getAliasFromCertificate(Certificate cer) throws Exception;
 
     public Provider getProvider();
+    
+    public void setProvider(Provider provider) throws Exception;
 
     public SupportedKeystore getName();
 

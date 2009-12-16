@@ -35,6 +35,15 @@ public class VerificationResult
         return errors;
     }
     
+    public String[] getErrorsAsStringArray()
+    {
+    	String[] aux= new String[errors.size()];
+    	for (int i=0; i<aux.length; i++){
+    		aux[i]= (String) errors.get(i); 
+    	}
+        return aux;
+    }
+    
     public void setErrors(ArrayList<String> errors)
     {
         this.errors = errors;

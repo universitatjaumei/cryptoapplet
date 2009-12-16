@@ -89,6 +89,7 @@ public class ConfigManager
 
     public String getProperty(String key)
     {
+    	System.out.println("ASK FOR: " + key + "return value" + props.getProperty(key));
         return props.getProperty(key);
     }
 

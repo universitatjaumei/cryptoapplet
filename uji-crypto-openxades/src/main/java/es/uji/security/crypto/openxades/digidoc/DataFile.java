@@ -839,6 +839,7 @@ public class DataFile implements Serializable
             // now remove the end tag again and calculate digest of the start tag only
             byte[] tmp2 = new byte[tmp1.length - tmp3.length];
             System.arraycopy(tmp1, 0, tmp2, 0, tmp2.length);
+            
             sha.update(tmp2);
             if (os != null)
                 os.write(tmp2);
@@ -898,7 +899,7 @@ public class DataFile implements Serializable
                 }
             }
             else
-            { // content allready in memeory
+            { // content allready in memory
                 if (m_body != null)
                 {
 //                    if (bUse64ByteLines && m_contentType.equals(CONTENT_EMBEDDED_BASE64))
@@ -908,10 +909,14 @@ public class DataFile implements Serializable
 //                    }
 //                    else
 //                    {
-                        if (m_contentType.equals(CONTENT_EMBEDDED_BASE64))
+                        if (m_contentType.equals(CONTENT_EMBEDDED_BASE64)){
                             tmp1 = Base64.encodeBytesToBytes(m_body);
-                        else
+                            m_body= tmp1;
+                            sha.update(tmp1);
+                        }
+                        else{
                             tmp1 = ConvertUtils.data2utf8(m_body, m_codepage);
+                        }
                         sbDig.write(tmp1);
 //                    }
                 }

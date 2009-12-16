@@ -157,7 +157,7 @@ public class PKCS11Helper
                     CK_ATTRIBUTE[] attrsP = new CK_ATTRIBUTE[2];
 
                     attrPriv.type = PKCS11Constants.CKA_CLASS;
-                    attrPriv.pValue = PKCS11Constants.CKO_PRIVATE_KEY;
+                    attrPriv.pValue = PKCS11Constants.CKA_PRIVATE;//CKO_PRIVATE_KEY;
 
                     attr.type = PKCS11Constants.CKA_ID;
                     attr.pValue = getID(hSession, i, p11);
