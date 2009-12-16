@@ -72,7 +72,7 @@ import es.uji.security.util.OS;
  */
 public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
 {
-    private static int i = 1;
+    //private static int i = 1;
     
     private Stack m_tags;
     private SignedDoc m_doc;
@@ -1744,8 +1744,8 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 try
                 {
                 	byte[] resp= Base64.decode(m_sbCollectItem.toString());
-                    OS.dumpToFile("/tmp/kk" + i + "-verify.bin", resp);
-                    i++;
+                    //OS.dumpToFile("/tmp/kk" + i + "-verify.bin", resp);
+                    //i++;
                 
                 	TSResponse response = new TSResponse(resp);
                     ts.setTimeStampResponse(response);
