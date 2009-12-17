@@ -96,7 +96,7 @@ public class SignatureHandler
      */
     public static void callback()
     {
-        System.out.println("\n\n\n\n\nSTART: " + start + " SIGNATURECOUNT: " + signatureCount);
+        System.out.println("\n\n\n\nSTART: " + start + " SIGNATURECOUNT: " + signatureCount);
         if ((!mustStop) && (start != signatureCount))
         {
             doSign();
