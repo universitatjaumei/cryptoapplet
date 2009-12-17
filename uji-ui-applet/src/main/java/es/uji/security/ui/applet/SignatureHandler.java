@@ -101,5 +101,9 @@ public class SignatureHandler
         {
             doSign();
         }
+        else
+        {
+            start = 0;
+        }
     }
 }
