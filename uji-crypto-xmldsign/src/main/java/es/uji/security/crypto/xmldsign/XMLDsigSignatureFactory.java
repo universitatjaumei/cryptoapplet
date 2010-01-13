@@ -1,10 +1,8 @@
 package es.uji.security.crypto.xmldsign;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.security.AccessController;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -26,12 +24,9 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
+import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.crypto.dsig.spec.XPathFilterParameterSpec;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -78,9 +73,20 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
         // XPath filtering for multiple enveloped signatures support
-        Transform transform = fac.newTransform(Transform.XPATH, new XPathFilterParameterSpec(
+        
+        Transform transform = null;
+        
+        if (signatureOptions.isCoSignEnabled())
+        {
+            transform = fac.newTransform(Transform.XPATH, new XPathFilterParameterSpec(
                 "not(ancestor-or-self::dsig:Signature)", Collections.singletonMap("dsig",
                         XMLSignature.XMLNS)));
+        }
+        else
+        {
+            transform = fac.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null);            
+        }
+        
         Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
                 Collections.singletonList(transform), null, null);
 
@@ -108,7 +114,7 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
         DOMSignContext dsc = new DOMSignContext(pk, doc.getDocumentElement());
 
         // Create the XMLSignature, but don't sign it yet.
-        XMLSignature signature = fac.newXMLSignature(si, ki);
+        XMLSignature signature = fac.newXMLSignature(si, ki, null, "first", null);
 
         // Marshal, generate, and sign the enveloped signature.
         signature.sign(dsc);
