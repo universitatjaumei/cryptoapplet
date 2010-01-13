@@ -431,7 +431,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
         try
         {
-            String verifier = conf.getStringProperty("DIGIDOC_CERT_VERIFIER", "OCSP");
+            String verifier = conf.getStringProperty("DIGIDOC_CERT_VERIFIER", "OCSP").trim();
             if (verifier != null && verifier.equals("OCSP"))
             {
                 // create the request
