@@ -27,11 +27,7 @@ public class SHA1Digest extends MessageDigestSpi
     public SHA1Digest(Provider provider, String algorithm) throws NoSuchAlgorithmException
     {
         super();
-        System.out.println("Nombre del provider: " + provider.getName());
-        System.out.println("_md = MessageDigest.getInstance(\"SHA1\");");
-        System.out.flush();
         _md = MessageDigest.getInstance("SHA1");
-        System.out.println("PASSED");
         engineReset();
     }
 
