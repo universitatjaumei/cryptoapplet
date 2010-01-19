@@ -48,11 +48,11 @@ public class Clauer
     {
         // Install BC Provider
     	// We need it for the PEMReader Object.
-        if (Security.getProvider("BC") == null)
-        {
-            BouncyCastleProvider bcp = new BouncyCastleProvider();
-            Security.addProvider(bcp);
-        }
+        //if (Security.getProvider("BC") == null)
+        //{
+        //    BouncyCastleProvider bcp = new BouncyCastleProvider();
+        //    Security.addProvider(bcp);
+        //}
     }
 
     public void open(String device) throws IOException, Exception
