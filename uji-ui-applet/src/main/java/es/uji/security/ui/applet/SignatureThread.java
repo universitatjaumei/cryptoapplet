@@ -223,7 +223,7 @@ public class SignatureThread extends Thread
                     throw new SignatureAppletException("ERROR_CERTIFICATE_NOT_SELECTED");
 
                 }
-                if (xcert.isDigitalSignatureCertificate() || 
+                if (xcert.isDigitalSignatureCertificate() || xcert.isNonRepudiationCertificate() || 
                     (xcert.isEmailProtectionCertificate() && 
                      _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS)))
                 {
