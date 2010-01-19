@@ -27,9 +27,9 @@ public class ClauerKeyStore implements IKeyStore
 
     public ClauerKeyStore() throws Exception
     {
-    	_provider= Security.getProvider("BC");
+    	_provider= Security.getProvider("SunRsaSign");
     	if (_provider==null){
-    		throw new Exception("Provider BC is mandatory.");
+    		throw new Exception("Some provider is mandatory.");
     	}
     }
 

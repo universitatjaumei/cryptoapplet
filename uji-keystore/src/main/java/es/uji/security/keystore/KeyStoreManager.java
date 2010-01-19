@@ -53,9 +53,9 @@ public class KeyStoreManager
                 explorerks.load("".toCharArray());
                 keystores.put(SupportedKeystore.MSCAPI, explorerks);
                 
-                Security.insertProviderAt(new MSCAPIProvider(), 1);
-                
-                log.debug("Inserted provider MSCAPI at position 0");
+                //Security.insertProviderAt(new MSCAPIProvider(), 1);
+                //log.debug("Inserted provider MSCAPI at position 0");
+                Security.addProvider(new MSCAPIProvider());
             }
             catch (Exception ex)
             {
@@ -87,8 +87,8 @@ public class KeyStoreManager
             {
                 System.out.println("ERR_MOZ_KEYSTORE_LOAD");
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                        .get("ERR_MOZ_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
+                //JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
+                //        .get("ERR_MOZ_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
                 // throw new SignatureAppletException(LabelManager.get("ERR_MOZ_KEYSTORE_LOAD"));
             }
 
