@@ -368,6 +368,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     {
         m_nCollectMode = 0;
         m_xmlnsAttr = null;
+        m_doc = null;
     }
 
     private void findCertIDandCertValueTypes(Signature sig)
