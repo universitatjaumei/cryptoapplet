@@ -2,15 +2,38 @@ var ch= false;
 var test= false;
 var xadesBigFile=false;
 
+function notifySuccess(txt){
+  $("#greenDiv").html(txt);
+  $.notifyBar({
+    delay: 2000,
+    animationSpeed: "normal",
+    jqObject: $("#greenDiv")
+  });  
+}
+
+function notifyError(txt){
+  $("#errorDiv").html(txt);
+  $.notifyBar({
+    delay: 4000,
+    animationSpeed: "normal",
+    jqObject: $("#errorDiv")
+  });
+}
+
+
 function myconsole(m){
  // if (typeof(console)!="undefined"){
  //   console.log(m);
  // }
- alert(m);
+ //alert(m);
+}
+
+function onWindowShow(){
+  //pass
 }
 
 function onSignCancel() {
-  alert('Signature process cancelled');
+  notifyError('Signature process cancelled');
 }
 
 function onSignOk(txt){ 
@@ -19,12 +42,12 @@ function onSignOk(txt){
   for(i=0; i<fmat.length; i++){
      if (fmat[i].checked){
         outputFor= fmat[i].id.toUpperCase();
-        //cp.setSignatureOutputFormat(outputFor);
      }
   }
 
-  if (outputFor=="XADES" || txt == null){
+  if (outputFor=="XADES" && txt == null){
     document.location.assign(document.location.href.replace("test.html","signature.xsig"));
+    document.getElementById("btnvfy").disabled= false;
     return;
   }
  
@@ -36,7 +59,9 @@ function onSignOk(txt){
     document.getElementById("sigta").value=txt;
     document.getElementById("sigta").style.visibility="visible";
     document.getElementById("btnl").disabled= false;
-    document.getElementById("btnvfy").disabled= false;
+ 
+    if (outputFor=="XADES")
+      document.getElementById("btnvfy").disabled= false;
   }
   
   if ( outputFor=="FACTURAE" ){
@@ -46,24 +71,25 @@ function onSignOk(txt){
     document.getElementById("btnvfy").disabled= true;
     document.getElementById("info").innerHTML="<img align='left' src='img/alerticon.jpg' />You can verify the invoice by downloading it and uploading to <a target='_blank' href='http://www11.mityc.es/FacturaE/index.jsp'> mityc e-invoice validation service </a>";
   }
- 
+  
+  notifySuccess("Signature for format " + outputFor + " has been done Ok!"); 
 
 }
 
 //TODO: Correct that function, the url must be calculated from the document.location.
 function verifyXAdES(){
-  $.post("write.php","content=" + $.base64Encode(document.getElementById("sigta").value));
+  $.post("write_b64.php","content=" + $.URLEncode($.base64Encode(document.getElementById("sigta").value)));
   var cp= document.getElementById("CryptoApplet");
   var r= cp.verifyXAdESDataUrl(document.location.href.replace("test.html","signature.xsig"));
-  if (r!=null)
-    alert(r[0]);
+  if (r==null || r.length==0 )
+    notifySuccess("OK");
   else
-    alert("OK");
+    notifyError(r[0]);
 }
 
 function downloadTextArea(){
  $.post(
-         "write.php",
+         "write_b64.php",
          "content=" + $.URLEncode($.base64Encode(document.getElementById("sigta").value)),
          function(data){
            document.location="get.php";
@@ -73,7 +99,7 @@ function downloadTextArea(){
 
 
 function onSignError(txt){
-  alert("Error:  " + txt);
+  notifyError("Error:  " + txt);
   document.getElementById("btnl").disabled= true;
 }
 
@@ -81,6 +107,9 @@ function Sign(){
   var enc= $('input[name="encoding"]');
   var inputEnc="";
 
+  var oenc= $('input[name="output_encoding"]');
+  var outputEnc="";
+  
   var xopts= $('input[name="xopts"]');
   var lang= $('input[name="lang"]');
   
@@ -94,12 +123,13 @@ function Sign(){
   document.getElementById("btns").disabled= true;
   document.getElementById("btnl").disabled= true;
 
-  try{ 
+  //try{ 
 
     if (!cp){
-      alert("ERROR: getting the applet object from tag id Cryptoapplet");
+      notifyError("ERROR: getting the applet object from tag id Cryptoapplet");
       return; 
     }
+
 
     for(i=0; i<fmat.length; i++){
       if (fmat[i].checked){
@@ -117,10 +147,18 @@ function Sign(){
 
     for(i=0; i<enc.length; i++){
       if (enc[i].checked){
-        inputEnc= enc[i].id.toUpperCase();
+        inputEnc= enc[i].value.toUpperCase();
         cp.setInputDataEncoding(inputEnc);
       }
     }
+
+   for(i=0; i<oenc.length; i++){
+      if (oenc[i].checked){
+        outputEnc= oenc[i].value.toUpperCase();
+        cp.setOutputDataEncoding(outputEnc);
+      }
+    }
+
 
     myconsole("outputFor: " + outputFor);
     if (outputFor=="XADES"){
@@ -145,9 +183,9 @@ function Sign(){
     }
     aux= document.getElementById('ts');
     if (aux || outputFor=="PDF" || outputFor=="FACTURAE" || outputFor=="XADES" && xadesBigFile){
-      if (outputFor=="XMLDSIG"){
+      if (outputFor=="XMLSIGNATURE"){
         if (! aux.value.match("^<[^>]+>[^<]*<[^>]+>$")){
-          alert("ERROR: The content for XMLDSIG must be an XML, \nplease enclose it with, for example:\n   <data></data> ");
+          notifyError("ERROR: The content for XMLSIGNATURE must be an XML, please enclose it with, for example: &lt;data&gt;content&lt;/data&gt; ");
           document.getElementById("sigta").style.visibility="visible";
           document.getElementById("btnl").disabled= false;
           return;
@@ -160,7 +198,7 @@ function Sign(){
       }
       if (inputEnc=="HEX"){
         if (!aux.value.match("^([0-9a-fA-F][0-9a-fA-F])+$")){
-          alert("ERROR: The input data is not a valid HEX value");
+          notifyError("ERROR: The input data is not a valid HEX value");
           document.getElementById("sigta").style.visibility="visible";
           document.getElementById("btnl").disabled= false;
           return;
@@ -175,22 +213,26 @@ function Sign(){
          cp.setOutputDataEncoding("BASE64");
          cp.signDataUrlToUrl(loc.replace("test.html","fich/f1.pdf") , loc.replace("test.html","write_pdf.php"));
       }
-      else if(outpurFor="FACTURAE"){
-         alert("amono");
+      else if(outputFor=="FACTURAE"){
+         notifySuccess("Facturae format selected");
          cp.signDataUrlToFunc(loc.replace("test.html","factura.xml") , "onSignOk");
       }
       else{
          myconsole("Let's invoke the function cp.signDataParamToFunc: " + jQuery.trim(aux.value));
+         //TODO: descomentar esto, es solo para XADES.
          cp.signDataParamToFunc(aux.value, "onSignOk");
+         //alert("Aux: " + aux.value);
+         //cp.signDataParamToUrl(aux.value, loc.replace("test.html","write.php")); //"onSignOk");
+         myconsole("Invoked!");
       }
     }
     else{
-      alert("ERROR: cannot get data for signature");
+      notifyError("ERROR: cannot get data for signature");
     }
-  } 
-  catch(e) {
-    alert("Por favor, reinicie su navegador, \nparece que hubo un problema en la aplicacion, \nsi ya lo ha hecho pongase en contacto con un administrador.\n\nERROR: " + e.message);
-  }
+  //} 
+  //catch(e) {
+  //  alert("Por favor, reinicie su navegador, \nparece que hubo un problema en la aplicacion, \nsi ya lo ha hecho pongase en contacto con un administrador.\n\nERROR: " + e.message);
+ // }
 }
 
 
@@ -198,12 +240,12 @@ function Sign(){
 function onInitOk(){
   cp= document.getElementById("CryptoApplet");
   if (test){
-    alert("The java version is: " +  cp.getJavaVersion());
+    notifySuccess("The java version is: " +  cp.getJavaVersion());
     document.getElementById("gjv").disabled=false;
     test= false; 
   }
   else{
-    alert("The applet has been correctly loaded.");
+    notifySuccess("The applet has been correctly loaded.");
     document.getElementById("btns").disabled= false;
   }
   document.getElementById("cappd").style.visibility= "hidden";
