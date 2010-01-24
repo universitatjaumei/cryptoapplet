@@ -107,7 +107,7 @@ public class CMSSignatureVerifier
 
             Iterator certIt = certCollection.iterator();
             X509Certificate cert = (X509Certificate) certIt.next();
-            result = signer.verify(cert, "BC");
+            result = signer.verify(cert, provider);
 
             if (result)
             {
