@@ -1,6 +1,12 @@
 package es.uji.security.crypto.config;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.Provider;
+import java.security.Security;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -148,4 +154,66 @@ public class ConfigManager
         props.setProperty(key, value);
     }
     
+    public ArrayList<Device> getDeviceConfig()
+    {
+    	ConfigManager conf = ConfigManager.getInstance();
+    	
+    	String deviceList = conf.getProperty("cryptoapplet.devices");
+    	ArrayList<Device> result = new ArrayList<Device>();
+    	
+    	if (deviceList != null)
+    	{
+    		for (String device : deviceList.split(","))
+    		{
+    			String deviceName = conf.getProperty("cryptoapplet.devices." + device + ".name");
+    			String deviceSlot = conf.getProperty("cryptoapplet.devices." + device + ".slot");
+    			
+    			String deviceLibrariesList = "";
+    			
+    			if (OS.isLinux())
+    			{
+    				deviceLibrariesList = conf.getProperty("cryptoapplet.devices." + device + ".libraries.linux");
+    			}
+    			else if (OS.isWindowsUpperEqualToNT())
+    			{
+    				deviceLibrariesList = conf.getProperty("cryptoapplet.devices." + device + ".libraries.windows");            				
+    			}
+
+				String deviceLibrary = null;
+
+				for (String library : deviceLibrariesList.split(",")) {
+					File f = new File(library);
+
+					if (f.exists()) {
+						deviceLibrary = library;
+						break;
+					}
+				}
+
+				if (deviceLibrary != null) 
+				{
+					Device newDevice = new Device(deviceName, deviceLibrary, deviceSlot);
+					
+					try
+					{
+						Provider provider = new sun.security.pkcs11.SunPKCS11(
+								new ByteArrayInputStream(newDevice.toString().getBytes()));
+			            Security.addProvider(provider);
+			            
+			            KeyStore.getInstance("PKCS11", provider);
+			            
+			            result.add(newDevice);
+					}
+					catch  (Exception e)
+					{
+						log.error("Could not initialize " + newDevice.getName() + " in slot "
+						+ newDevice.getSlot() + " loading " + newDevice.getLibrary());
+						continue;
+					}
+				}
+    		}
+    	}
+    	
+    	return result;
+    }    
 }
