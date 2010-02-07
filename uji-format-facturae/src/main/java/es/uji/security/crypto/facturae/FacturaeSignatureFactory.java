@@ -11,8 +11,8 @@ import org.w3c.dom.NodeList;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.jxades.JXAdESSignatureFactory;
-import es.uji.security.util.OS;
 
 public class FacturaeSignatureFactory implements ISignFormatProvider
 {

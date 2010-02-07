@@ -68,13 +68,13 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
 import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Notary;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.util.Base64;
-import es.uji.security.util.OS;
 
 /**
  * Implements the NotaryFactory by using BouncyCastle JCE toolkit

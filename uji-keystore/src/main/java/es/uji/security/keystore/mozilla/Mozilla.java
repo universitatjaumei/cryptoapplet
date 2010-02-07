@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
-import es.uji.security.util.OS;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.util.RegQuery;
 
 /**

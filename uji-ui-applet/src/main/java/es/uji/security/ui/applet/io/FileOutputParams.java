@@ -9,7 +9,7 @@ import javax.swing.JFileChooser;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.util.OS;
+import es.uji.security.crypto.config.OS;
 
 public class FileOutputParams implements OutputParams
 {

@@ -13,9 +13,9 @@ import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.crypto.config.OS;
 import es.uji.security.ui.applet.JSCommands;
 import es.uji.security.ui.applet.SignatureApplet;
-import es.uji.security.util.OS;
 
 public class URLOutputParams extends AbstractData implements OutputParams
 {

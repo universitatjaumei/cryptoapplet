@@ -5,8 +5,8 @@ import java.security.Security;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.mityc.MitycXAdESSignatureValidator;
-import es.uji.security.util.OS;
 
 public class Test
 {

@@ -3,7 +3,7 @@ package es.uji.security.keystore.clauer.test;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
-import es.uji.security.util.OS;
+import es.uji.security.crypto.config.OS;
 
 public class Clauer
 {

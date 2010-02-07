@@ -39,6 +39,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.CertID;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
@@ -62,7 +63,6 @@ import es.uji.security.crypto.openxades.digidoc.UnsignedProperties;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.util.Base64;
-import es.uji.security.util.OS;
 
 /**
  * SAX implementation of DigiDocFactory Provides methods for reading a DigiDoc file

@@ -12,8 +12,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.jxades.JXAdESSignatureFactory;
-import es.uji.security.util.OS;
 
 public class TestJXAdESSignatureFactory
 {

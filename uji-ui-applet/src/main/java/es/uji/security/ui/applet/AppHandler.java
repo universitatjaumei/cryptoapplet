@@ -23,10 +23,10 @@ import org.apache.log4j.Logger;
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
 import es.uji.security.util.HexDump;
-import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 /**
@@ -98,10 +98,10 @@ public class AppHandler
         
         try
         {
-            log.debug("Recover JavaScript member: navigator");            
+            log.debug("Get JavaScript member: navigator");            
             JSObject document = (JSObject) JSCommands.getWindow().getMember("navigator");
             
-            log.debug("Recover JavaScript member: userAgent");
+            log.debug("Get JavaScript member: userAgent");
             String userAgent = (String) document.getMember("userAgent");        
             
             if (userAgent != null)
@@ -345,47 +345,47 @@ public class AppHandler
     {
         String destAbsolutePath = System.getenv("TEMP");
 
-        String completeDllPath = destAbsolutePath + File.separator + "MicrosoftCryptoApi_0_3.dll";
-        File dllFile = new File(completeDllPath);
+        String completeDLLPath = destAbsolutePath + File.separator + "MicrosoftCryptoApi_0_3.dll";
+        File dllFile = new File(completeDLLPath);
 
         if (!dllFile.exists())
         {
-            log.debug("MicrosoftCryptoApi_0_3.dll not found. Downloading DLL file");
+            log.info("MicrosoftCryptoApi_0_3.dll not found. Downloading DLL file");
             
-            installDLL(this.downloadURL, completeDllPath);                
+            installDLL(this.downloadURL, completeDLLPath);                
         }
         else
         {
-            log.debug("MicrosoftCryptoApi_0_3.dll already exists. Verifying existing DLL file");
+            log.info("MicrosoftCryptoApi_0_3.dll already exists. Verifying existing DLL file");
             
             try
             {
-                byte[] digest = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
+                byte[] originalDLLHash = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
                         (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35,
                         0x71, (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
 
-                FileInputStream fis = new FileInputStream(dllFile);
+                FileInputStream dllFileStream = new FileInputStream(dllFile);
 
-                MessageDigest dig = MessageDigest.getInstance("SHA1");
-                byte[] readed = new byte[fis.available()];
+                MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+                byte[] readed = new byte[dllFileStream.available()];
 
-                fis.read(readed);
-                dig.update(readed);
+                dllFileStream.read(readed);
+                messageDigest.update(readed);
 
-                byte[] origHash = dig.digest();
+                byte[] currentDLLHash = messageDigest.digest();
 
-                System.out.println(HexDump.xdump(digest));
-                System.out.println("\n---\n");
-                System.out.println(HexDump.xdump(origHash));
+                log.debug("Original DLL digest: " + HexDump.xdump(originalDLLHash));
+                log.debug("Current DLL digest: " + HexDump.xdump(currentDLLHash));
 
-                // Compare it.
-                for (int i = 0; i < origHash.length; i++)
+                // Compare original and current hash
+                
+                for (int i = 0; i < currentDLLHash.length; i++)
                 {
-                    if (origHash[i] != digest[i])
+                    if (currentDLLHash[i] != originalDLLHash[i])
                     {
-                        log.debug("DLL not valid. Download orginal DLL file");
+                        log.info("DLL not valid. Downloading orginal DLL file");
                         
-                        installDLL(this.downloadURL, completeDllPath);
+                        installDLL(this.downloadURL, completeDLLPath);
                         break;
                     }
                 }
@@ -398,13 +398,13 @@ public class AppHandler
         
         try
         {
-            log.debug("Executing System.load");
+            log.debug("Loading DLL with System.load " + completeDLLPath);
             
-            System.load(completeDllPath);
+            System.load(completeDLLPath);
         }
         catch (Throwable e)
         {
-            log.error("Error loading " + completeDllPath, e);
+            log.error("Error loading " + completeDLLPath, e);
         }        
     }
     

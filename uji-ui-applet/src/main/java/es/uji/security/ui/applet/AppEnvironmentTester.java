@@ -463,8 +463,16 @@ public class AppEnvironmentTester extends Thread
         _jf.setContentPane(_jsp);
         _jf.setVisible(true);
 
-        this.keyStoreManager = new KeyStoreManager();
-        this.keyStoreManager.initKeyStoresTable(this._apph.getNavigator());
+        try
+        {
+        	this.keyStoreManager = new KeyStoreManager();
+            this.keyStoreManager.initBrowserStores(this._apph.getNavigator());
+            this.keyStoreManager.initClauer();
+        }
+        catch (Exception e)
+        {
+        	e.printStackTrace();
+        }
         
         // Lets go with the tests
         testJavaVersion();

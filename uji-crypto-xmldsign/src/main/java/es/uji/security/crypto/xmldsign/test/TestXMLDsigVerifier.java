@@ -11,8 +11,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import es.uji.security.crypto.VerificationResult;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.xmldsign.XMLDsigVerifier;
-import es.uji.security.util.OS;
 
 public class TestXMLDsigVerifier
 {
