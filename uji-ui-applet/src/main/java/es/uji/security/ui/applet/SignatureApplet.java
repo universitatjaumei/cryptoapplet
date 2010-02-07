@@ -1,12 +1,16 @@
 package es.uji.security.ui.applet;
 
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
+import java.security.KeyStore;
 import java.security.PrivilegedAction;
+import java.security.Provider;
+import java.security.Security;
+import java.util.ArrayList;
 
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
@@ -17,21 +21,21 @@ import netscape.javascript.JSException;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.VerificationResult;
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.config.Device;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
-import es.uji.security.keystore.IKeyStore;
+import es.uji.security.keystore.DeviceInitializationException;
 import es.uji.security.keystore.KeyStoreManager;
-import es.uji.security.keystore.dnie.Dnie;
 import es.uji.security.ui.applet.io.ConsoleOutputParams;
 import es.uji.security.ui.applet.io.FileInputParams;
 import es.uji.security.ui.applet.io.FuncOutputParams;
 import es.uji.security.ui.applet.io.ParamInputData;
 import es.uji.security.ui.applet.io.URLInputParams;
 import es.uji.security.ui.applet.io.URLOutputParams;
-import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 /**
@@ -60,15 +64,15 @@ public class SignatureApplet extends JApplet
 
     private KeyStoreManager keyStoreManager;
 
-    public String recvHash; // compatibility issues
-
-    /**
-     * Init method. Installs the applet on client side. Downloads MicrosoftCryptoApi dll and loads
-     * it in case of Internet Explorer
-     */
+	/**
+	 * Init method. Installs the applet on client side. Downloads
+	 * MicrosoftCryptoApi dll and loads it in case of Internet Explorer
+	 */
 
     public void init()
     {
+    	// Init JavaScript interface
+    	
         try
         {
             JSCommands.clearInstance();
@@ -76,11 +80,15 @@ public class SignatureApplet extends JApplet
         }
         catch (Exception e)
         {
+        	log.error("Error with JSCommands init", e);
         }
 
         // Init Nimbus Look&Feel if available (JDK1.6u10 or higher)
+        
         try
         {
+            log.debug("Looking for suitable Look&Feels");
+            
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
             {
                 if ("Nimbus".equals(info.getName()))
@@ -94,7 +102,7 @@ public class SignatureApplet extends JApplet
         }
         catch (Exception e)
         {
-            log.debug("Nimbus Look&Feel is not present. Using default Look&Feel");
+            log.error("Nimbus Look&Feel is not present. Using default Look&Feel");
         }
 
         try
@@ -110,21 +118,17 @@ public class SignatureApplet extends JApplet
                 downloadURL = this.getCodeBase().toString();
             }
 
-            this.apph = AppHandler.getInstance(downloadURL);
-
+            this.apph = AppHandler.getInstance(downloadURL);            
             this.keyStoreManager = new KeyStoreManager();
-            this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
-
+            
+            // Init keystores
+            
+            this.initKeystores();
+            
+            // Call onInitOk 
+            
             log.debug("Call JavaScript method: onInitOk");
             JSCommands.getWindow().call("onInitOk", new String[] {});
-        }
-        catch (SignatureAppletException e)
-        {
-            log.error(e);
-            JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-
-            log.debug("Call JavaScript method: onSignError");
-            JSCommands.getWindow().call("onSignError", new String[] {});
         }
         catch (Exception e)
         {
@@ -136,82 +140,81 @@ public class SignatureApplet extends JApplet
         }
     }
 
-    public KeyStoreManager getKeyStoreManager()
+	/**
+	 * Try to load storege devices: Navigator store, Clauer UJI store and PKCS11
+	 * configured stores
+	 */
+    
+    private void initKeystores() 
+    {    	
+        this.keyStoreManager.flushKeyStoresTable();        
+        this.keyStoreManager.initBrowserStores(apph.getNavigator());
+        this.keyStoreManager.initClauer();
+     
+    	ConfigManager conf = ConfigManager.getInstance();
+        
+        for (Device device : conf.getDeviceConfig())
+        {
+            try
+            {
+            	keyStoreManager.initPKCS11Device(device, null);
+            }
+            catch (DeviceInitializationException die)
+            {				
+				for (int i=0 ; i<3 ; i++)
+				{
+					PasswordPrompt passwordPrompt = new PasswordPrompt(null,
+							device.getName(), "Pin:");
+
+					try
+					{
+						this.keyStoreManager.initPKCS11Device(device, passwordPrompt
+								.getPassword());
+						break;
+					}
+					catch (Exception e)
+					{
+						JOptionPane.showMessageDialog(null, LabelManager
+								.get("ERROR_INCORRECT_DNIE_PWD"), "",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
+            }
+        }
+	}
+
+	public KeyStoreManager getKeyStoreManager()
     {
         return this.keyStoreManager;
     }
 
     private void initializeWindow()
     {
+    	log.debug("Init window");
+    	
         try
         {
             if (window == null)
             {
-                if (!this.apph.getNavigator().equals(SupportedBrowser.IEXPLORER))
-                {
-
-                    Dnie dnie = new Dnie();
-                    if (dnie.isPresent())
-                    {
-                        PasswordPrompt pp = new PasswordPrompt(null, LabelManager
-                                .get("DNIE_PASSWORD_TITLE"), LabelManager.get("DNIE_PIN"));
-
-                        try
-                        {
-                            IKeyStore keystoreDNIe = dnie.initDnie(pp.getPassword());
-                            this.keyStoreManager.addP11KeyStore(keystoreDNIe);
-                        }
-                        catch (Exception e)
-                        {
-                            ByteArrayOutputStream os = new ByteArrayOutputStream();
-                            PrintStream ps = new PrintStream(os);
-                            e.printStackTrace(ps);
-                            String stk = new String(os.toByteArray()).toLowerCase();
-
-                            e.printStackTrace();
-
-                            if (stk.indexOf("incorrect") > -1)
-                            {
-                                JOptionPane.showMessageDialog(null, LabelManager
-                                        .get("ERROR_INCORRECT_DNIE_PWD"), "",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
-                            else
-                            {
-                                JOptionPane.showMessageDialog(null, LabelManager
-                                        .get("ERROR_UNKNOWN"), "", JOptionPane.ERROR_MESSAGE);
-                            }
-                        }
-                    }
-                }
-
                 window = new MainWindow(this.keyStoreManager, this.apph);
             }
             else
             {
-                window.getPasswordTextField().setText("");
-                window.getGlobalProgressBar().setValue(0);
-                window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
+				window.getPasswordTextField().setText("");
+				window.getGlobalProgressBar().setValue(0);
+				window.getInformationLabelField().setText(
+						LabelManager.get("SELECT_A_CERTIFICATE"));
 
-                this.keyStoreManager.flushKeyStoresTable();
-                this.keyStoreManager.initKeyStoresTable(this.apph.getNavigator());
+				this.initKeystores();
 
-                window.reloadCertificateJTree();
-                window.getMainFrame().setVisible(true);
-                window.getShowSignatureCheckBox().setVisible(true);
+				window.reloadCertificateJTree();
+				window.getMainFrame().setVisible(true);
+				window.getShowSignatureCheckBox().setVisible(true);
             }
-        }
-        catch (SignatureAppletException ex)
-        {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-
-            log.debug("Call JavaScript method: " + apph.getJsSignError());
-            JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
+            log.error(ex);
             JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 
             try
@@ -236,16 +239,19 @@ public class SignatureApplet extends JApplet
         }
     }
 
-    /**
-     * This method sets up the applet language, possible values are: ES_es for spanish CA_ca for
-     * EN_en
-     * 
-     * @param lang
-     *            true means ask for it, false means keep the last correct config.
-     */
+	/**
+	 * This method sets up the applet language, possible values are: ES_es for
+	 * spanish CA_ca for EN_en
+	 * 
+	 * @param lang
+	 *            true means ask for it, false means keep the last correct
+	 *            config.
+	 */
+    
     public void setLanguage(final String lang)
     {
-        /* We grant to JavaScript the same privileges as the core applet. */
+		// We grant to JavaScript the same privileges as the core applet
+    	
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
@@ -868,19 +874,19 @@ public class SignatureApplet extends JApplet
 
     public String getAppletVersion()
     {
-        return "2.1.0";
+        return "2.1.1";
     }
 
     public String getJavaVersion()
     {
         return System.getProperty("java.version");
     }
-
+    
     public static void main(String args[])
     {
         try
         {
-            new SignatureApplet();
+        	SignatureApplet signatureApplet = new SignatureApplet();
             AppHandler apph = AppHandler.getInstance();
 
             apph.setInput(new FileInputParams());
@@ -888,10 +894,12 @@ public class SignatureApplet extends JApplet
             apph.setInputDataEncoding(SupportedDataEncoding.PLAIN);
             apph.setSignatureOutputFormat(SupportedSignatureFormat.XADES);
 
-            KeyStoreManager keyStoreManager = new KeyStoreManager();
-            keyStoreManager.initKeyStoresTable(apph.getNavigator());
+            signatureApplet.apph = apph;
+            signatureApplet.keyStoreManager = new KeyStoreManager();
 
-            MainWindow window = new MainWindow(keyStoreManager, apph);
+            signatureApplet.initKeystores();
+            
+            MainWindow window = new MainWindow(signatureApplet.keyStoreManager, apph);
             window.getMainFrame().setSize(590, 520);
             window.getMainFrame().setResizable(true);
             window.repaint();

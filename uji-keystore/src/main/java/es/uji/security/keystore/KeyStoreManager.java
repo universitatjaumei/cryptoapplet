@@ -1,8 +1,14 @@
 package es.uji.security.keystore;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.net.ConnectException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.Provider;
 import java.security.Security;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 
 import javax.swing.JOptionPane;
@@ -11,6 +17,9 @@ import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.config.Device;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.mscapi.MSCAPIProvider;
@@ -35,26 +44,54 @@ public class KeyStoreManager
         keystores.clear();
     }
 
-    /**
-     * Initializes the KeyStore Hashtable with the store/s that must be used depending on the
-     * navigator
-     * 
-     *@throws SignatureAppletException
-     */
-
-    public void initKeyStoresTable(SupportedBrowser navigator)
+    public void initPKCS11Device(Device device, char[] password) throws DeviceInitializationException
     {
+		byte[] config = device.toString().getBytes();
+				            
+//		try
+//		{
+////			            
+////			            IKeyStore key = (IKeyStore) new PKCS11KeyStore(pkcs11ConfigStream, 
+////						keystore.load(null, password);
+//		}
+//		catch (Exception e)
+//		{
+//			log.error("Could not initialize " + device.getName() + " in slot "
+//					+ device.getSlot() + " loading " + device.getLibrary());
+//		}
+
+        IKeyStore keystore = null;
+		
+		try
+		{
+			keystore = (IKeyStore) new PKCS11KeyStore(
+					new ByteArrayInputStream(config), null, false);
+            keystore.load(password);
+            
+			ArrayList<String> aliases = Collections.list(keystore.aliases());						
+			log.debug("Keystore available aliases: " + aliases);
+		}
+		catch (Exception e)
+		{
+			log.debug("Device " + device.getName() + " initialization error. Try to reload the device with the pin");
+			
+			throw new DeviceInitializationException(e);
+		}
+		
+		keystores.put(SupportedKeystore.PKCS11, keystore);
+    }
+    
+    public void initBrowserStores(SupportedBrowser navigator)
+    {    
         if (navigator.equals(SupportedBrowser.IEXPLORER))
-        {
-            IKeyStore explorerks = (IKeyStore) new MsCapiKeyStore();
+        {        	
+        	IKeyStore keystore = (IKeyStore) new MsCapiKeyStore();
 
             try
             {
-                explorerks.load("".toCharArray());
-                keystores.put(SupportedKeystore.MSCAPI, explorerks);
+                keystore.load("".toCharArray());
+                keystores.put(SupportedKeystore.MSCAPI, keystore);
                 
-                //Security.insertProviderAt(new MSCAPIProvider(), 1);
-                //log.debug("Inserted provider MSCAPI at position 0");
                 Security.addProvider(new MSCAPIProvider());
             }
             catch (Exception ex)
@@ -64,10 +101,9 @@ public class KeyStoreManager
                 log.error(error, ex);
                 JOptionPane.showMessageDialog(null, ex.getMessage(), error, JOptionPane.WARNING_MESSAGE);
             }
-        }
-        else
+        }        
+        else if (navigator.equals(SupportedBrowser.MOZILLA))
         {
-            /* Mozilla Keystore */
             try
             {
                 Mozilla mozilla = new Mozilla();
@@ -91,36 +127,37 @@ public class KeyStoreManager
                 //        .get("ERR_MOZ_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
                 // throw new SignatureAppletException(LabelManager.get("ERR_MOZ_KEYSTORE_LOAD"));
             }
-
-            /* Clauer KeyStore */
+        }
+    }
+    
+    public void initClauer()
+    {
+        try
+        {
+            IKeyStore p11clauerks = (IKeyStore) new ClauerKeyStore();
+            
             try
             {
-
-                IKeyStore p11clauerks = (IKeyStore) new ClauerKeyStore();
-                try
-                {
-                    p11clauerks.load(null);
-                    keystores.put(SupportedKeystore.CLAUER, p11clauerks);
-
-                }
-                catch (KeyStoreException kex)
-                {
-                    // Here do nothing because that mean
-                    // that there is no clauer plugged on
-                    // the system.
-                }
-                catch (ConnectException cex)
-                {
-                    // Nothing to do also, clauer is not
-                    // installed,go ahead!
-                }
+                p11clauerks.load(null);
+                keystores.put(SupportedKeystore.CLAUER, p11clauerks);
             }
-            catch (Exception ex)
+            catch (KeyStoreException kex)
             {
-                JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                        .get("ERR_CL_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-                // throw new SignatureAppletException(LabelManager.get("ERR_CL_KEYSTORE_LOAD"));
+                // Here do nothing because that mean
+                // that there is no clauer plugged on
+                // the system.
             }
+            catch (ConnectException cex)
+            {
+                // Nothing to do also, clauer is not
+                // installed,go ahead!
+            }
+        }
+        catch (Exception ex)
+        {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
+                    .get("ERR_CL_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
+            // throw new SignatureAppletException(LabelManager.get("ERR_CL_KEYSTORE_LOAD"));
         }
     }
 

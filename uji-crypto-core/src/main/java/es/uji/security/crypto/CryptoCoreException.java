@@ -13,6 +13,11 @@ public class CryptoCoreException extends Exception
         super(message);
     }
 
+    public CryptoCoreException(Throwable exception)
+    {
+        super(exception);
+    }
+    
     public CryptoCoreException(String message, Throwable exception)
     {
         super(message, exception);

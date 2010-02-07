@@ -20,6 +20,7 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
@@ -32,7 +33,6 @@ import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
 import es.uji.security.util.Base64;
-import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class OpenXAdESSignatureFactory implements ISignFormatProvider

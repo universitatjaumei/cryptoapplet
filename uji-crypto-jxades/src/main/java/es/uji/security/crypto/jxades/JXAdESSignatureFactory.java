@@ -35,7 +35,7 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.util.OS;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class JXAdESSignatureFactory implements ISignFormatProvider

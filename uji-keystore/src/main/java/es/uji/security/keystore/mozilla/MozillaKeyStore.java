@@ -19,8 +19,8 @@ import java.util.Enumeration;
 import java.util.Random;
 
 import es.uji.security.crypto.SupportedKeystore;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.keystore.IKeyStore;
-import es.uji.security.util.OS;
 import es.uji.security.util.RegQuery;
 
 public class MozillaKeyStore implements IKeyStore

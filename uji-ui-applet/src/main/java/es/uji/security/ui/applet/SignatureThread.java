@@ -21,6 +21,7 @@ import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.X509CertificateHandler;
@@ -28,7 +29,6 @@ import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
 import es.uji.security.util.Base64;
 import es.uji.security.util.HexEncoder;
-import es.uji.security.util.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class SignatureThread extends Thread

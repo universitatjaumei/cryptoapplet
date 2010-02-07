@@ -16,9 +16,9 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.VerificationResult;
+import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
-import es.uji.security.util.OS;
 
 public class TestOpenXAdESSignatureFactory
 {

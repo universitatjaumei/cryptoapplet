@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 
-import es.uji.security.util.OS;
+import es.uji.security.crypto.config.OS;
 
 /**
  * A timestamper that communicates with a Timestamping Authority (TSA) over HTTP. It supports the

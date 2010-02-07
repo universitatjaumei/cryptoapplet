@@ -45,7 +45,7 @@ import sun.security.x509.GeneralNameInterface;
 import sun.security.x509.URIName;
 import sun.security.x509.X509CertImpl;
 import es.uji.security.crypto.OCSPResponseDetails;
-import es.uji.security.util.OS;
+import es.uji.security.crypto.config.OS;
 
 public class OCSPChecker
 {
