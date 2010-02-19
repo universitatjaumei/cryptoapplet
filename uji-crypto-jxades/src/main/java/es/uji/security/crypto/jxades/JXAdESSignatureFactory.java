@@ -97,13 +97,16 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             spi = new SignaturePolicyIdentifierImpl(false);
             spi.setIdentifier(signatureOptions.getPolicyIdentifier());
             spi.setDescription(signatureOptions.getPolicyDescription());
+            xades.setSignaturePolicyIdentifier(spi);
         }
+       /*
         else
         {
             spi = new SignaturePolicyIdentifierImpl(true);
         }
+        */
 
-        xades.setSignaturePolicyIdentifier(spi);
+       
 
         ConfigManager conf = ConfigManager.getInstance();
         int tsaCount = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);
@@ -123,7 +126,13 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             NodeList result = element.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
                     "Signature");
             int numSignature = result.getLength();
-
+            
+            String baseRef= "";
+            if (signatureOptions.getXAdESBaseReference() != null){
+            	baseRef= signatureOptions.getXAdESBaseReference();
+            }
+            
+            //TODO: Revisar frima cosign, si no es enveloped funciona bien por el else.  
             if (signatureOptions.isCoSignEnabled())
             {
                 XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
@@ -133,8 +142,8 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
                 Transform transform = xmlSignatureFactory.newTransform(Transform.XPATH,
                         new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
                                 Collections.singletonMap("dsig", XMLSignature.XMLNS)));
-
-                Reference reference = xmlSignatureFactory.newReference("", digestMethod,
+ 	
+                Reference reference = xmlSignatureFactory.newReference(baseRef, digestMethod,
                         Collections.singletonList(transform), null, null);
 
                 xmlSignature.sign(certificate, privateKey, Arrays
@@ -142,7 +151,7 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             }
             else
             {
-                xmlSignature.sign(certificate, privateKey, Arrays.asList(new Object[] { "" }), "S"
+                xmlSignature.sign(certificate, privateKey, Arrays.asList(new Object[] { baseRef }), "S"
                         + numSignature, tsaUrl);
             }
         }

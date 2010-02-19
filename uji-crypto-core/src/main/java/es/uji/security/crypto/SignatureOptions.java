@@ -15,10 +15,11 @@ public class SignatureOptions
     private boolean hash = false;
     private boolean localFile = false;
     private boolean swapToFile = false;
-    private boolean coSignEnabled = true;
+    private boolean coSignEnabled = false;
     
     private String policyIdentifier;
     private String policyDescription;
+	private String baseReference;
 
     public SignatureOptions()
     {
@@ -123,4 +124,12 @@ public class SignatureOptions
     {
         this.policyDescription = policyDescription;
     }
+
+    public String getXAdESBaseReference() {
+		return this.baseReference;
+	}
+    
+    public void setXAdESBaseReference(String baseRef) {
+    	this.baseReference= baseRef;
+	}
 }

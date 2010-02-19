@@ -71,11 +71,14 @@ public class AppHandler
     private String[] signerRole;
     private String xadesFilename;
     private String xadesFileMimeType;
+    private String[] xadesBaseRef;
     
     private boolean isBigFile= false;
 
     private SSLSocketFactory defaultSocketFactory;
     private String downloadURL;
+
+	
 
     public AppHandler() throws SignatureAppletException
     {
@@ -705,5 +708,14 @@ public class AppHandler
 	public void setIsBigFile(boolean isBigFile) {
 		System.out.println("SET ISBIGFILE to: " + isBigFile);
 		this.isBigFile= isBigFile; 
+	}
+
+	public void setXAdESBaseRef(String[] baseReference) {
+		this.xadesBaseRef=baseReference; 
+		
+	}
+	
+	public String[] getXAdESBaseRef() {
+		return this.xadesBaseRef; 	
 	}
 }

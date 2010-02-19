@@ -386,6 +386,24 @@ public class SignatureApplet extends JApplet
             }
         });
     }
+    
+    /**
+     * JS interface to setting the XAdES main reference id from Navigator's javascript
+     * 
+     * @param id
+     */
+    public void setXadesBaseReference(final String baseReference)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+            	String[] refs = baseReference.split(_separator);
+                apph.setXAdESBaseRef(refs);
+                return null;
+            }
+        });
+    }
 
     /**
      * JS interface to setting the XAdES file name from Navigator's javascript
