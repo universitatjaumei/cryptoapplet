@@ -108,7 +108,7 @@ public class BaseCryptoAppletTest
             }
         }
         
-        Assert.assertTrue(signatureResult.isValid());        
+        Assert.assertTrue(signatureResult.isValid());
     }    
 
     protected void showErrors(VerificationResult verificationResult)
@@ -121,6 +121,11 @@ public class BaseCryptoAppletTest
             }
         }
         
-        Assert.assertTrue(verificationResult.isValid());        
+        Assert.assertTrue(verificationResult.isValid());
     }    
+    
+    public void setData(byte[] data)
+    {
+        this.data = data;
+    }
 }
