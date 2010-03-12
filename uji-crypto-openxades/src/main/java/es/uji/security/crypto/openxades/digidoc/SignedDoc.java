@@ -21,29 +21,29 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.DataInputStream;
-import java.io.InputStream; //import java.io.DataOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.net.URL;
 import java.security.KeyStore;
 import java.security.MessageDigest;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.security.cert.X509Certificate; //import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory; //import java.util.Date;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+
 import javax.crypto.Cipher;
 
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
 
 /**
  * Represents an instance of signed doc in DIGIDOC format. Contains one or more DataFile -s and zero

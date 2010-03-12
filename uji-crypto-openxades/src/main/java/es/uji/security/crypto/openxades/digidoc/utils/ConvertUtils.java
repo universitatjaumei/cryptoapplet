@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 

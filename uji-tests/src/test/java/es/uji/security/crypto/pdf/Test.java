@@ -20,7 +20,6 @@ import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
-import es.uji.security.crypto.pdf.PDFSignatureFactory;
 
 public class Test
 {

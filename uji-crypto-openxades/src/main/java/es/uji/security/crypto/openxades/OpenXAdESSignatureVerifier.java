@@ -9,6 +9,7 @@ import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
+import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;
 
 public class OpenXAdESSignatureVerifier
 {
@@ -21,7 +22,7 @@ public class OpenXAdESSignatureVerifier
         {
             ConfigManager conf = ConfigManager.getInstance();
 
-            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
+            DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
             SignedDoc sdoc = digFac.readSignedDoc(new ByteArrayInputStream(signedData));
 
             if (sdoc.countSignatures() == 0)

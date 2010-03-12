@@ -68,8 +68,6 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.OS;
-import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Notary;
 import es.uji.security.crypto.openxades.digidoc.Signature;
@@ -435,7 +433,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             if (verifier != null && verifier.equals("OCSP"))
             {
                 // create the request
-                DigiDocFactory ddocFac = ConfigHandler.getDigiDocFactory();
+                DigiDocFactory ddocFac = FactoryManager.getDigiDocFactory();
                 X509Certificate caCert = ddocFac.findCAforCertificate(cert);
                 if (m_logger.isDebugEnabled())
                 {
@@ -493,7 +491,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
             else if (verifier != null && verifier.equals("CRL"))
             {
-                CRLFactory crlFac = ConfigHandler.getCRLFactory();
+                CRLFactory crlFac = FactoryManager.getCRLFactory();
                 crlFac.checkCertificate(cert, new Date());
             }
         }
@@ -525,7 +523,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             if (bUseOcsp)
             {
                 // create the request
-                DigiDocFactory ddocFac = ConfigHandler.getDigiDocFactory();
+                DigiDocFactory ddocFac = FactoryManager.getDigiDocFactory();
                 X509Certificate caCert = ddocFac.findCAforCertificate(cert);
                 if (m_logger.isDebugEnabled())
                 {
@@ -583,7 +581,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
             else
             {
-                CRLFactory crlFac = ConfigHandler.getCRLFactory();
+                CRLFactory crlFac = FactoryManager.getCRLFactory();
                 crlFac.checkCertificate(cert, new Date());
             }
         }
@@ -759,7 +757,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 m_logger.debug("Checking response status, CERT: " + cert.getSubjectDN().getName()
                         + " SEARCH: " + SignedDoc.getCommonName(cert.getIssuerDN().getName()));
             // check the response on our cert
-            DigiDocFactory ddocFac = ConfigHandler.getDigiDocFactory();
+            DigiDocFactory ddocFac = FactoryManager.getDigiDocFactory();
             X509Certificate caCert = ddocFac.findCAforCertificate(cert);
             // X509Certificate caCert = (X509Certificate)m_ocspCACerts.
             // get(SignedDoc.getCommonName(cert.getIssuerDN().getName()));

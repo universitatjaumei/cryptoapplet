@@ -21,28 +21,28 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
-import java.io.Serializable;
-import java.util.ArrayList; //import java.io.FileOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.security.MessageDigest;
-import java.io.FileInputStream;
 import java.io.File;
-import java.io.OutputStream; //import ee.sk.digidoc.factory.SAXDigiDocFactory;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.security.MessageDigest;
+import java.util.ArrayList;
 
-import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
-import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
-import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-import es.uji.security.util.Base64;
-
-import org.w3c.dom.Node;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory; //import javax.xml.transform.TransformerException;
-//import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.OutputKeys; //Logging classes
+
 import org.apache.log4j.Logger;
+import org.w3c.dom.Node;
+
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
+import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;
+import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
+import es.uji.security.util.Base64;
 
 /**
  * Represents a DataFile instance, that either contains payload data or references and external
@@ -689,7 +689,7 @@ public class DataFile implements Serializable
     {
         try
         {
-            CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
+            CanonicalizationFactory canFac = FactoryManager.getCanonicalizationFactory();
             byte[] tmp = canFac.canonicalize(data, SignedDoc.CANONICALIZATION_METHOD_20010315);
             return tmp;
         }
