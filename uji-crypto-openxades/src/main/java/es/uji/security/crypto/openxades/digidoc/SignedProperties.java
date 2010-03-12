@@ -29,8 +29,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 
-import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
+import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 import es.uji.security.util.Base64;
 
@@ -595,7 +595,7 @@ public class SignedProperties implements Serializable
     {
         if (m_origDigest == null)
         {
-            CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
+            CanonicalizationFactory canFac = FactoryManager.getCanonicalizationFactory();
             byte[] tmp = canFac.canonicalize(toXML(), SignedDoc.CANONICALIZATION_METHOD_20010315);
             // debugWriteFile("SigProp2.xml", tmp);
             // System.out.println("SigProp2: " + tmp.length

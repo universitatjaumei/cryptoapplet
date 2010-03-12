@@ -27,7 +27,7 @@ import java.io.Serializable;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
-import es.uji.security.crypto.openxades.ConfigHandler;
+import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;
 import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
@@ -295,7 +295,7 @@ public class UnsignedProperties implements Serializable
         // verify notary status
         try
         {
-            NotaryFactory notFac = ConfigHandler.getNotaryFactory();
+            NotaryFactory notFac = FactoryManager.getNotaryFactory();
             notFac.parseAndVerifyResponse(m_signature, m_notary);
         }
         catch (DigiDocException ex)

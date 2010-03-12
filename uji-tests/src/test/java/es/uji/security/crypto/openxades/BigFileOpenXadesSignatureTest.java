@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
@@ -26,6 +25,7 @@ import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
+import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
@@ -146,7 +146,7 @@ public class BigFileOpenXadesSignatureTest
         byte[] completeRevocationRefs = sig.getUnsignedProperties().getCompleteRevocationRefs()
                 .toXML();
 
-        CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
+        CanonicalizationFactory canFac = FactoryManager.getCanonicalizationFactory();
 
         byte[] canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
                 SignedDoc.CANONICALIZATION_METHOD_20010315);
@@ -173,7 +173,7 @@ public class BigFileOpenXadesSignatureTest
 
         sdoc.writeToFile(new File("/tmp/signed-output.xml"));
 
-        DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
+        DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
         SignedDoc r_sdoc = digFac.readSignedDoc(new FileInputStream("/tmp/signed-output.xml"));
 
         boolean confirmation = conf.getProperty("DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY")

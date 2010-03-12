@@ -29,6 +29,7 @@ import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 import es.uji.security.crypto.openxades.digidoc.factory.CanonicalizationFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
+import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;
 import es.uji.security.crypto.timestamp.TSResponse;
 import es.uji.security.crypto.timestamp.TSResponseToken;
 import es.uji.security.crypto.timestamp.TimeStampFactory;
@@ -122,7 +123,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         	
         	if (docs.getLength() == 1)
         	{        	
-        		DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
+        		DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
         		signedDoc = digFac.readSignedDoc(new ByteArrayInputStream(data));
         	}
         	else
@@ -283,7 +284,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             byte[] completeRevocationRefs = signature.getUnsignedProperties()
                     .getCompleteRevocationRefs().toXML();
 
-            CanonicalizationFactory canFac = ConfigHandler.getCanonicalizationFactory();
+            CanonicalizationFactory canFac = FactoryManager.getCanonicalizationFactory();
             byte[] canCompleteCertificateRefs = canFac.canonicalize(completeCertificateRefs,
                     SignedDoc.CANONICALIZATION_METHOD_20010315);
 

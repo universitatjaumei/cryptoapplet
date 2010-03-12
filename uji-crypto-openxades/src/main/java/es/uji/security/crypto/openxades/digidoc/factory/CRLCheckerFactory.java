@@ -22,39 +22,34 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-import es.uji.security.crypto.openxades.digidoc.factory.CRLCheckerFactory;
-import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
-
-import javax.naming.Context;
-import javax.naming.ldap.InitialLdapContext;
-import javax.naming.ldap.Control;
-import javax.naming.NamingEnumeration;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.Attribute;
-
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.io.File;
-import java.io.ByteArrayInputStream;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.FileOutputStream;
 
-import java.security.cert.X509Certificate;
-import java.security.cert.X509CRL;
-import java.security.cert.CertificateFactory;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
+import javax.naming.ldap.Control;
+import javax.naming.ldap.InitialLdapContext;
 
 import org.apache.log4j.Logger;
+
+import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 
 /**
  * Handles CRL download from SK server using LDAP or HTTP connection and uses it for verifying

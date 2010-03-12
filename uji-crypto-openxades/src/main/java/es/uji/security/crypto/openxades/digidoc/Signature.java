@@ -33,9 +33,9 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.openxades.ConfigHandler;
 import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
+import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;
 import es.uji.security.crypto.openxades.digidoc.factory.NotaryFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.TimestampFactory;
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
@@ -690,7 +690,7 @@ public class Signature implements Serializable
      */
     public void getConfirmation() throws DigiDocException
     {
-        NotaryFactory notFac = ConfigHandler.getNotaryFactory();
+        NotaryFactory notFac = FactoryManager.getNotaryFactory();
         X509Certificate cert = m_keyInfo.getSignersCertificate();
 
         X509Certificate caCert = null;
@@ -698,7 +698,7 @@ public class Signature implements Serializable
 
         try
         {
-            ddocFac = ConfigHandler.getDigiDocFactory();
+            ddocFac = FactoryManager.getDigiDocFactory();
             caCert = ddocFac.findCAforCertificate(cert);
         }
         catch (DigiDocException dex)
@@ -896,7 +896,7 @@ public class Signature implements Serializable
         // check certificates CA
         try
         {
-            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
+            DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
             digFac.verifyCertificate(m_keyInfo.getSignersCertificate());
         }
         catch (DigiDocException ex)
@@ -910,7 +910,7 @@ public class Signature implements Serializable
         {
             try
             {
-                CRLFactory crlFac = ConfigHandler.getCRLFactory();
+                CRLFactory crlFac = FactoryManager.getCRLFactory();
                 crlFac.checkCertificate(m_keyInfo.getSignersCertificate(), new Date());
             }
             catch (DigiDocException ex)
@@ -940,7 +940,7 @@ public class Signature implements Serializable
             TimestampFactory tsFac = null;
             try
             {
-                tsFac = ConfigHandler.getTimestampFactory();
+                tsFac = FactoryManager.getTimestampFactory();
             }
             catch (DigiDocException ex)
             {
@@ -1148,7 +1148,7 @@ public class Signature implements Serializable
         // check certificates CA
         try
         {
-            DigiDocFactory digFac = ConfigHandler.getDigiDocFactory();
+            DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
             digFac.verifyCertificate(m_keyInfo.getSignersCertificate());
         }
         catch (DigiDocException ex)
@@ -1177,7 +1177,7 @@ public class Signature implements Serializable
                 TimestampFactory tsFac = null;
                 try
                 {
-                    tsFac = ConfigHandler.getTimestampFactory();
+                    tsFac = FactoryManager.getTimestampFactory();
                 }
                 catch (DigiDocException ex)
                 {
@@ -1241,7 +1241,7 @@ public class Signature implements Serializable
         {
             try
             {
-                CRLFactory crlFac = ConfigHandler.getCRLFactory();
+                CRLFactory crlFac = FactoryManager.getCRLFactory();
                 crlFac.checkCertificate(m_keyInfo.getSignersCertificate(), new Date());
             }
             catch (DigiDocException ex)
