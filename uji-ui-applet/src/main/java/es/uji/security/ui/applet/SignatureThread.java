@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.JLabel;
@@ -276,15 +277,26 @@ public class SignatureThread extends Thread
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 6 * inc);
 
                     IKeyStore kAux = xcert.getKeyStore();
-                    SignatureResult signatureResult = null; 
+                    SignatureResult signatureResult = null;
+                    
+                    log.debug(Collections.list(kAux.aliases()));
                         
                     try
                     {
                         // Set up the data for the signature handling.
                         SignatureOptions sigOpt = new SignatureOptions();
-                        sigOpt.setDataToSign(in);
+                        sigOpt.setDataToSign(in);                        
                         sigOpt.setCertificate(xcert.getCertificate());
-                        sigOpt.setPrivateKey((PrivateKey) kAux.getKey(xcert.getAlias()));
+                        
+                        PrivateKey privateKey = (PrivateKey) kAux.getKey(xcert.getAlias());
+                        
+                        log.debug("Private key format: " + privateKey.getFormat());
+                        log.debug("Private key algorithm: " + privateKey.getAlgorithm());
+                        
+                        sigOpt.setPrivateKey(privateKey);
+                        
+                        log.debug("Provider: " + kAux.getProvider().getName());
+                        
                         sigOpt.setProvider(kAux.getProvider());
  						sigOpt.setSwapToFile(_mw.getAppHandler().getIsBigFile());
  						String[] baseRefs= _mw.getAppHandler().getXAdESBaseRef();
