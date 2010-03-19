@@ -1,16 +1,10 @@
 package es.uji.security.ui.applet;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
-import java.security.KeyStore;
 import java.security.PrivilegedAction;
-import java.security.Provider;
-import java.security.Security;
-import java.util.ArrayList;
 
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
@@ -21,6 +15,7 @@ import netscape.javascript.JSException;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.VerificationResult;
@@ -123,7 +118,7 @@ public class SignatureApplet extends JApplet
             
             // Init keystores
             
-            this.initKeystores();
+            this.initKeystores(this.apph.getNavigator());
             
             // Call onInitOk 
             
@@ -143,42 +138,46 @@ public class SignatureApplet extends JApplet
 	/**
 	 * Try to load storege devices: Navigator store, Clauer UJI store and PKCS11
 	 * configured stores
+	 * @param supportedBrowser 
 	 */
     
-    private void initKeystores() 
+    private void initKeystores(SupportedBrowser supportedBrowser) 
     {    	
         this.keyStoreManager.flushKeyStoresTable();        
         this.keyStoreManager.initBrowserStores(apph.getNavigator());
         this.keyStoreManager.initClauer();
      
-    	ConfigManager conf = ConfigManager.getInstance();
-        
-        for (Device device : conf.getDeviceConfig())
+        if (! supportedBrowser.equals(SupportedBrowser.IEXPLORER))
         {
-            try
+        	ConfigManager conf = ConfigManager.getInstance();
+            
+            for (Device device : conf.getDeviceConfig())
             {
-            	keyStoreManager.initPKCS11Device(device, null);
-            }
-            catch (DeviceInitializationException die)
-            {				
-				for (int i=0 ; i<3 ; i++)
-				{
-					PasswordPrompt passwordPrompt = new PasswordPrompt(null,
-							device.getName(), "Pin:");
-
-					try
-					{
-						this.keyStoreManager.initPKCS11Device(device, passwordPrompt
-								.getPassword());
-						break;
-					}
-					catch (Exception e)
-					{
-						JOptionPane.showMessageDialog(null, LabelManager
-								.get("ERROR_INCORRECT_DNIE_PWD"), "",
-								JOptionPane.ERROR_MESSAGE);
-					}
-				}
+                try
+                {
+                	keyStoreManager.initPKCS11Device(device, null);
+                }
+                catch (DeviceInitializationException die)
+                {				
+    				for (int i=0 ; i<3 ; i++)
+    				{
+    					PasswordPrompt passwordPrompt = new PasswordPrompt(null,
+    							device.getName(), "Pin:");
+    
+    					try
+    					{
+    						this.keyStoreManager.initPKCS11Device(device, passwordPrompt
+    								.getPassword());
+    						break;
+    					}
+    					catch (Exception e)
+    					{
+    						JOptionPane.showMessageDialog(null, LabelManager
+    								.get("ERROR_INCORRECT_DNIE_PWD"), "",
+    								JOptionPane.ERROR_MESSAGE);
+    					}
+    				}
+                }
             }
         }
 	}
@@ -205,7 +204,7 @@ public class SignatureApplet extends JApplet
 				window.getInformationLabelField().setText(
 						LabelManager.get("SELECT_A_CERTIFICATE"));
 
-				this.initKeystores();
+				this.initKeystores(this.apph.getNavigator());
 
 				window.reloadCertificateJTree();
 				window.getMainFrame().setVisible(true);
@@ -915,7 +914,7 @@ public class SignatureApplet extends JApplet
             signatureApplet.apph = apph;
             signatureApplet.keyStoreManager = new KeyStoreManager();
 
-            signatureApplet.initKeystores();
+            signatureApplet.initKeystores(SupportedBrowser.MOZILLA);
             
             MainWindow window = new MainWindow(signatureApplet.keyStoreManager, apph);
             window.getMainFrame().setSize(590, 520);
