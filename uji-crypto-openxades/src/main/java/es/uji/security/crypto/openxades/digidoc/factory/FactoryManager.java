@@ -21,8 +21,6 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import org.apache.log4j.Logger;
-
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 
@@ -32,26 +30,23 @@ import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 public class FactoryManager
 {
     private static NotaryFactory m_notFac = null;
-    /** canonicalization factory instance */
     private static CanonicalizationFactory m_canFac = null;
-    /** timestamp factory implementation */
     private static TimestampFactory m_tsFac = null;
-    /** CRL factory instance */
     private static CRLFactory m_crlFac = null;
-    /** loh4j logger */
-    private Logger m_logger = null;
 
-     /**
+    /**
      * Returns the SignatureFactory instance
      * 
      * @return SignatureFactory implementation
      */
     public static SignatureFactory getSignatureFactory() throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
         SignatureFactory sigFac = null;
+
         try
         {
-            sigFac = (SignatureFactory) Class.forName(ConfigManager.getProperty("DIGIDOC_SIGN_IMPL"))
+            sigFac = (SignatureFactory) Class.forName(conf.getProperty("DIGIDOC_SIGN_IMPL"))
                     .newInstance();
             sigFac.init();
         }
@@ -75,10 +70,12 @@ public class FactoryManager
      */
     public static SignatureFactory getSignatureFactory(String type) throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
         SignatureFactory sigFac = null;
+
         try
         {
-            String strClass = ConfigManager.getProperty("DIGIDOC_SIGN_IMPL_" + type);
+            String strClass = conf.getProperty("DIGIDOC_SIGN_IMPL_" + type);
             if (strClass != null)
             {
                 sigFac = (SignatureFactory) Class.forName(strClass).newInstance();
@@ -107,11 +104,13 @@ public class FactoryManager
      */
     public static NotaryFactory getNotaryFactory() throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
+
         try
         {
             if (m_notFac == null)
             {
-                m_notFac = (NotaryFactory) Class.forName(ConfigManager.getProperty("DIGIDOC_NOTARY_IMPL"))
+                m_notFac = (NotaryFactory) Class.forName(conf.getProperty("DIGIDOC_NOTARY_IMPL"))
                         .newInstance();
                 m_notFac.init();
             }
@@ -134,12 +133,14 @@ public class FactoryManager
      */
     public static TimestampFactory getTimestampFactory() throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
+
         try
         {
             if (m_tsFac == null)
             {
-                m_tsFac = (TimestampFactory) Class.forName(ConfigManager.getProperty("DIGIDOC_TIMESTAMP_IMPL"))
-                        .newInstance();
+                m_tsFac = (TimestampFactory) Class.forName(
+                        conf.getProperty("DIGIDOC_TIMESTAMP_IMPL")).newInstance();
                 m_tsFac.init();
             }
         }
@@ -161,10 +162,12 @@ public class FactoryManager
      */
     public static DigiDocFactory getDigiDocFactory() throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
         DigiDocFactory digFac = null;
+
         try
         {
-            digFac = (DigiDocFactory) Class.forName(ConfigManager.getProperty("DIGIDOC_FACTORY_IMPL"))
+            digFac = (DigiDocFactory) Class.forName(conf.getProperty("DIGIDOC_FACTORY_IMPL"))
                     .newInstance();
             digFac.init();
         }
@@ -186,12 +189,14 @@ public class FactoryManager
      */
     public static CanonicalizationFactory getCanonicalizationFactory() throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
+
         try
         {
             if (m_canFac == null)
             {
                 m_canFac = (CanonicalizationFactory) Class.forName(
-                        ConfigManager.getProperty("CANONICALIZATION_FACTORY_IMPL")).newInstance();
+                        conf.getProperty("CANONICALIZATION_FACTORY_IMPL")).newInstance();
                 m_canFac.init();
             }
         }
@@ -213,11 +218,13 @@ public class FactoryManager
      */
     public static CRLFactory getCRLFactory() throws DigiDocException
     {
+        ConfigManager conf = ConfigManager.getInstance();
+
         try
         {
             if (m_crlFac == null)
             {
-                m_crlFac = (CRLFactory) Class.forName(ConfigManager.getProperty("CRL_FACTORY_IMPL"))
+                m_crlFac = (CRLFactory) Class.forName(conf.getProperty("CRL_FACTORY_IMPL"))
                         .newInstance();
                 m_crlFac.init();
             }
