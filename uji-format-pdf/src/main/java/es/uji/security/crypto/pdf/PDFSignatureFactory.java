@@ -11,7 +11,6 @@ import java.security.Provider;
 import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 
@@ -39,11 +38,10 @@ public class PDFSignatureFactory implements ISignFormatProvider
     private PrivateKey pk;
     private Provider pv;
     private Certificate[] chain;
-
     private ConfigManager conf = ConfigManager.getInstance();
 
-    protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk, Provider provider,
-            Certificate[] chain) throws Exception
+    protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk,
+            Provider provider, Certificate[] chain) throws Exception
     {
 
         PdfPKCS7TSA sgn = new PdfPKCS7TSA(pk, chain, null, "SHA1", provider, true);
@@ -55,7 +53,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         {
             sgn.update(buff, 0, len);
         }
-        
+
         return sgn.getEncodedPKCS7(null, null, tsaUrl, null);
 
     }
@@ -68,27 +66,29 @@ public class PDFSignatureFactory implements ISignFormatProvider
         sap.setLocation(conf.getProperty("PDFSIG_LOCATION"));
         sap.setContact(conf.getProperty("PDFSIG_CONTACT"));
     }
-    
+
     // Take a look at http://itextpdf.sourceforge.net/howtosign.html#signtsocspjava
     private void signPdfTsp(PdfSignatureAppearance sap) throws Exception
     {
         PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKMS, PdfName.ADBE_PKCS7_SHA1);
-    	
-    	dic.setReason(conf.getProperty("PDFSIG_REASON"));
+
+        dic.setReason(conf.getProperty("PDFSIG_REASON"));
         dic.setLocation(conf.getProperty("PDFSIG_LOCATION"));
         dic.setContact(conf.getProperty("PDFSIG_CONTACT"));
         dic.setDate(new PdfDate(sap.getSignDate())); // time-stamp will over-rule this
         sap.setCryptoDictionary(dic);
-        
+
         sap.setCrypto((PrivateKey) pk, chain, null, null);
-        
+
         int contentEst = 15000;
-        HashMap exc = new HashMap();
+
+        HashMap<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
         exc.put(PdfName.CONTENTS, new Integer(contentEst * 2 + 2));
         sap.preClose(exc);
-        
+
         // Get the true data signature, including a true time stamp token
-        byte[] encodedSig = genPKCS7Signature(sap.getRangeStream(), conf.getProperty("PDFSIG_TSA_URL"), pk, pv, chain);
+        byte[] encodedSig = genPKCS7Signature(sap.getRangeStream(), conf
+                .getProperty("PDFSIG_TSA_URL"), pk, pv, chain);
 
         if (contentEst + 2 < encodedSig.length)
         {
@@ -143,24 +143,21 @@ public class PDFSignatureFactory implements ISignFormatProvider
             }
 
             chain = new Certificate[2];
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
             // Here the certificates has to be disposed as next:
             // chain[0]= user_cert, chain[1]= level_n_cert,
             // chain[2]= level_n-1_cert, ...
-            ClassLoader cl = PDFSignatureFactory.class.getClassLoader();
 
             SignatureResult signatureResult = new SignatureResult();
 
             // Get the CA certificate list
-            Integer n = new Integer(conf.getProperty("PDFSIG_CA_CERTS"));
+            Integer n = new Integer(conf.getProperty("DIGIDOC_CA_CERTS"));
             Certificate cert = sCer;
             Certificate CACert = null;
 
             for (int i = 1; i <= n; i++)
             {
-                CACert = cf.generateCertificate(cl.getResourceAsStream(conf
-                        .getProperty("PDFSIG_CA_CERT" + i)));
+                CACert = ConfigManager.readCertificate(conf.getProperty("DIGIDOC_CA_CERT" + i));
                 try
                 {
                     cert.verify(CACert.getPublicKey());
