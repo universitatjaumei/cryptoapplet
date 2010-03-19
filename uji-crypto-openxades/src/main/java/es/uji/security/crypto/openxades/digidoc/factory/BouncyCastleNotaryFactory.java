@@ -1322,8 +1322,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                             + ocspCAFile);
                 // System.out.println("OCSP CERTFILE: " + ocspCertFile);
                 if (ocspCertFile != null)
-                    m_ocspCerts.put(ocspCN, SignedDoc.readCertificate(ocspCertFile));
-                m_ocspCACerts.put(ocspCACN, SignedDoc.readCertificate(ocspCAFile));
+                    m_ocspCerts.put(ocspCN, ConfigManager.readCertificate(ocspCertFile));
+                m_ocspCACerts.put(ocspCACN, ConfigManager.readCertificate(ocspCAFile));
                 // read any further certs if they exist
                 int j = 1;
                 String certFile = null;
@@ -1335,7 +1335,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                         if (m_logger.isDebugEnabled())
                             m_logger.debug("Responder: " + ocspCN + " cert: " + ocspCertFile
                                     + " ca-cert: " + ocspCAFile);
-                        m_ocspCerts.put(ocspCN + "-" + j, SignedDoc.readCertificate(certFile));
+                        m_ocspCerts.put(ocspCN + "-" + j, ConfigManager.readCertificate(certFile));
                     }
                     j++;
                 }
@@ -1343,17 +1343,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
 
         }
-        catch (DigiDocException d_ex)
-        {
-            if (d_ex.getCode() == DigiDocException.ERR_READ_FILE)
-                throw new DigiDocException(DigiDocException.ERR_OCSP_READ_FILE,
-                        "Reading OCSP config", d_ex);
-            else
-                throw d_ex;
-        }
         catch (Exception ex)
         {
-            DigiDocException.handleException(ex, DigiDocException.ERR_NOT_FAC_INIT);
+            DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
         }
     }
 }

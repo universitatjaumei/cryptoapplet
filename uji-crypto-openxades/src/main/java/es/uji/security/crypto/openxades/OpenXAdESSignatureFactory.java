@@ -211,7 +211,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true);
 
-            X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
+            X509Certificate xcaCert = ConfigManager.readCertificate(tsa1_ca);
             TSResponseToken responseToken = new TSResponseToken(response);
             
             TSResponse mmm = new TSResponse(Base64.decode(Base64.encodeBytes(response.getEncodedToken())));
@@ -298,7 +298,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
                     canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
 
-            X509Certificate xcaCert = SignedDoc.readCertificate(tsa1_ca);
+            X509Certificate xcaCert = ConfigManager.readCertificate(tsa1_ca);
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
             TSResponseToken responseToken = new TSResponseToken(response);            
 

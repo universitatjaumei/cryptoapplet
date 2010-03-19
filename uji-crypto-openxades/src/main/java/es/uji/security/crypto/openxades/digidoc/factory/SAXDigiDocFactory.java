@@ -191,7 +191,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     m_logger.info("CA: " + ("DIGIDOC_CA_CERT" + (i + 1)) + " file: " + certFile);
                 }
                 
-                X509Certificate cert = SignedDoc.readCertificate(certFile);
+                X509Certificate cert = ConfigManager.readCertificate(certFile);
                 
                 if (cert != null)
                 {

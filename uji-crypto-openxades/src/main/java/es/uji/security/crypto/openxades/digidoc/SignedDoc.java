@@ -966,58 +966,6 @@ public class SignedDoc implements Serializable
     }
 
     /**
-     * Reads the cert from a file, URL or from another location somewhere in the CLASSPATH such as
-     * in the librarys jar file.
-     * 
-     * @param certLocation
-     *            certificates file name, or URL. You can use url in form jar://<location> to read a
-     *            certificate from the car file or some other location in the CLASSPATH
-     * @return certificate object
-     */
-    public static X509Certificate readCertificate(String certLocation) throws DigiDocException
-    {
-        X509Certificate cert = null;
-        try
-        {
-            InputStream isCert = null;
-            URL url = null;
-            if (certLocation.startsWith("http"))
-            {
-                url = new URL(certLocation);
-                isCert = url.openStream();
-            }
-            else if (certLocation.startsWith("jar://"))
-            {
-                ClassLoader cl = SignedDoc.class.getClassLoader();
-                isCert = cl.getResourceAsStream(certLocation.substring(6));
-            }
-            else if (certLocation.startsWith("keystore://"))
-            {
-                ClassLoader cl = SignedDoc.class.getClassLoader();
-                isCert = cl.getResourceAsStream(conf.getProperty("DEFAULT_KEYSTORE"));
-                
-                String str_cert= certLocation.substring(11);
-                KeyStore ks= KeyStore.getInstance("JKS");
-                
-                return (X509Certificate) ks.getCertificate(str_cert);                 
-            }
-            else
-            {
-                isCert = new FileInputStream(certLocation);
-            }
-            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-            cert = (X509Certificate) certificateFactory.generateCertificate(isCert);
-            isCert.close();
-        }
-        catch (Exception ex)
-        {
-            log.info("ERROR: Ca Certificate " + certLocation + " Not Found");
-            DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE);
-        }
-        return cert;
-    }
-
-    /**
      * Helper method for comparing digest values
      * 
      * @param dig1

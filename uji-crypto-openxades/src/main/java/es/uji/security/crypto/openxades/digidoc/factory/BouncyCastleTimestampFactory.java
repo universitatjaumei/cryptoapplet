@@ -47,7 +47,7 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
     private Logger m_logger = null;
 
     private ConfigManager conf = ConfigManager.getInstance();
-    
+
     /**
      * Creates new BouncyCastleTimestampFactory
      */
@@ -79,8 +79,8 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
         byte[] messageImp = null;
 
         try
-        {      	
-            TSResponseToken tsResponseToken = new TSResponseToken(ts.getTimeStampResponse());            
+        {
+            TSResponseToken tsResponseToken = new TSResponseToken(ts.getTimeStampResponse());
             messageImp = tsResponseToken.getMessageImprint();
 
             if (m_logger.isDebugEnabled())
@@ -142,8 +142,19 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
 
     private X509Certificate findTSACert(int idx) throws DigiDocException
     {
-        return SignedDoc.readCertificate(conf.getProperty(
-                "DIGIDOC_TSA" + idx + "_CERT"));
+        X509Certificate certificate = null;
+
+        try
+        {
+            certificate = ConfigManager.readCertificate(conf.getProperty("DIGIDOC_TSA" + idx
+                    + "_CERT"));
+        }
+        catch (Exception e)
+        {
+            DigiDocException.handleException(e, DigiDocException.ERR_READ_FILE);
+        }
+
+        return certificate;
     }
 
     private X509Certificate findTSACACert(int idx) throws DigiDocException
@@ -151,7 +162,19 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
         String fname = conf.getProperty("DIGIDOC_TSA" + idx + "_CA_CERT");
         if (m_logger.isDebugEnabled())
             m_logger.debug("Read ca cert: " + fname);
-        return SignedDoc.readCertificate(fname);
+
+        X509Certificate certificate = null;
+
+        try
+        {
+            certificate = ConfigManager.readCertificate(fname);
+        }
+        catch (Exception e)
+        {
+            DigiDocException.handleException(e, DigiDocException.ERR_READ_FILE);
+        }
+
+        return certificate;
     }
 
     /**

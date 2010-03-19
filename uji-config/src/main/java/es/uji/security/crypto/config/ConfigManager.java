@@ -2,10 +2,18 @@ package es.uji.security.crypto.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -24,13 +32,23 @@ public class ConfigManager
     {
         if (configManager == null)
         {
-            configManager = new ConfigManager();
+            configManager = new ConfigManager(null);
         }
 
         return configManager;
     }
 
-    public static Properties getDefaultProperties()
+    public static ConfigManager getInstance(Properties properties)
+    {
+        if (configManager == null)
+        {
+            configManager = new ConfigManager(properties);
+        }
+
+        return configManager;
+    }
+
+    public Properties getDefaultProperties()
     {
         Properties prop = new Properties();
 
@@ -52,29 +70,36 @@ public class ConfigManager
         return prop;
     }
 
-    private ConfigManager()
+    private ConfigManager(Properties properties)
     {
         // Try to load system properties
 
-        try
+        if (properties != null)
         {
-            props.load(ConfigManager.class.getClassLoader()
-                    .getResourceAsStream(DEFAULT_CONFIG_FILE));
+            props.putAll(properties);
         }
-        catch (IOException e)
+        else
         {
-            log.error("Cant not load ujiCrypto.conf file", e);
+            try
+            {
+                props.load(ConfigManager.class.getClassLoader().getResourceAsStream(
+                        DEFAULT_CONFIG_FILE));
+            }
+            catch (IOException e)
+            {
+                log.error("Cant not load ujiCrypto.conf file", e);
+            }
         }
 
         props.putAll(getDefaultProperties());
     }
 
-    public static String getProperty(String key)
+    public String getProperty(String key)
     {
         return props.getProperty(key);
     }
 
-    public static void setProperty(String key, String value)
+    public void setProperty(String key, String value)
     {
         props.setProperty(key, value);
     }
@@ -102,29 +127,27 @@ public class ConfigManager
 
     public ArrayList<Device> getDeviceConfig()
     {
-        String deviceList = ConfigManager.getProperty("cryptoapplet.devices");
+        String deviceList = getProperty("cryptoapplet.devices");
         ArrayList<Device> result = new ArrayList<Device>();
 
         if (deviceList != null)
         {
             for (String device : deviceList.split(","))
             {
-                String deviceName = ConfigManager.getProperty("cryptoapplet.devices." + device
-                        + ".name");
-                String deviceSlot = ConfigManager.getProperty("cryptoapplet.devices." + device
-                        + ".slot");
+                String deviceName = getProperty("cryptoapplet.devices." + device + ".name");
+                String deviceSlot = getProperty("cryptoapplet.devices." + device + ".slot");
 
                 String deviceLibrariesList = "";
 
                 if (OS.isLinux())
                 {
-                    deviceLibrariesList = ConfigManager.getProperty("cryptoapplet.devices."
-                            + device + ".libraries.linux");
+                    deviceLibrariesList = getProperty("cryptoapplet.devices." + device
+                            + ".libraries.linux");
                 }
                 else if (OS.isWindowsUpperEqualToNT())
                 {
-                    deviceLibrariesList = ConfigManager.getProperty("cryptoapplet.devices."
-                            + device + ".libraries.windows");
+                    deviceLibrariesList = getProperty("cryptoapplet.devices." + device
+                            + ".libraries.windows");
                 }
 
                 String deviceLibrary = null;
@@ -165,5 +188,49 @@ public class ConfigManager
         }
 
         return result;
+    }
+
+    public static X509Certificate readCertificate(String certLocation) throws KeyStoreException,
+            IOException, CertificateException, NoSuchAlgorithmException
+    {
+        ConfigManager conf = ConfigManager.getInstance();
+
+        InputStream certificateStream = null;
+
+        if (certLocation.startsWith("http"))
+        {
+            URL url = new URL(certLocation);
+            certificateStream = url.openStream();
+        }
+        else if (certLocation.startsWith("jar://"))
+        {
+            ClassLoader classLoader = ConfigManager.class.getClassLoader();
+            certificateStream = classLoader.getResourceAsStream(certLocation.substring(6));
+        }
+        else if (certLocation.startsWith("keystore://"))
+        {
+            ClassLoader classLoader = ConfigManager.class.getClassLoader();
+            certificateStream = classLoader.getResourceAsStream(conf
+                    .getProperty("DEFAULT_KEYSTORE"));
+
+            String str_cert = certLocation.substring(11);
+            KeyStore keystore = KeyStore.getInstance("JKS");
+
+            keystore.load(certificateStream, conf.getProperty("DEFAULT_KEYSTORE_PASSWORD")
+                    .toCharArray());
+
+            return (X509Certificate) keystore.getCertificate(str_cert);
+        }
+        else
+        {
+            certificateStream = new FileInputStream(certLocation);
+        }
+
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate certificate = (X509Certificate) certificateFactory
+                .generateCertificate(certificateStream);
+        certificateStream.close();
+
+        return certificate;
     }
 }
