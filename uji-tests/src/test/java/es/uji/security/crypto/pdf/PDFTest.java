@@ -1,0 +1,44 @@
+package es.uji.security.crypto.pdf;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import es.uji.security.BaseCryptoAppletTest;
+import es.uji.security.crypto.ISignFormatProvider;
+import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.VerificationResult;
+import es.uji.security.crypto.config.OS;
+
+public class PDFTest extends BaseCryptoAppletTest
+{
+    @Before
+    public void init() throws IOException
+    {
+        data = OS.inputStreamToByteArray(new FileInputStream(baseDir + "in-pdf.pdf"));
+        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
+    }
+
+    @Test
+    public void pdf() throws Exception
+    {
+        // Sign
+
+        ISignFormatProvider signFormatProvider = new PDFSignatureFactory();
+        SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+
+        showErrors(signatureResult, baseDir + "out-pdf.pdf");
+
+        // Verify
+
+        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir + "out-pdf.pdf"));
+
+        PDFSignatureVerifier signatureVerifier = new PDFSignatureVerifier();
+        VerificationResult verificationResult = signatureVerifier.verify(signedData);
+
+        showErrors(verificationResult);
+    }
+}
