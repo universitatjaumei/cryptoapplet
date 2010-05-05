@@ -5,10 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
+import java.util.Properties;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
+import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
@@ -36,8 +37,8 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class AppHandler
 {
-    private Logger log = Logger.getLogger(AppHandler.class);
-    
+    private static Logger log = Logger.getLogger(AppHandler.class);
+
     /* The singleton applet object */
     private static AppHandler singleton;
 
@@ -47,7 +48,7 @@ public class AppHandler
     // This object interacts with the signature thread and wraps all the multisignature complexity
     public SignatureHandler sigh = null;
 
-    // JavaScript Functions 
+    // JavaScript Functions
     private String jsSignOk = "onSignOk";
     private String jsSignError = "onSignError";
     private String jsSignCancel = "onSignCancel";
@@ -59,10 +60,10 @@ public class AppHandler
     // Input data encoding format
     private SupportedDataEncoding inputDataEncoding = SupportedDataEncoding.PLAIN;
     private SupportedDataEncoding outputDataEncoding = SupportedDataEncoding.PLAIN;
-    
+
     // Host navigator
     private SupportedBrowser navigator = SupportedBrowser.MOZILLA;
-    
+
     // Input/Output Data handling
     private InputParams input;
     private OutputParams output;
@@ -72,18 +73,16 @@ public class AppHandler
     private String xadesFilename;
     private String xadesFileMimeType;
     private String[] xadesBaseRef;
-    
-    private boolean isBigFile= false;
+
+    private boolean isBigFile = false;
 
     private SSLSocketFactory defaultSocketFactory;
     private String downloadURL;
 
-	
-
     public AppHandler() throws SignatureAppletException
     {
         this(null);
-        
+
         log.debug("Running in desktop application mode");
     }
 
@@ -94,19 +93,19 @@ public class AppHandler
      * That class should be used as a Sigleton so you must use getInstance in order to get this
      * class object.
      **/
-    
+
     public AppHandler(String downloadURL) throws SignatureAppletException
     {
         this.downloadURL = downloadURL;
-        
+
         try
         {
-            log.debug("Get JavaScript member: navigator");            
+            log.debug("Get JavaScript member: navigator");
             JSObject document = (JSObject) JSCommands.getWindow().getMember("navigator");
-            
+
             log.debug("Get JavaScript member: userAgent");
-            String userAgent = (String) document.getMember("userAgent");        
-            
+            String userAgent = (String) document.getMember("userAgent");
+
             if (userAgent != null)
             {
                 userAgent = userAgent.toLowerCase();
@@ -124,11 +123,11 @@ public class AppHandler
                     catch (Throwable e)
                     {
                         log.error("Error installing or loading the DLL file", e);
-                    }                    
+                    }
                 }
-                else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1 || 
-                         userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1 || 
-                         userAgent.indexOf("netscape") > -1)
+                else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1
+                        || userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1
+                        || userAgent.indexOf("netscape") > -1)
                 {
                     this.navigator = SupportedBrowser.MOZILLA;
                 }
@@ -140,7 +139,7 @@ public class AppHandler
         }
 
         log.debug("Navigator variable set to " + this.navigator);
-        
+
         // Keep a copy to restore its value
         defaultSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
     }
@@ -328,13 +327,13 @@ public class AppHandler
         try
         {
             log.debug("Downloading " + downloadUrl + ". Complete DLL path is " + completeDllPath);
-            dumpFile(downloadUrl + "MicrosoftCryptoApi_0_3.dll", completeDllPath);                        
+            dumpFile(downloadUrl + "MicrosoftCryptoApi_0_3.dll", completeDllPath);
         }
         catch (Throwable e)
         {
             log.error(LabelManager.get("ERROR_CAPI_DLL_INSTALL"), e);
             throw new SignatureAppletException(LabelManager.get("ERROR_CAPI_DLL_INSTALL"));
-        }        
+        }
     }
 
     /**
@@ -354,18 +353,18 @@ public class AppHandler
         if (!dllFile.exists())
         {
             log.info("MicrosoftCryptoApi_0_3.dll not found. Downloading DLL file");
-            
-            installDLL(this.downloadURL, completeDLLPath);                
+
+            installDLL(this.downloadURL, completeDLLPath);
         }
         else
         {
             log.info("MicrosoftCryptoApi_0_3.dll already exists. Verifying existing DLL file");
-            
+
             try
             {
                 byte[] originalDLLHash = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
-                        (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35,
-                        0x71, (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
+                        (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35, 0x71,
+                        (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
 
                 FileInputStream dllFileStream = new FileInputStream(dllFile);
 
@@ -381,13 +380,13 @@ public class AppHandler
                 log.debug("Current DLL digest: " + HexDump.xdump(currentDLLHash));
 
                 // Compare original and current hash
-                
+
                 for (int i = 0; i < currentDLLHash.length; i++)
                 {
                     if (currentDLLHash[i] != originalDLLHash[i])
                     {
                         log.info("DLL not valid. Downloading orginal DLL file");
-                        
+
                         installDLL(this.downloadURL, completeDLLPath);
                         break;
                     }
@@ -398,19 +397,19 @@ public class AppHandler
                 throw new SignatureAppletException(e.getMessage(), false);
             }
         }
-        
+
         try
         {
             log.debug("Loading DLL with System.load " + completeDLLPath);
-            
+
             System.load(completeDLLPath);
         }
         catch (Throwable e)
         {
             log.error("Error loading " + completeDLLPath, e);
-        }        
+        }
     }
-    
+
     /**
      * Calls the javascript function indicated as func with params arguments
      * 
@@ -552,7 +551,7 @@ public class AppHandler
     {
         this.signatureFormat = signatureFormat;
 
-        log.debug("Setting signOutputFormat to " + signatureFormat);        
+        log.debug("Setting signOutputFormat to " + signatureFormat);
     }
 
     /**
@@ -564,7 +563,7 @@ public class AppHandler
     {
         return this.inputDataEncoding;
     }
-    
+
     /**
      * It returns the selected output data encoding
      * 
@@ -588,12 +587,13 @@ public class AppHandler
     /**
      * A method for get the isBigFile attribute.
      * 
-     * @return boolean indicating if it is bigFile or not. 
+     * @return boolean indicating if it is bigFile or not.
      */
-	public boolean getIsBigFile() {
-		return this.isBigFile; 
-	}
-    
+    public boolean getIsBigFile()
+    {
+        return this.isBigFile;
+    }
+
     /**
      * A method for setting the encoding type of the input data
      * 
@@ -603,11 +603,10 @@ public class AppHandler
     public void setInputDataEncoding(SupportedDataEncoding inputDataEncoding)
     {
         this.inputDataEncoding = inputDataEncoding;
-        
+
         log.debug("Setting inputDataEncoding to " + inputDataEncoding);
     }
 
-    
     /**
      * A method for setting the encoding type for the output data
      * 
@@ -617,10 +616,10 @@ public class AppHandler
     public void setOutputDataEncoding(SupportedDataEncoding outputDataEncoding)
     {
         this.outputDataEncoding = outputDataEncoding;
-        
+
         log.debug("Setting inputDataEncoding to " + outputDataEncoding);
     }
-    
+
     /**
      * Sets the InputParams for this signature
      * 
@@ -675,22 +674,23 @@ public class AppHandler
         else
         {
             // Create a trust manager that does not validate certificate chains
-            TrustManager[] trustAllCerts = new TrustManager[] { 
-                    new X509TrustManager() {                
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers()
-                        {
-                            return null;
-                        }
-                        
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType)
-                        {
-                        }
+            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
+            {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers()
+                {
+                    return null;
+                }
 
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
-                        {
-                        }
-                    } 
-            };
+                public void checkClientTrusted(java.security.cert.X509Certificate[] certs,
+                        String authType)
+                {
+                }
+
+                public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
+                        String authType)
+                {
+                }
+            } };
 
             // Install the all-trusting trust manager
             try
@@ -705,17 +705,41 @@ public class AppHandler
         }
     }
 
-	public void setIsBigFile(boolean isBigFile) {
-		System.out.println("SET ISBIGFILE to: " + isBigFile);
-		this.isBigFile= isBigFile; 
-	}
+    public void setIsBigFile(boolean isBigFile)
+    {
+        System.out.println("SET ISBIGFILE to: " + isBigFile);
+        this.isBigFile = isBigFile;
+    }
 
-	public void setXAdESBaseRef(String[] baseReference) {
-		this.xadesBaseRef=baseReference; 
-		
-	}
-	
-	public String[] getXAdESBaseRef() {
-		return this.xadesBaseRef; 	
-	}
+    public void setXAdESBaseRef(String[] baseReference)
+    {
+        this.xadesBaseRef = baseReference;
+
+    }
+
+    public String[] getXAdESBaseRef()
+    {
+        return this.xadesBaseRef;
+    }
+
+    public static void initConfig(String downloadURL)
+    {
+        try
+        {
+            // Retrieve ujiCrypto.conf file
+            URL url = new URL(downloadURL + "/ujiCrypto.conf");
+            URLConnection uc = url.openConnection();
+            uc.connect();
+
+            Properties properties = new Properties();
+            properties.load(uc.getInputStream());
+
+            // Load remote properties
+            ConfigManager.getInstance(properties);
+        }
+        catch (Exception e)
+        {
+            log.error("Cann't load ujiCrypto.conf from server. WARNING: Bundled local file will be loaded.");
+        }
+    }
 }
