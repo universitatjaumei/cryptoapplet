@@ -4,12 +4,8 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-//import org.apache.log4j.Logger;
-
 public class LabelManager
 {
-    // private Logger log = Logger.getLogger(LabelManager.class);
-
     private static LabelManager i18n;
     private Properties _prop = new Properties();
     private static String _lang = null;
@@ -17,10 +13,7 @@ public class LabelManager
     public static void setLang(String lang)
     {
         _lang = lang;
-        // if (i18n == null)
-        // {
         i18n = new LabelManager();
-        // }
     }
 
     private LabelManager()
@@ -30,11 +23,15 @@ public class LabelManager
             ResourceBundle bundle;
 
             if (_lang != null)
-                bundle = ResourceBundle.getBundle("i18n" + "_" + _lang);
+            {
+                bundle = CustomBundleLoader.getBundle("i18n" + "_" + _lang);
+            }
             else
-                bundle = ResourceBundle.getBundle("i18n");
+            {
+                bundle = CustomBundleLoader.getBundle("i18n");
+            }
 
-            Enumeration enume = bundle.getKeys();
+            Enumeration<String> enume = bundle.getKeys();
             String key = null;
 
             while (enume.hasMoreElements())
@@ -42,9 +39,6 @@ public class LabelManager
                 key = (String) enume.nextElement();
                 _prop.put(key, bundle.getObject(key));
             }
-
-            // log.debug("LabelManager has loaded " + _prop.size() + " labels");
-
         }
         catch (Exception e)
         {
@@ -67,7 +61,7 @@ public class LabelManager
         }
         catch (Exception e)
         {
-            // Untranslated message.
+            // Untranslated message
             translated = "ERROR: UNTRANSLATED MESSAGE: " + propName;
         }
 
