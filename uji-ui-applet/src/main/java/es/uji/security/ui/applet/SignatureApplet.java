@@ -13,6 +13,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import netscape.javascript.JSException;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
@@ -63,6 +64,20 @@ public class SignatureApplet extends JApplet
 	 * Init method. Installs the applet on client side. Downloads
 	 * MicrosoftCryptoApi dll and loads it in case of Internet Explorer
 	 */
+    
+    
+    static
+    {
+        // Para evitar que pida cosas del log4j
+        System.setProperty("log4j.defaultInitOverride", "true");
+        Logger.getRootLogger().setLevel(Level.DEBUG);
+
+        // Para evitar que pida .class varios
+        System.setProperty("javax.xml.parsers.SAXParserFactory", "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
+        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+        System.setProperty("javax.xml.transform.TransformerFactory", "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+        System.setProperty("org.apache.xml.dtm.DTMManager", "org.apache.xml.dtm.ref.DTMManagerDefault");
+    }
 
     public void init()
     {
@@ -115,6 +130,10 @@ public class SignatureApplet extends JApplet
 
             this.apph = AppHandler.getInstance(downloadURL);            
             this.keyStoreManager = new KeyStoreManager();
+            
+            // Init config (try to load ujiCrypto.conf from server)
+            
+            AppHandler.initConfig(downloadURL);
             
             // Init keystores
             
