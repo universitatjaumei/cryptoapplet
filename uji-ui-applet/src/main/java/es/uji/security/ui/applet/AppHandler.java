@@ -724,6 +724,8 @@ public class AppHandler
 
     public static void initConfig(String downloadURL)
     {
+        log.debug("Trying to retrieve ujiCrypto.conf from server ...");
+        
         try
         {
             // Retrieve ujiCrypto.conf file
@@ -736,6 +738,8 @@ public class AppHandler
 
             // Load remote properties
             ConfigManager.getInstance(properties);
+            
+            log.debug("Remote ujiCrypto.conf loaded successfully!!");
         }
         catch (Exception e)
         {
