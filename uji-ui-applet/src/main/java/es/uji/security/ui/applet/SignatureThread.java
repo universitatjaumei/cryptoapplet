@@ -299,12 +299,17 @@ public class SignatureThread extends Thread
                         
                         sigOpt.setProvider(kAux.getProvider());
  						sigOpt.setSwapToFile(_mw.getAppHandler().getIsBigFile());
- 						String[] baseRefs= _mw.getAppHandler().getXAdESBaseRef();
- 						if (baseRefs.length != 1){ 
- 							sigOpt.setXAdESBaseReference(baseRefs[this._step]);
- 						}
- 						else{
- 							sigOpt.setXAdESBaseReference(baseRefs[0]);
+ 						
+ 						if (_mw.getAppHandler().getXAdESBaseRef() != null)
+ 						{
+     						String[] baseRefs= _mw.getAppHandler().getXAdESBaseRef();
+     						
+     						if (baseRefs.length != 1){ 
+     							sigOpt.setXAdESBaseReference(baseRefs[this._step]);
+     						}
+     						else{
+     							sigOpt.setXAdESBaseReference(baseRefs[0]);
+     						}
  						}
  
                         if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS_HASH))
