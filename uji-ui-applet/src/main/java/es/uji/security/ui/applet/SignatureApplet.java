@@ -13,8 +13,13 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import netscape.javascript.JSException;
 
+import org.apache.log4j.Appender;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
@@ -70,6 +75,13 @@ public class SignatureApplet extends JApplet
     {
         // Para evitar que pida cosas del log4j
         System.setProperty("log4j.defaultInitOverride", "true");
+        
+        BasicConfigurator.resetConfiguration();
+        
+        Layout layout = new PatternLayout("%p %t %c [%d{HH:mm:ss,SSS}] - %m%n"); 
+        Appender appender = new ConsoleAppender(layout);
+        BasicConfigurator.configure(appender);
+        
         Logger.getRootLogger().setLevel(Level.DEBUG);
 
         // Para evitar que pida .class varios
