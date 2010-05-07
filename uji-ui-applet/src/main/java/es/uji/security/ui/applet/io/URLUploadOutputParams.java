@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 
 import es.uji.security.ui.applet.JSCommands;
 import es.uji.security.ui.applet.SignatureApplet;
-import es.uji.security.util.OS;
+import es.uji.security.crypto.config.OS;
 
 public class URLUploadOutputParams extends AbstractData implements OutputParams
 {
