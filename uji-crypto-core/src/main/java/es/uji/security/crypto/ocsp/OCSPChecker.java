@@ -403,13 +403,13 @@ public class OCSPChecker
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
         X509Certificate cagvaCertificate = (X509Certificate) certificateFactory
                 .generateCertificate(new FileInputStream(
-                        "../uji-config/src/main/resources/cagva.pem"));
+                        "src/main/resources/cagva.pem"));
         X509Certificate accvCertificate = (X509Certificate) certificateFactory
                 .generateCertificate(new FileInputStream(
-                        "../uji-config/src/main/resources/accv-ca2.pem"));
+                        "src/main/resources/accv-ca2.pem"));
         X509Certificate ocspCertificate = (X509Certificate) certificateFactory
                 .generateCertificate(new FileInputStream(
-                        "../uji-config/src/main/resources/ocsp-gva.crt"));
+                        "src/main/resources/ocsp-gva.crt"));
 
         OCSPChecker oscp = new OCSPChecker();
 
