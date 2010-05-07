@@ -97,9 +97,11 @@ public class BaseCryptoAppletTest
     
     protected void showErrors(SignatureResult signatureResult, String dumpFile) throws IOException
     {
-        OS.dumpToFile(new File(dumpFile), signatureResult
-                .getSignatureData());
-        
+    	if (signatureResult.getSignatureData() != null){
+    		OS.dumpToFile(new File(dumpFile), signatureResult
+    				.getSignatureData());
+    	}
+    	
         if (!signatureResult.isValid())
         {
             for (String error : signatureResult.getErrors())
