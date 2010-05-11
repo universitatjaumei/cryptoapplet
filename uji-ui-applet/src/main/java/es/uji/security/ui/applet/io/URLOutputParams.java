@@ -64,21 +64,13 @@ public class URLOutputParams extends AbstractData implements OutputParams
             log.debug("Cookies can not be obtained", e);            
         }
         
-        String urlOk= null;
-        if (this.urls.length>1)
-        	urlOk = this.urls[current];
-        else
-        	urlOk = this.urls[0];
-        
-        if (urlOk.indexOf('?') > -1)
-        {
-            urlOk = urlOk.substring(0, urlOk.indexOf('?'));
-        }
-        
+        String currentURL = this.urls[current];
+        String urlWithoutParams = currentURL.substring(0, currentURL.indexOf('?'));
+        String urlParams = currentURL.substring(currentURL.indexOf('?')+1);
 
-        log.debug("Posting data to " + urlOk + ", with post parameter variable " + postVariable);
+        log.debug("Posting data to " + currentURL + ", with post parameter variable " + postVariable);
         
-        URL url = new URL(urlOk);
+        URL url = new URL(urlWithoutParams);
 
         HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
 
@@ -106,7 +98,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
         
         out.writeBytes("&item=" + URLEncoder.encode("" + _count, "ISO-8859-1"));
 
-        StringTokenizer strTok = new StringTokenizer(urlOk.substring(urlOk.indexOf('?') + 1), "&");
+        StringTokenizer strTok = new StringTokenizer(urlParams, "&");
         
         while (strTok.hasMoreTokens())
         {
