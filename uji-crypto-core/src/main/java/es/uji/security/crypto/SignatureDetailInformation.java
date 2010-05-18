@@ -15,7 +15,7 @@ import org.w3c.dom.NodeList;
 
 public class SignatureDetailInformation
 {
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     private String signerCN;
     private Date signatureTime;
@@ -69,7 +69,7 @@ public class SignatureDetailInformation
 
     public String getSignatureTimeAsXMLDateTime()
     {
-        return simpleDateFormat.format(this.signatureTime);
+        return simpleDateFormat.format(this.signatureTime) + "Z";
     }
 
     public static List<SignatureDetailInformation> getSignatureDetailInformation(byte[] data,
