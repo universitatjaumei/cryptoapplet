@@ -1,8 +1,5 @@
 package es.uji.security.crypto.pdf;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,7 +10,6 @@ import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
 
 import es.uji.security.crypto.SignatureDetailInformation;
-import es.uji.security.crypto.config.OS;
 
 public class PDFSignatureDetail
 {
