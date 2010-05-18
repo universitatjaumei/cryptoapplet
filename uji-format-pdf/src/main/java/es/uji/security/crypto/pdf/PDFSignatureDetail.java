@@ -1,5 +1,6 @@
 package es.uji.security.crypto.pdf;
 
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -9,16 +10,27 @@ import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
 
+import es.uji.security.crypto.CryptoCoreException;
+import es.uji.security.crypto.IDetailInformationGenerator;
 import es.uji.security.crypto.SignatureDetailInformation;
 
-public class PDFSignatureDetail
+public class PDFSignatureDetail implements IDetailInformationGenerator
 {
     @SuppressWarnings("unchecked")
-    public List<SignatureDetailInformation> getDetails(byte[] data) throws Exception
+    public List<SignatureDetailInformation> getDetails(byte[] data) throws CryptoCoreException
     {
         List<SignatureDetailInformation> result = new ArrayList<SignatureDetailInformation>();
 
-        PdfReader reader = new PdfReader(data);
+        PdfReader reader = null;
+        
+        try
+        {
+            reader = new PdfReader(data);
+        }
+        catch (IOException e)
+        {
+            return result;
+        }
 
         AcroFields acroFields = reader.getAcroFields();
         ArrayList<String> signatureNameList = acroFields.getSignatureNames();
