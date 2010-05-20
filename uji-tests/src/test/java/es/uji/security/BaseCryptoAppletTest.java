@@ -75,7 +75,7 @@ public class BaseCryptoAppletTest
     
             if (System.getProperty("uji.keystore.alias") != null)
             {
-                keyPassword = System.getProperty("uji.keystore.alias");
+                alias = System.getProperty("uji.keystore.alias");
             }
     
             // Certificado de firma
