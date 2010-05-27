@@ -4,6 +4,8 @@ import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SignatureOptions
 {
@@ -20,9 +22,12 @@ public class SignatureOptions
     private String policyIdentifier;
     private String policyDescription;
 	private String baseReference;
+	
+	private Map<String, String> bindValues;
 
     public SignatureOptions()
     {
+        bindValues = new HashMap<String, String>();
     }
 
     public boolean isHash()
@@ -132,4 +137,14 @@ public class SignatureOptions
     public void setXAdESBaseReference(String baseRef) {
     	this.baseReference= baseRef;
 	}
+
+    public Map<String, String> getVisibleSignatureTextBindValues()
+    {
+        return bindValues;
+    }
+    
+    public void setVisibleSignatureTextBindValues(Map<String, String> bindValues)
+    {
+        this.bindValues = bindValues;
+    }
 }
