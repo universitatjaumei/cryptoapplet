@@ -13,8 +13,10 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.lowagie.text.BadElementException;
+import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfDate;
@@ -29,6 +31,7 @@ import com.lowagie.text.pdf.PdfString;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.config.CertificateUtils;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.util.i18n.LabelManager;
@@ -40,10 +43,28 @@ public class PDFSignatureFactory implements ISignFormatProvider
     private Certificate[] chain;
     private ConfigManager conf = ConfigManager.getInstance();
 
+    private Font font;
+
+    public PDFSignatureFactory()
+    {
+        String fontSizeProperty = conf.getProperty("PDFSIG_VISIBLE_AREA_TEXT_SIZE");
+        int fontSize = 8;
+        
+        try
+        {
+            fontSize = Integer.parseInt(fontSizeProperty);
+        }
+        catch (Exception e)
+        {            
+        }
+        
+        font = new Font();
+        font.setSize(fontSize);
+    }
+
     protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk,
             Provider provider, Certificate[] chain) throws Exception
     {
-
         PdfPKCS7TSA sgn = new PdfPKCS7TSA(pk, chain, null, "SHA1", provider, true);
 
         byte[] buff = new byte[2048];
@@ -54,8 +75,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             sgn.update(buff, 0, len);
         }
 
-        return sgn.getEncodedPKCS7(null, null, tsaUrl, null);
-
+        return sgn.getEncodedPKCS7(null, null, tsaUrl, null);        
     }
 
     private void signPdf(PdfSignatureAppearance sap)
@@ -108,16 +128,29 @@ public class PDFSignatureFactory implements ISignFormatProvider
         sap.close(dic2);
     }
 
-    private void createVisibleSignature(PdfSignatureAppearance sap) throws BadElementException,
+    private void createVisibleSignature(PdfSignatureAppearance sap, int numSignatures,
+            String pattern, Map<String, String> bindValues) throws BadElementException,
             MalformedURLException, IOException
     {
-        sap.setVisibleSignature(new Rectangle(Float.parseFloat(conf
-                .getProperty("PDFSIG_VISIBLE_AREA_X")), Float.parseFloat(conf
-                .getProperty("PDFSIG_VISIBLE_AREA_Y")), Float.parseFloat(conf
-                .getProperty("PDFSIG_VISIBLE_AREA_X2")), Float.parseFloat(conf
-                .getProperty("PDFSIG_VISIBLE_AREA_Y2"))), Integer.parseInt(conf
-                .getProperty("PDFSIG_VISIBLE_AREA_PAGE")), null);
+        float x1 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_X"));
+        float y1 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_Y"));
+        float x2 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_X2"));
+        float y2 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_Y2"));
+
+        float offset = (x2 - x1) * numSignatures;
+
+        sap.setVisibleSignature(new Rectangle(x1 + offset, y1, x2 + offset, y2), Integer
+                .parseInt(conf.getProperty("PDFSIG_VISIBLE_AREA_PAGE")), null);
         sap.setAcro6Layers(true);
+        sap.setLayer2Font(font);
+        
+        if (pattern != null && pattern.length()>0)
+        {
+            PatternParser patternParser = new PatternParser(pattern);
+            String signatureText = patternParser.parse(bindValues);
+    
+            sap.setLayer2Text(signatureText);
+        }
 
         byte[] imageData = OS.inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
                 .getResourceAsStream(conf.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
@@ -186,18 +219,28 @@ public class PDFSignatureFactory implements ISignFormatProvider
             PdfReader reader = new PdfReader(datos);
             ByteArrayOutputStream sout = new ByteArrayOutputStream();
 
-            PdfStamper stp = PdfStamper.createSignature(reader, sout, '\0', null, true);
-
+            PdfStamper stp = PdfStamper.createSignature(reader, sout, '\0', null, true);            
             PdfSignatureAppearance sap = stp.getSignatureAppearance();
 
             String aux = conf.getProperty("PDFSIG_VISIBLE_SIGNATURE");
 
             if (aux != null && aux.trim().equals("true"))
             {
-                createVisibleSignature(sap);
-            }
+                String pattern = conf.getProperty("PDFSIG_VISIBLE_AREA_TEXT_PATTERN");
 
+                Map<String, String> bindValues = signatureOptions.getVisibleSignatureTextBindValues();
+                
+                if (bindValues != null)
+                {
+                    bindValues.put("%s", CertificateUtils.getCn(sCer));
+                }
+                
+                createVisibleSignature(sap, reader.getAcroFields().getSignatureNames().size(),
+                        pattern, bindValues);
+            }
+            
             aux = conf.getProperty("PDFSIG_TIMESTAMPING");
+            
             if (aux != null && aux.trim().equals("true")
                     && conf.getProperty("PDFSIG_TSA_URL") != null)
             {
@@ -208,7 +251,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 signPdf(sap);
                 stp.close();
             }
-
+            
             signatureResult.setValid(true);
             signatureResult.setSignatureData(new ByteArrayInputStream(sout.toByteArray()));
 
