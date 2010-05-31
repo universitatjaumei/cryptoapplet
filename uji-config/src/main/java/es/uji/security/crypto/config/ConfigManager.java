@@ -99,6 +99,20 @@ public class ConfigManager
         return props.getProperty(key);
     }
 
+    public String getProperty(String key, String defaultValue)
+    {
+        String value = props.getProperty(key);
+        
+        if (value != null)
+        {
+            return value;
+        }
+        else
+        {
+            return defaultValue;
+        }
+    }
+    
     public void setProperty(String key, String value)
     {
         props.setProperty(key, value);
