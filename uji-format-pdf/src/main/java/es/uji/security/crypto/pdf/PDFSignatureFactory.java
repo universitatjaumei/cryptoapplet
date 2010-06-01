@@ -172,11 +172,23 @@ public class PDFSignatureFactory implements ISignFormatProvider
         float x2 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_X2"));
         float y2 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_Y2"));
 
-        float offset = (x2 - x1) * numSignatures;
+        float offsetX = ((x2 - x1) * numSignatures) + 10;
+        float offsetY = ((y2 - y1) * numSignatures) + 10;
 
         // Position of the visible signature
+        
+        String axis = conf.getProperty("PDFSIG_VISIBLE_AREA_REPEAT_AXIS", "X");
 
-        Rectangle rectangle = new Rectangle(x1 + offset, y1, x2 + offset, y2);
+        Rectangle rectangle = null;
+        
+        if (axis.equals("Y")) 
+        {
+            rectangle = new Rectangle(x1, y1 + offsetY, x2, y2 + offsetY);
+        }
+        else
+        {
+            rectangle = new Rectangle(x1 + offsetX, y1, x2 + offsetX, y2);
+        }
 
         sap.setVisibleSignature(rectangle, Integer.parseInt(conf
                 .getProperty("PDFSIG_VISIBLE_AREA_PAGE")), null);
