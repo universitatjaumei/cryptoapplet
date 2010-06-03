@@ -27,6 +27,9 @@ public class PDFTest extends BaseCryptoAppletTest
         bindValues.put("%x", "3439-2134-1371-0998");
         
         signatureOptions.setVisibleSignatureTextBindValues(bindValues);
+        
+        signatureOptions.setVisibleAreaTextPattern("%s con referencia %x a las %t");
+        signatureOptions.setVisibleAreaRepeatAxis("Y");
     }
 
     @Test

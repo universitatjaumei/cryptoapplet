@@ -51,29 +51,14 @@ public class PDFSignatureFactory implements ISignFormatProvider
     private Provider provider;
     private Certificate[] chain;
     private ConfigManager conf = ConfigManager.getInstance();
+    private ConfigurationAdapter confAdapter;
 
     private Font font;
 
-    public PDFSignatureFactory()
-    {
-        initFontDefinition();
-    }
-
     private void initFontDefinition()
     {
-        String fontSizeProperty = conf.getProperty("PDFSIG_VISIBLE_AREA_TEXT_SIZE");
-        int fontSize = 8;
-
-        try
-        {
-            fontSize = Integer.parseInt(fontSizeProperty);
-        }
-        catch (Exception e)
-        {
-        }
-
         font = new Font();
-        font.setSize(fontSize);
+        font.setSize(confAdapter.getVisibleAreaTextSize());
     }
 
     protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk,
@@ -96,29 +81,22 @@ public class PDFSignatureFactory implements ISignFormatProvider
     {
         // Check if TSA support is enabled
 
-        String timestamping = conf.getProperty("PDFSIG_TIMESTAMPING");
-        String tsaUrl = conf.getProperty("PDFSIG_TSA_URL");
-
         boolean enableTSP = false;
 
-        if (timestamping != null && timestamping.trim().equals("true") && tsaUrl != null)
+        if (confAdapter.isTimestamping() && confAdapter.getTsaURL() != null)
         {
             enableTSP = true;
         }
 
         // Add configured values
 
-        String reason = conf.getProperty("PDFSIG_REASON");
-        String location = conf.getProperty("PDFSIG_LOCATION");
-        String contact = conf.getProperty("PDFSIG_CONTACT");
-
         if (enableTSP)
         {
             PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKMS, PdfName.ADBE_PKCS7_SHA1);
 
-            dic.setReason(reason);
-            dic.setLocation(location);
-            dic.setContact(contact);
+            dic.setReason(confAdapter.getReason());
+            dic.setLocation(confAdapter.getLocation());
+            dic.setContact(confAdapter.getContact());
             dic.setDate(new PdfDate(pdfSignatureAppearance.getSignDate())); // time-stamp will
             // over-rule this
 
@@ -133,8 +111,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             // Get the true data signature, including a true time stamp token
 
-            byte[] encodedSig = genPKCS7Signature(pdfSignatureAppearance.getRangeStream(), tsaUrl,
-                    privateKey, provider, chain);
+            byte[] encodedSig = genPKCS7Signature(pdfSignatureAppearance.getRangeStream(),
+                    confAdapter.getTsaURL(), privateKey, provider, chain);
 
             if (contentEst + 2 < encodedSig.length)
             {
@@ -157,9 +135,9 @@ public class PDFSignatureFactory implements ISignFormatProvider
             pdfSignatureAppearance.setProvider(provider.getName());
             pdfSignatureAppearance.setCrypto(privateKey, chain, null,
                     PdfSignatureAppearance.WINCER_SIGNED);
-            pdfSignatureAppearance.setReason(reason);
-            pdfSignatureAppearance.setLocation(location);
-            pdfSignatureAppearance.setContact(contact);
+            pdfSignatureAppearance.setReason(confAdapter.getReason());
+            pdfSignatureAppearance.setLocation(confAdapter.getLocation());
+            pdfSignatureAppearance.setContact(confAdapter.getContact());
         }
     }
 
@@ -167,21 +145,19 @@ public class PDFSignatureFactory implements ISignFormatProvider
             String pattern, Map<String, String> bindValues) throws MalformedURLException,
             IOException, DocumentException
     {
-        float x1 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_X"));
-        float y1 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_Y"));
-        float x2 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_X2"));
-        float y2 = Float.parseFloat(conf.getProperty("PDFSIG_VISIBLE_AREA_Y2"));
+        float x1 = confAdapter.getVisibleAreaX();
+        float y1 = confAdapter.getVisibleAreaY();
+        float x2 = confAdapter.getVisibleAreaX2();
+        float y2 = confAdapter.getVisibleAreaY2();
 
         float offsetX = ((x2 - x1) * numSignatures) + 10;
         float offsetY = ((y2 - y1) * numSignatures) + 10;
 
         // Position of the visible signature
-        
-        String axis = conf.getProperty("PDFSIG_VISIBLE_AREA_REPEAT_AXIS", "X");
 
         Rectangle rectangle = null;
-        
-        if (axis.equals("Y")) 
+
+        if (confAdapter.getVisibleAreaRepeatAxis().equals("Y"))
         {
             rectangle = new Rectangle(x1, y1 + offsetY, x2, y2 + offsetY);
         }
@@ -190,8 +166,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             rectangle = new Rectangle(x1 + offsetX, y1, x2 + offsetX, y2);
         }
 
-        sap.setVisibleSignature(rectangle, Integer.parseInt(conf
-                .getProperty("PDFSIG_VISIBLE_AREA_PAGE")), null);
+        sap.setVisibleSignature(rectangle, confAdapter.getVisibleAreaPage(), null);
         sap.setAcro6Layers(true);
         sap.setLayer2Font(font);
 
@@ -207,8 +182,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         // Determine the visible signature type
 
-        String signatureType = conf.getProperty("PDFSIG_VISIBLE_SIGNATURE_TYPE",
-                "GRAPHIC_AND_DESCRIPTION");
+        String signatureType = confAdapter.getVisibleSignatureType();
 
         if (signatureType.equals("GRAPHIC_AND_DESCRIPTION"))
         {
@@ -233,7 +207,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         // Retrieve image
 
         byte[] imageData = OS.inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
-                .getResourceAsStream(conf.getProperty("PDFSIG_VISIBLE_AREA_IMGFILE")));
+                .getResourceAsStream(confAdapter.getVisibleAreaImgFile()));
         Image image = Image.getInstance(imageData);
 
         if (signatureText != null)
@@ -265,6 +239,10 @@ public class PDFSignatureFactory implements ISignFormatProvider
     public SignatureResult formatSignature(SignatureOptions signatureOptions)
             throws KeyStoreException, Exception
     {
+        this.confAdapter = new ConfigurationAdapter(signatureOptions);
+
+        initFontDefinition();
+
         try
         {
             byte[] datos = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
@@ -326,13 +304,9 @@ public class PDFSignatureFactory implements ISignFormatProvider
             PdfStamper pdfStamper = PdfStamper.createSignature(reader, sout, '\0', null, true);
             PdfSignatureAppearance pdfSignatureAppareance = pdfStamper.getSignatureAppearance();
 
-            String visibleSignature = conf.getProperty("PDFSIG_VISIBLE_SIGNATURE");
-            boolean isVisibleSignature = (visibleSignature != null && visibleSignature.trim()
-                    .equals("true"));
-
-            if (isVisibleSignature)
+            if (confAdapter.isVisibleSignature())
             {
-                String pattern = conf.getProperty("PDFSIG_VISIBLE_AREA_TEXT_PATTERN");
+                String pattern = confAdapter.getVisibleAreaTextPattern();
 
                 Map<String, String> bindValues = signatureOptions
                         .getVisibleSignatureTextBindValues();
@@ -340,7 +314,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 if (bindValues != null)
                 {
                     bindValues.put("%s", CertificateUtils.getCn(certificate));
-                    
+
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                     bindValues.put("%t", simpleDateFormat.format(new Date()));
                 }
