@@ -9,6 +9,8 @@ import java.util.Map;
 
 public class SignatureOptions
 {
+    // General options
+    
     private X509Certificate certificate;
     private PrivateKey privateKey;
     private Provider provider;
@@ -19,11 +21,31 @@ public class SignatureOptions
     private boolean swapToFile = false;
     private boolean coSignEnabled = false;
     
+    // XML options
+    
     private String policyIdentifier;
     private String policyDescription;
 	private String baseReference;
 	
+	// PDF options
+	
 	private Map<String, String> bindValues;
+	private String reason;
+	private String location;
+	private String contact;
+	private Boolean timestamping;
+	private String tsaURL;
+	private Boolean visibleSignature;
+	private String visibleSignatureType;
+	private Integer visibleAreaX;
+    private Integer visibleAreaY;
+    private Integer visibleAreaX2;
+    private Integer visibleAreaY2;
+    private Integer visibleAreaPage;
+    private Integer visibleAreaTextSize;
+    private String visibleAreaImgFile;
+    private String visibleAreaRepeatAxis;
+    private String visibleAreaTextPattern;
 
     public SignatureOptions()
     {
@@ -147,4 +169,184 @@ public class SignatureOptions
     {
         this.bindValues = bindValues;
     }
+
+    public String getBaseReference()
+    {
+        return baseReference;
+    }
+
+    public void setBaseReference(String baseReference)
+    {
+        this.baseReference = baseReference;
+    }
+
+    public Map<String, String> getBindValues()
+    {
+        return bindValues;
+    }
+
+    public void setBindValues(Map<String, String> bindValues)
+    {
+        this.bindValues = bindValues;
+    }
+
+    public String getReason()
+    {
+        return reason;
+    }
+
+    public void setReason(String reason)
+    {
+        this.reason = reason;
+    }
+
+    public String getLocation()
+    {
+        return location;
+    }
+
+    public void setLocation(String location)
+    {
+        this.location = location;
+    }
+
+    public String getContact()
+    {
+        return contact;
+    }
+
+    public void setContact(String contact)
+    {
+        this.contact = contact;
+    }
+
+    public Boolean isTimestamping()
+    {
+        return timestamping;
+    }
+
+    public void setTimestamping(Boolean timestamping)
+    {
+        this.timestamping = timestamping;
+    }
+
+    public String getTsaURL()
+    {
+        return tsaURL;
+    }
+
+    public void setTsaURL(String tsaURL)
+    {
+        this.tsaURL = tsaURL;
+    }
+
+    public Boolean isVisibleSignature()
+    {
+        return visibleSignature;
+    }
+
+    public void setVisibleSignature(Boolean visibleSignature)
+    {
+        this.visibleSignature = visibleSignature;
+    }
+
+    public String getVisibleSignatureType()
+    {
+        return visibleSignatureType;
+    }
+
+    public void setVisibleSignatureType(String visibleSignatureType)
+    {
+        this.visibleSignatureType = visibleSignatureType;
+    }
+
+    public Integer getVisibleAreaX()
+    {
+        return visibleAreaX;
+    }
+
+    public void setVisibleAreaX(Integer visibleAreaX)
+    {
+        this.visibleAreaX = visibleAreaX;
+    }
+
+    public Integer getVisibleAreaY()
+    {
+        return visibleAreaY;
+    }
+
+    public void setVisibleAreaY(Integer visibleAreaY)
+    {
+        this.visibleAreaY = visibleAreaY;
+    }
+
+    public Integer getVisibleAreaX2()
+    {
+        return visibleAreaX2;
+    }
+
+    public void setVisibleAreaX2(Integer visibleAreaX2)
+    {
+        this.visibleAreaX2 = visibleAreaX2;
+    }
+
+    public Integer getVisibleAreaY2()
+    {
+        return visibleAreaY2;
+    }
+
+    public void setVisibleAreaY2(Integer visibleAreaY2)
+    {
+        this.visibleAreaY2 = visibleAreaY2;
+    }
+
+    public Integer getVisibleAreaPage()
+    {
+        return visibleAreaPage;
+    }
+
+    public void setVisibleAreaPage(Integer visibleAreaPage)
+    {
+        this.visibleAreaPage = visibleAreaPage;
+    }
+
+    public Integer getVisibleAreaTextSize()
+    {
+        return visibleAreaTextSize;
+    }
+
+    public void setVisibleAreaTextSize(Integer visibleAreaTextSize)
+    {
+        this.visibleAreaTextSize = visibleAreaTextSize;
+    }
+
+    public String getVisibleAreaImgFile()
+    {
+        return visibleAreaImgFile;
+    }
+
+    public void setVisibleAreaImgFile(String visibleAreaImgFile)
+    {
+        this.visibleAreaImgFile = visibleAreaImgFile;
+    }
+
+    public String getVisibleAreaRepeatAxis()
+    {
+        return visibleAreaRepeatAxis;
+    }
+
+    public void setVisibleAreaRepeatAxis(String visibleAreaRepeatAxis)
+    {
+        this.visibleAreaRepeatAxis = visibleAreaRepeatAxis;
+    }
+
+    public String getVisibleAreaTextPattern()
+    {
+        return visibleAreaTextPattern;
+    }
+
+    public void setVisibleAreaTextPattern(String visibleAreaTextPattern)
+    {
+        this.visibleAreaTextPattern = visibleAreaTextPattern;
+    }       
 }
