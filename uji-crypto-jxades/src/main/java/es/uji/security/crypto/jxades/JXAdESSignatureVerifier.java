@@ -2,6 +2,7 @@ package es.uji.security.crypto.jxades;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -22,7 +23,7 @@ import es.uji.security.crypto.VerificationResult;
 public class JXAdESSignatureVerifier
 {
     public VerificationResult verify(byte[] signedData) throws ParserConfigurationException,
-            SAXException, IOException
+            SAXException, IOException, GeneralSecurityException
     {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);
