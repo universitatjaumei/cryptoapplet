@@ -131,9 +131,9 @@ public class ConfigManager
         {
             rc = Integer.parseInt(props.getProperty(key));
         }
-        catch (NumberFormatException ex)
+        catch (Exception ex)
         {
-            log.error("Error parsing number: " + key, ex);
+            log.error("Error parsing number: " + key);
         }
 
         return rc;
