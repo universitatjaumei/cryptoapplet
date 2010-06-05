@@ -77,7 +77,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         return sgn.getEncodedPKCS7(null, null, tsaUrl, null);
     }
 
-    private void sign(PdfSignatureAppearance pdfSignatureAppearance) throws Exception
+    private void sign(PdfStamper pdfStamper, PdfSignatureAppearance pdfSignatureAppearance) throws Exception
     {
         // Check if TSA support is enabled
 
@@ -138,6 +138,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             pdfSignatureAppearance.setReason(confAdapter.getReason());
             pdfSignatureAppearance.setLocation(confAdapter.getLocation());
             pdfSignatureAppearance.setContact(confAdapter.getContact());
+            pdfStamper.close();
         }
     }
 
@@ -324,7 +325,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 createVisibleSignature(pdfSignatureAppareance, numSignatures, pattern, bindValues);
             }
 
-            sign(pdfSignatureAppareance);
+            sign(pdfStamper, pdfSignatureAppareance);
 
             signatureResult.setValid(true);
             signatureResult.setSignatureData(new ByteArrayInputStream(sout.toByteArray()));
