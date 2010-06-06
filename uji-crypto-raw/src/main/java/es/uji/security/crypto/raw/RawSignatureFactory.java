@@ -8,6 +8,7 @@ import java.security.Signature;
 import java.security.cert.X509Certificate;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
@@ -62,7 +63,7 @@ public class RawSignatureFactory implements ISignFormatProvider
         
         log.info("Trying to verify signed data");
         
-        Signature rsa_vfy = Signature.getInstance("SHA1withRSA", provider);
+        Signature rsa_vfy = Signature.getInstance("SHA1withRSA", new BouncyCastleProvider());
         rsa_vfy.initVerify(certificate.getPublicKey());
         rsa_vfy.update(data);
 
