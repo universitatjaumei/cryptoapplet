@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -79,10 +81,30 @@ public class AppHandler
     private SSLSocketFactory defaultSocketFactory;
     private String downloadURL;
 
+    // PDF options
+    
+    private Map<String, String> bindValues;
+    private String reason;
+    private String location;
+    private String contact;
+    private Boolean timestamping;
+    private String tsaURL;
+    private Boolean visibleSignature;
+    private String visibleSignatureType;
+    private Integer visibleAreaX;
+    private Integer visibleAreaY;
+    private Integer visibleAreaX2;
+    private Integer visibleAreaY2;
+    private Integer visibleAreaPage;
+    private Integer visibleAreaTextSize;
+    private String visibleAreaImgFile;
+    private String visibleAreaRepeatAxis;
+    private String visibleAreaTextPattern;
+    
     public AppHandler() throws SignatureAppletException
     {
         this(null);
-
+        
         log.debug("Running in desktop application mode");
     }
 
@@ -96,6 +118,7 @@ public class AppHandler
 
     public AppHandler(String downloadURL) throws SignatureAppletException
     {
+        this.bindValues = new HashMap<String, String>();
         this.downloadURL = downloadURL;
 
         try
@@ -745,5 +768,180 @@ public class AppHandler
         {
             log.error("Cann't load ujiCrypto.conf from server. WARNING: Bundled local file will be loaded.");
         }
+    }
+
+    public Map<String, String> getBindValues()
+    {
+        return bindValues;
+    }
+
+    public void setBindValues(Map<String, String> bindValues)
+    {
+        this.bindValues = bindValues;
+    }
+
+    public String getReason()
+    {
+        return reason;
+    }
+
+    public void setReason(String reason)
+    {
+        this.reason = reason;
+    }
+
+    public String getLocation()
+    {
+        return location;
+    }
+
+    public void setLocation(String location)
+    {
+        this.location = location;
+    }
+
+    public String getContact()
+    {
+        return contact;
+    }
+
+    public void setContact(String contact)
+    {
+        this.contact = contact;
+    }
+
+    public Boolean getTimestamping()
+    {
+        return timestamping;
+    }
+
+    public void setTimestamping(Boolean timestamping)
+    {
+        this.timestamping = timestamping;
+    }
+
+    public String getTsaURL()
+    {
+        return tsaURL;
+    }
+
+    public void setTsaURL(String tsaURL)
+    {
+        this.tsaURL = tsaURL;
+    }
+
+    public Boolean getVisibleSignature()
+    {
+        return visibleSignature;
+    }
+
+    public void setVisibleSignature(Boolean visibleSignature)
+    {
+        this.visibleSignature = visibleSignature;
+    }
+
+    public String getVisibleSignatureType()
+    {
+        return visibleSignatureType;
+    }
+
+    public void setVisibleSignatureType(String visibleSignatureType)
+    {
+        this.visibleSignatureType = visibleSignatureType;
+    }
+
+    public Integer getVisibleAreaX()
+    {
+        return visibleAreaX;
+    }
+
+    public void setVisibleAreaX(Integer visibleAreaX)
+    {
+        this.visibleAreaX = visibleAreaX;
+    }
+
+    public Integer getVisibleAreaY()
+    {
+        return visibleAreaY;
+    }
+
+    public void setVisibleAreaY(Integer visibleAreaY)
+    {
+        this.visibleAreaY = visibleAreaY;
+    }
+
+    public Integer getVisibleAreaX2()
+    {
+        return visibleAreaX2;
+    }
+
+    public void setVisibleAreaX2(Integer visibleAreaX2)
+    {
+        this.visibleAreaX2 = visibleAreaX2;
+    }
+
+    public Integer getVisibleAreaY2()
+    {
+        return visibleAreaY2;
+    }
+
+    public void setVisibleAreaY2(Integer visibleAreaY2)
+    {
+        this.visibleAreaY2 = visibleAreaY2;
+    }
+
+    public Integer getVisibleAreaPage()
+    {
+        return visibleAreaPage;
+    }
+
+    public void setVisibleAreaPage(Integer visibleAreaPage)
+    {
+        this.visibleAreaPage = visibleAreaPage;
+    }
+
+    public Integer getVisibleAreaTextSize()
+    {
+        return visibleAreaTextSize;
+    }
+
+    public void setVisibleAreaTextSize(Integer visibleAreaTextSize)
+    {
+        this.visibleAreaTextSize = visibleAreaTextSize;
+    }
+
+    public String getVisibleAreaImgFile()
+    {
+        return visibleAreaImgFile;
+    }
+
+    public void setVisibleAreaImgFile(String visibleAreaImgFile)
+    {
+        this.visibleAreaImgFile = visibleAreaImgFile;
+    }
+
+    public String getVisibleAreaRepeatAxis()
+    {
+        return visibleAreaRepeatAxis;
+    }
+
+    public void setVisibleAreaRepeatAxis(String visibleAreaRepeatAxis)
+    {
+        this.visibleAreaRepeatAxis = visibleAreaRepeatAxis;
+    }
+
+    public String getVisibleAreaTextPattern()
+    {
+        return visibleAreaTextPattern;
+    }
+
+    public void setVisibleAreaTextPattern(String visibleAreaTextPattern)
+    {
+        this.visibleAreaTextPattern = visibleAreaTextPattern;
+    }
+
+    public void setSignatureFormat(SupportedSignatureFormat signatureFormat)
+    {
+        this.signatureFormat = signatureFormat;
     }
 }
