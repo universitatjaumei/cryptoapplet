@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.util.Collections;
+import java.util.Map;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.JLabel;
@@ -314,7 +315,27 @@ public class SignatureThread extends Thread
  
                         if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS_HASH))
                         {
-                           sigOpt.setHash(true);	
+                            sigOpt.setHash(true);	
+                        }
+                        else if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.PDF))
+                        {
+                            sigOpt.setBindValues(_mw._aph.getBindValues());
+                            sigOpt.setReason(_mw._aph.getReason());
+                            sigOpt.setLocation(_mw._aph.getLocation());
+                            sigOpt.setContact(_mw._aph.getContact());
+                            sigOpt.setTimestamping(_mw._aph.getTimestamping());
+                            sigOpt.setTsaURL(_mw._aph.getTsaURL());
+                            sigOpt.setVisibleSignature(_mw._aph.getVisibleSignature());
+                            sigOpt.setVisibleSignatureType(_mw._aph.getVisibleSignatureType());
+                            sigOpt.setVisibleAreaX(_mw._aph.getVisibleAreaX());
+                            sigOpt.setVisibleAreaY(_mw._aph.getVisibleAreaY());
+                            sigOpt.setVisibleAreaX2(_mw._aph.getVisibleAreaX2());
+                            sigOpt.setVisibleAreaY2(_mw._aph.getVisibleAreaY2());
+                            sigOpt.setVisibleAreaPage(_mw._aph.getVisibleAreaPage());
+                            sigOpt.setVisibleAreaTextSize(_mw._aph.getVisibleAreaTextSize());
+                            sigOpt.setVisibleAreaImgFile(_mw._aph.getVisibleAreaImgFile());
+                            sigOpt.setVisibleAreaRepeatAxis(_mw._aph.getVisibleAreaRepeatAxis());
+                            sigOpt.setVisibleAreaTextPattern(_mw._aph.getVisibleAreaTextPattern());                            
                         }
 
                         log.debug("Signing data");
