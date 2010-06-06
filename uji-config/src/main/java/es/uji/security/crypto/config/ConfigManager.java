@@ -181,21 +181,24 @@ public class ConfigManager
                 {
                     Device newDevice = new Device(deviceName, deviceLibrary, deviceSlot);
 
-                    try
+                    for (int i=0 ; i<3 ; i++)
                     {
-                        Provider provider = new sun.security.pkcs11.SunPKCS11(
-                                new ByteArrayInputStream(newDevice.toString().getBytes()));
-                        Security.addProvider(provider);
-
-                        KeyStore.getInstance("PKCS11", provider);
-
-                        result.add(newDevice);
-                    }
-                    catch (Exception e)
-                    {
-                        log.error("Could not initialize " + newDevice.getName() + " in slot "
-                                + newDevice.getSlot() + " loading " + newDevice.getLibrary());
-                        continue;
+                        try
+                        {
+                            Provider provider = new sun.security.pkcs11.SunPKCS11(
+                                    new ByteArrayInputStream(newDevice.toString().getBytes()));
+                            Security.addProvider(provider);
+    
+                            KeyStore.getInstance("PKCS11", provider);
+    
+                            result.add(newDevice);
+                            break;
+                        }
+                        catch (Exception e)
+                        {
+                            log.error("Could not initialize " + newDevice.getName() + " in slot "
+                                    + newDevice.getSlot() + " loading " + newDevice.getLibrary());
+                        }
                     }
                 }
             }
