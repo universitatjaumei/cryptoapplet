@@ -9,7 +9,9 @@ import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.net.ssl.SSLHandshakeException;
 import javax.swing.JLabel;
@@ -319,23 +321,113 @@ public class SignatureThread extends Thread
                         }
                         else if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.PDF))
                         {
-                            sigOpt.setBindValues(_mw._aph.getBindValues());
-                            sigOpt.setReason(_mw._aph.getReason());
-                            sigOpt.setLocation(_mw._aph.getLocation());
-                            sigOpt.setContact(_mw._aph.getContact());
-                            sigOpt.setTimestamping(_mw._aph.getTimestamping());
-                            sigOpt.setTsaURL(_mw._aph.getTsaURL());
-                            sigOpt.setVisibleSignature(_mw._aph.getVisibleSignature());
-                            sigOpt.setVisibleSignatureType(_mw._aph.getVisibleSignatureType());
-                            sigOpt.setVisibleAreaX(_mw._aph.getVisibleAreaX());
-                            sigOpt.setVisibleAreaY(_mw._aph.getVisibleAreaY());
-                            sigOpt.setVisibleAreaX2(_mw._aph.getVisibleAreaX2());
-                            sigOpt.setVisibleAreaY2(_mw._aph.getVisibleAreaY2());
-                            sigOpt.setVisibleAreaPage(_mw._aph.getVisibleAreaPage());
-                            sigOpt.setVisibleAreaTextSize(_mw._aph.getVisibleAreaTextSize());
-                            sigOpt.setVisibleAreaImgFile(_mw._aph.getVisibleAreaImgFile());
-                            sigOpt.setVisibleAreaRepeatAxis(_mw._aph.getVisibleAreaRepeatAxis());
-                            sigOpt.setVisibleAreaTextPattern(_mw._aph.getVisibleAreaTextPattern());                            
+                            log.debug("Define PDF options");
+                            
+                            Map<String, String> result = new HashMap<String, String>();
+                            
+                            for (Entry<String, String[]> entry : _mw._aph.getBindValues().entrySet())
+                            {
+                                result.put(entry.getKey(), getValue(entry.getValue()));
+                                log.debug("Bind key: " + entry.getKey() + ", Bind value: " + getValue(entry.getValue())); 
+                            }
+                            
+                            sigOpt.setBindValues(result);
+                            
+                            if (hasValue(_mw._aph.getReason()))
+                            {
+                                sigOpt.setReason(getValue(_mw._aph.getReason()));
+                                log.debug("Reason: " + getValue(_mw._aph.getReason()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getLocation()))
+                            {
+                                sigOpt.setLocation(getValue(_mw._aph.getLocation()));
+                                log.debug("Location: " + getValue(_mw._aph.getLocation()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getContact()))
+                            {
+                                sigOpt.setContact(getValue(_mw._aph.getContact()));
+                                log.debug("Contact: " + getValue(_mw._aph.getContact()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getTimestamping()))
+                            {
+                                sigOpt.setTimestamping(getValue(_mw._aph.getTimestamping()).equals("true"));
+                                log.debug("Timestamping: " + getValue(_mw._aph.getTimestamping()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getTsaURL()))
+                            {
+                                sigOpt.setTsaURL(getValue(_mw._aph.getTsaURL()));
+                                log.debug("TsaURL: " + getValue(_mw._aph.getTsaURL()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleSignature()))
+                            {
+                                sigOpt.setVisibleSignature(getValue(_mw._aph.getVisibleSignature()).equals("true"));
+                                log.debug("VisibleSignature: " + getValue(_mw._aph.getVisibleSignature()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleSignatureType()))
+                            {
+                                sigOpt.setVisibleSignatureType(getValue(_mw._aph.getVisibleSignatureType()));
+                                log.debug("VisibleSignatureType: " + getValue(_mw._aph.getVisibleSignatureType()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaX()))
+                            {
+                                sigOpt.setVisibleAreaX(new Integer(getValue(_mw._aph.getVisibleAreaX())));
+                                log.debug("VisibleAreaX: " + getValue(_mw._aph.getVisibleAreaX()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaY()))
+                            {
+                                sigOpt.setVisibleAreaY(new Integer(getValue(_mw._aph.getVisibleAreaY())));
+                                log.debug("VisibleAreaY: " + getValue(_mw._aph.getVisibleAreaY()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaX2()))
+                            {
+                                sigOpt.setVisibleAreaX2(new Integer(getValue(_mw._aph.getVisibleAreaX2())));
+                                log.debug("VisibleAreaX2: " + getValue(_mw._aph.getVisibleAreaX2()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaY2()))
+                            {
+                                sigOpt.setVisibleAreaY2(new Integer(getValue(_mw._aph.getVisibleAreaY2())));
+                                log.debug("VisibleAreaY2: " + getValue(_mw._aph.getVisibleAreaY2()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaPage()))
+                            {
+                                sigOpt.setVisibleAreaPage(new Integer(getValue(_mw._aph.getVisibleAreaPage())));
+                                log.debug("VisibleAreaPage: " + getValue(_mw._aph.getVisibleAreaPage()));
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaTextSize()))
+                            {
+                                sigOpt.setVisibleAreaTextSize(new Integer(getValue(_mw._aph.getVisibleAreaTextSize())));
+                                log.debug("VisibleAreaTextSize: " + getValue(_mw._aph.getVisibleAreaTextSize()));                                
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaImgFile()))
+                            {
+                                sigOpt.setVisibleAreaImgFile(getValue(_mw._aph.getVisibleAreaImgFile()));
+                                log.debug("VisibleAreaImgFile: " + getValue(_mw._aph.getVisibleAreaImgFile()));                                
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaRepeatAxis()))
+                            {
+                                sigOpt.setVisibleAreaRepeatAxis(getValue(_mw._aph.getVisibleAreaRepeatAxis()));
+                                log.debug("VisibleAreaRepeatAxis: " + getValue(_mw._aph.getVisibleAreaRepeatAxis()));                                
+                            }
+                            
+                            if (hasValue(_mw._aph.getVisibleAreaTextPattern()))
+                            {
+                                sigOpt.setVisibleAreaTextPattern(getValue(_mw._aph.getVisibleAreaTextPattern()));
+                                log.debug("VisibleAreaTextPattern: " + getValue(_mw._aph.getVisibleAreaTextPattern()));
+                            }
                         }
 
                         log.debug("Signing data");
@@ -506,6 +598,23 @@ public class SignatureThread extends Thread
             }
             _mw.getAppHandler().getInputParams().flush();
         }
+    }
+
+    private String getValue(String[] values)
+    {
+        if (values.length == 1 || this._step >= values.length)
+        {
+            return values[0];
+        }
+        else
+        {
+            return values[this._step];
+        }
+    }
+
+    private boolean hasValue(String[] element)
+    {
+        return (element != null && element.length>0);
     }
 
     private void guiInitialize()
