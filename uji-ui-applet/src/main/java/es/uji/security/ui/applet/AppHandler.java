@@ -83,23 +83,23 @@ public class AppHandler
 
     // PDF options
     
-    private Map<String, String> bindValues;
-    private String reason;
-    private String location;
-    private String contact;
-    private Boolean timestamping;
-    private String tsaURL;
-    private Boolean visibleSignature;
-    private String visibleSignatureType;
-    private Integer visibleAreaX;
-    private Integer visibleAreaY;
-    private Integer visibleAreaX2;
-    private Integer visibleAreaY2;
-    private Integer visibleAreaPage;
-    private Integer visibleAreaTextSize;
-    private String visibleAreaImgFile;
-    private String visibleAreaRepeatAxis;
-    private String visibleAreaTextPattern;
+    private Map<String, String[]> bindValues;
+    private String[] reason;
+    private String[] location;
+    private String[] contact;
+    private String[] timestamping;
+    private String[] tsaURL;
+    private String[] visibleSignature;
+    private String[] visibleSignatureType;
+    private String[] visibleAreaX;
+    private String[] visibleAreaY;
+    private String[] visibleAreaX2;
+    private String[] visibleAreaY2;
+    private String[] visibleAreaPage;
+    private String[] visibleAreaTextSize;
+    private String[] visibleAreaImgFile;
+    private String[] visibleAreaRepeatAxis;
+    private String[] visibleAreaTextPattern;
     
     public AppHandler() throws SignatureAppletException
     {
@@ -118,7 +118,7 @@ public class AppHandler
 
     public AppHandler(String downloadURL) throws SignatureAppletException
     {
-        this.bindValues = new HashMap<String, String>();
+        this.bindValues = new HashMap<String, String[]>();
         this.downloadURL = downloadURL;
 
         try
@@ -770,172 +770,172 @@ public class AppHandler
         }
     }
 
-    public Map<String, String> getBindValues()
+    public Map<String, String[]> getBindValues()
     {
         return bindValues;
     }
 
-    public void setBindValues(Map<String, String> bindValues)
+    public void setBindValues(Map<String, String[]> bindValues)
     {
         this.bindValues = bindValues;
     }
 
-    public String getReason()
+    public String[] getReason()
     {
         return reason;
     }
 
-    public void setReason(String reason)
+    public void setReason(String[] reason)
     {
         this.reason = reason;
     }
 
-    public String getLocation()
+    public String[] getLocation()
     {
         return location;
     }
 
-    public void setLocation(String location)
+    public void setLocation(String[] location)
     {
         this.location = location;
     }
 
-    public String getContact()
+    public String[] getContact()
     {
         return contact;
     }
 
-    public void setContact(String contact)
+    public void setContact(String[] contact)
     {
         this.contact = contact;
     }
 
-    public Boolean getTimestamping()
+    public String[] getTimestamping()
     {
         return timestamping;
     }
 
-    public void setTimestamping(Boolean timestamping)
+    public void setTimestamping(String[] timestamping)
     {
         this.timestamping = timestamping;
     }
 
-    public String getTsaURL()
+    public String[] getTsaURL()
     {
         return tsaURL;
     }
 
-    public void setTsaURL(String tsaURL)
+    public void setTsaURL(String[] tsaURL)
     {
         this.tsaURL = tsaURL;
     }
 
-    public Boolean getVisibleSignature()
+    public String[] getVisibleSignature()
     {
         return visibleSignature;
     }
 
-    public void setVisibleSignature(Boolean visibleSignature)
+    public void setVisibleSignature(String[] visibleSignature)
     {
         this.visibleSignature = visibleSignature;
     }
 
-    public String getVisibleSignatureType()
+    public String[] getVisibleSignatureType()
     {
         return visibleSignatureType;
     }
 
-    public void setVisibleSignatureType(String visibleSignatureType)
+    public void setVisibleSignatureType(String[] visibleSignatureType)
     {
         this.visibleSignatureType = visibleSignatureType;
     }
 
-    public Integer getVisibleAreaX()
+    public String[] getVisibleAreaX()
     {
         return visibleAreaX;
     }
 
-    public void setVisibleAreaX(Integer visibleAreaX)
+    public void setVisibleAreaX(String[] visibleAreaX)
     {
         this.visibleAreaX = visibleAreaX;
     }
 
-    public Integer getVisibleAreaY()
+    public String[] getVisibleAreaY()
     {
         return visibleAreaY;
     }
 
-    public void setVisibleAreaY(Integer visibleAreaY)
+    public void setVisibleAreaY(String[] visibleAreaY)
     {
         this.visibleAreaY = visibleAreaY;
     }
 
-    public Integer getVisibleAreaX2()
+    public String[] getVisibleAreaX2()
     {
         return visibleAreaX2;
     }
 
-    public void setVisibleAreaX2(Integer visibleAreaX2)
+    public void setVisibleAreaX2(String[] visibleAreaX2)
     {
         this.visibleAreaX2 = visibleAreaX2;
     }
 
-    public Integer getVisibleAreaY2()
+    public String[] getVisibleAreaY2()
     {
         return visibleAreaY2;
     }
 
-    public void setVisibleAreaY2(Integer visibleAreaY2)
+    public void setVisibleAreaY2(String[] visibleAreaY2)
     {
         this.visibleAreaY2 = visibleAreaY2;
     }
 
-    public Integer getVisibleAreaPage()
+    public String[] getVisibleAreaPage()
     {
         return visibleAreaPage;
     }
 
-    public void setVisibleAreaPage(Integer visibleAreaPage)
+    public void setVisibleAreaPage(String[] visibleAreaPage)
     {
         this.visibleAreaPage = visibleAreaPage;
     }
 
-    public Integer getVisibleAreaTextSize()
+    public String[] getVisibleAreaTextSize()
     {
         return visibleAreaTextSize;
     }
 
-    public void setVisibleAreaTextSize(Integer visibleAreaTextSize)
+    public void setVisibleAreaTextSize(String[] visibleAreaTextSize)
     {
         this.visibleAreaTextSize = visibleAreaTextSize;
     }
 
-    public String getVisibleAreaImgFile()
+    public String[] getVisibleAreaImgFile()
     {
         return visibleAreaImgFile;
     }
 
-    public void setVisibleAreaImgFile(String visibleAreaImgFile)
+    public void setVisibleAreaImgFile(String[] visibleAreaImgFile)
     {
         this.visibleAreaImgFile = visibleAreaImgFile;
     }
 
-    public String getVisibleAreaRepeatAxis()
+    public String[] getVisibleAreaRepeatAxis()
     {
         return visibleAreaRepeatAxis;
     }
 
-    public void setVisibleAreaRepeatAxis(String visibleAreaRepeatAxis)
+    public void setVisibleAreaRepeatAxis(String[] visibleAreaRepeatAxis)
     {
         this.visibleAreaRepeatAxis = visibleAreaRepeatAxis;
     }
 
-    public String getVisibleAreaTextPattern()
+    public String[] getVisibleAreaTextPattern()
     {
         return visibleAreaTextPattern;
     }
 
-    public void setVisibleAreaTextPattern(String visibleAreaTextPattern)
+    public void setVisibleAreaTextPattern(String[] visibleAreaTextPattern)
     {
         this.visibleAreaTextPattern = visibleAreaTextPattern;
     }

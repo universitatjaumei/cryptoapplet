@@ -889,7 +889,8 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.getBindValues().put(key, value);
+                String[] values = value.split(_separator);
+                apph.getBindValues().put(key, values);
                 
                 return null;
             }
@@ -902,7 +903,8 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setReason(reason);
+                String[] values = reason.split(_separator);
+                apph.setReason(values);
                 
                 return null;
             }
@@ -915,7 +917,8 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setLocation(location);
+                String[] values = location.split(_separator);
+                apph.setLocation(values);
                 
                 return null;
             }
@@ -928,20 +931,22 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setContact(contact);
+                String[] values = contact.split(_separator);
+                apph.setContact(values);
                 
                 return null;
             }
         });
     }
 
-    public void setTimestamping(final Boolean timestamping)
+    public void setTimestamping(final String timestamping)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setTimestamping(timestamping);
+                String[] values = timestamping.split(_separator);
+                apph.setTimestamping(values);
                 
                 return null;
             }
@@ -954,20 +959,22 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setTsaURL(tsaURL);
+                String[] values = tsaURL.split(_separator);
+                apph.setTsaURL(values);
                 
                 return null;
             }
         });
     }
 
-    public void setVisibleSignature(final Boolean visibleSignature)
+    public void setVisibleSignature(final String visibleSignature)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setVisibleSignature(visibleSignature);
+                String[] values = visibleSignature.split(_separator);
+                apph.setVisibleSignature(values);
                 
                 return null;
             }
@@ -980,85 +987,92 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setVisibleSignatureType(visibleSignatureType);
+                String[] values = visibleSignatureType.split(_separator);
+                apph.setVisibleSignatureType(values);
                 
                 return null;
             }
         });
     }
 
-    public void setVisibleAreaX(final Integer visibleAreaX)
+    public void setVisibleAreaX(final String visibleAreaX)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setVisibleAreaX(visibleAreaX);
+                String[] values = visibleAreaX.split(_separator);
+                apph.setVisibleAreaX(values);
                 
                 return null;
             }
         });
     }
 
-    public void setVisibleAreaY(final Integer visibleAreaY)
+    public void setVisibleAreaY(final String visibleAreaY)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setVisibleAreaY(visibleAreaY);
+                String[] values = visibleAreaY.split(_separator);
+                apph.setVisibleAreaY(values);
                 
                 return null;
             }
         });
     }
 
-    public void setVisibleAreaX2(final Integer visibleAreaX2)
+    public void setVisibleAreaX2(final String visibleAreaX2)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setVisibleAreaX2(visibleAreaX2);
+                String[] values = visibleAreaX2.split(_separator);
+                apph.setVisibleAreaX2(values);
                 
                 return null;
             }
         });
     }
 
-    public void setVisibleAreaY2(final Integer visibleAreaY2)
+    public void setVisibleAreaY2(final String visibleAreaY2)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setVisibleAreaY2(visibleAreaY2);
+                String[] values = visibleAreaY2.split(_separator);
+                apph.setVisibleAreaY2(values);
                 
                 return null;
             }
         });
     }
 
-    public void setVisibleAreaPage(final Integer visibleAreaPage)
+    public void setVisibleAreaPage(final String visibleAreaPage)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setVisibleAreaPage(visibleAreaPage);
+                String[] values = visibleAreaPage.split(_separator);
+                apph.setVisibleAreaPage(values);
                 
                 return null;
             }
         });
     }
 
-    public void setVisibleAreaTextSize(final Integer visibleAreaTextSize)
+    public void setVisibleAreaTextSize(final String visibleAreaTextSize)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                apph.setVisibleAreaTextSize(visibleAreaTextSize);
+                String[] values = visibleAreaTextSize.split(_separator);
+                apph.setVisibleAreaTextSize(values);
                 
                 return null;
             }
@@ -1071,7 +1085,8 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setVisibleAreaImgFile(visibleAreaImgFile);
+                String[] values = visibleAreaImgFile.split(_separator);
+                apph.setVisibleAreaImgFile(values);
                 
                 return null;
             }
@@ -1084,7 +1099,8 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setVisibleAreaRepeatAxis(visibleAreaRepeatAxis);
+                String[] values = visibleAreaRepeatAxis.split(_separator);                
+                apph.setVisibleAreaRepeatAxis(values);
                 
                 return null;
             }
@@ -1097,7 +1113,8 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setVisibleAreaTextPattern(visibleAreaTextPattern);
+                String[] values = visibleAreaTextPattern.split(_separator);
+                apph.setVisibleAreaTextPattern(values);
                 
                 return null;
             }

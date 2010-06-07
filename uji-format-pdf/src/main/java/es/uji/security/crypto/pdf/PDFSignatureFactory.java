@@ -16,6 +16,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
+
+import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
 
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -38,13 +44,14 @@ import com.lowagie.text.pdf.PdfWriter;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.CertificateUtils;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.util.i18n.LabelManager;
 
 public class PDFSignatureFactory implements ISignFormatProvider
 {
+    private Logger log = Logger.getLogger(PDFSignatureFactory.class);
+    
     private static final int PADDING = 3;
 
     private PrivateKey privateKey;
@@ -57,6 +64,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
     private void initFontDefinition()
     {
+        log.debug("VisibleAreaTextSize: " + confAdapter.getVisibleAreaTextSize());
+
         font = new Font();
         font.setSize(confAdapter.getVisibleAreaTextSize());
     }
@@ -154,6 +163,9 @@ public class PDFSignatureFactory implements ISignFormatProvider
         float offsetX = ((x2 - x1) * numSignatures) + 10;
         float offsetY = ((y2 - y1) * numSignatures) + 10;
 
+        log.debug("VisibleArea: " + x1 + "," + y1 + "," + x2 + "," + y2 + " offsetX:" + offsetX
+                + ", offsetY:" + offsetY);
+        
         // Position of the visible signature
 
         Rectangle rectangle = null;
@@ -167,6 +179,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
             rectangle = new Rectangle(x1 + offsetX, y1, x2 + offsetX, y2);
         }
 
+        log.debug("VisibleAreaPage: " + confAdapter.getVisibleAreaPage());
+        
         sap.setVisibleSignature(rectangle, confAdapter.getVisibleAreaPage(), null);
         sap.setAcro6Layers(true);
         sap.setLayer2Font(font);
@@ -184,6 +198,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         // Determine the visible signature type
 
         String signatureType = confAdapter.getVisibleSignatureType();
+        log.debug("VisibleSignatureType: " + signatureType);
 
         if (signatureType.equals("GRAPHIC_AND_DESCRIPTION"))
         {
@@ -207,10 +222,12 @@ public class PDFSignatureFactory implements ISignFormatProvider
     {
         // Retrieve image
 
+        log.debug("VisibleAreaImgFile: " + confAdapter.getVisibleAreaImgFile());
+        
         byte[] imageData = OS.inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
                 .getResourceAsStream(confAdapter.getVisibleAreaImgFile()));
         Image image = Image.getInstance(imageData);
-
+        
         if (signatureText != null)
         {
             // Retrieve and reset Layer2
@@ -240,6 +257,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
     public SignatureResult formatSignature(SignatureOptions signatureOptions)
             throws KeyStoreException, Exception
     {
+        log.debug("Init PDF signature configuration");
+        
         this.confAdapter = new ConfigurationAdapter(signatureOptions);
 
         initFontDefinition();
@@ -305,19 +324,29 @@ public class PDFSignatureFactory implements ISignFormatProvider
             PdfStamper pdfStamper = PdfStamper.createSignature(reader, sout, '\0', null, true);
             PdfSignatureAppearance pdfSignatureAppareance = pdfStamper.getSignatureAppearance();
 
+            log.debug("VisibleSignature: " + confAdapter.isVisibleSignature());
+            
             if (confAdapter.isVisibleSignature())
             {
                 String pattern = confAdapter.getVisibleAreaTextPattern();
+                log.debug("VisibleAreaTextPattern: " + pattern);
 
                 Map<String, String> bindValues = signatureOptions
                         .getVisibleSignatureTextBindValues();
 
                 if (bindValues != null)
                 {
-                    bindValues.put("%s", CertificateUtils.getCn(certificate));
+                    final X509Principal principal = PrincipalUtil.getSubjectX509Principal(certificate);
+                    final Vector<?> values = principal.getValues(X509Name.CN);
+                    
+                    String certificateCN = (String) values.get(0);
+                    bindValues.put("%s", certificateCN);
+                    log.debug("Bind value %s: " + certificateCN);                    
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                    bindValues.put("%t", simpleDateFormat.format(new Date()));
+                    String currentDate = simpleDateFormat.format(new Date());
+                    bindValues.put("%t", currentDate);
+                    log.debug("Bind value %t: " + currentDate);
                 }
 
                 int numSignatures = reader.getAcroFields().getSignatureNames().size();
