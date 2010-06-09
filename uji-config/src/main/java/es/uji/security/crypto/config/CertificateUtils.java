@@ -1,12 +1,10 @@
 package es.uji.security.crypto.config;
 
-import java.io.FileInputStream;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Vector;
@@ -43,12 +41,9 @@ public class CertificateUtils
      * 
      * 
      * @return X509Certificate[] the certificate chain of given certificate or null if the chain is not found. 
-     * @throws IOException 
-     * @throws NoSuchAlgorithmException 
-     * @throws CertificateException 
-     * @throws KeyStoreException 
+     * @throws ConfigException 
      */
-     public static X509Certificate[] getCertificateChain(X509Certificate cer) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException{
+     public static X509Certificate[] getCertificateChain(X509Certificate cer) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, ConfigException{
     	ConfigManager cfm= ConfigManager.getInstance();
     	//First we must get a copy of each certificate in configuration: 
     	//Testing with the CA certs. 
@@ -82,32 +77,19 @@ public class CertificateUtils
     			vcertchain.add(auxcert);
     		}
     		catch (Exception ex){
-    			ex.printStackTrace();
-    			return null;
+    			throw new ConfigException(ex);
     		}
     	}
     	   	   
+    	//Reversing the cert order to get CA_lvl3, CA_lvl2, CA_root.
     	res= new X509Certificate[vcertchain.size()];
-    	vcertchain.toArray(res);
+    	if (res.length != 0){
+    		res = new X509Certificate[res.length];
+    		for (int i=0; i<res.length; i++){
+    			res[res.length - (1 + i)] = vcertchain.get(i);
+    		}
+    	}
+    	
     	return res;
     }
-          
-     //Testing porpouses, this should go to uji-tests.
-     public static void main(String args[]) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException{ 	 
-    	 InputStream certificateStream = new FileInputStream("/home/paul/mio.pem");
-    	 CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-         X509Certificate certificate = (X509Certificate) certificateFactory
-                 .generateCertificate(certificateStream);
-         certificateStream.close();
-    
-         X509Certificate[] xchain= CertificateUtils.getCertificateChain(certificate);
-         if (xchain != null){
-        	 for (int i=0; i<xchain.length; i++){
-        		 System.out.println(xchain[i].getSubjectDN());
-        	 }
-         }
-         else{
-        	 System.out.println("xchain is null");
-         }
-     }
 }
