@@ -13,6 +13,7 @@ import java.util.Collections;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
@@ -91,7 +92,7 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
         xades.setSigningCertificate(certificate);
 
         SignaturePolicyIdentifier spi;
-        
+
         if (signatureOptions.getPolicyIdentifier() != null)
         {
             spi = new SignaturePolicyIdentifierImpl(false);
@@ -99,25 +100,20 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             spi.setDescription(signatureOptions.getPolicyDescription());
             xades.setSignaturePolicyIdentifier(spi);
         }
-       /*
-        else
-        {
-            spi = new SignaturePolicyIdentifierImpl(true);
-        }
-        */
-
-       
+        /*
+         * else { spi = new SignaturePolicyIdentifierImpl(true); }
+         */
 
         ConfigManager conf = ConfigManager.getInstance();
         int tsaCount = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);
 
         String tsaUrl = null;
-        
+
         if (tsaCount != 0)
         {
             tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
         }
-        
+
         // Sign data
         XMLAdvancedSignature xmlSignature = XMLAdvancedSignature.newInstance(xades);
 
@@ -126,13 +122,14 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             NodeList result = element.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
                     "Signature");
             int numSignature = result.getLength();
-            
-            String baseRef= "";
-            if (signatureOptions.getXAdESBaseReference() != null){
-            	baseRef= signatureOptions.getXAdESBaseReference();
+
+            String baseRef = "";
+            if (signatureOptions.getXAdESBaseReference() != null)
+            {
+                baseRef = signatureOptions.getXAdESBaseReference();
             }
-            
-            //TODO: Revisar frima cosign, si no es enveloped funciona bien por el else.  
+
+            // TODO: Revisar frima cosign, si no es enveloped funciona bien por el else.
             if (signatureOptions.isCoSignEnabled())
             {
                 XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
@@ -142,17 +139,17 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
                 Transform transform = xmlSignatureFactory.newTransform(Transform.XPATH,
                         new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
                                 Collections.singletonMap("dsig", XMLSignature.XMLNS)));
- 	
+
                 Reference reference = xmlSignatureFactory.newReference(baseRef, digestMethod,
                         Collections.singletonList(transform), null, null);
 
-                xmlSignature.sign(certificate, privateKey, Arrays
+                xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, Arrays
                         .asList(new Object[] { reference }), "S" + numSignature, tsaUrl);
             }
             else
             {
-                xmlSignature.sign(certificate, privateKey, Arrays.asList(new Object[] { baseRef }), "S"
-                        + numSignature, tsaUrl);
+                xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, Arrays
+                        .asList(new Object[] { baseRef }), "S" + numSignature, tsaUrl);
             }
         }
         catch (MarshalException me)
