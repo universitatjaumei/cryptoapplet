@@ -180,10 +180,11 @@ public class SignatureApplet extends JApplet
     {
         this.keyStoreManager.flushKeyStoresTable();
         this.keyStoreManager.initBrowserStores(apph.getNavigator());
-        this.keyStoreManager.initClauer();
 
         if (!supportedBrowser.equals(SupportedBrowser.IEXPLORER))
         {
+            this.keyStoreManager.initClauer();
+
             ConfigManager conf = ConfigManager.getInstance();
 
             for (Device device : conf.getDeviceConfig())
