@@ -71,34 +71,11 @@ public class OCSPChecker
 
         try
         {
-            X509Principal issuerName = PrincipalUtil.getSubjectX509Principal(caCertificate);
-
-            MessageDigest digest = MessageDigest.getInstance("1.3.14.3.2.26", provider);
-            digest.update(issuerName.getEncoded());
-
-            ASN1OctetString issuerNameHash = new BERConstructedOctetString(digest.digest());
-
-            byte[] arr = caCertificate.getExtensionValue("2.5.29.14");
-            byte[] arr2 = new byte[arr.length - 4];
-            System.arraycopy(arr, 4, arr2, 0, arr2.length);
-            ASN1OctetString issuerKeyHash = new BERConstructedOctetString(arr2);
-
-            CertID cerid = new CertID(new AlgorithmIdentifier("1.3.14.3.2.26"), issuerNameHash,
-                    issuerKeyHash, new DERInteger(certificate.getSerialNumber()));
-
-            certificateID = new CertificateID(cerid);
+            certificateID = new CertificateID(CertificateID.HASH_SHA1, caCertificate, certificate.getSerialNumber());
         }
-        catch (CertificateEncodingException cee)
+        catch (OCSPException e)
         {
-            throw new CryptoCoreOCSPException(
-                    "Can not generate a valid certificate ID. CA certificate encoding is not valid",
-                    cee);
-        }
-        catch (NoSuchAlgorithmException nsae)
-        {
-            throw new CryptoCoreOCSPException(
-                    "Can not generate a valid certificate ID. Can not generate an instance of SHA-1 algorithm",
-                    nsae);
+            throw new CryptoCoreOCSPException("Can not generate a valid certificate ID. CA certificate encoding is not valid", e);
         }
 
         return certificateID;
