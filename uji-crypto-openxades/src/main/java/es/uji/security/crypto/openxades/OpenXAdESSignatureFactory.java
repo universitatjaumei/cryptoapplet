@@ -270,7 +270,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             }
 
             // OCSP validation
-            if (conf.getProperty("DIGIDOC_CERT_VERIFIER").trim().equals("OCSP"))
+            String certVerifier = conf.getProperty("DIGIDOC_CERT_VERIFIER").trim();
+            if (certVerifier.equals("OCSP") || certVerifier.equals("POST"))
             {
                 signature.getConfirmation();
             }

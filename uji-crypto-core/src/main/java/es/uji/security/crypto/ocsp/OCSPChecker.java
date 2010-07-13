@@ -1,14 +1,12 @@
 package es.uji.security.crypto.ocsp;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
@@ -19,14 +17,9 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.ocsp.CertID;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.ocsp.OCSPResponse;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.ocsp.BasicOCSPResp;
 import org.bouncycastle.ocsp.CertificateID;
@@ -39,13 +32,16 @@ import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
+import sun.misc.BASE64Encoder;
 import sun.security.x509.AccessDescription;
 import sun.security.x509.AuthorityInfoAccessExtension;
 import sun.security.x509.GeneralNameInterface;
 import sun.security.x509.URIName;
 import sun.security.x509.X509CertImpl;
 import es.uji.security.crypto.OCSPResponseDetails;
+import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
+import es.uji.security.util.Base64;
 
 public class OCSPChecker
 {
@@ -64,8 +60,7 @@ public class OCSPChecker
         return ok;
     }
 
-    private CertificateID generateCertificateID(X509Certificate certificate,
-            X509Certificate caCertificate, Provider provider) throws CryptoCoreOCSPException
+    private CertificateID generateCertificateID(X509Certificate certificate, X509Certificate caCertificate, Provider provider) throws CryptoCoreOCSPException
     {
         CertificateID certificateID = null;
 
@@ -76,26 +71,43 @@ public class OCSPChecker
         catch (OCSPException e)
         {
             throw new CryptoCoreOCSPException("Can not generate a valid certificate ID. CA certificate encoding is not valid", e);
-        }
+		}
 
         return certificateID;
     }
 
-    private OCSPResp sendOCSPRequest(String ocspURL, CertificateID certificateID,
+    public OCSPResp sendOCSPRequest(String ocspURL, CertificateID certificateID,
             X509Certificate certificate) throws CryptoCoreOCSPException
+    {
+        try
+        {
+	        OCSPReqGenerator ocspRequest = new OCSPReqGenerator();
+	        ocspRequest.addRequest(certificateID);
+	
+	        GeneralName name = new GeneralName(PrincipalUtil.getSubjectX509Principal(certificate));
+	        ocspRequest.setRequestorName(name);
+	
+	        OCSPReq req = ocspRequest.generate();
+	
+	        return sendOCSPRequest(req, ocspURL);
+        }
+        catch (CertificateEncodingException cee)
+        {
+            throw new CryptoCoreOCSPException(
+                    "Can not send OCSP request. Certificate encoding is not valid", cee);
+        }
+        catch (OCSPException oe)
+        {
+            throw new CryptoCoreOCSPException("Can not generate OCSP request", oe);
+        }
+    }
+    
+    public OCSPResp sendOCSPRequest(OCSPReq req, String ocspURL) throws CryptoCoreOCSPException
     {
         OCSPResp ocspResp = null;
 
         try
         {
-            OCSPReqGenerator ocspRequest = new OCSPReqGenerator();
-            ocspRequest.addRequest(certificateID);
-
-            GeneralName name = new GeneralName(PrincipalUtil.getSubjectX509Principal(certificate));
-            ocspRequest.setRequestorName(name);
-
-            OCSPReq req = ocspRequest.generate();
-
             byte[] breq = req.getEncoded();
             URL url = new URL(ocspURL);
             URLConnection con = url.openConnection();
@@ -117,18 +129,54 @@ public class OCSPChecker
 
             ocspResp = new OCSPResp(bresp);
         }
+        catch (IOException ioe)
+        {
+            throw new CryptoCoreOCSPException("Can not recover response from server " + ocspURL,
+                    ioe);
+        }
+
+        return ocspResp;
+    }
+
+    public OCSPResp sendOCSPRequestPOST(String postURL, X509Certificate certificate) throws CryptoCoreOCSPException
+    {
+        OCSPResp ocspResp = null;
+
+        try
+        {
+        	BASE64Encoder encoder=new BASE64Encoder();
+        	String certBase64 = encoder.encodeBuffer(certificate.getEncoded());
+        	
+            URL url = new URL(postURL);
+            URLConnection con = url.openConnection();
+            con.setReadTimeout(10000);
+            con.setConnectTimeout(10000);
+            con.setAllowUserInteraction(false);
+            con.setUseCaches(false);
+            con.setDoOutput(true);
+            con.setDoInput(true);
+
+            con.setRequestProperty("Content-Type", "application/octet-stream");
+            OutputStream os = con.getOutputStream();
+            os.write(certBase64.getBytes());
+            os.close();
+
+            byte[] resp64 = OS.inputStreamToByteArray(con.getInputStream());
+            byte[] bresp = Base64.decode(resp64);
+            
+            if (bresp.length==0)
+            	ocspResp = new OCSPResp(new OCSPResponse(null));
+            else
+            	ocspResp = new OCSPResp(bresp);
+        }
         catch (CertificateEncodingException cee)
         {
             throw new CryptoCoreOCSPException(
                     "Can not send OCSP request. Certificate encoding is not valid", cee);
         }
-        catch (OCSPException oe)
-        {
-            throw new CryptoCoreOCSPException("Can not generate OCSP request", oe);
-        }
         catch (IOException ioe)
         {
-            throw new CryptoCoreOCSPException("Can not recover response from server " + ocspURL,
+            throw new CryptoCoreOCSPException("Can not recover response from server " + postURL,
                     ioe);
         }
 
@@ -209,7 +257,24 @@ public class OCSPChecker
 
         try
         {
-            resp = sendOCSPRequest(ocspURL, certificateID, certificate);
+        	ConfigManager conf = ConfigManager.getInstance();
+        	String type = conf.getProperty("DIGIDOC_CERT_VERIFIER");
+        	
+        	if (type.equals("POST"))
+        	{
+        		resp = sendOCSPRequestPOST(conf.getProperty("DIGIDOC_CERT_VERIFIER_URL"), certificate);
+        		
+        		if (resp==null)
+        		{
+                    responseDetails.setValid(false);
+                    responseDetails.addError(("Server does not know about this certificate"));
+                    return responseDetails;
+        		}
+        	}
+       		else if (type.equals("OCSP"))
+       		{
+        		resp = sendOCSPRequest(ocspURL, certificateID, certificate);
+       		}
         }
         catch (CryptoCoreOCSPException ccoe)
         {
@@ -218,6 +283,13 @@ public class OCSPChecker
             return responseDetails;
         }
 
+        if (resp == null)
+        {
+        	responseDetails.setValid(false);
+        	responseDetails.addError("An internal error occured in the OCSP Server!");
+        	return responseDetails;
+        }
+        
         try
         {
             responseDetails.setResponseData(resp.getEncoded());
@@ -229,12 +301,6 @@ public class OCSPChecker
             return responseDetails;
         }
 
-        if (resp == null)
-        {
-            responseDetails.setValid(false);
-            responseDetails.addError("An internal error occured in the OCSP Server!");
-            return responseDetails;
-        }
 
         if (resp.getStatus() != OCSPRespStatus.SUCCESSFUL)
         {
@@ -375,9 +441,10 @@ public class OCSPChecker
             Security.addProvider(provider);
         }
 
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+        
         String ocspURL = "http://ocsp.accv.es";
 
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
         X509Certificate cagvaCertificate = (X509Certificate) certificateFactory
                 .generateCertificate(new FileInputStream(
                         "src/main/resources/cagva.pem"));
@@ -387,19 +454,36 @@ public class OCSPChecker
         X509Certificate ocspCertificate = (X509Certificate) certificateFactory
                 .generateCertificate(new FileInputStream(
                         "src/main/resources/ocsp-gva.crt"));
+        
+        
+        X509Certificate fnmtCertificate = (X509Certificate) certificateFactory
+        .generateCertificate(new FileInputStream(
+        		"src/main/resources/fnmt-ca.der"));        
+        X509Certificate ocspFnmtCertificate = (X509Certificate) certificateFactory
+		.generateCertificate(new FileInputStream(
+        		"src/main/resources/fnmt-ocsp.cer")); 
 
         OCSPChecker oscp = new OCSPChecker();
-
+        
         KeyStore ks = KeyStore.getInstance("PKCS12");
+        ks.load(new FileInputStream("src/main/resources/fnmt.p12"), "makeall"
+                .toCharArray());
+        X509Certificate fnmt = (X509Certificate) ks.getCertificate(ks.aliases()
+                .nextElement());
+        oscp.showStatus(oscp.getCertificateStatus ("", fnmt, fnmtCertificate,
+        		ocspFnmtCertificate, provider));
+        
+        /*
+        
+        ks = KeyStore.getInstance("PKCS12");
         ks.load(new FileInputStream("src/main/resources/uactivo951v_firma.p12"), "1234"
                 .toCharArray());
         X509Certificate cagvaFirma = (X509Certificate) ks
                 .getCertificate(ks.aliases().nextElement());
-        oscp.showStatus(oscp.getCertificateStatus(cagvaFirma, cagvaCertificate, ocspCertificate,
-                provider));
+        oscp.showStatus(oscp.getCertificateStatus(cagvaFirma, cagvaCertificate, ocspCertificate, provider));
         oscp.showStatus(oscp.getCertificateStatus(ocspURL, cagvaFirma, cagvaCertificate,
                 ocspCertificate, provider));
-
+        
         ks = KeyStore.getInstance("PKCS12");
         ks.load(new FileInputStream("src/main/resources/uactivo951v_cifrado.p12"), "1234"
                 .toCharArray());
@@ -452,5 +536,6 @@ public class OCSPChecker
                 .nextElement());
         oscp.showStatus(oscp.getCertificateStatus(ocspURL, accvCifradoRevocado, accvCertificate,
                 ocspCertificate, provider));
+                */
     }
 }

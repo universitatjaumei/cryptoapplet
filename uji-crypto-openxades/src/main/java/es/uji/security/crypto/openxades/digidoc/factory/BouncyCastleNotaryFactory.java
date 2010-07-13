@@ -24,13 +24,8 @@
 package es.uji.security.crypto.openxades.digidoc.factory;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigInteger;
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.KeyStore;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -45,20 +40,17 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.bouncycastle.asn1.ocsp.CertID;
 import org.bouncycastle.asn1.ocsp.ResponderID;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.ocsp.BasicOCSPResp;
 import org.bouncycastle.ocsp.CertificateID;
+import org.bouncycastle.ocsp.OCSPException;
 import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
@@ -68,6 +60,8 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
 import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ocsp.CryptoCoreOCSPException;
+import es.uji.security.crypto.ocsp.OCSPChecker;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Notary;
 import es.uji.security.crypto.openxades.digidoc.Signature;
@@ -95,6 +89,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     private boolean m_useNonce = true;
 
     private ConfigManager conf = ConfigManager.getInstance();
+    private OCSPChecker ocspChecker;
 
     /** Creates new BouncyCastleNotaryFactory */
     public BouncyCastleNotaryFactory()
@@ -109,6 +104,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         String aux = conf.getProperty("DIGIDOC_USE_NONCE");
         if (aux != null)
             m_useNonce = aux.toLowerCase().equals("true");
+        
+        ocspChecker = new OCSPChecker();
     }
 
     /**
@@ -298,7 +295,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 
                     String ocspResponder = conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL" + i);
 
-                    OCSPResp resp = sendRequest(req, ocspResponder);
+                    OCSPResp resp = sendRequest(signersCert, req, ocspResponder);
                     // debugWriteFile("resp.der", resp.getEncoded());
                     if (m_logger.isDebugEnabled())
                         m_logger.debug("RESPONSE:\n" + Base64.encodeBytes(resp.getEncoded()));
@@ -430,7 +427,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         try
         {
             String verifier = conf.getStringProperty("DIGIDOC_CERT_VERIFIER", "OCSP").trim();
-            if (verifier != null && verifier.equals("OCSP"))
+            if (verifier != null && (verifier.equals("OCSP") || verifier.equals("POST")))
             {
                 // create the request
                 DigiDocFactory ddocFac = FactoryManager.getDigiDocFactory();
@@ -454,7 +451,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 // send it
                 String ocspResponder = conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL1");
 
-                OCSPResp resp = sendRequest(req, ocspResponder);
+                OCSPResp resp = sendRequest(cert, req, ocspResponder);
                 // debugWriteFile("resp1.der", resp.getEncoded());
                 if (m_logger.isDebugEnabled())
                 {
@@ -544,7 +541,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 
                 // send it
                 String ocspResponder = conf.getProperty("DIGIDOC_OCSP_RESPONDER_URL1");
-                OCSPResp resp = sendRequest(req, ocspResponder);
+                OCSPResp resp = sendRequest(cert, req, ocspResponder);
 
                 // debugWriteFile("resp1.der", resp.getEncoded());
                 if (m_logger.isDebugEnabled())
@@ -1038,12 +1035,14 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException
      * @throws CertificateEncodingException
+     * @throws OCSPException 
      */
     private CertificateID creatCertReq(X509Certificate signersCert, X509Certificate caCert)
-            throws NoSuchAlgorithmException, NoSuchProviderException, CertificateEncodingException,
-            DigiDocException
+            throws OCSPException
     {
+    	return new CertificateID(CertificateID.HASH_SHA1, caCert, signersCert.getSerialNumber());
 
+    	/*
         MessageDigest digest = MessageDigest.getInstance("1.3.14.3.2.26", "BC");
         if (m_logger.isDebugEnabled())
             m_logger.debug("CA cert: " + ((caCert != null) ? caCert.toString() : "NULL"));
@@ -1074,6 +1073,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         CertID cerid = new CertID(new AlgorithmIdentifier("1.3.14.3.2.26"), issuerNameHash,
                 issuerKeyHash, new DERInteger(signersCert.getSerialNumber()));
         return new CertificateID(cerid);
+        */
     }
 
     /**
@@ -1156,13 +1156,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
 
         }
-        catch (DigiDocException d_ex)
+        catch (Exception e)
         {
-            throw d_ex;
-        }
-        catch (Exception ex)
-        {
-            DigiDocException.handleException(ex, DigiDocException.ERR_OCSP_REQ_CREATE);
+            DigiDocException.handleException(e, DigiDocException.ERR_OCSP_REQ_CREATE);
         }
         return req;
     }
@@ -1174,72 +1170,29 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
      *            OCSP request
      * @returns OCSP response
      */
-    private OCSPResp sendRequest(OCSPReq req, String ocspResponder) throws DigiDocException
+    private OCSPResp sendRequest(X509Certificate certificate, OCSPReq req, String ocspResponder) throws DigiDocException
     {
         OCSPResp resp = null;
+
         try
         {
-
-            byte[] breq = req.getEncoded();
-            // debugWriteFile("request-bc.req", breq);
-            String responderUrl = ocspResponder;/*
-                                                 * conf. getProperty("DIGIDOC_OCSP_RESPONDER_URL");
-                                                 */
-            URL url = new URL(responderUrl);
-            URLConnection con = url.openConnection();
-            con.setReadTimeout(10000);
-            con.setConnectTimeout(10000);
-            con.setAllowUserInteraction(false);
-            con.setUseCaches(false);
-            con.setDoOutput(true);
-            con.setDoInput(true);
-            // send the OCSP request
-            con.setRequestProperty("Content-Type", "application/ocsp-request");
-            OutputStream os = con.getOutputStream();
-            os.write(breq);
-            os.close();
-            // read the response
-            InputStream is = con.getInputStream();
-            int cl = con.getContentLength();
-            byte[] bresp = null;
-            // System.out.println("Content: " + cl + " bytes");
-            if (cl > 0)
-            {
-                int avail = 0;
-                do
-                {
-                    avail = is.available();
-                    byte[] data = new byte[avail];
-                    int rc = is.read(data);
-                    if (bresp == null)
-                    {
-                        bresp = new byte[rc];
-                        System.arraycopy(data, 0, bresp, 0, rc);
-                    }
-                    else
-                    {
-                        byte[] tmp = new byte[bresp.length + rc];
-                        System.arraycopy(bresp, 0, tmp, 0, bresp.length);
-                        System.arraycopy(data, 0, tmp, bresp.length, rc);
-                        bresp = tmp;
-                    }
-                    // System.out.println("Got: " + avail + "/" + rc + " bytes!");
-                    cl -= rc;
-                }
-                while (cl > 0);
-            }
-            is.close();
-            if (bresp != null)
-            {
-                // debugWriteFile("response-bc.resp", bresp);
-                resp = new OCSPResp(bresp);
-                // System.out.println("Response: " + resp.toString());
-            }
+        	ConfigManager conf = ConfigManager.getInstance();
+        	String type = conf.getProperty("DIGIDOC_CERT_VERIFIER", "OCSP");
+        	
+        	if (type.equals("POST"))
+        	{
+        		resp = ocspChecker.sendOCSPRequestPOST(conf.getProperty("DIGIDOC_CERT_VERIFIER_URL"), certificate);
+        	}
+       		else if (type.equals("OCSP"))
+       		{
+        		resp = ocspChecker.sendOCSPRequest(req, ocspResponder);
+       		}
         }
-        catch (Exception ex)
+        catch (CryptoCoreOCSPException e)
         {
-            DigiDocException.handleException(ex, DigiDocException.ERR_OCSP_REQ_SEND);
+        	DigiDocException.handleException(e, DigiDocException.ERR_OCSP_REQ_SEND);
         }
+        
         return resp;
     }
 

@@ -16,6 +16,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.crypto.config.Device;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
@@ -300,6 +301,7 @@ public class EventActionHandler
                                 + chooser.getSelectedFile().getAbsolutePath());
 
                         File pkFile = chooser.getSelectedFile().getAbsoluteFile();
+                        
                         if (!pkFile.exists())
                         {
                             JOptionPane.showMessageDialog(mw.getMainFrame(),
@@ -309,15 +311,17 @@ public class EventActionHandler
                         {
                             try
                             {
-                                PKCS11KeyStore pkStore = new PKCS11KeyStore(pkFile
-                                        .getAbsolutePath());
-                                System.out.println(pkStore.getName());
-                                PasswordPrompt pp = new PasswordPrompt(mw.getMainFrame());
+                                PasswordPrompt pp = new PasswordPrompt(mw.getMainFrame());                                
                                 char[] pass = pp.getPassword();
+                                
                                 if (pass != null)
                                 {
-                                    pkStore.load(pass);
-                                    keyStoreManager.addP11KeyStore(pkStore);
+                                    Device device = new Device();
+                                    device.setName("CustomPKCS11");
+                                    device.setLibrary(pkFile.getAbsolutePath());
+                                    device.setSlot("1");
+                                    
+                                    keyStoreManager.initPKCS11Device(device, pass);
                                     mw.reloadCertificateJTree();
                                 }
                             }
