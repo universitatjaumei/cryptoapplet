@@ -477,7 +477,11 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     public void startElement(String namespaceURI, String lName, String qName, Attributes attrs)
             throws SAXDigiDocException
     {
-
+        if (qName.contains(":"))
+        {
+            qName = qName.split(":")[1];
+        }
+        
         // System.out.println("qName: " + qName );
         if (qName.equals("Signature"))
         {
@@ -1234,6 +1238,11 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
      */
     public void endElement(String namespaceURI, String sName, String qName) throws SAXException
     {
+        if (qName.contains(":"))
+        {
+            qName = qName.split(":")[1];
+        }
+        
         if (m_logger.isDebugEnabled())
             m_logger.debug("End Element: " + qName + " collect: " + m_nCollectMode);
         // remove last tag from stack

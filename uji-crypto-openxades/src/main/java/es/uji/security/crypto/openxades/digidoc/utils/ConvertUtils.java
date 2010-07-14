@@ -89,7 +89,16 @@ public class ConvertUtils
             SimpleDateFormat f = new SimpleDateFormat(
                     ((ddoc.getVersion().equals(SignedDoc.VERSION_1_3) || ddoc.getVersion().equals(
                             SignedDoc.VERSION_1_4)) ? m_dateFormatXAdES : m_dateFormat));
-            f.setTimeZone(TimeZone.getTimeZone("GMT+00:00"));
+            
+            String timeZone = "GMT+00:00";
+            
+            if (str.contains("+"))
+            {
+                timeZone = str.substring(str.indexOf("+"), str.indexOf("+")+6);
+                str = str.substring(0, str.indexOf("+")) + "Z";
+            }
+            
+            f.setTimeZone(TimeZone.getTimeZone(timeZone));
             d = f.parse(str);
         }
         catch (Exception ex)
