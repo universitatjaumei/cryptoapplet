@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -305,15 +306,12 @@ public class SignatureThread extends Thread
  						
  						if (_mw.getAppHandler().getXAdESBaseRef() != null)
  						{
-     						String[] baseRefs= _mw.getAppHandler().getXAdESBaseRef();
-     						
-     						if (baseRefs.length != 1){ 
-     							sigOpt.setXAdESBaseReference(baseRefs[this._step]);
-     						}
-     						else{
-     							sigOpt.setXAdESBaseReference(baseRefs[0]);
-     						}
+     						String[] baseRefs = _mw.getAppHandler().getXAdESBaseRef();
+  							sigOpt.setReferences(Arrays.asList(baseRefs));
  						}
+ 						
+ 						sigOpt.setCoSignEnabled(_mw.getAppHandler().isCosign());
+                        sigOpt.setEnveloped(_mw.getAppHandler().isEnveloped());
  
                         if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS_HASH))
                         {

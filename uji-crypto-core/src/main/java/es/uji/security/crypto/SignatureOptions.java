@@ -4,7 +4,9 @@ import java.io.InputStream;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SignatureOptions
@@ -20,12 +22,13 @@ public class SignatureOptions
     private boolean localFile = false;
     private boolean swapToFile = false;
     private boolean coSignEnabled = false;
+    private boolean enveloped = true;
     
     // XML options
     
     private String policyIdentifier;
     private String policyDescription;
-	private String baseReference;
+	private List<String> references;
 	
 	// PDF options
 	
@@ -50,6 +53,7 @@ public class SignatureOptions
     public SignatureOptions()
     {
         bindValues = new HashMap<String, String>();
+        references = new ArrayList<String>();
     }
 
     public boolean isHash()
@@ -152,14 +156,6 @@ public class SignatureOptions
         this.policyDescription = policyDescription;
     }
 
-    public String getXAdESBaseReference() {
-		return this.baseReference;
-	}
-    
-    public void setXAdESBaseReference(String baseRef) {
-    	this.baseReference= baseRef;
-	}
-
     public Map<String, String> getVisibleSignatureTextBindValues()
     {
         return bindValues;
@@ -170,16 +166,29 @@ public class SignatureOptions
         this.bindValues = bindValues;
     }
 
-    public String getBaseReference()
+    public List<String> getReferences()
     {
-        return baseReference;
+        return references;
     }
 
-    public void setBaseReference(String baseReference)
+    public void setReferences(List<String> references)
     {
-        this.baseReference = baseReference;
+        this.references = references;
     }
 
+    public void addReference(String reference)
+    {
+        if (this.references != null)
+        {
+            this.references.add(reference);
+        }
+    }
+
+    public void clearReferences()
+    {
+        this.references.clear();
+    }
+    
     public Map<String, String> getBindValues()
     {
         return bindValues;
@@ -348,5 +357,15 @@ public class SignatureOptions
     public void setVisibleAreaTextPattern(String visibleAreaTextPattern)
     {
         this.visibleAreaTextPattern = visibleAreaTextPattern;
-    }       
+    }
+
+    public boolean isEnveloped()
+    {
+        return enveloped;
+    }
+
+    public void setEnveloped(boolean enveloped)
+    {
+        this.enveloped = enveloped;
+    }
 }

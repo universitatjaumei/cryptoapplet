@@ -67,7 +67,7 @@ public class AppHandler
     private SupportedBrowser navigator = SupportedBrowser.MOZILLA;
 
     // Input/Output Data handling
-    private InputParams input;
+    private InputParams input;    
     private OutputParams output;
 
     // XAdES signer role customization
@@ -99,11 +99,17 @@ public class AppHandler
     private String[] visibleAreaTextSize;
     private String[] visibleAreaImgFile;
     private String[] visibleAreaRepeatAxis;
-    private String[] visibleAreaTextPattern;
+    private String[] visibleAreaTextPattern;   
+    
+    private boolean cosign;
+    private boolean enveloped;    
     
     public AppHandler() throws SignatureAppletException
     {
         this(null);
+        
+        this.cosign = false;
+        this.enveloped = true;
         
         log.debug("Running in desktop application mode");
     }
@@ -943,5 +949,25 @@ public class AppHandler
     public void setSignatureFormat(SupportedSignatureFormat signatureFormat)
     {
         this.signatureFormat = signatureFormat;
+    }
+
+    public boolean isCosign()
+    {
+        return cosign;
+    }
+
+    public void setCosign(boolean cosign)
+    {
+        this.cosign = cosign;
+    }
+
+    public boolean isEnveloped()
+    {
+        return enveloped;
+    }
+
+    public void setEnveloped(boolean enveloped)
+    {
+        this.enveloped = enveloped;
     }
 }

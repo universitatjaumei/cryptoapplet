@@ -66,6 +66,8 @@ public class JTreeCertificateBuilder
                                     ((DefaultMutableTreeNode) caNodes.get(j))
                                             .add(new DefaultMutableTreeNode(certHandle));
                                     found = true;
+
+                                    log.debug("Added new certificate " + certHandle);
                                 }
                             }
 
@@ -74,7 +76,13 @@ public class JTreeCertificateBuilder
                                 String issuerOrg = certHandle.getIssuerOrganization();
                                 DefaultMutableTreeNode nodeAux = new DefaultMutableTreeNode(
                                         issuerOrg);
+                                
+                                log.debug("Added new CA " + issuerOrg);
+
                                 nodeAux.add(new DefaultMutableTreeNode(certHandle));
+
+                                log.debug("Added new certificate " + certHandle);
+
                                 caStrs.add(issuerOrg);
                                 root.add(nodeAux);
                                 caNodes.add(nodeAux);

@@ -9,6 +9,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.DigestMethod;
@@ -123,14 +124,17 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
                     "Signature");
             int numSignature = result.getLength();
 
-            String baseRef = "";
-            if (signatureOptions.getXAdESBaseReference() != null)
+            List<String> references = signatureOptions.getReferences();
+
+            // If no there are no references, add enveloped reference
+            if (signatureOptions.isEnveloped() || references.isEmpty())
             {
-                baseRef = signatureOptions.getXAdESBaseReference();
+                references.clear();
+                references.add("");
             }
 
-            // TODO: Revisar frima cosign, si no es enveloped funciona bien por el else.
-            if (signatureOptions.isCoSignEnabled())
+            // If enveloped+cosig construct special transformation
+            if (signatureOptions.isEnveloped() && signatureOptions.isCoSignEnabled())
             {
                 XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
                 DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(DigestMethod.SHA1,
@@ -140,7 +144,7 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
                         new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
                                 Collections.singletonMap("dsig", XMLSignature.XMLNS)));
 
-                Reference reference = xmlSignatureFactory.newReference(baseRef, digestMethod,
+                Reference reference = xmlSignatureFactory.newReference("", digestMethod,
                         Collections.singletonList(transform), null, null);
 
                 xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, Arrays
@@ -148,8 +152,8 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             }
             else
             {
-                xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, Arrays
-                        .asList(new Object[] { baseRef }), "S" + numSignature, tsaUrl);
+                xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, references,
+                        "S" + numSignature, tsaUrl);
             }
         }
         catch (MarshalException me)

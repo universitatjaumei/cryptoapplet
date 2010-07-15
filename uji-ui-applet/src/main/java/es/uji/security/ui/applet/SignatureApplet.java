@@ -5,7 +5,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Map;
 
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
@@ -487,11 +486,38 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setIsBigFile(bigfile.equals("true"));
+                apph.setIsBigFile(bigfile.toLowerCase().equals("true"));
                 return null;
             }
         });
     }
+    
+    public void setCosign(final String cosign)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {                
+                apph.setCosign(cosign.toLowerCase().equals("true"));
+                
+                return null;
+            }
+        });
+    }
+
+    public void setEnveloped(final String enveloped)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {                
+                apph.setEnveloped(enveloped.toLowerCase().equals("true"));
+                
+                return null;
+            }
+        });
+    }
+    
 
     /* SIGNATURE COMPUTATION FUNCTIONS */
 
