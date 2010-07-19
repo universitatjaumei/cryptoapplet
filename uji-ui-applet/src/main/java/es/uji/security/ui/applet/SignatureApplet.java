@@ -33,6 +33,7 @@ import es.uji.security.keystore.DeviceInitializationException;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.ui.applet.io.ConsoleOutputParams;
 import es.uji.security.ui.applet.io.FileInputParams;
+import es.uji.security.ui.applet.io.FileOutputParams;
 import es.uji.security.ui.applet.io.FuncOutputParams;
 import es.uji.security.ui.applet.io.ParamInputData;
 import es.uji.security.ui.applet.io.URLInputParams;
@@ -736,6 +737,35 @@ public class SignatureApplet extends JApplet
             }
         });
     }
+    
+    /**
+     * Computes the signature getting the data from the given inputURL, and opens a selector for local 
+     * saving of the resulting file 
+     * 
+     * @param inputURL
+     *            the URL where the data must be retrieved.
+     */
+
+    public void signDataUrlToFile(final String inputURLs)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+                String[] in = inputURLs.split(_separator);
+             
+                URLInputParams input = new URLInputParams(in);
+                FileOutputParams output = new FileOutputParams();
+                
+                apph.setInput(input);
+                apph.setOutput(output);
+
+                initializeWindow();
+                return null;
+            }
+        });
+    }
+
 
     /**
      * Computes the signature getting the data from the given inputURL, and it invokes JavaScript
@@ -1195,6 +1225,7 @@ public class SignatureApplet extends JApplet
         Runtime.getRuntime().gc();
 
         log.debug("Applet destoy called. Executing garbage collection");
+        //System.exit(0);
     }
 
     public String getAppletInfo()
