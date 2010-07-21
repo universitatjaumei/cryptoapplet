@@ -166,16 +166,19 @@ public class ConfigManager
 
                 String deviceLibrary = null;
 
-                for (String library : deviceLibrariesList.split(","))
-                {
-                    File f = new File(library);
+		// If only one OS is supported we can get null over the other
+		if ( deviceLibrariesList != null ) {
+                  for (String library : deviceLibrariesList.split(","))
+                  {
+                      File f = new File(library);
 
-                    if (f.exists())
-                    {
-                        deviceLibrary = library;
-                        break;
-                    }
-                }
+                      if (f.exists())
+                      {
+                          deviceLibrary = library;
+                          break;
+                      }
+                  }
+		}
 
                 if (deviceLibrary != null)
                 {
