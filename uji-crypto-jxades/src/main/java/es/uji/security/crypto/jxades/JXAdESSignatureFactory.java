@@ -7,6 +7,7 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +26,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import net.java.xades.security.xml.XAdES.SignaturePolicyIdentifier;
 import net.java.xades.security.xml.XAdES.SignaturePolicyIdentifierImpl;
+import net.java.xades.security.xml.XAdES.SignerRole;
+import net.java.xades.security.xml.XAdES.SignerRoleImpl;
 import net.java.xades.security.xml.XAdES.XAdES;
 import net.java.xades.security.xml.XAdES.XAdES_EPES;
 import net.java.xades.security.xml.XAdES.XMLAdvancedSignature;
@@ -101,9 +104,15 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             spi.setDescription(signatureOptions.getPolicyDescription());
             xades.setSignaturePolicyIdentifier(spi);
         }
-        /*
-         * else { spi = new SignaturePolicyIdentifierImpl(true); }
-         */
+
+        if (signatureOptions.getSignerRole() != null)
+        {
+            SignerRole role = new SignerRoleImpl();
+            role.setClaimedRole(new ArrayList<String>(Arrays.asList(new String[] { signatureOptions
+                    .getSignerRole() })));
+
+            xades.setSignerRole(role);
+        }
 
         ConfigManager conf = ConfigManager.getInstance();
         int tsaCount = conf.getIntProperty("DIGIDOC_TSA_COUNT", 0);

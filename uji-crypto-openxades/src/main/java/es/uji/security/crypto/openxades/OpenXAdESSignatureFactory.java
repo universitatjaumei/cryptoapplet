@@ -39,15 +39,9 @@ import es.uji.security.util.i18n.LabelManager;
 public class OpenXAdESSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(OpenXAdESSignatureFactory.class);
-
-    private String signerRole;
+    
     private String xadesFileName = "data.xml";
     private String xadesFileMimeType = "application/binary";
-
-    public void setSignerRole(String signerRole)
-    {
-        this.signerRole = signerRole;
-    }
 
     public void setXadesFileName(String xadesFileName)
     {
@@ -153,9 +147,9 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         // Prepare the signature        
         String[] roles;
         
-        if (this.signerRole != null)
+        if (signatureOptions.getSignerRole() != null)
         {
-            roles = new String[] { signerRole };
+            roles = new String[] { signatureOptions.getSignerRole() };
         }
         else
         {

@@ -184,19 +184,18 @@ public class SignatureThread extends Thread
             // Creating an instance of the signature formater: CMS, XAdES, etc
             Class<?> sf = Class.forName(_mw.getAppHandler().getSignatureFormat().toString());
             ISignFormatProvider signer = (ISignFormatProvider) sf.newInstance();
+            SignatureOptions sigOpt = new SignatureOptions();
 
+            String[] roles = _mw.getAppHandler().getSignerRole();
+            
+            if (roles != null && this._step < roles.length)
+            {
+                sigOpt.setSignerRole(roles[this._step]);
+                log.debug("Signer Role: " + sigOpt.getSignerRole());                
+            }            
+            
             if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.XADES))
             {
-                String[] roles = _mw.getAppHandler().getSignerRole();
-                String sr = "UNSET";
-                
-                if (roles != null && this._step < roles.length)
-                {
-                    sr = roles[this._step];
-                }
-                
-                log.debug("Signer Role: " + sr);                
-                
                 String fname = (_mw.getAppHandler().getXadesFileName() != null) ? _mw
                         .getAppHandler().getXadesFileName() : "UNSET";
                 String fmimetype = (_mw.getAppHandler().getXadesFileMimeType() != null) ? _mw
@@ -206,7 +205,6 @@ public class SignatureThread extends Thread
                 log.debug("Content Type:" + fmimetype);                
                         
                 OpenXAdESSignatureFactory xs = (OpenXAdESSignatureFactory) signer;
-                xs.setSignerRole(sr);
                 xs.setXadesFileName(fname);
                 xs.setXadesFileMimeType(fmimetype);
             }
@@ -228,6 +226,7 @@ public class SignatureThread extends Thread
                     throw new SignatureAppletException("ERROR_CERTIFICATE_NOT_SELECTED");
 
                 }
+                
                 if (xcert.isDigitalSignatureCertificate() || xcert.isNonRepudiationCertificate() || 
                     (xcert.isEmailProtectionCertificate() && 
                      _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS)))
@@ -288,7 +287,6 @@ public class SignatureThread extends Thread
                     try
                     {
                         // Set up the data for the signature handling.
-                        SignatureOptions sigOpt = new SignatureOptions();
                         sigOpt.setDataToSign(in);                        
                         sigOpt.setCertificate(xcert.getCertificate());
                         

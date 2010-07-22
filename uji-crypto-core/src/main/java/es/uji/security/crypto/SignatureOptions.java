@@ -12,7 +12,7 @@ import java.util.Map;
 public class SignatureOptions
 {
     // General options
-    
+
     private X509Certificate certificate;
     private PrivateKey privateKey;
     private Provider provider;
@@ -23,24 +23,25 @@ public class SignatureOptions
     private boolean swapToFile = false;
     private boolean coSignEnabled = false;
     private boolean enveloped = true;
-    
+
     // XML options
-    
+
     private String policyIdentifier;
     private String policyDescription;
-	private List<String> references;
-	
-	// PDF options
-	
-	private Map<String, String> bindValues;
-	private String reason;
-	private String location;
-	private String contact;
-	private Boolean timestamping;
-	private String tsaURL;
-	private Boolean visibleSignature;
-	private String visibleSignatureType;
-	private Integer visibleAreaX;
+    private List<String> references;
+    private String signerRole;
+
+    // PDF options
+
+    private Map<String, String> bindValues;
+    private String reason;
+    private String location;
+    private String contact;
+    private Boolean timestamping;
+    private String tsaURL;
+    private Boolean visibleSignature;
+    private String visibleSignatureType;
+    private Integer visibleAreaX;
     private Integer visibleAreaY;
     private Integer visibleAreaX2;
     private Integer visibleAreaY2;
@@ -80,7 +81,7 @@ public class SignatureOptions
     {
         this.swapToFile = swapToFile;
     }
-    
+
     public boolean getSwapToFile()
     {
         return this.swapToFile;
@@ -160,7 +161,7 @@ public class SignatureOptions
     {
         return bindValues;
     }
-    
+
     public void setVisibleSignatureTextBindValues(Map<String, String> bindValues)
     {
         this.bindValues = bindValues;
@@ -188,7 +189,7 @@ public class SignatureOptions
     {
         this.references.clear();
     }
-    
+
     public Map<String, String> getBindValues()
     {
         return bindValues;
@@ -367,5 +368,15 @@ public class SignatureOptions
     public void setEnveloped(boolean enveloped)
     {
         this.enveloped = enveloped;
+    }
+
+    public String getSignerRole()
+    {
+        return signerRole;
+    }
+
+    public void setSignerRole(String signerRole)
+    {
+        this.signerRole = signerRole;
     }
 }
