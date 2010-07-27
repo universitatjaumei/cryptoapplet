@@ -2,6 +2,7 @@ package es.uji.security.crypto.timestamp;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 
@@ -17,7 +18,7 @@ public class TSResponseTest {
 		
 		byte[] bts1= new byte[fts1.available()];
 		byte[] bts2= new byte[fts2.available()];
-		byte[] bts3= new byte[fts2.available()];
+		byte[] bts3= new byte[fts3.available()];
 		
 		fts1.read(bts1);
 		fts2.read(bts2);
