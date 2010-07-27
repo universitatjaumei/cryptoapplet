@@ -29,6 +29,7 @@ import java.util.TimeZone;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
+import es.uji.security.util.ISO8601DateParser;
 
 /**
  * Miscellaneous data conversion utility methods
@@ -83,29 +84,18 @@ public class ConvertUtils
      */
     public static Date string2date(String str, SignedDoc ddoc) throws DigiDocException
     {
-        Date d = null;
+        Date result = null;
+        
         try
         {
-            SimpleDateFormat f = new SimpleDateFormat(
-                    ((ddoc.getVersion().equals(SignedDoc.VERSION_1_3) || ddoc.getVersion().equals(
-                            SignedDoc.VERSION_1_4)) ? m_dateFormatXAdES : m_dateFormat));
-            
-            String timeZone = "GMT+00:00";
-            
-            if (str.contains("+"))
-            {
-                timeZone = str.substring(str.indexOf("+"), str.indexOf("+")+6);
-                str = str.substring(0, str.indexOf("+")) + "Z";
-            }
-            
-            f.setTimeZone(TimeZone.getTimeZone(timeZone));
-            d = f.parse(str);
+            result = ISO8601DateParser.parse(str);
         }
         catch (Exception ex)
         {
             DigiDocException.handleException(ex, DigiDocException.ERR_DATE_FORMAT);
         }
-        return d;
+        
+        return result;
     }
 
     /**

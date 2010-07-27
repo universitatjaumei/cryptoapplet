@@ -2,7 +2,6 @@ package es.uji.security.crypto;
 
 import java.io.ByteArrayInputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,10 +12,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-public class SignatureDetailInformation
-{
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+import es.uji.security.util.ISO8601DateParser;
 
+public class SignatureDetailInformation
+{    
     private String signerCN;
     private Date signatureTime;
     private String signingRole;
@@ -43,7 +42,7 @@ public class SignatureDetailInformation
 
     public void setSignatureTimeAsXMLDateTime(String signatureTime) throws ParseException
     {
-        this.signatureTime = simpleDateFormat.parse(signatureTime);
+        this.signatureTime = ISO8601DateParser.parse(signatureTime);
     }
 
     public String getSigningRole()
@@ -69,7 +68,7 @@ public class SignatureDetailInformation
 
     public String getSignatureTimeAsXMLDateTime()
     {
-        return simpleDateFormat.format(this.signatureTime) + "Z";
+        return ISO8601DateParser.toString(this.signatureTime);
     }
 
     public static List<SignatureDetailInformation> getSignatureDetailInformation(byte[] data,
@@ -125,8 +124,8 @@ public class SignatureDetailInformation
                     if (nlTime != null && nlTime.getLength() > 0
                             && nlTime.item(0).getFirstChild() != null)
                     {
-                        signatureDetailInformation.setSignatureTimeAsXMLDateTime(nlTime.item(0)
-                                .getFirstChild().getNodeValue());
+						String timeString = nlTime.item(0).getFirstChild().getNodeValue();
+						signatureDetailInformation.setSignatureTimeAsXMLDateTime(timeString);
                     }
 
                     if (nlRole != null && nlRole.getLength() > 0
