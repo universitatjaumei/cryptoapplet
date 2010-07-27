@@ -11,7 +11,7 @@ public class TSResponseTest
 
     public static void main(String[] args) throws IOException
     {
-        for (String fileName : new String[] { "ts_response_1.bin", "ts_response_2.bin","bueno.bin", "new_bueno.bin" })
+        for (String fileName : new String[] { "ts_response_1.bin", "ts_response_2.bin","bueno.bin"})
     	
         {
             try
