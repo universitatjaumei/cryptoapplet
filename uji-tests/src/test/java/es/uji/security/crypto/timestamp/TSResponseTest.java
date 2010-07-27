@@ -11,8 +11,8 @@ public class TSResponseTest
 
     public static void main(String[] args) throws IOException
     {
-        for (String fileName : new String[] { "ts_response_1.bin", "ts_response_2.bin",
-                "ts_response_3.bin", "bueno.bin" })
+        for (String fileName : new String[] { "ts_response_1.bin", "ts_response_2.bin","bueno.bin", "new_bueno.bin" })
+    	
         {
             try
             {
@@ -22,8 +22,9 @@ public class TSResponseTest
             }
             catch (Exception e)
             {
-                System.out.println("Error parseando respuesta: " + e.getMessage());
+            	e.printStackTrace();	
+            	System.out.println("Error parseando respuesta: " + e.getMessage());
             }
         }
     }
-}
+}	
