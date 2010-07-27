@@ -269,6 +269,13 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             {
                 signature.getConfirmation();
             }
+            else
+            {
+                signatureResult.setValid(false);
+                signatureResult.addError("Unknows DIGIDOC_CERT_VERIFIER option. Must be OCSP or POST");
+                
+                return signatureResult;                            	
+            }
 
             String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
             String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
