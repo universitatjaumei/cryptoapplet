@@ -7,6 +7,7 @@
 
 package es.uji.security.crypto.timestamp;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import sun.security.pkcs.PKCS7;
@@ -317,19 +318,46 @@ public class TSResponse
      */
     private void parse(byte[] tsReply) throws IOException
     {
-        // Decode TimeStampResp
-        DerValue derValue = new DerValue(tsReply);
+    	DerValue derValue, status;
+    	byte[] tsReplyAux= new byte[tsReply.length + 9];
         
-        if (derValue.tag != DerValue.tag_Sequence)
-        {
-            throw new IOException("Bad encoding for timestamp response");
+    	// Decode TimeStampResp
+    	try{
+    		derValue = new DerValue(tsReply);
+
+    		if (derValue.tag != DerValue.tag_Sequence)
+    		{
+    			throw new IOException("Bad encoding for timestamp response");
+    		}
+
+    		// Parse status
+    		status = derValue.data.getDerValue();
+
+    		// Parse status
+
+    		this.status = status.data.getInteger();
+    	}
+        catch (Exception e){
+        	//Let's try to correct the response with the status value: 
+        	tsReplyAux[0]=0x30;tsReplyAux[1]=(byte)0x82;
+        
+        	//The size of the reply + 5 in hex
+        	Integer size= tsReply.length+5;	
+        	tsReplyAux[2]= (byte) (((size) & 0x0000FF00)>>8);  
+          	tsReplyAux[3]= (byte) ((size) & 0x000000FF);
+        	
+        	
+        	System.arraycopy(new byte[]{0x30, 0x03, 0x02, 0x01, 0x00}, 0, tsReplyAux, 4, 5);
+        	System.arraycopy(tsReply, 0, tsReplyAux, 9, tsReply.length);
+        	
+        	FileOutputStream fos= new FileOutputStream("/tmp/kk");
+        	fos.write(tsReplyAux); fos.close();
+        	
+        	derValue = new DerValue(tsReplyAux);
+        	status = derValue.data.getDerValue();
+        	this.status = status.data.getInteger();
         }
 
-        // Parse status
-        DerValue status = derValue.data.getDerValue();
-
-        // Parse status
-        this.status = status.data.getInteger();
         
         if (DEBUG)
         {
