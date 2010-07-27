@@ -349,10 +349,7 @@ public class TSResponse
         	
         	System.arraycopy(new byte[]{0x30, 0x03, 0x02, 0x01, 0x00}, 0, tsReplyAux, 4, 5);
         	System.arraycopy(tsReply, 0, tsReplyAux, 9, tsReply.length);
-        	
-        	FileOutputStream fos= new FileOutputStream("/tmp/kk");
-        	fos.write(tsReplyAux); fos.close();
-        	
+        	        	
         	derValue = new DerValue(tsReplyAux);
         	status = derValue.data.getDerValue();
         	this.status = status.data.getInteger();
