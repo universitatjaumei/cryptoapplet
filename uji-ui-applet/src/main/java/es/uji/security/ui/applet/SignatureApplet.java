@@ -162,7 +162,9 @@ public class SignatureApplet extends JApplet
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage());
+            log.error("Stack Trace: " + OS.stackTraceToString(e));
+            
             JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 
             log.debug("Call JavaScript method: onSignError");
