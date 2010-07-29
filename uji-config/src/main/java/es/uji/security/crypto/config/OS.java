@@ -1,11 +1,14 @@
 package es.uji.security.crypto.config;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
 
 public class OS
 {
@@ -52,6 +55,28 @@ public class OS
     	return System.getProperty("java.io.tmpdir");
     }
 
+
+    public static String stackTraceToString(Exception exc){
+    	
+    	byte b[];
+    	
+    	try{
+    		PipedInputStream pInput=new PipedInputStream();
+    		PipedOutputStream pOutput=new PipedOutputStream(pInput);
+    		PrintStream pw=new PrintStream(pOutput);
+
+    		exc.printStackTrace(pw);
+
+    		b=new byte[pInput.available()];
+    		pInput.read(b,0,pInput.available());
+    	}
+    	catch (Exception e){
+    		return "Cannot get StackTrace - no info";
+    	}
+    	return new String(b);    
+    }
+
+    
     public static byte[] inputStreamToByteArray(InputStream in) throws IOException
     {
         byte[] buffer = new byte[2048];
