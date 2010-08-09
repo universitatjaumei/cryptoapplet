@@ -1,5 +1,6 @@
 package es.uji.security.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -53,10 +54,9 @@ public class ISO8601DateParser
     // TZD = time zone designator (Z or +hh:mm or -hh:mm)
     public static Date parse(String input) throws java.text.ParseException
     {
-
         // NOTE: SimpleDateFormat uses GMT[-+]hh:mm for the TZ which breaks
         // things a bit. Before we go on we have to repair this.
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+        
 
         // this is zero time so we need to add that TZ indicator for
         if (input.endsWith("Z"))
@@ -73,21 +73,39 @@ public class ISO8601DateParser
             input = s0 + "GMT" + s1;
         }
 
-        return df.parse(input);
+        Date result;
+
+        try
+        {
+            result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz").parse(input);
+        }
+        catch (ParseException e)
+        {
+            try
+            {
+                result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz").parse(input);
+            }
+            catch (ParseException e2)
+            {
+                result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmz").parse(input);
+            }
+        }
+        
+        return result;
     }
 
     public static String toString(Date date)
     {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSz");
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
 
         df.setTimeZone(tz);
 
         String output = df.format(date);
-
-        int inset0 = 9;
-        int inset1 = 6;
+        
+        int inset0 = 3;
+        int inset1 = 3;
 
         String s0 = output.substring(0, output.length() - inset0);
         String s1 = output.substring(output.length() - inset1, output.length());
