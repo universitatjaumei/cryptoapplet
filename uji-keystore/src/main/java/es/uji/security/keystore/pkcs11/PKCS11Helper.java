@@ -18,240 +18,311 @@ import sun.security.pkcs11.wrapper.PKCS11Exception;
 public class PKCS11Helper
 {
 
-    private static int MAX_CERTS = 1000;
+	private static int MAX_CERTS = 1000;
+	private static long CKM_RSA_PKCS= 0x00000001;
+	private static long CKM_SHA1_RSA_PKCS= 0x00000006;
 
-    String _initArgs, _pk11LibPath, _name;
-    Vector<X509Certificate> certificates = new Vector<X509Certificate>();
+	String _initArgs, _pk11LibPath, _name;
+	Vector<X509Certificate> certificates = new Vector<X509Certificate>();
 
-    public PKCS11Helper(String pk11LibPath, String initArgs) throws PKCS11HelperException
-    {
+	public PKCS11Helper(String pk11LibPath, String initArgs) throws PKCS11HelperException
+	{
+		
+		_initArgs = initArgs;
+		_pk11LibPath = pk11LibPath;
+		initialize();
+	}
 
-        _initArgs = initArgs;
-        _pk11LibPath = pk11LibPath;
-        initialize();
-    }
+	public PKCS11Helper(String pk11LibPath) throws PKCS11HelperException
+	{
+		
+		_initArgs = null;
+		_pk11LibPath = pk11LibPath;
+		initialize();
 
-    public PKCS11Helper(String pk11LibPath) throws PKCS11HelperException
-    {
+	}
 
-        _initArgs = null;
-        _pk11LibPath = pk11LibPath;
-        initialize();
+	public String getName()
+	{
+		return _name;
+	}
 
-    }
+	private void initialize() throws PKCS11HelperException
+	{
 
-    public String getName()
-    {
-        return _name;
-    }
+		long hSession = 0;
+		long[] slots;
+		boolean found = false;
 
-    private void initialize() throws PKCS11HelperException
-    {
+		CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[1];
+		CK_ATTRIBUTE attr = new CK_ATTRIBUTE();
+		CK_TOKEN_INFO ckti = null;
+		
+		PKCS11 p11 = getP11Instance();
+	
+		try
+		{
+			slots = p11.C_GetSlotList(true); //true is token present, false to get all slots.
+		}
+		catch (Exception e)
+		{
+			throw new PKCS11HelperException("Getting Slot List::" + e.getMessage(),
+					PKCS11HelperException.errorType.ERR_GET_SLOT_LIST);
+		}
 
-        long hSession = 0;
-        long[] slots;
-        boolean found = false;
+		for (long k : slots)
+		{
 
-        CK_C_INITIALIZE_ARGS cia = new CK_C_INITIALIZE_ARGS();
-        CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[1];
-        CK_ATTRIBUTE attr = new CK_ATTRIBUTE();
-        CK_TOKEN_INFO ckti = null;
+			try
+			{
+				System.out.println("Slot k = " + k );
+				for (long x: p11.C_GetMechanismList(k)){
+					if ( x == CKM_RSA_PKCS || x == CKM_SHA1_RSA_PKCS ){
+						System.out.println("Slot " + k + " has signature capabilities");
+						break;
+					}
+				}
 
-        cia.pReserved = (Object) _initArgs;
-        cia.flags = 0;
+				ckti = p11.C_GetTokenInfo(k);
+				_name = new String(ckti.label);
+			}
+			catch (Exception e)
+			{
+				throw new PKCS11HelperException("Getting token Info::" + e.getMessage(),
+						PKCS11HelperException.errorType.ERR_GET_TOKEN_INFO);
+			}
 
-        PKCS11 p11 = null;
+			try
+			{
+				hSession = p11.C_OpenSession(k, PKCS11Constants.CKF_SERIAL_SESSION, null, null);
+			}
+			catch (Exception e)
+			{
+				throw new PKCS11HelperException("Opening a new Session::" + e.getMessage(),
+						PKCS11HelperException.errorType.ERR_OPEN_SESSION);
+			}
+			
+			attr.type = PKCS11Constants.CKA_CLASS;
+			attr.pValue = PKCS11Constants.CKO_CERTIFICATE;
+			attrs[0] = attr;
 
-        Method[] methods = PKCS11.class.getMethods();
-        Method p11Getinstance = null;
+			try
+			{
+				p11.C_FindObjectsInit(hSession, attrs);
 
-        for (int i = 0; i < methods.length; i++)
-        {
-            if (methods[i].getName().equals("getInstance"))
-                p11Getinstance = methods[i];
-        }
+				long[] l = p11.C_FindObjects(hSession, MAX_CERTS);
 
-        try
-        {
+				p11.C_FindObjectsFinal(hSession);
 
-            File _fpk11LibPath = new File(_pk11LibPath);
-            _pk11LibPath = _fpk11LibPath.getCanonicalPath();
+				for (long i : l)
+				{
 
-            System.out.println("_pk11LibPath: " + _pk11LibPath);
+					CK_ATTRIBUTE attrPriv = new CK_ATTRIBUTE();
+					CK_ATTRIBUTE[] attrsP = new CK_ATTRIBUTE[2];
 
-            String version = System.getProperty("java.version");
-            if (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1)
-            {
-                // JRE 1.6 , JRE 1.7
-                p11 = (PKCS11) p11Getinstance.invoke(null, new Object[] { _pk11LibPath,
-                        "C_GetFunctionList", cia, false });
-            }
-            else if (version.indexOf("1.5") > -1)
-            {
-                // JRE 1.5
-                p11 = (PKCS11) p11Getinstance.invoke(null,
-                        new Object[] { _pk11LibPath, cia, false });
-            }
-            else
-            {
-                System.err.println("Unsupported version of VM");
-                return;// System.exit(-1);
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            throw new PKCS11HelperException("Problem using java reflection with pkcs11 classes::"
-                    + e.getMessage(), PKCS11HelperException.errorType.ERR_INVOKE_INITIALIZE);
-        }
+					attrPriv.type = PKCS11Constants.CKA_CLASS;
+					attrPriv.pValue = PKCS11Constants.CKA_PRIVATE;//CKO_PRIVATE_KEY;
 
-        try
-        {
-            slots = p11.C_GetSlotList(true);
-        }
-        catch (Exception e)
-        {
-            throw new PKCS11HelperException("Getting Slot List::" + e.getMessage(),
-                    PKCS11HelperException.errorType.ERR_GET_SLOT_LIST);
-        }
+					attr.type = PKCS11Constants.CKA_ID;
+					attr.pValue = getID(hSession, i, p11);
 
-        for (long k : slots)
-        {
+					if (attr.pValue != null)
+					{
+						attrsP[0] = attrPriv;
+						attrsP[1] = attr;
 
-            try
-            {
-                ckti = p11.C_GetTokenInfo(k);
-                _name = new String(ckti.label);
-            }
-            catch (Exception e)
-            {
-                throw new PKCS11HelperException("Getting token Info::" + e.getMessage(),
-                        PKCS11HelperException.errorType.ERR_GET_TOKEN_INFO);
-            }
+						p11.C_FindObjectsInit(hSession, attrsP);
+						long[] m = p11.C_FindObjects(hSession, MAX_CERTS);
+						if (m.length > 0)
+						{
+							found = true;
+							certificates.add(loadCert(hSession, i, p11));
+						}
+						p11.C_FindObjectsFinal(hSession);
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				throw new PKCS11HelperException("Unsuccesfully FindObjects secuence::"
+						+ e.getMessage(), PKCS11HelperException.errorType.ERR_FIND_OBJECTS);
+			}
 
-            try
-            {
-                hSession = p11.C_OpenSession(k, PKCS11Constants.CKF_SERIAL_SESSION, null, null);
-            }
-            catch (Exception e)
-            {
-                throw new PKCS11HelperException("Opening a new Session::" + e.getMessage(),
-                        PKCS11HelperException.errorType.ERR_OPEN_SESSION);
-            }
-            attr.type = PKCS11Constants.CKA_CLASS;
-            attr.pValue = PKCS11Constants.CKO_CERTIFICATE;
-            attrs[0] = attr;
+			try
+			{
+				p11.C_CloseSession(hSession);
+				if (found)
+					break;
+			}
+			catch (Throwable e)
+			{
+				throw new PKCS11HelperException("Cannot close sesion::" + e.getMessage(),
+						PKCS11HelperException.errorType.ERR_CLOSE_SESSION);
+			}
+		}
+		
+		try
+		{
+			// Should be revised against the code of jdk.
+			// That should be done under normal conditions, but when using com.sun.security classes,
+			// something happen that make future SunPKCS11 provider against mozilla library
+			// fails on session handle.
 
-            try
-            {
-                p11.C_FindObjectsInit(hSession, attrs);
+			// p11.C_Finalize(hSession);
 
-                long[] l = p11.C_FindObjects(hSession, MAX_CERTS);
+			p11 = null;
+			Runtime.getRuntime().gc();
+		}
+		catch (Throwable e)
+		{
+			throw new PKCS11HelperException("Cannot Finalize::" + e.getMessage(),
+					PKCS11HelperException.errorType.ERR_FINALIZE);
+		}
+	}
 
-                p11.C_FindObjectsFinal(hSession);
+	private X509Certificate loadCert(long session, long oHandle, PKCS11 p11)
+	throws PKCS11Exception, CertificateException
+	{
 
-                for (long i : l)
-                {
+		CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(PKCS11Constants.CKA_VALUE) };
+		p11.C_GetAttributeValue(session, oHandle, attrs);
 
-                    CK_ATTRIBUTE attrPriv = new CK_ATTRIBUTE();
-                    CK_ATTRIBUTE[] attrsP = new CK_ATTRIBUTE[2];
+		byte[] bytes = attrs[0].getByteArray();
+		if (bytes == null)
+		{
+			throw new CertificateException("unexpectedly retrieved null byte array");
+		}
+		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+		return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(bytes));
+	}
 
-                    attrPriv.type = PKCS11Constants.CKA_CLASS;
-                    attrPriv.pValue = PKCS11Constants.CKA_PRIVATE;//CKO_PRIVATE_KEY;
+	private byte[] getID(long session, long oHandle, PKCS11 p11) throws PKCS11Exception,
+	CertificateException
+	{
 
-                    attr.type = PKCS11Constants.CKA_ID;
-                    attr.pValue = getID(hSession, i, p11);
+		byte[] bytes = null;
+		CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(PKCS11Constants.CKA_ID) };
 
-                    if (attr.pValue != null)
-                    {
-                        attrsP[0] = attrPriv;
-                        attrsP[1] = attr;
+		p11.C_GetAttributeValue(session, oHandle, attrs);
 
-                        p11.C_FindObjectsInit(hSession, attrsP);
-                        long[] m = p11.C_FindObjects(hSession, MAX_CERTS);
-                        if (m.length > 0)
-                        {
-                            found = true;
-                            certificates.add(loadCert(hSession, i, p11));
-                        }
-                        p11.C_FindObjectsFinal(hSession);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                throw new PKCS11HelperException("Unsuccesfully FindObjects secuence::"
-                        + e.getMessage(), PKCS11HelperException.errorType.ERR_FIND_OBJECTS);
-            }
+		if (attrs[0].pValue != null)
+		{
+			bytes = attrs[0].getByteArray();
+		}
 
-            try
-            {
-                p11.C_CloseSession(hSession);
-                if (found)
-                    break;
-            }
-            catch (Throwable e)
-            {
-                throw new PKCS11HelperException("Cannot close sesion::" + e.getMessage(),
-                        PKCS11HelperException.errorType.ERR_CLOSE_SESSION);
-            }
-        }
-        try
-        {
-            // Should be revised against the code of jdk.
-            // That should be done under normal conditions, but when using com.sun.security classes,
-            // something happen that make future SunPKCS11 provider against mozilla library
-            // fails on session handle.
+		return bytes;
+	}
 
-            // p11.C_Finalize(hSession);
+	public X509Certificate[] getCertificates() throws PKCS11HelperException
+	{
+		X509Certificate[] xcer = new X509Certificate[0];
+		return certificates.toArray(xcer);
+	}
+		
+	public long[] getSignatureCapableSlots() throws PKCS11HelperException{
 
-            p11 = null;
-            Runtime.getRuntime().gc();
-        }
-        catch (Throwable e)
-        {
-            throw new PKCS11HelperException("Cannot Finalize::" + e.getMessage(),
-                    PKCS11HelperException.errorType.ERR_FINALIZE);
-        }
-    }
+		long[] slots;
+		
+		Vector<Long> vslots = new Vector<Long>(); 
 
-    private X509Certificate loadCert(long session, long oHandle, PKCS11 p11)
-            throws PKCS11Exception, CertificateException
-    {
+		PKCS11 p11 = getP11Instance();
 
-        CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(PKCS11Constants.CKA_VALUE) };
-        p11.C_GetAttributeValue(session, oHandle, attrs);
+		try
+		{
+			slots = p11.C_GetSlotList(true); //true is token present, false to get all slots.
+		}
+		catch (Exception e)
+		{
+			throw new PKCS11HelperException("Getting Slot List::" + e.getMessage(),
+					PKCS11HelperException.errorType.ERR_GET_SLOT_LIST);
+		}
 
-        byte[] bytes = attrs[0].getByteArray();
-        if (bytes == null)
-        {
-            throw new CertificateException("unexpectedly retrieved null byte array");
-        }
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(bytes));
-    }
+		for (long k : slots)
+		{
+			try {
+				for (long x: p11.C_GetMechanismList(k)){
+					if ( x == CKM_SHA1_RSA_PKCS ){
+						vslots.add(k);
+						break;
+					}
+				}
+			} catch (PKCS11Exception e) {
+				throw new PKCS11HelperException("Cannot get Mechanism list::" + e.getMessage(),
+						PKCS11HelperException.errorType.ERR_GET_SLOT_LIST);
+			}
+		}
 
-    private byte[] getID(long session, long oHandle, PKCS11 p11) throws PKCS11Exception,
-            CertificateException
-    {
+		long[] res= new long[vslots.size()];
+		for (int i=0; i<vslots.size(); i++){
+			res[i]= vslots.get(i);
+		}
+		
+		return res;
+	}
+	
+	public PKCS11 getP11Instance() throws PKCS11HelperException{
 
-        byte[] bytes = null;
-        CK_ATTRIBUTE[] attrs = new CK_ATTRIBUTE[] { new CK_ATTRIBUTE(PKCS11Constants.CKA_ID) };
+		Method[] methods = PKCS11.class.getMethods();
+		Method p11Getinstance = null;
+		PKCS11 p11= null; 
 
-        p11.C_GetAttributeValue(session, oHandle, attrs);
+		CK_C_INITIALIZE_ARGS cia = new CK_C_INITIALIZE_ARGS();
+		
+		cia.pReserved = (Object) _initArgs;
+		cia.flags = 0;
 
-        if (attrs[0].pValue != null)
-        {
-            bytes = attrs[0].getByteArray();
-        }
+		for (int i = 0; i < methods.length; i++)
+		{
+			if (methods[i].getName().equals("getInstance"))
+				p11Getinstance = methods[i];
+		}
+		
+		try
+		{
+			File _fpk11LibPath = new File(_pk11LibPath);
+			_pk11LibPath = _fpk11LibPath.getCanonicalPath();
 
-        return bytes;
-    }
+			String version = System.getProperty("java.version");
+			if (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1)
+			{
+				// JRE 1.6 , JRE 1.7
+				p11 = (PKCS11) p11Getinstance.invoke(null, new Object[] { _pk11LibPath,
+						"C_GetFunctionList", cia, false });
+			}
+			else if (version.indexOf("1.5") > -1)
+			{
+				// JRE 1.5
+				p11 = (PKCS11) p11Getinstance.invoke(null,
+						new Object[] { _pk11LibPath, cia, false });
+			}
+			else
+			{
+				System.err.println("Unsupported version of VM");
+				return null;// System.exit(-1);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw new PKCS11HelperException("Problem using java reflection with pkcs11 classes::"
+					+ e.getMessage(), PKCS11HelperException.errorType.ERR_INVOKE_INITIALIZE);
+		}
+		
+		return p11; 
+	}
 
-    public X509Certificate[] getCertificates() throws PKCS11HelperException
-    {
-        X509Certificate[] xcer = new X509Certificate[0];
-        return certificates.toArray(xcer);
-    }
+
+	public static void main(String[] args) throws PKCS11HelperException{
+		PKCS11Helper pk11h= new PKCS11Helper("/usr/lib/libclauerpkcs11.so", "");
+
+		for (X509Certificate xc: pk11h.getCertificates()){
+			System.out.println(xc.getSubjectDN());    		
+		}
+
+		//Lets try to get slots by a given mechanism: 
+		for (long i: pk11h.getSignatureCapableSlots()){
+			System.out.println("Slot " + i + " is signature capable.");
+		} 
+	}
 }
