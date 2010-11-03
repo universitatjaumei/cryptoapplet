@@ -169,7 +169,7 @@ public class PKCS11Helper
 
                         p11.C_FindObjectsInit(hSession, attrsP);
                         long[] m = p11.C_FindObjects(hSession, MAX_CERTS);
-                        for (long n : m)
+                        if (m.length > 0)
                         {
                             found = true;
                             certificates.add(loadCert(hSession, i, p11));
