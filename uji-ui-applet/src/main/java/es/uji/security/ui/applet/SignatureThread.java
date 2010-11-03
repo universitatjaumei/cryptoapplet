@@ -261,7 +261,7 @@ public class SignatureThread extends Thread
                     }                   
 
                     if (_mw.isShowSignatureEnabled() && ! _mw.getAppHandler().getIsBigFile())
-                    {
+                    {     	
                         int sel = JOptionPane.showConfirmDialog(_mw.getMainFrame(), _mw
                                 .getShowDataScrollPane(OS.inputStreamToByteArray(in)), LabelManager
                                 .get("LABEL_SHOW_DATA_WINDOW"), JOptionPane.OK_CANCEL_OPTION);
@@ -273,9 +273,8 @@ public class SignatureThread extends Thread
                             guiFinalize(true);
                             return;
                         }
+                        in.reset();
                     }
-
-   					InputStream sig = null;
 
                     _mw.getGlobalProgressBar().setValue(_ini_percent + 6 * inc);
 
