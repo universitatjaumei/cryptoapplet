@@ -44,8 +44,10 @@ public class FacturaeSignatureFactory implements ISignFormatProvider
         signatureOptions.setCoSignEnabled(false);
         signatureOptions
                 .setPolicyIdentifier("http://www.facturae.es/politica_de_firma_formato_facturae/politica_de_firma_formato_facturae_v3_1.pdf");
+        /*signatureOptions
+                .setPolicyDescription("Pol\u00edtica de firma electr\u00f3nica para facturaci\u00f3n electr\u00f3nica con formato Facturae");*/
         signatureOptions
-                .setPolicyDescription("Pol\u00edtica de firma electr\u00f3nica para facturaci\u00f3n electr\u00f3nica con formato Facturae");
+                .setPolicyDescription("facturae31");
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
 
         JXAdESSignatureFactory signatureFactory = new JXAdESSignatureFactory();
