@@ -235,8 +235,10 @@ public class SignatureThread extends Thread
 
                     ByteArrayOutputStream ot = new ByteArrayOutputStream();
 
-                    InputStream in = inputParams.getSignData();
+                    //Converting the InputStream to a ByteArrayInputStream that for sure will accept .reset() method. 
+                    InputStream in = new ByteArrayInputStream(OS.inputStreamToByteArray(inputParams.getSignData()));
 
+                    
                     SupportedDataEncoding encoding = _mw.getAppHandler().getInputDataEncoding();
                     
                     log.debug("Encoding: " + encoding);                    
