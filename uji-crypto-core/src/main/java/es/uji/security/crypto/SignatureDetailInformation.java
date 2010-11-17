@@ -5,10 +5,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.bouncycastle.jce.X509Principal;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -71,6 +73,7 @@ public class SignatureDetailInformation
         return ISO8601DateParser.toString(this.signatureTime);
     }
 
+    @SuppressWarnings("unchecked")
     public static List<SignatureDetailInformation> getSignatureDetailInformation(byte[] data,
             String xadesNamespace) throws CryptoCoreException
     {
@@ -109,14 +112,12 @@ public class SignatureDetailInformation
 
                         if (nodeValue != null)
                         {
-                            String[] fields = nodeValue.split(",");
-
-                            for (String f : fields)
+                            X509Principal principal = new X509Principal(nodeValue);
+                            Vector values = principal.getValues();
+                            
+                            if (values != null && values.size()>0)
                             {
-                                if (f.trim().startsWith("CN="))
-                                {
-                                    signatureDetailInformation.setSignerCN(f.trim().substring(3));
-                                }
+                                signatureDetailInformation.setSignerCN((String) values.get(values.size()-1));
                             }
                         }
                     }
