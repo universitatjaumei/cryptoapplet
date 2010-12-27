@@ -102,7 +102,7 @@ public class ConfigManager
     public String getProperty(String key, String defaultValue)
     {
         String value = props.getProperty(key);
-        
+
         if (value != null)
         {
             return value;
@@ -112,7 +112,7 @@ public class ConfigManager
             return defaultValue;
         }
     }
-    
+
     public void setProperty(String key, String value)
     {
         props.setProperty(key, value);
@@ -149,58 +149,77 @@ public class ConfigManager
             for (String device : deviceList.split(","))
             {
                 String deviceName = getProperty("cryptoapplet.devices." + device + ".name");
-                String deviceSlot = getProperty("cryptoapplet.devices." + device + ".slot");
-
                 String deviceLibrariesList = "";
-
+                boolean disableNativePasswordDialog = false;
+                
                 if (OS.isLinux())
                 {
                     deviceLibrariesList = getProperty("cryptoapplet.devices." + device
                             + ".libraries.linux");
+                    
+                    String passwordProperty = getProperty("cryptoapplet.devices." + device + ".libraries.linux.disableNativePasswordDialog");
+                    
+                    if (passwordProperty != null && passwordProperty.equals("true"))
+                    {
+                        disableNativePasswordDialog = true;
+                    }
                 }
                 else if (OS.isWindowsUpperEqualToNT())
                 {
                     deviceLibrariesList = getProperty("cryptoapplet.devices." + device
                             + ".libraries.windows");
+
+                    String passwordProperty = getProperty("cryptoapplet.devices." + device + ".libraries.windows.disableNativePasswordDialog");
+                    
+                    if (passwordProperty != null && passwordProperty.equals("true"))
+                    {
+                        disableNativePasswordDialog = true;
+                    }
                 }
 
                 String deviceLibrary = null;
 
-		// If only one OS is supported we can get null over the other
-		if ( deviceLibrariesList != null ) {
-                  for (String library : deviceLibrariesList.split(","))
-                  {
-                      File f = new File(library);
+                // If only one OS is supported we can get null over the other
+                if (deviceLibrariesList != null)
+                {
+                    for (String library : deviceLibrariesList.split(","))
+                    {
+                        File f = new File(library);
 
-                      if (f.exists())
-                      {
-                          deviceLibrary = library;
-                          break;
-                      }
-                  }
-		}
+                        if (f.exists())
+                        {
+                            deviceLibrary = library;
+                            break;
+                        }
+                    }
+                }
 
                 if (deviceLibrary != null)
                 {
-                    Device newDevice = new Device(deviceName, deviceLibrary, deviceSlot);
-
-                    for (int i=0 ; i<3 ; i++)
+                    for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
                     {
-                        try
+                        Device newDevice = new Device(deviceName, deviceLibrary, String
+                                .valueOf(deviceSlot), disableNativePasswordDialog);
+
+                        for (int i = 0; i < 3; i++)
                         {
-                            Provider provider = new sun.security.pkcs11.SunPKCS11(
-                                    new ByteArrayInputStream(newDevice.toString().getBytes()));
-                            Security.addProvider(provider);
-    
-                            KeyStore.getInstance("PKCS11", provider);
-    
-                            result.add(newDevice);
-                            break;
-                        }
-                        catch (Exception e)
-                        {
-                            log.error("Could not initialize " + newDevice.getName() + " in slot "
-                                    + newDevice.getSlot() + " loading " + newDevice.getLibrary());
+                            try
+                            {
+                                Provider provider = new sun.security.pkcs11.SunPKCS11(
+                                        new ByteArrayInputStream(newDevice.toString().getBytes()));
+                                Security.addProvider(provider);
+
+                                KeyStore.getInstance("PKCS11", provider);
+
+                                result.add(newDevice);
+                                break;
+                            }
+                            catch (Exception e)
+                            {
+                                log.error("Could not initialize " + newDevice.getName()
+                                        + " in slot " + newDevice.getSlot() + " loading "
+                                        + newDevice.getLibrary());
+                            }
                         }
                     }
                 }

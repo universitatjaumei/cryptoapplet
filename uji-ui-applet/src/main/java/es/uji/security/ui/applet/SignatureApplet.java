@@ -197,23 +197,26 @@ public class SignatureApplet extends JApplet
                 }
                 catch (DeviceInitializationException die)
                 {
-                    for (int i = 0; i < 3; i++)
+                    if (! device.isDisableNativePasswordDialog())
                     {
-                        PasswordPrompt passwordPrompt = new PasswordPrompt(null, device.getName(),
-                                "Pin:");
-
-                        try
+                        for (int i = 0; i < 3; i++)
                         {
-                            this.keyStoreManager.initPKCS11Device(device, passwordPrompt
-                                    .getPassword());
-                            break;
-                        }
-                        catch (Exception e)
-                        {
-                            JOptionPane
-                                    .showMessageDialog(null, LabelManager
-                                            .get("ERROR_INCORRECT_DNIE_PWD"), "",
-                                            JOptionPane.ERROR_MESSAGE);
+                            PasswordPrompt passwordPrompt = new PasswordPrompt(null, device.getName(),
+                                    "Pin:");
+    
+                            try
+                            {
+                                this.keyStoreManager.initPKCS11Device(device, passwordPrompt
+                                        .getPassword());
+                                break;
+                            }
+                            catch (Exception e)
+                            {
+                                JOptionPane
+                                        .showMessageDialog(null, LabelManager
+                                                .get("ERROR_INCORRECT_DNIE_PWD"), "",
+                                                JOptionPane.ERROR_MESSAGE);
+                            }
                         }
                     }
                 }
@@ -399,6 +402,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setSSLCertificateVerfication(!(value.trim().equals("false")));
+                
                 return null;
             }
         });
@@ -419,6 +423,7 @@ public class SignatureApplet extends JApplet
                 String[] sr_arr = signerrole.split(_separator);
 
                 apph.setSignerRole(sr_arr);
+                
                 return null;
             }
         });
@@ -437,6 +442,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] refs = baseReference.split(_separator);
                 apph.setXAdESBaseRef(refs);
+                
                 return null;
             }
         });
@@ -454,6 +460,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setXadesFileName(filename);
+                
                 return null;
             }
         });
@@ -471,6 +478,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setXadesFileMimeType(mimetype);
+                
                 return null;
             }
         });
@@ -490,6 +498,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setIsBigFile(bigfile.toLowerCase().equals("true"));
+                
                 return null;
             }
         });
@@ -879,21 +888,17 @@ public class SignatureApplet extends JApplet
 
     /**
      * 
-     * This function allow to set which certificate is allowed to sign.
      * 
-     * @param Issuer
-     *            In a ... format
-     * @param SerialNo
-     *            In a ... format
+     * 
      */
 
-    public void setAllowedCertificate(final String Issuer, final String SerialNo)
+    public void setDNIToCheckAgainsCertificate(final String dni)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                // apph.setSignatureOutputFormat(format);
+                apph.setDNIToCheckAgainsCertificate(dni);
                 return null;
             }
         });

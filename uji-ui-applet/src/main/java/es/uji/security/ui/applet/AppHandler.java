@@ -102,7 +102,9 @@ public class AppHandler
     private String[] visibleAreaTextPattern;   
     
     private boolean cosign;
-    private boolean enveloped;    
+    private boolean enveloped;
+
+    private String dniToCheckAgainsCertificate;    
     
     public AppHandler() throws SignatureAppletException
     {
@@ -969,5 +971,15 @@ public class AppHandler
     public void setEnveloped(boolean enveloped)
     {
         this.enveloped = enveloped;
+    }
+
+    public void setDNIToCheckAgainsCertificate(String dni)
+    {
+        this.dniToCheckAgainsCertificate = dni;
+    }
+    
+    public String getDniToCheckAgainsCertificate()
+    {
+        return this.dniToCheckAgainsCertificate;
     }
 }

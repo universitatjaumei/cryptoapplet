@@ -231,6 +231,22 @@ public class SignatureThread extends Thread
                     (xcert.isEmailProtectionCertificate() && 
                      _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS)))
                 {
+                    String dniToCheck = _mw.getAppHandler().getDniToCheckAgainsCertificate();
+                    
+                    if (dniToCheck != null)
+                    {
+                        String dnCertificate = xcert.getCertificate().getSubjectX500Principal().getName();
+                        
+                        if (! dnCertificate.contains(dniToCheck))
+                        {
+                            log.error("Error checking DNI " + dniToCheck + " against certificate DN");
+                            _mw.getAppHandler().callJavaScriptCallbackFunction(
+                                    _mw.getAppHandler().getJsSignError(),
+                                    new String[] { LabelManager.get("ERROR_CHECKING_DNI_AGAINST_CERTIFICATE_DN") });
+                            throw new SignatureAppletException(LabelManager.get("ERROR_CHECKING_DNI_AGAINST_CERTIFICATE_DN"));
+                        }
+                    }
+                    
                     log.debug("Selected a digital signature certificate");
 
                     ByteArrayOutputStream ot = new ByteArrayOutputStream();
