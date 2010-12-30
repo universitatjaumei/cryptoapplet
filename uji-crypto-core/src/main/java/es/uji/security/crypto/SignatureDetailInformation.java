@@ -113,12 +113,8 @@ public class SignatureDetailInformation
                         if (nodeValue != null)
                         {
                             X509Principal principal = new X509Principal(nodeValue);
-                            Vector values = principal.getValues();
-                            
-                            if (values != null && values.size()>0)
-                            {
-                                signatureDetailInformation.setSignerCN((String) values.get(values.size()-1));
-                            }
+                            Vector values = principal.getValues(X509Principal.CN);
+                            signatureDetailInformation.setSignerCN((String) values.get(0));
                         }
                     }
 
