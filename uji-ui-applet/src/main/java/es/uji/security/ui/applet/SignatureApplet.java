@@ -556,10 +556,12 @@ public class SignatureApplet extends JApplet
                  * signature porpouses
                  */
 
-                String[] arr = new String[] { toSign };
+            	String[] arr = toSign.split(_separator);
 
                 ParamInputData input = new ParamInputData(arr);
+                                
                 FuncOutputParams output = new FuncOutputParams(sa, funcOut);
+                output.setCount(arr.length);
 
                 apph.setInput(input);
                 apph.setOutput(output);
@@ -595,7 +597,7 @@ public class SignatureApplet extends JApplet
 
                 String[] arr = toSign.split(separator);
 
-                ParamInputData input = new ParamInputData(toSign.split(separator));
+                ParamInputData input = new ParamInputData(arr);
                 FuncOutputParams output = new FuncOutputParams(sa, funcOut);
                 output.setCount(arr.length);
 
