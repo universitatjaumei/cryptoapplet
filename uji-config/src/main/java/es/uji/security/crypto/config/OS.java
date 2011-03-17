@@ -3,9 +3,11 @@ package es.uji.security.crypto.config;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
@@ -121,6 +123,26 @@ public class OS
             
             fos.close();
         }
+    }
+    
+
+    public static void copyfile(String srFile, String dtFile) throws FileNotFoundException, IOException{
+
+    	File f1 = new File(srFile);
+    	File f2 = new File(dtFile);
+    	
+    	if (! f2.exists() ){
+    		InputStream in = new FileInputStream(f1);
+    		OutputStream out = new FileOutputStream(f2);
+
+    		byte[] buf = new byte[1024];
+    		int len;
+    		while ((len = in.read(buf)) > 0){
+    			out.write(buf, 0, len);
+    		}
+    		in.close();
+    		out.close();
+    	}
     }
     
     public static String getOS()
