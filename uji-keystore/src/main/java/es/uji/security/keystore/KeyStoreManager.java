@@ -1,11 +1,8 @@
 package es.uji.security.keystore;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.net.ConnectException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,9 +14,7 @@ import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedKeystore;
-import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.Device;
-import es.uji.security.crypto.config.OS;
 import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.mscapi.MSCAPIProvider;

@@ -1,33 +1,26 @@
 package es.uji.security.keystore.clauer;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream; //import java.io.DataOutputStream;
-//import java.io.InputStream;
-//import java.io.OutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.InputStreamReader; //import java.net.Socket;
-import java.util.Vector;
-import java.util.Enumeration;
-
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.Security;
-import java.security.cert.CertificateFactory; 
-
-import java.security.KeyPair;
-
-
-import es.uji.security.util.HexEncoder;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.*;
+import org.bouncycastle.openssl.PEMReader;
 
-import es.uji.security.keystore.clauer.ClauerRunTime;
+import es.uji.security.util.HexEncoder;
 
 public class Clauer
 {
@@ -46,13 +39,18 @@ public class Clauer
 
     public Clauer()
     {
-        // Install BC Provider
+      
+    }
+    
+    private void _installBCprovider(){
+    	// Install BC Provider
     	// We need it for the PEMReader Object.
-        //if (Security.getProvider("BC") == null)
-        //{
-        //    BouncyCastleProvider bcp = new BouncyCastleProvider();
-        //    Security.addProvider(bcp);
-        //}
+        if (Security.getProvider("BC") == null)
+        {
+           BouncyCastleProvider bcp = new BouncyCastleProvider();
+           Security.addProvider(bcp);
+           System.out.println("Added BC provider....");
+        }
     }
 
     public void open(String device) throws IOException, Exception
@@ -243,6 +241,8 @@ public class Clauer
 
                 Reader fRd = new BufferedReader(new InputStreamReader(
                         new ByteArrayInputStream(bkey)));
+                
+                _installBCprovider();
                 PEMReader pemRd = new PEMReader(fRd, null);
                 Object o;
                 o = pemRd.readObject();

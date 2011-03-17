@@ -1,14 +1,12 @@
 package es.uji.security.keystore.mozilla;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Vector;
 
 import es.uji.security.crypto.config.OS;
@@ -129,58 +127,99 @@ public class Mozilla
      */
     public String getAbsoluteApplicationPath()
     {
-        String res = null;
+    	String res = null;
 
-        if (_windows)
-        {
-            RegQuery r = new RegQuery();
-            res = r.getAbsoluteApplicationPath(_execName);
-            if (res != null)
-            {
-                return res;
-            }
-            String progFiles = System.getenv("ProgramFiles");
-            String dirs[] = { "\\Mozilla\\ Firefox\\", "\\Mozilla", "\\Firefox", "\\SeaMonkey",
-                    "\\mozilla.org\\SeaMonkey" };
+    	if (_windows)
+    	{
+    		RegQuery r = new RegQuery();
+    		res = r.getAbsoluteApplicationPath(_execName);
+    		
+    		// Dirty hack to make the applet work on Windows 7 64 bit with 32 bit browsers. 
+    		// In firefox, the path has a "(",")" characters and them are not allowed by the SunPkcs11 provider configuration parser. 
+    		// What we do here is to copy the needed dll to the user tmp and load them from there.
+    		// References: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6581254
+    		//             http://hg.openjdk.java.net/jdk7/build/jdk/file/d4c2d2d72cfc/src/share/classes/sun/security/pkcs11/Config.java
+    		
+    		if ( System.getProperty("os.arch").equals("x86") && res.indexOf("m Files (x86)") != -1 )
+    		{
+    			String strTmpDir= OS.getSystemTmpDir() + "cryptoapplet";
+    			File dir= new File(strTmpDir); 
+    			if (! dir.exists() && ! new File(strTmpDir).mkdir())
+    			{ 
+    				return null;
+    			}
+    			String[] libraries= {"softokn3.dll", "nssutil3.dll", "plc4.dll", "nspr4.dll", "mozcrt19.dll"};
+    			try
+    			{
+    				for (String orig:libraries)
+    				{
+    					OS.copyfile(res + "\\" + orig, strTmpDir +  "\\" + orig);
+    				}
+    				res= strTmpDir; 
+    			}
+    			catch(Exception ex)
+    			{
+    				ex.printStackTrace();
+    				return null;
+    			}
+    		}
 
-            for (int i = 0; i < dirs.length; i++)
-            {
-                File f = new File(progFiles + dirs[i]);
-                if (f.exists())
-                {
-                    return progFiles + dirs[i];
-                }
-            }
-        }
+    		
+    		if (res == null)
+    		{
+    			String progFiles = System.getenv("ProgramFiles");
+    			String dirs[] = { "\\Mozilla\\ Firefox\\", "\\Mozilla", "\\Firefox", "\\SeaMonkey",
+    			"\\mozilla.org\\SeaMonkey" };
 
-        else if (_linux)
-        {
-            try
-            {
-                File f;
-                Properties env = new Properties();
-                env.load(Runtime.getRuntime().exec("env").getInputStream());
-                String userPath = (String) env.get("PATH");
-                String[] pathDirs = userPath.split(":");
+    			for (int i = 0; i < dirs.length; i++)
+    			{
+    				File f = new File(progFiles + dirs[i]);
+    				if (f.exists())
+    				{
+    					res= progFiles + dirs[i];
+    				}
+    			}
+    		}
+    		
+    		try{
+    			File tmp= new File(res);
+    			// Expanding 8.3 directories like foobar~1
+    			res= tmp.getCanonicalPath();
+    		}
+    		catch(Exception ex){
+    			ex.printStackTrace();
+    			return null;
+    		}
+    	}
 
-                for (int i = 0; i < pathDirs.length; i++)
-                {
-                    f = new File(pathDirs[i] + File.separator + _execName);
+    	else if (_linux)
+    	{
+    		try
+    		{
+    			File f;
+    			Properties env = new Properties();
+    			env.load(Runtime.getRuntime().exec("env").getInputStream());
+    			String userPath = (String) env.get("PATH");
+    			String[] pathDirs = userPath.split(":");
 
-                    if (f.exists())
-                    {
-                        return f.getCanonicalPath().substring(0,
-                                f.getCanonicalPath().length() - _execName.length());
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
+    			for (int i = 0; i < pathDirs.length; i++)
+    			{
+    				f = new File(pathDirs[i] + File.separator + _execName);
 
-        return res;
+    				if (f.exists())
+    				{
+    					res= f.getCanonicalPath().substring(0,
+    							f.getCanonicalPath().length() - _execName.length());
+    				}
+    			}
+    		}
+    		catch (Exception e)
+    		{
+    			return null;
+    		}
+    	}
+
+    	return res;
     }
 
     public String getPkcs11FilePath()
