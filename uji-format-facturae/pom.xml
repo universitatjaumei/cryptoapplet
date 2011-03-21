@@ -6,20 +6,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.uji.security</groupId>
   <artifactId>uji-format-facturae</artifactId>
-  <version>2.1.1</version>
+  <version>2.1.2</version>
   <name>uji-format-facturae</name>
 
   <parent>
     <groupId>es.uji.security</groupId>
     <artifactId>CryptoApplet</artifactId>
-    <version>2.1.1</version>
+    <version>2.1.2</version>
   </parent>
   
   <dependencies>
     <dependency>
       <groupId>es.uji.security</groupId>
       <artifactId>uji-crypto-jxades</artifactId>
-      <version>2.1.1</version>    
+      <version>2.1.2</version>    
     </dependency>    
   </dependencies>
   
