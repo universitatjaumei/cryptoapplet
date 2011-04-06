@@ -196,6 +196,7 @@ public class ConfigManager
 
                 if (deviceLibrary != null)
                 {
+		    outerloop:
                     for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
                     {
                         Device newDevice = new Device(deviceName, deviceLibrary, String
@@ -210,9 +211,10 @@ public class ConfigManager
                                 Security.addProvider(provider);
 
                                 KeyStore.getInstance("PKCS11", provider);
+				log.info("Added provider " + provider.getName());
 
                                 result.add(newDevice);
-                                break;
+                                break outerloop;
                             }
                             catch (Exception e)
                             {
