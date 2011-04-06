@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.security.Provider;
+import java.security.Security;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.DigestMethod;
@@ -43,6 +45,8 @@ import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.util.i18n.LabelManager;
 
+import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
+
 public class JXAdESSignatureFactory implements ISignFormatProvider
 {
     public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
@@ -50,6 +54,11 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
         byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
         X509Certificate certificate = signatureOptions.getCertificate();
         PrivateKey privateKey = signatureOptions.getPrivateKey();
+        Provider provider = signatureOptions.getProvider();
+        
+        //TODO: KeyStore loaded in device init must store the reference 
+        Security.removeProvider(provider.getName());
+        Security.insertProviderAt(provider, 1);
 
         ByteArrayInputStream originalData = new ByteArrayInputStream(data);
 
