@@ -5,11 +5,11 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.uji.security</groupId>
-  <version>2.1.2</version>
+  <version>3.0.0-SNAPSHOT</version>
   <artifactId>CryptoApplet</artifactId>
   <packaging>pom</packaging>
   <name>CryptoApplet</name>
-  <url>http://proyectostic.uji.es/cryptoapplet/</url>
+  <url>http://universitatjaumei.jira.com/browse/CRYPTOAPPLET/</url>
 
   <organization>
     <name>Universitat Jaume I</name>
@@ -18,8 +18,8 @@
 
   <repositories>
     <repository>
-      <id>proyectostic</id>
-      <url>http://maven.forja.uji.es/</url>
+      <id>uji</id>
+      <url>http://devel.uji.es/nexus/content/groups/public/</url>
     </repository>
   </repositories>
 
@@ -27,16 +27,16 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
     </plugins>
   </build>
 
   <modules>
-    <module>xmlsec-backport-jdk6</module>
     <module>uji-config</module>
     <module>uji-utils</module>
     <module>uji-crypto-core</module>
@@ -73,18 +73,9 @@
     </dependencies>
   </dependencyManagement>
 
-  <licenses>
-    <license>
-      <name>XXX</name>
-      <url>LICENSE.txt</url>
-      <distribution>XXX</distribution>
-      <comments>XXX</comments>
-    </license>
-  </licenses>
-
   <issueManagement>
     <system>CryptoApplet Issue Tracking</system>
-    <url>http://forja.uji.es/tracker/?group_id=24</url>
+    <url>http://universitatjaumei.jira.com/browse/CRYPTOAPPLET</url>
   </issueManagement>
 
   <mailingLists>
@@ -115,9 +106,23 @@
   </developers>
 
   <scm>
-    <connection>scm:svn:https://forja.uji.es/svn/cryptoapplet</connection>
-    <developerConnection>scm:svn:https://forja.uji.es/svn/cryptoapplet</developerConnection>
-    <url>http://forja.uji.es/plugins/scmsvn/viewcvs.php/?root=cryptoapplet</url>
+    <connection>scm:svn:http://universitatjaumei.jira.com/svn/CRYPTOAPPLET/</connection>
+    <developerConnection>scm:svn:http://universitatjaumei.jira.com/svn/CRYPTOAPPLET/</developerConnection>
+    <url>http://universitatjaumei.jira.com/svn/CRYPTOAPPLET/</url>
   </scm>
+
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <uji.keytool.keystore>../uji.keystore</uji.keytool.keystore>
+        <uji.keytool.alias>uji</uji.keytool.alias>
+        <uji.keytool.password>cryptoapplet</uji.keytool.password>
+      </properties>
+    </profile>
+  </profiles>
 
 </project>

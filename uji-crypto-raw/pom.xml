@@ -6,20 +6,19 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.uji.security</groupId>
   <artifactId>uji-crypto-raw</artifactId>
-  <version>2.1.2</version>
   <name>uji-crypto-raw</name>
 
   <parent>
     <groupId>es.uji.security</groupId>
     <artifactId>CryptoApplet</artifactId>
-    <version>2.1.2</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>es.uji.security</groupId>
       <artifactId>uji-crypto-core</artifactId>
-      <version>2.1.2</version>    
+      <version>${project.version}</version>    
     </dependency>
   </dependencies>
   
@@ -27,14 +26,16 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
 
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
         <executions>
           <execution>
             <goals>

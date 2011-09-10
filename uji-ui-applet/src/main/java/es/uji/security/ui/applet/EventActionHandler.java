@@ -305,7 +305,7 @@ public class EventActionHandler
                         if (!pkFile.exists())
                         {
                             JOptionPane.showMessageDialog(mw.getMainFrame(),
-                                    "No se encontró fichero", "", JOptionPane.ERROR_MESSAGE);
+                                    "No se encontro fichero", "", JOptionPane.ERROR_MESSAGE);
                         }
                         else
                         {
