@@ -145,7 +145,7 @@ package es.uji.security.keystore.mscapi;
 //					}
 //					else
 //					{
-//						System.out.println("Fallo en la Verfificación");
+//						System.out.println("Fallo en la Verfificacion");
 //					}
 //				}
 //				

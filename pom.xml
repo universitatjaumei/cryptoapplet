@@ -11,6 +11,12 @@
   <name>CryptoApplet</name>
   <url>http://universitatjaumei.jira.com/browse/CRYPTOAPPLET/</url>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <bouncycastle.version>1.43</bouncycastle.version>
+    <jxades.version>0.0.3</jxades.version>
+  </properties>
+
   <organization>
     <name>Universitat Jaume I</name>
     <url>http://www.uji.es/</url>

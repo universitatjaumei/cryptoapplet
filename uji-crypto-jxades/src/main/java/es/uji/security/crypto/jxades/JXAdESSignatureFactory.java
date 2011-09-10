@@ -5,14 +5,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.security.Provider;
-import java.security.Security;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.DigestMethod;
@@ -44,8 +44,6 @@ import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.util.i18n.LabelManager;
-
-import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
 
 public class JXAdESSignatureFactory implements ISignFormatProvider
 {

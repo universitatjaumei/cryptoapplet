@@ -24,7 +24,7 @@ public class DNIeTest
         Security.addProvider(pkcs11Provider);
         // KeyStore.getInstance("PKCS11", _pk11provider);
         //
-        // // Si pasamos de aquí el dnie está insertado.
+        // // Si pasamos de aqui el dnie esta insertado.
         // Security.removeProvider(_pk11provider.getName());
         // System.out.println("Saliendo true ...");
     }
