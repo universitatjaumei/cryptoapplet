@@ -29,6 +29,11 @@
       <artifactId>bcprov-jdk15</artifactId>
       <version>${bouncycastle.version}</version>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
