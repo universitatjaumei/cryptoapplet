@@ -204,7 +204,7 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
         bos.flush();
 
         signatureResult.setValid(true);
-        signatureResult.setSignatureData(new ByteArrayInputStream(out.toString().getBytes()));
+        signatureResult.setSignatureData(new ByteArrayInputStream(out.toByteArray()));
 
         return signatureResult;
     }
