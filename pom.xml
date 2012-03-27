@@ -82,6 +82,17 @@
     </mailingList>
   </mailingLists>
 
+  <licenses>
+    <license>
+      <name>GPL-v3.0</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+    </license>
+    <license>
+      <name>EUPL-v1.1</name>
+      <url>http://joinup.ec.europa.eu/system/files/ES/EUPL%20v.1.1%20-%20Licencia.pdf</url>
+    </license>
+  </licenses>
+
   <developers>
     <developer>
       <name>Paul Santapau</name>
