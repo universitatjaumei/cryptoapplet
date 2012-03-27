@@ -290,7 +290,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             for (int i = 1; i <= n; i++)
             {
-                CACert = ConfigManager.readCertificate(conf.getProperty("DIGIDOC_CA_CERT" + i));
+                CACert = ConfigManager.getInstance().readCertificate(conf.getProperty("DIGIDOC_CA_CERT" + i));
 
                 try
                 {

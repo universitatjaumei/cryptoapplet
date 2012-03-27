@@ -99,7 +99,9 @@ public class MainWindow
                 public void windowClosing(WindowEvent e)
                 {
                     mainFrame.setVisible(false);
-                    _aph.callJavaScriptCallbackFunction(_aph.getJsSignCancel(), null);
+                    
+                    //TODO: How todo this call?
+                    //_aph.callJavaScriptCallbackFunction(_aph.getJsSignCancel(), null);
                 }
             });
             mainFrame.setResizable(false);

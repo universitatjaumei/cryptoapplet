@@ -146,7 +146,7 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
 
         try
         {
-            certificate = ConfigManager.readCertificate(conf.getProperty("DIGIDOC_TSA" + idx
+            certificate = ConfigManager.getInstance().readCertificate(conf.getProperty("DIGIDOC_TSA" + idx
                     + "_CERT"));
         }
         catch (Exception e)
@@ -167,7 +167,7 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
 
         try
         {
-            certificate = ConfigManager.readCertificate(fname);
+            certificate = ConfigManager.getInstance().readCertificate(fname);
         }
         catch (Exception e)
         {

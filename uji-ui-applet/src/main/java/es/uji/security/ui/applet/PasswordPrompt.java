@@ -15,7 +15,6 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class PasswordPrompt extends JDialog
 {
-
     private static final long serialVersionUID = 1L;
 
     private JPanel jContentPane = null;
@@ -28,9 +27,6 @@ public class PasswordPrompt extends JDialog
     private int _width = 350, _height = 125;
     private String title, ask;
 
-    /**
-     * @param owner
-     */
     public PasswordPrompt(Frame owner)
     {
         super(owner);

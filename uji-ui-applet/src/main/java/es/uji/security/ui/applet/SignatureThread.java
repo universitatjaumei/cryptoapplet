@@ -240,9 +240,11 @@ public class SignatureThread extends Thread
                         if (! dnCertificate.contains(dniToCheck))
                         {
                             log.error("Error checking DNI " + dniToCheck + " against certificate DN");
-                            _mw.getAppHandler().callJavaScriptCallbackFunction(
-                                    _mw.getAppHandler().getJsSignError(),
-                                    new String[] { LabelManager.get("ERROR_CHECKING_DNI_AGAINST_CERTIFICATE_DN") });
+                            
+                            //TODO: How todo this call?
+//                            _mw.getAppHandler().callJavaScriptCallbackFunction(
+//                                    _mw.getAppHandler().getJsSignError(),
+//                                    new String[] { LabelManager.get("ERROR_CHECKING_DNI_AGAINST_CERTIFICATE_DN") });
                             throw new SignatureAppletException(LabelManager.get("ERROR_CHECKING_DNI_AGAINST_CERTIFICATE_DN"));
                         }
                     }
@@ -285,8 +287,9 @@ public class SignatureThread extends Thread
                                 .get("LABEL_SHOW_DATA_WINDOW"), JOptionPane.OK_CANCEL_OPTION);
                         if (sel != JOptionPane.OK_OPTION)
                         {
-                            _mw.getAppHandler().callJavaScriptCallbackFunction(
-                                    _mw.getAppHandler().getJsSignCancel(), new String[] {});
+                            //TODO: How todo this call?
+//                            _mw.getAppHandler().callJavaScriptCallbackFunction(
+//                                    _mw.getAppHandler().getJsSignCancel(), new String[] {});
                             showSignatureOk = false;
                             guiFinalize(true);
                             return;
@@ -454,9 +457,11 @@ public class SignatureThread extends Thread
                     catch (Exception e)
                     {
                         log.error(LabelManager.get("ERROR_COMPUTING_SIGNATURE"), e);
-                        _mw.getAppHandler().callJavaScriptCallbackFunction(
-                      		  _mw.getAppHandler().getJsSignError(),
-                      		  new String[]{LabelManager.get("ERROR_COMPUTING_SIGNATURE") + ":" + e.getMessage()});
+                        
+                        //TODO: How todo this call?
+//                        _mw.getAppHandler().callJavaScriptCallbackFunction(
+//                      		  _mw.getAppHandler().getJsSignError(),
+//                      		  new String[]{LabelManager.get("ERROR_COMPUTING_SIGNATURE") + ":" + e.getMessage()});
                          throw new SignatureAppletException(LabelManager.get("ERROR_COMPUTING_SIGNATURE"));
                     }
 
@@ -519,9 +524,11 @@ public class SignatureThread extends Thread
                         catch (Exception e)
                         {
                             log.error("Exception decoding data", e);
-                            _mw.getAppHandler().callJavaScriptCallbackFunction(
-                            		  _mw.getAppHandler().getJsSignError(),
-                            		  new String[]{LabelManager.get("ERROR_CANNOT_SET_OUTPUT_DATA") + e.getMessage()});
+                            
+                            //TODO: How todo this call?
+//                            _mw.getAppHandler().callJavaScriptCallbackFunction(
+//                            		  _mw.getAppHandler().getJsSignError(),
+//                            		  new String[]{LabelManager.get("ERROR_CANNOT_SET_OUTPUT_DATA") + e.getMessage()});
                             throw new SignatureAppletException(LabelManager.get("ERROR_CANNOT_SET_OUTPUT_DATA"));
                         }
                     }

@@ -1275,8 +1275,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                             + ocspCAFile);
                 // System.out.println("OCSP CERTFILE: " + ocspCertFile);
                 if (ocspCertFile != null)
-                    m_ocspCerts.put(ocspCN, ConfigManager.readCertificate(ocspCertFile));
-                m_ocspCACerts.put(ocspCACN, ConfigManager.readCertificate(ocspCAFile));
+                    m_ocspCerts.put(ocspCN, ConfigManager.getInstance().readCertificate(ocspCertFile));
+                m_ocspCACerts.put(ocspCACN, ConfigManager.getInstance().readCertificate(ocspCAFile));
                 // read any further certs if they exist
                 int j = 1;
                 String certFile = null;
@@ -1288,7 +1288,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                         if (m_logger.isDebugEnabled())
                             m_logger.debug("Responder: " + ocspCN + " cert: " + ocspCertFile
                                     + " ca-cert: " + ocspCAFile);
-                        m_ocspCerts.put(ocspCN + "-" + j, ConfigManager.readCertificate(certFile));
+                        m_ocspCerts.put(ocspCN + "-" + j, ConfigManager.getInstance().readCertificate(certFile));
                     }
                     j++;
                 }

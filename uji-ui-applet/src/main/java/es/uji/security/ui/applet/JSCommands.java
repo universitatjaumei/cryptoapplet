@@ -9,33 +9,28 @@ import netscape.javascript.JSObject;
 public class JSCommands
 {
     private Logger log = Logger.getLogger(JSCommands.class);
-    
+
     private static JSObject browserWindow = null;
     private static JSCommands singleton = null;
-    
-    private JSCommands(JApplet owner) 
+
+    private JSCommands(JApplet owner)
     {
         log.debug("New access to browser window from Applet");
-        
+
         browserWindow = JSObject.getWindow(owner);
     }
 
-    public static JSCommands getInstance(JApplet owner) 
+    public static JSCommands getInstance(JApplet owner)
     {
-        if (singleton == null) 
+        if (singleton == null)
         {
             singleton = new JSCommands(owner);
         }
-        
+
         return singleton;
     }
 
-    public static void clearInstance() 
-    {
-        singleton = null;
-    }
-    
-    public static JSObject getWindow()
+    public JSObject getWindow()
     {
         return browserWindow;
     }

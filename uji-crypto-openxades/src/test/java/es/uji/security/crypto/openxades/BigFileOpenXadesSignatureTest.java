@@ -117,7 +117,7 @@ public class BigFileOpenXadesSignatureTest
 
             String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
 
-            X509Certificate xcaCert = ConfigManager.readCertificate(tsa1_ca);
+            X509Certificate xcaCert = ConfigManager.getInstance().readCertificate(tsa1_ca);
 
             cval = new CertValue();
             cval.setType(CertValue.CERTVAL_TYPE_TSA);

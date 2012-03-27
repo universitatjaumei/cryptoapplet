@@ -57,7 +57,7 @@ public class PDFSignatureVerifier
             {
                 log.debug("Adding certificate DIGIDOC_CA_CERTS" + i + " to the global keystore");
 
-                Certificate certificate = ConfigManager.readCertificate(conf
+                Certificate certificate = conf.readCertificate(conf
                         .getProperty("DIGIDOC_CA_CERT" + i));
 
                 kall.setCertificateEntry("host ca " + i, certificate);

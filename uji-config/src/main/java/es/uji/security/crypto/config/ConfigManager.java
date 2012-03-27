@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -21,34 +22,14 @@ import org.apache.log4j.Logger;
 
 public class ConfigManager
 {
-    private Logger log = Logger.getLogger(ConfigManager.class);
-
-    private static Properties props = new Properties();
-    private static ConfigManager configManager = null;
+    private static Logger log = Logger.getLogger(ConfigManager.class);
 
     private static String DEFAULT_CONFIG_FILE = "ujiCrypto.conf";
 
-    public static ConfigManager getInstance()
-    {
-        if (configManager == null)
-        {
-            configManager = new ConfigManager(null);
-        }
+    private static Properties properties;
+    private static ConfigManager instance;
 
-        return configManager;
-    }
-
-    public static ConfigManager getInstance(Properties properties)
-    {
-        if (configManager == null)
-        {
-            configManager = new ConfigManager(properties);
-        }
-
-        return configManager;
-    }
-
-    public Properties getDefaultProperties()
+    public static Properties getDefaultProperties()
     {
         Properties prop = new Properties();
 
@@ -56,9 +37,8 @@ public class ConfigManager
                 "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleNotaryFactory");
         prop.put("DIGIDOC_FACTORY_IMPL",
                 "es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocFactory");
-        prop
-                .put("DIGIDOC_TIMESTAMP_IMPL",
-                        "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleSignatureTimestampFactory");
+        prop.put("DIGIDOC_TIMESTAMP_IMPL",
+                "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleSignatureTimestampFactory");
         prop.put("CANONICALIZATION_FACTORY_IMPL",
                 "es.uji.security.crypto.openxades.digidoc.factory.DOMCanonicalizationFactory");
         prop.put("CRL_FACTORY_IMPL",
@@ -70,38 +50,14 @@ public class ConfigManager
         return prop;
     }
 
-    private ConfigManager(Properties properties)
-    {
-        // Try to load system properties
-
-        if (properties != null)
-        {
-            props.putAll(properties);
-        }
-        else
-        {
-            try
-            {
-                props.load(ConfigManager.class.getClassLoader().getResourceAsStream(
-                        DEFAULT_CONFIG_FILE));
-            }
-            catch (IOException e)
-            {
-                log.error("Cant not load ujiCrypto.conf file", e);
-            }
-        }
-
-        props.putAll(getDefaultProperties());
-    }
-
     public String getProperty(String key)
     {
-        return props.getProperty(key);
+        return properties.getProperty(key);
     }
 
     public String getProperty(String key, String defaultValue)
     {
-        String value = props.getProperty(key);
+        String value = properties.getProperty(key);
 
         if (value != null)
         {
@@ -113,32 +69,32 @@ public class ConfigManager
         }
     }
 
-    public void setProperty(String key, String value)
+    public String getStringProperty(String key, String defaultValue)
     {
-        props.setProperty(key, value);
+        return properties.getProperty(key, defaultValue);
     }
 
-    public String getStringProperty(String key, String def)
+    public int getIntProperty(String key, int defaultValue)
     {
-        return props.getProperty(key, def);
-    }
-
-    public int getIntProperty(String key, int def)
-    {
-        int rc = def;
+        int intValue = defaultValue;
 
         try
         {
-            rc = Integer.parseInt(props.getProperty(key));
+            intValue = Integer.parseInt(properties.getProperty(key));
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
             log.error("Error parsing number: " + key);
         }
 
-        return rc;
+        return intValue;
     }
 
+    public void setProperty(String key, String value)
+    {
+        properties.setProperty(key, value);
+    }
+    //TODO: Correct here?
     public ArrayList<Device> getDeviceConfig()
     {
         String deviceList = getProperty("cryptoapplet.devices");
@@ -151,14 +107,15 @@ public class ConfigManager
                 String deviceName = getProperty("cryptoapplet.devices." + device + ".name");
                 String deviceLibrariesList = "";
                 boolean disableNativePasswordDialog = false;
-                
+
                 if (OS.isLinux())
                 {
                     deviceLibrariesList = getProperty("cryptoapplet.devices." + device
                             + ".libraries.linux");
-                    
-                    String passwordProperty = getProperty("cryptoapplet.devices." + device + ".libraries.linux.disableNativePasswordDialog");
-                    
+
+                    String passwordProperty = getProperty("cryptoapplet.devices." + device
+                            + ".libraries.linux.disableNativePasswordDialog");
+
                     if (passwordProperty != null && passwordProperty.equals("true"))
                     {
                         disableNativePasswordDialog = true;
@@ -169,8 +126,9 @@ public class ConfigManager
                     deviceLibrariesList = getProperty("cryptoapplet.devices." + device
                             + ".libraries.windows");
 
-                    String passwordProperty = getProperty("cryptoapplet.devices." + device + ".libraries.windows.disableNativePasswordDialog");
-                    
+                    String passwordProperty = getProperty("cryptoapplet.devices." + device
+                            + ".libraries.windows.disableNativePasswordDialog");
+
                     if (passwordProperty != null && passwordProperty.equals("true"))
                     {
                         disableNativePasswordDialog = true;
@@ -196,11 +154,10 @@ public class ConfigManager
 
                 if (deviceLibrary != null)
                 {
-		    outerloop:
-                    for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
+                    outerloop: for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
                     {
-                        Device newDevice = new Device(deviceName, deviceLibrary, String
-                                .valueOf(deviceSlot), disableNativePasswordDialog);
+                        Device newDevice = new Device(deviceName, deviceLibrary,
+                                String.valueOf(deviceSlot), disableNativePasswordDialog);
 
                         for (int i = 0; i < 3; i++)
                         {
@@ -211,7 +168,7 @@ public class ConfigManager
                                 Security.addProvider(provider);
 
                                 KeyStore.getInstance("PKCS11", provider);
-				log.info("Added provider " + provider.getName());
+                                log.info("Added provider " + provider.getName());
 
                                 result.add(newDevice);
                                 break outerloop;
@@ -231,11 +188,10 @@ public class ConfigManager
         return result;
     }
 
-    public static X509Certificate readCertificate(String certLocation) throws KeyStoreException,
+    //TODO: Correct here?
+    public X509Certificate readCertificate(String certLocation) throws KeyStoreException,
             IOException, CertificateException, NoSuchAlgorithmException
     {
-        ConfigManager conf = ConfigManager.getInstance();
-
         InputStream certificateStream = null;
 
         if (certLocation.startsWith("http"))
@@ -251,14 +207,12 @@ public class ConfigManager
         else if (certLocation.startsWith("keystore://"))
         {
             ClassLoader classLoader = ConfigManager.class.getClassLoader();
-            certificateStream = classLoader.getResourceAsStream(conf
-                    .getProperty("DEFAULT_KEYSTORE"));
+            certificateStream = classLoader.getResourceAsStream(getProperty("DEFAULT_KEYSTORE"));
 
             String str_cert = certLocation.substring(11);
             KeyStore keystore = KeyStore.getInstance("JKS");
 
-            keystore.load(certificateStream, conf.getProperty("DEFAULT_KEYSTORE_PASSWORD")
-                    .toCharArray());
+            keystore.load(certificateStream, getProperty("DEFAULT_KEYSTORE_PASSWORD").toCharArray());
 
             return (X509Certificate) keystore.getCertificate(str_cert);
         }
@@ -273,5 +227,56 @@ public class ConfigManager
         certificateStream.close();
 
         return certificate;
+    }
+
+    private ConfigManager()
+    {
+        properties = new Properties();
+        properties.putAll(getDefaultProperties());
+
+        try
+        {
+            properties.load(ConfigManager.class.getClassLoader().getResourceAsStream(
+                    DEFAULT_CONFIG_FILE));
+        }
+        catch (IOException e)
+        {
+            log.error("Cant not load ujiCrypto.conf file", e);
+        }
+    }
+
+    public static ConfigManager getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new ConfigManager();
+        }
+
+        return instance;
+    }
+
+    public void loadRemotePropertiesFile(String baseURL)
+    {
+        log.debug("Trying to retrieve ujiCrypto.conf from server ...");
+
+        try
+        {
+            URL url = new URL(baseURL + "/" + DEFAULT_CONFIG_FILE);
+            URLConnection uc = url.openConnection();
+            uc.connect();
+
+            Properties remoteProperties = new Properties();
+            remoteProperties.load(uc.getInputStream());
+
+            log.debug("Remote ujiCrypto.conf loaded successfully!!");
+
+            properties.clear();
+            properties.putAll(getDefaultProperties());
+            properties.putAll(remoteProperties);
+        }
+        catch (Exception e)
+        {
+            log.error("Cann't load ujiCrypto.conf from server. WARNING: Bundled local file will be loaded.");
+        }
     }
 }

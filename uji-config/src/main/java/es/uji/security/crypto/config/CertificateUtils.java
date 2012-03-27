@@ -60,7 +60,7 @@ public class CertificateUtils
     	//Let's read the certificates. 
     	for (int i=1; i<=n; i++){
     		scert= cfm.getProperty("DIGIDOC_CA_CERT" + i);
-    		xcert= ConfigManager.readCertificate(scert);
+    		xcert= ConfigManager.getInstance().readCertificate(scert);
     		certmap.put(xcert.getSubjectDN().toString(), xcert);
     	}
     	

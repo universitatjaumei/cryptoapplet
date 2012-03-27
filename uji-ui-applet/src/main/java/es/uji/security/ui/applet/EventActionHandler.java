@@ -84,7 +84,9 @@ public class EventActionHandler
             	
                 mw.mainFrame.setVisible(false);
                 aph.getSignatureHandler().stop();
-                aph.callJavaScriptCallbackFunction(aph.getJsSignCancel(), null);
+                
+                //TODO: How todo this call?
+                //aph.callJavaScriptCallbackFunction(aph.getJsSignCancel(), null);
             }
         };
 

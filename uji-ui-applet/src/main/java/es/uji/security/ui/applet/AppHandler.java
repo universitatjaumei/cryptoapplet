@@ -1,13 +1,7 @@
 package es.uji.security.ui.applet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -26,11 +20,8 @@ import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.OS;
 import es.uji.security.ui.applet.io.InputParams;
 import es.uji.security.ui.applet.io.OutputParams;
-import es.uji.security.util.HexDump;
-import es.uji.security.util.i18n.LabelManager;
 
 /**
  * Handles all the applet singularities such as applet parameters, applet installation, host
@@ -67,7 +58,7 @@ public class AppHandler
     private SupportedBrowser navigator = SupportedBrowser.MOZILLA;
 
     // Input/Output Data handling
-    private InputParams input;    
+    private InputParams input;
     private OutputParams output;
 
     // XAdES signer role customization
@@ -79,10 +70,9 @@ public class AppHandler
     private boolean isBigFile = false;
 
     private SSLSocketFactory defaultSocketFactory;
-    private String downloadURL;
 
     // PDF options
-    
+
     private Map<String, String[]> bindValues;
     private String[] reason;
     private String[] location;
@@ -99,22 +89,12 @@ public class AppHandler
     private String[] visibleAreaTextSize;
     private String[] visibleAreaImgFile;
     private String[] visibleAreaRepeatAxis;
-    private String[] visibleAreaTextPattern;   
-    
+    private String[] visibleAreaTextPattern;
+
     private boolean cosign;
     private boolean enveloped;
 
-    private String dniToCheckAgainsCertificate;    
-    
-    public AppHandler() throws SignatureAppletException
-    {
-        this(null);
-        
-        this.cosign = false;
-        this.enveloped = true;
-        
-        log.debug("Running in desktop application mode");
-    }
+    private String dniToCheckAgainsCertificate;
 
     /**
      * Base constructor, instantiates an AppHandler object, setting up the target navigator and
@@ -124,74 +104,10 @@ public class AppHandler
      * class object.
      **/
 
-    public AppHandler(String downloadURL) throws SignatureAppletException
+    public AppHandler() throws SignatureAppletException
     {
         this.bindValues = new HashMap<String, String[]>();
-        this.downloadURL = downloadURL;
 
-        try
-        {
-            log.debug("Get JavaScript member: navigator");
-            JSObject document = (JSObject) JSCommands.getWindow().getMember("navigator");
-
-            log.debug("Get JavaScript member: userAgent");
-            String userAgent = (String) document.getMember("userAgent");
-
-            if (userAgent != null)
-            {
-                userAgent = userAgent.toLowerCase();
-
-                log.debug("Detected user agent " + userAgent);
-
-                if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
-                {
-                    this.navigator = SupportedBrowser.IEXPLORER;
-
-                    try
-                    {
-                        this.install();
-                    }
-                    catch (Throwable e)
-                    {
-                        log.error("Error installing or loading the DLL file", e);
-                    }
-                }
-                else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1
-                        || userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1
-                        || userAgent.indexOf("netscape") > -1)
-                {
-                    this.navigator = SupportedBrowser.MOZILLA;
-                }
-            }
-        }
-        catch (Exception exc)
-        {
-            log.error("Error accesing web browser window", exc);
-        }
-
-        log.debug("Navigator variable set to " + this.navigator);
-
-        // Keep a copy to restore its value
-        defaultSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
-    }
-
-    /**
-     * 
-     * That method instantiates this Singleton class or returns the Object.
-     * 
-     * @param parent
-     *            the main applet object
-     * 
-     * @return AppHandler The application handler object.
-     **/
-    public static AppHandler getInstance(String downloadURL) throws SignatureAppletException
-    {
-        if (singleton == null)
-        {
-            singleton = new AppHandler(downloadURL);
-        }
-
-        return singleton;
     }
 
     /**
@@ -283,7 +199,7 @@ public class AppHandler
     /**
      * A method for setting the signer role, that method is called from setSignerRole JS function.
      * 
-     *@param signerrole
+     * @param signerrole
      *            The signer role to be set for XAdES output format
      */
     public void setSignerRole(String[] signerrole)
@@ -294,7 +210,7 @@ public class AppHandler
     /**
      * A method for setting the filename, that method is called from setXadesFileName JS function.
      * 
-     *@param filename
+     * @param filename
      *            The file name to be set for XAdES output format
      */
     public void setXadesFileName(String filename)
@@ -322,137 +238,6 @@ public class AppHandler
     public void setMainWindow(MainWindow mw)
     {
         _mw = mw;
-    }
-
-    /**
-     * Help method for install(), it downloads the dll and writes it down to the filesystem
-     * 
-     * @param input
-     *            URL where get the data from.
-     * @param output
-     *            Destination path of the dll.
-     */
-    private void dumpFile(String input, String output) throws IOException
-    {
-        URL url = new URL(input);
-        URLConnection uc = url.openConnection();
-        uc.connect();
-        InputStream in = uc.getInputStream();
-
-        FileOutputStream fos = new FileOutputStream(output);
-        fos.write(OS.inputStreamToByteArray(in));
-        fos.close();
-        in.close();
-    }
-
-    /**
-     * Installs the applet on the client, basically downloads and loads MicrosoftCryptoApi dll
-     * 
-     * @throws SignatureAppletException
-     *             with the message
-     * @throws
-     */
-    public void installDLL(String downloadUrl, String completeDllPath)
-            throws SignatureAppletException
-    {
-        try
-        {
-            log.debug("Downloading " + downloadUrl + ". Complete DLL path is " + completeDllPath);
-            dumpFile(downloadUrl + "MicrosoftCryptoApi_0_3.dll", completeDllPath);
-        }
-        catch (Throwable e)
-        {
-            log.error(LabelManager.get("ERROR_CAPI_DLL_INSTALL"), e);
-            throw new SignatureAppletException(LabelManager.get("ERROR_CAPI_DLL_INSTALL"));
-        }
-    }
-
-    /**
-     * Installs the applet on the client, basically downloads and loads MicrosoftCryptoApi dll
-     * 
-     * @throws SignatureAppletException
-     *             with the message
-     * @throws
-     */
-    public void install() throws SignatureAppletException
-    {
-        String destAbsolutePath = System.getenv("TEMP");
-
-        String completeDLLPath = destAbsolutePath + File.separator + "MicrosoftCryptoApi_0_3.dll";
-        File dllFile = new File(completeDLLPath);
-
-        if (!dllFile.exists())
-        {
-            log.info("MicrosoftCryptoApi_0_3.dll not found. Downloading DLL file");
-
-            installDLL(this.downloadURL, completeDLLPath);
-        }
-        else
-        {
-            log.info("MicrosoftCryptoApi_0_3.dll already exists. Verifying existing DLL file");
-
-            try
-            {
-                byte[] originalDLLHash = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
-                        (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35, 0x71,
-                        (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
-
-                FileInputStream dllFileStream = new FileInputStream(dllFile);
-
-                MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
-                byte[] readed = new byte[dllFileStream.available()];
-
-                dllFileStream.read(readed);
-                messageDigest.update(readed);
-
-                byte[] currentDLLHash = messageDigest.digest();
-
-                log.debug("Original DLL digest: " + HexDump.xdump(originalDLLHash));
-                log.debug("Current DLL digest: " + HexDump.xdump(currentDLLHash));
-
-                // Compare original and current hash
-
-                for (int i = 0; i < currentDLLHash.length; i++)
-                {
-                    if (currentDLLHash[i] != originalDLLHash[i])
-                    {
-                        log.info("DLL not valid. Downloading orginal DLL file");
-
-                        installDLL(this.downloadURL, completeDLLPath);
-                        break;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw new SignatureAppletException(e.getMessage(), false);
-            }
-        }
-
-        try
-        {
-            log.debug("Loading DLL with System.load " + completeDLLPath);
-
-            System.load(completeDLLPath);
-        }
-        catch (Throwable e)
-        {
-            log.error("Error loading " + completeDLLPath, e);
-        }
-    }
-
-    /**
-     * Calls the javascript function indicated as func with params arguments
-     * 
-     * @param func
-     *            The function that must be invoked
-     * @param params
-     *            The parameters that must be passed to that function
-     */
-    public void callJavaScriptCallbackFunction(String func, String[] params)
-    {
-        log.debug("Call JavaScript method: " + func);
-        JSCommands.getWindow().call(func, params);
     }
 
     /**
@@ -753,30 +538,6 @@ public class AppHandler
         return this.xadesBaseRef;
     }
 
-    public static void initConfig(String downloadURL)
-    {
-        log.debug("Trying to retrieve ujiCrypto.conf from server ...");
-        
-        try
-        {
-            // Retrieve ujiCrypto.conf file
-            URL url = new URL(downloadURL + "/ujiCrypto.conf");
-            URLConnection uc = url.openConnection();
-            uc.connect();
-
-            Properties properties = new Properties();
-            properties.load(uc.getInputStream());
-
-            // Load remote properties
-            ConfigManager.getInstance(properties);
-            
-            log.debug("Remote ujiCrypto.conf loaded successfully!!");
-        }
-        catch (Exception e)
-        {
-            log.error("Cann't load ujiCrypto.conf from server. WARNING: Bundled local file will be loaded.");
-        }
-    }
 
     public Map<String, String[]> getBindValues()
     {
@@ -977,7 +738,7 @@ public class AppHandler
     {
         this.dniToCheckAgainsCertificate = dni;
     }
-    
+
     public String getDniToCheckAgainsCertificate()
     {
         return this.dniToCheckAgainsCertificate;

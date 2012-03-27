@@ -12,6 +12,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import netscape.javascript.JSException;
+import netscape.javascript.JSObject;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
@@ -40,18 +41,6 @@ import es.uji.security.ui.applet.io.URLInputParams;
 import es.uji.security.ui.applet.io.URLOutputParams;
 import es.uji.security.util.i18n.LabelManager;
 
-/**
- * This is the main applet class, it handles the web-to-java interaction by exporting some method to
- * JavaScript for being invoked within a web page.
- * 
- * The instantiation inside a web page must be in this way:
- * 
- * <applet id="CryptoApplet" name="CryptoApplet" code="es.uji.dsign.applet.SignatureApplet"
- * width="0" height="0" codebase="path" archive="archive and deps mayscript> </applet>
- * 
- * Each method below related to setup or signature forgery can be invoked from JavaScript
- */
-
 @SuppressWarnings("serial")
 public class SignatureApplet extends JApplet
 {
@@ -66,25 +55,14 @@ public class SignatureApplet extends JApplet
 
     private KeyStoreManager keyStoreManager;
 
-    /**
-     * Init method. Installs the applet on client side. Downloads MicrosoftCryptoApi dll and loads
-     * it in case of Internet Explorer
-     */
-
     static
     {
-        // Para evitar que pida cosas del log4j
-        System.setProperty("log4j.defaultInitOverride", "true");
+        initLog4jConfiguration();
+        initSystemFactoryDefinitions();
+    }
 
-        BasicConfigurator.resetConfiguration();
-
-        Layout layout = new PatternLayout("%p %t %c [%d{HH:mm:ss,SSS}] - %m%n");
-        Appender appender = new ConsoleAppender(layout);
-        BasicConfigurator.configure(appender);
-
-        Logger.getRootLogger().setLevel(Level.DEBUG);
-
-        // Para evitar que pida .class varios
+    private static void initSystemFactoryDefinitions()
+    {
         System.setProperty("javax.xml.parsers.SAXParserFactory",
                 "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
         System.setProperty("javax.xml.parsers.DocumentBuilderFactory",
@@ -95,22 +73,74 @@ public class SignatureApplet extends JApplet
                 "org.apache.xml.dtm.ref.DTMManagerDefault");
     }
 
+    private static void initLog4jConfiguration()
+    {
+        System.setProperty("log4j.defaultInitOverride", "true");
+
+        BasicConfigurator.resetConfiguration();
+
+        Layout layout = new PatternLayout("%p %t %c [%d{HH:mm:ss,SSS}] - %m%n");
+        Appender appender = new ConsoleAppender(layout);
+        BasicConfigurator.configure(appender);
+
+        Logger.getRootLogger().setLevel(Level.DEBUG);
+    }
+
     public void init()
     {
-        // Init JavaScript interface
+        initLookAndFeel();
+
+        String baseURL = this.getCodeBase().toString();
+        ConfigManager.getInstance().loadRemotePropertiesFile(baseURL);
+
+        JSCommands jsCommands = JSCommands.getInstance(this);
 
         try
         {
-            JSCommands.clearInstance();
-            JSCommands.getInstance(this);
+            apph = AppHandler.getInstance();
+            keyStoreManager = new KeyStoreManager();
+
+            initKeystores(this.apph.getNavigator());
+
+            log.debug("Call JavaScript method: onInitOk");
+            jsCommands.getWindow().call("onInitOk", new String[] {});
         }
         catch (Exception e)
         {
-            log.error("Error with JSCommands init", e);
+            log.error(e.getMessage());
+            log.error("Stack Trace: " + OS.stackTraceToString(e));
+
+            JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+
+            log.debug("Call JavaScript method: onSignError");
+            jsCommands.getWindow().call("onSignError", new String[] {});
+        }
+    }
+
+    public SupportedBrowser getSupportedBrowser()
+    {
+        JSCommands jsCommands = JSCommands.getInstance(this);
+
+        JSObject document = (JSObject) jsCommands.getWindow().getMember("navigator");
+        String userAgent = (String) document.getMember("userAgent");
+
+        if (userAgent != null)
+        {
+            userAgent = userAgent.toLowerCase();
+
+            log.debug("Detected user agent " + userAgent);
+
+            if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
+            {
+                return SupportedBrowser.IEXPLORER;
+            }
         }
 
-        // Init Nimbus Look&Feel if available (JDK1.6u10 or higher)
+        return SupportedBrowser.MOZILLA;
+    }
 
+    private void initLookAndFeel()
+    {
         try
         {
             log.debug("Looking for suitable Look&Feels");
@@ -130,53 +160,7 @@ public class SignatureApplet extends JApplet
         {
             log.error("Nimbus Look&Feel is not present. Using default Look&Feel");
         }
-
-        try
-        {
-            String downloadURL = "";
-
-            if (this.getParameter("downloadUrl") != null)
-            {
-                downloadURL = this.getParameter("downloadUrl");
-            }
-            else
-            {
-                downloadURL = this.getCodeBase().toString();
-            }
-
-            this.apph = AppHandler.getInstance(downloadURL);
-            this.keyStoreManager = new KeyStoreManager();
-
-            // Init config (try to load ujiCrypto.conf from server)
-
-            AppHandler.initConfig(downloadURL);
-
-            // Init keystores
-
-            this.initKeystores(this.apph.getNavigator());
-
-            // Call onInitOk
-
-            log.debug("Call JavaScript method: onInitOk");
-            JSCommands.getWindow().call("onInitOk", new String[] {});
-        }
-        catch (Exception e)
-        {
-            log.error(e.getMessage());
-            log.error("Stack Trace: " + OS.stackTraceToString(e));
-            
-            JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-
-            log.debug("Call JavaScript method: onSignError");
-            JSCommands.getWindow().call("onSignError", new String[] {});
-        }
     }
-
-    /**
-     * Try to load storege devices: Navigator store, Clauer UJI store and PKCS11 configured stores
-     * 
-     * @param supportedBrowser
-     */
 
     private void initKeystores(SupportedBrowser supportedBrowser)
     {
@@ -197,25 +181,24 @@ public class SignatureApplet extends JApplet
                 }
                 catch (DeviceInitializationException die)
                 {
-                    if (! device.isDisableNativePasswordDialog())
+                    if (!device.isDisableNativePasswordDialog())
                     {
                         for (int i = 0; i < 3; i++)
                         {
-                            PasswordPrompt passwordPrompt = new PasswordPrompt(null, device.getName(),
-                                    "Pin:");
-    
+                            PasswordPrompt passwordPrompt = new PasswordPrompt(null,
+                                    device.getName(), "Pin:");
+
                             try
                             {
-                                this.keyStoreManager.initPKCS11Device(device, passwordPrompt
-                                        .getPassword());
+                                this.keyStoreManager.initPKCS11Device(device,
+                                        passwordPrompt.getPassword());
                                 break;
                             }
                             catch (Exception e)
                             {
-                                JOptionPane
-                                        .showMessageDialog(null, LabelManager
-                                                .get("ERROR_INCORRECT_DNIE_PWD"), "",
-                                                JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(null,
+                                        LabelManager.get("ERROR_INCORRECT_DNIE_PWD"), "",
+                                        JOptionPane.ERROR_MESSAGE);
                             }
                         }
                     }
@@ -257,25 +240,39 @@ public class SignatureApplet extends JApplet
             log.error(ex);
             JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 
-            try
-            {
-                log.debug("Call JavaScript method: " + apph.getJsSignError());
-                JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
-            }
-            catch (JSException e)
-            {
-                log.error("Error calling " + apph.getJsSignError(), e);
-            }
+            callJavaScriptSignError();
         }
+
+        callJavaScriptWindowShow();
+    }
+
+    private void callJavaScriptWindowShow()
+    {
+        JSCommands jsCommands = JSCommands.getInstance(this);
 
         try
         {
             log.debug("Call JavaScript method: " + apph.getJsWindowShow());
-            JSCommands.getWindow().call(apph.getJsWindowShow(), new String[] { "" });
+            jsCommands.getWindow().call(apph.getJsWindowShow(), new String[] { "" });
         }
         catch (JSException e)
         {
             log.error("Error calling " + apph.getJsWindowShow(), e);
+        }
+    }
+
+    private void callJavaScriptSignError()
+    {
+        JSCommands jsCommands = JSCommands.getInstance(this);
+
+        try
+        {
+            log.debug("Call JavaScript method: " + apph.getJsSignError());
+            jsCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
+        }
+        catch (JSException e)
+        {
+            log.error("Error calling " + apph.getJsSignError(), e);
         }
     }
 
@@ -340,8 +337,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                apph.setSignatureOutputFormat(SupportedSignatureFormat
-                        .valueOf(format.toUpperCase()));
+                apph.setSignatureOutputFormat(SupportedSignatureFormat.valueOf(format.toUpperCase()));
                 return null;
             }
         });
@@ -402,7 +398,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setSSLCertificateVerfication(!(value.trim().equals("false")));
-                
+
                 return null;
             }
         });
@@ -423,7 +419,7 @@ public class SignatureApplet extends JApplet
                 String[] sr_arr = signerrole.split(_separator);
 
                 apph.setSignerRole(sr_arr);
-                
+
                 return null;
             }
         });
@@ -442,7 +438,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] refs = baseReference.split(_separator);
                 apph.setXAdESBaseRef(refs);
-                
+
                 return null;
             }
         });
@@ -460,7 +456,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setXadesFileName(filename);
-                
+
                 return null;
             }
         });
@@ -478,7 +474,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setXadesFileMimeType(mimetype);
-                
+
                 return null;
             }
         });
@@ -498,20 +494,20 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setIsBigFile(bigfile.toLowerCase().equals("true"));
-                
+
                 return null;
             }
         });
     }
-    
+
     public void setCosign(final String cosign)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
-            {                
+            {
                 apph.setCosign(cosign.toLowerCase().equals("true"));
-                
+
                 return null;
             }
         });
@@ -522,14 +518,13 @@ public class SignatureApplet extends JApplet
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
-            {                
+            {
                 apph.setEnveloped(enveloped.toLowerCase().equals("true"));
-                
+
                 return null;
             }
         });
     }
-    
 
     /* SIGNATURE COMPUTATION FUNCTIONS */
 
@@ -556,10 +551,10 @@ public class SignatureApplet extends JApplet
                  * signature porpouses
                  */
 
-            	String[] arr = toSign.split(_separator);
+                String[] arr = toSign.split(_separator);
 
                 ParamInputData input = new ParamInputData(arr);
-                                
+
                 FuncOutputParams output = new FuncOutputParams(sa, funcOut);
                 output.setCount(arr.length);
 
@@ -750,10 +745,10 @@ public class SignatureApplet extends JApplet
             }
         });
     }
-    
+
     /**
-     * Computes the signature getting the data from the given inputURL, and opens a selector for local 
-     * saving of the resulting file 
+     * Computes the signature getting the data from the given inputURL, and opens a selector for
+     * local saving of the resulting file
      * 
      * @param inputURL
      *            the URL where the data must be retrieved.
@@ -766,10 +761,10 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 String[] in = inputURLs.split(_separator);
-             
+
                 URLInputParams input = new URLInputParams(in);
                 FileOutputParams output = new FileOutputParams();
-                
+
                 apph.setInput(input);
                 apph.setOutput(output);
 
@@ -778,7 +773,6 @@ public class SignatureApplet extends JApplet
             }
         });
     }
-
 
     /**
      * Computes the signature getting the data from the given inputURL, and it invokes JavaScript
@@ -957,7 +951,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = value.split(_separator);
                 apph.getBindValues().put(key, values);
-                
+
                 return null;
             }
         });
@@ -971,7 +965,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = reason.split(_separator);
                 apph.setReason(values);
-                
+
                 return null;
             }
         });
@@ -985,7 +979,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = location.split(_separator);
                 apph.setLocation(values);
-                
+
                 return null;
             }
         });
@@ -999,7 +993,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = contact.split(_separator);
                 apph.setContact(values);
-                
+
                 return null;
             }
         });
@@ -1013,7 +1007,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = timestamping.split(_separator);
                 apph.setTimestamping(values);
-                
+
                 return null;
             }
         });
@@ -1027,7 +1021,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = tsaURL.split(_separator);
                 apph.setTsaURL(values);
-                
+
                 return null;
             }
         });
@@ -1041,7 +1035,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleSignature.split(_separator);
                 apph.setVisibleSignature(values);
-                
+
                 return null;
             }
         });
@@ -1055,7 +1049,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleSignatureType.split(_separator);
                 apph.setVisibleSignatureType(values);
-                
+
                 return null;
             }
         });
@@ -1069,7 +1063,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaX.split(_separator);
                 apph.setVisibleAreaX(values);
-                
+
                 return null;
             }
         });
@@ -1083,7 +1077,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaY.split(_separator);
                 apph.setVisibleAreaY(values);
-                
+
                 return null;
             }
         });
@@ -1097,7 +1091,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaX2.split(_separator);
                 apph.setVisibleAreaX2(values);
-                
+
                 return null;
             }
         });
@@ -1111,7 +1105,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaY2.split(_separator);
                 apph.setVisibleAreaY2(values);
-                
+
                 return null;
             }
         });
@@ -1125,7 +1119,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaPage.split(_separator);
                 apph.setVisibleAreaPage(values);
-                
+
                 return null;
             }
         });
@@ -1139,7 +1133,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaTextSize.split(_separator);
                 apph.setVisibleAreaTextSize(values);
-                
+
                 return null;
             }
         });
@@ -1153,7 +1147,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaImgFile.split(_separator);
                 apph.setVisibleAreaImgFile(values);
-                
+
                 return null;
             }
         });
@@ -1165,9 +1159,9 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                String[] values = visibleAreaRepeatAxis.split(_separator);                
+                String[] values = visibleAreaRepeatAxis.split(_separator);
                 apph.setVisibleAreaRepeatAxis(values);
-                
+
                 return null;
             }
         });
@@ -1181,7 +1175,7 @@ public class SignatureApplet extends JApplet
             {
                 String[] values = visibleAreaTextPattern.split(_separator);
                 apph.setVisibleAreaTextPattern(values);
-                
+
                 return null;
             }
         });
@@ -1194,7 +1188,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 apph.setSignatureFormat(signatureFormat);
-                
+
                 return null;
             }
         });
@@ -1234,7 +1228,7 @@ public class SignatureApplet extends JApplet
         Runtime.getRuntime().gc();
 
         log.debug("Applet destoy called. Executing garbage collection");
-        //System.exit(0);
+        // System.exit(0);
     }
 
     public String getAppletInfo()

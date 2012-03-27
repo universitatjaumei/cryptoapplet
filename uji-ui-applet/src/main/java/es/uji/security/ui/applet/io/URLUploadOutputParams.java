@@ -61,9 +61,11 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
        try
        {
            log.debug("Recover JavaScript member: document");
-           JSObject document = (JSObject) JSCommands.getWindow().getMember("document");
-
-           cookies = (String) document.getMember("cookie");
+           
+           //TODO: How todo this call?
+           //JSObject document = (JSObject) JSCommands.getWindow().getMember("document");
+           //cookies = (String) document.getMember("cookie");
+           
            log.debug("Cookies: " + cookies);
        }
        catch (Exception e)
@@ -188,7 +190,9 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
        if (!signOkInvoked)
        {
            log.debug("Call JavaScript method: onSignOk");
-           JSCommands.getWindow().call("onSignOk", new String[] { "" });
+           
+           //TODO: How todo this call?
+           //JSCommands.getWindow().call("onSignOk", new String[] { "" });
        }
    }
 
