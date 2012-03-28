@@ -1,7 +1,5 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.FragmentBase;
-import es.uji.security.crypto.openxades.digidoc.c14n.FragmentBase_Bounds;
 
 public final class EntityParser_Fragment extends FragmentBase
 {

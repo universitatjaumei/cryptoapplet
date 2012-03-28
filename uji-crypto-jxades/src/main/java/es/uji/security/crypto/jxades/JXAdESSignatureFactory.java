@@ -42,14 +42,14 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.util.i18n.LabelManager;
 
 public class JXAdESSignatureFactory implements ISignFormatProvider
 {
     public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
     {
-        byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
         X509Certificate certificate = signatureOptions.getCertificate();
         PrivateKey privateKey = signatureOptions.getPrivateKey();
         Provider provider = signatureOptions.getProvider();

@@ -1,14 +1,14 @@
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-import es.uji.security.crypto.openxades.digidoc.Signature;
-import es.uji.security.crypto.openxades.digidoc.SignedDoc;
-import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
-
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
+import es.uji.security.crypto.openxades.digidoc.Signature;
+import es.uji.security.crypto.openxades.digidoc.SignedDoc;
+import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
 
 public class BouncyCastleSignatureTimestampFactory extends BouncyCastleTimestampFactory
 {

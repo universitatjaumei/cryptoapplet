@@ -3,9 +3,6 @@ package es.uji.security.crypto.openxades.digidoc.c14n.common;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.common.Convert;
-import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
-
 public final class Helper
 {
 

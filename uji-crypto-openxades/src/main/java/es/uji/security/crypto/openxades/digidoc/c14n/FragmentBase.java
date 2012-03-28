@@ -1,8 +1,6 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.FragmentBase_Bounds;
 import es.uji.security.crypto.openxades.digidoc.c14n.common.Convert;
-import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 
 /**
  * a fragment represents a special bytestream, a class of bytes, for example - spaces \x20 \x09 \x0D

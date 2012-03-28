@@ -21,15 +21,14 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 import es.uji.security.util.Base64;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Models an OCSP confirmation of the validity of a given signature in the given context.

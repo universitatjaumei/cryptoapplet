@@ -45,13 +45,13 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.util.i18n.LabelManager;
 
 public class PDFSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(PDFSignatureFactory.class);
-    
+
     private static final int PADDING = 3;
 
     private PrivateKey privateKey;
@@ -86,7 +86,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
         return sgn.getEncodedPKCS7(null, null, tsaUrl, null);
     }
 
-    private void sign(PdfStamper pdfStamper, PdfSignatureAppearance pdfSignatureAppearance) throws Exception
+    private void sign(PdfStamper pdfStamper, PdfSignatureAppearance pdfSignatureAppearance)
+            throws Exception
     {
         // Check if TSA support is enabled
 
@@ -165,7 +166,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         log.debug("VisibleArea: " + x1 + "," + y1 + "," + x2 + "," + y2 + " offsetX:" + offsetX
                 + ", offsetY:" + offsetY);
-        
+
         // Position of the visible signature
 
         Rectangle rectangle = null;
@@ -180,7 +181,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         }
 
         log.debug("VisibleAreaPage: " + confAdapter.getVisibleAreaPage());
-        
+
         sap.setVisibleSignature(rectangle, confAdapter.getVisibleAreaPage(), null);
         sap.setAcro6Layers(true);
         sap.setLayer2Font(font);
@@ -223,11 +224,11 @@ public class PDFSignatureFactory implements ISignFormatProvider
         // Retrieve image
 
         log.debug("VisibleAreaImgFile: " + confAdapter.getVisibleAreaImgFile());
-        
-        byte[] imageData = OS.inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
-                .getResourceAsStream(confAdapter.getVisibleAreaImgFile()));
+
+        byte[] imageData = StreamUtils.inputStreamToByteArray(PDFSignatureFactory.class
+                .getClassLoader().getResourceAsStream(confAdapter.getVisibleAreaImgFile()));
         Image image = Image.getInstance(imageData);
-        
+
         if (signatureText != null)
         {
             // Retrieve and reset Layer2
@@ -258,14 +259,14 @@ public class PDFSignatureFactory implements ISignFormatProvider
             throws KeyStoreException, Exception
     {
         log.debug("Init PDF signature configuration");
-        
+
         this.confAdapter = new ConfigurationAdapter(signatureOptions);
 
         initFontDefinition();
 
         try
         {
-            byte[] datos = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+            byte[] datos = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
             X509Certificate certificate = signatureOptions.getCertificate();
             this.privateKey = signatureOptions.getPrivateKey();
             this.provider = signatureOptions.getProvider();
@@ -290,7 +291,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             for (int i = 1; i <= n; i++)
             {
-                CACert = ConfigManager.getInstance().readCertificate(conf.getProperty("DIGIDOC_CA_CERT" + i));
+                CACert = ConfigManager.getInstance().readCertificate(
+                        conf.getProperty("DIGIDOC_CA_CERT" + i));
 
                 try
                 {
@@ -325,7 +327,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             PdfSignatureAppearance pdfSignatureAppareance = pdfStamper.getSignatureAppearance();
 
             log.debug("VisibleSignature: " + confAdapter.isVisibleSignature());
-            
+
             if (confAdapter.isVisibleSignature())
             {
                 String pattern = confAdapter.getVisibleAreaTextPattern();
@@ -336,12 +338,13 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
                 if (bindValues != null)
                 {
-                    final X509Principal principal = PrincipalUtil.getSubjectX509Principal(certificate);
+                    final X509Principal principal = PrincipalUtil
+                            .getSubjectX509Principal(certificate);
                     final Vector<?> values = principal.getValues(X509Name.CN);
-                    
+
                     String certificateCN = (String) values.get(0);
                     bindValues.put("%s", certificateCN);
-                    log.debug("Bind value %s: " + certificateCN);                    
+                    log.debug("Bind value %s: " + certificateCN);
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                     String currentDate = simpleDateFormat.format(new Date());

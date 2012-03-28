@@ -5,15 +5,15 @@ import java.io.InputStream;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class ConsoleOutputParams implements OutputParams
 {
     private Logger log = Logger.getLogger(ConsoleOutputParams.class);
-    
+
     public void setSignData(InputStream is) throws IOException
     {
-    	byte[] data= OS.inputStreamToByteArray(is);
+        byte[] data = StreamUtils.inputStreamToByteArray(is);
         System.out.println(new String(data));
     }
 

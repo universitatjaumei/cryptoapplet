@@ -20,10 +20,10 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-
 import java.security.cert.X509Certificate;
 import java.util.Date;
+
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 
 /**
  * Interface for handling CRL-s DigiDoc files

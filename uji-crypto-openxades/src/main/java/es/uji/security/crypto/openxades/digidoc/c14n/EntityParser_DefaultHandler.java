@@ -1,7 +1,5 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.EntityParser_Entity;
-import es.uji.security.crypto.openxades.digidoc.c14n.EntityParser_Handler;
 
 public class EntityParser_DefaultHandler implements EntityParser_Handler
 {

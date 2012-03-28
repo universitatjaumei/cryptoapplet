@@ -9,7 +9,8 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.FileSystemUtils;
+import es.uji.security.crypto.config.OperatingSystemUtils;
 import es.uji.security.util.RegQuery;
 
 /**
@@ -35,7 +36,7 @@ public class Mozilla
     {
         _userHome = System.getProperty("user.home");
 
-        if (OS.isLinux())
+        if (OperatingSystemUtils.isLinux())
         {
             _profileDir = new String[1];
             _profileDir[0] = _userHome + "/.mozilla/firefox/";
@@ -43,7 +44,7 @@ public class Mozilla
             _linux = true;
             _execName = "firefox";
         }
-        else if (OS.isWindowsUpperEqualToNT())
+        else if (OperatingSystemUtils.isWindowsUpperEqualToNT())
         {
             RegQuery rq = new RegQuery();
 
@@ -54,7 +55,7 @@ public class Mozilla
             _windows = true;
             _execName = "firefox.exe";
         }
-        else if (OS.isMac())
+        else if (OperatingSystemUtils.isMac())
         {
             _profileDir = new String[2];
             _profileDir[0] = _userHome + "/.mozilla/firefox/";
@@ -127,99 +128,102 @@ public class Mozilla
      */
     public String getAbsoluteApplicationPath()
     {
-    	String res = null;
+        String res = null;
 
-    	if (_windows)
-    	{
-    		RegQuery r = new RegQuery();
-    		res = r.getAbsoluteApplicationPath(_execName);
-    		
-    		// Dirty hack to make the applet work on Windows 7 64 bit with 32 bit browsers. 
-    		// In firefox, the path has a "(",")" characters and them are not allowed by the SunPkcs11 provider configuration parser. 
-    		// What we do here is to copy the needed dll to the user tmp and load them from there.
-    		// References: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6581254
-    		//             http://hg.openjdk.java.net/jdk7/build/jdk/file/d4c2d2d72cfc/src/share/classes/sun/security/pkcs11/Config.java
-    		
-    		if ( System.getProperty("os.arch").equals("x86") && res.indexOf("m Files (x86)") != -1 )
-    		{
-    			String strTmpDir= OS.getSystemTmpDir() + "cryptoapplet";
-    			File dir= new File(strTmpDir); 
-    			if (! dir.exists() && ! new File(strTmpDir).mkdir())
-    			{ 
-    				return null;
-    			}
-    			String[] libraries= {"softokn3.dll", "nssutil3.dll", "plc4.dll", "nspr4.dll", "mozcrt19.dll"};
-    			try
-    			{
-    				for (String orig:libraries)
-    				{
-    					OS.copyfile(res + "\\" + orig, strTmpDir +  "\\" + orig);
-    				}
-    				res= strTmpDir; 
-    			}
-    			catch(Exception ex)
-    			{
-    				ex.printStackTrace();
-    				return null;
-    			}
-    		}
+        if (_windows)
+        {
+            RegQuery r = new RegQuery();
+            res = r.getAbsoluteApplicationPath(_execName);
 
-    		
-    		if (res == null)
-    		{
-    			String progFiles = System.getenv("ProgramFiles");
-    			String dirs[] = { "\\Mozilla\\ Firefox\\", "\\Mozilla", "\\Firefox", "\\SeaMonkey",
-    			"\\mozilla.org\\SeaMonkey" };
+            // Dirty hack to make the applet work on Windows 7 64 bit with 32 bit browsers.
+            // In firefox, the path has a "(",")" characters and them are not allowed by the
+            // SunPkcs11 provider configuration parser.
+            // What we do here is to copy the needed dll to the user tmp and load them from there.
+            // References: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6581254
+            // http://hg.openjdk.java.net/jdk7/build/jdk/file/d4c2d2d72cfc/src/share/classes/sun/security/pkcs11/Config.java
 
-    			for (int i = 0; i < dirs.length; i++)
-    			{
-    				File f = new File(progFiles + dirs[i]);
-    				if (f.exists())
-    				{
-    					res= progFiles + dirs[i];
-    				}
-    			}
-    		}
-    		
-    		try{
-    			File tmp= new File(res);
-    			// Expanding 8.3 directories like foobar~1
-    			res= tmp.getCanonicalPath();
-    		}
-    		catch(Exception ex){
-    			ex.printStackTrace();
-    			return null;
-    		}
-    	}
+            if (System.getProperty("os.arch").equals("x86") && res.indexOf("m Files (x86)") != -1)
+            {
+                String strTmpDir = OperatingSystemUtils.getSystemTmpDir() + "cryptoapplet";
+                File dir = new File(strTmpDir);
+                if (!dir.exists() && !new File(strTmpDir).mkdir())
+                {
+                    return null;
+                }
+                String[] libraries = { "softokn3.dll", "nssutil3.dll", "plc4.dll", "nspr4.dll",
+                        "mozcrt19.dll" };
+                try
+                {
+                    for (String orig : libraries)
+                    {
+                        FileSystemUtils.copyfile(res + "\\" + orig, strTmpDir + "\\" + orig);
+                    }
+                    res = strTmpDir;
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                    return null;
+                }
+            }
 
-    	else if (_linux)
-    	{
-    		try
-    		{
-    			File f;
-    			Properties env = new Properties();
-    			env.load(Runtime.getRuntime().exec("env").getInputStream());
-    			String userPath = (String) env.get("PATH");
-    			String[] pathDirs = userPath.split(":");
+            if (res == null)
+            {
+                String progFiles = System.getenv("ProgramFiles");
+                String dirs[] = { "\\Mozilla\\ Firefox\\", "\\Mozilla", "\\Firefox", "\\SeaMonkey",
+                        "\\mozilla.org\\SeaMonkey" };
 
-    			for (int i = 0; i < pathDirs.length; i++)
-    			{
-    				f = new File(pathDirs[i] + File.separator + _execName);
+                for (int i = 0; i < dirs.length; i++)
+                {
+                    File f = new File(progFiles + dirs[i]);
+                    if (f.exists())
+                    {
+                        res = progFiles + dirs[i];
+                    }
+                }
+            }
 
-    				if (f.exists())
-    				{
-    					res= f.getCanonicalPath().substring(0,
-    							f.getCanonicalPath().length() - _execName.length());
-    				}
-    			}
-    		}
-    		catch (Exception e)
-    		{
-    			return null;
-    		}
-    	}
+            try
+            {
+                File tmp = new File(res);
+                // Expanding 8.3 directories like foobar~1
+                res = tmp.getCanonicalPath();
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+                return null;
+            }
+        }
 
-    	return res;
+        else if (_linux)
+        {
+            try
+            {
+                File f;
+                Properties env = new Properties();
+                env.load(Runtime.getRuntime().exec("env").getInputStream());
+                String userPath = (String) env.get("PATH");
+                String[] pathDirs = userPath.split(":");
+
+                for (int i = 0; i < pathDirs.length; i++)
+                {
+                    f = new File(pathDirs[i] + File.separator + _execName);
+
+                    if (f.exists())
+                    {
+                        res = f.getCanonicalPath().substring(0,
+                                f.getCanonicalPath().length() - _execName.length());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        return res;
     }
 
     public String getPkcs11FilePath()
@@ -280,20 +284,18 @@ public class Mozilla
 
     public ByteArrayInputStream getPkcs11ConfigInputStream()
     {
-
-        OS os = new OS();
         String _pkcs11file = getPkcs11FilePath();
         String _currentprofile = getCurrentProfiledir();
         ByteArrayInputStream bais = null;
 
-        if (OS.isWindowsUpperEqualToNT())
+        if (OperatingSystemUtils.isWindowsUpperEqualToNT())
         {
             bais = new ByteArrayInputStream(("name = NSS\r" + "library = " + _pkcs11file + "\r"
                     + "attributes= compatibility" + "\r" + "slot=2\r" + "nssArgs=\""
                     + "configdir='" + _currentprofile.replace("\\", "/") + "' " + "certPrefix='' "
                     + "keyPrefix='' " + "secmod=' secmod.db' " + "flags=readOnly\"\r").getBytes());
         }
-        else if (OS.isLinux() || OS.isMac())
+        else if (OperatingSystemUtils.isLinux() || OperatingSystemUtils.isMac())
         {
             /*
              * TODO:With Linux is pending to test what's up with the white spaces in the path.
@@ -313,7 +315,7 @@ public class Mozilla
         return "configdir='" + getCurrentProfiledir().replace("\\", "/")
                 + "' certPrefix='' keyPrefix='' secmod='secmod.db' flags=";
     }
-    
+
     public boolean isInitialized()
     {
         try
@@ -329,13 +331,13 @@ public class Mozilla
             PrintStream ps = new PrintStream(os);
             e.printStackTrace(ps);
             String stk = new String(os.toByteArray());
-            
+
             if (stk.indexOf("CKR_USER_TYPE_INVALID") > -1)
             {
                 return false;
             }
-            
+
             return true;
         }
-    }    
+    }
 }

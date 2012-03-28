@@ -12,7 +12,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.xml.sax.SAXException;
 
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.xmldsign.odf.ODFSignatureVerifier;
 
 public class TestODFSignatureVerifier
 {

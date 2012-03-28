@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import es.uji.security.crypto.config.Device;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.keystore.X509CertificateHandler;
-import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 import es.uji.security.keystore.pkcs12.PKCS12KeyStore;
 import es.uji.security.util.i18n.LabelManager;
 

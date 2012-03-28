@@ -1,11 +1,7 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.EntityParser_Entity;
-import es.uji.security.crypto.openxades.digidoc.c14n.EntityParser_Handler;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLCanonicalizerHandler_TextStringNormalizer_EntityHelper;
 import es.uji.security.crypto.openxades.digidoc.c14n.common.Convert;
 import es.uji.security.crypto.openxades.digidoc.c14n.common.Helper;
-import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 
 class TinyXMLCanonicalizerHandler_TextStringNormalizer implements EntityParser_Handler
 {

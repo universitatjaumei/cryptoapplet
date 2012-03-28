@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.ui.applet.SignatureApplet;
 
 public class FuncOutputParams implements OutputParams
@@ -25,8 +25,8 @@ public class FuncOutputParams implements OutputParams
     public void setSignData(InputStream is) throws IOException
     {
 
-    	byte[] data= OS.inputStreamToByteArray(is);
-    	
+        byte[] data = StreamUtils.inputStreamToByteArray(is);
+
         strSig = new String(data);
 
         if (_count > 1 && (_current != (_count - 1)))
@@ -34,7 +34,6 @@ public class FuncOutputParams implements OutputParams
             commit();
             _current++;
         }
-
     }
 
     public void setCount(int count)
@@ -45,14 +44,10 @@ public class FuncOutputParams implements OutputParams
     public void setSignFormat(Hashtable<String, Object> params, byte[] signFormat)
             throws IOException
     {
-        // TODO Auto-generated method stub
-
     }
 
     public void setSignFormat(byte[] signFormat) throws IOException
     {
-        // TODO Auto-generated method stub
-
     }
 
     private void commit()
@@ -71,8 +66,5 @@ public class FuncOutputParams implements OutputParams
 
     public void flush()
     {
-        // TODO Auto-generated method stub
-
     }
-
 }

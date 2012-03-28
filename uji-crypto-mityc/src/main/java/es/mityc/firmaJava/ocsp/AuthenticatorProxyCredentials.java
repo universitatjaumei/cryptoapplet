@@ -22,8 +22,8 @@
 package es.mityc.firmaJava.ocsp;
 
 import java.net.Authenticator;
-import java.net.PasswordAuthentication;
 import java.net.Authenticator.RequestorType;
+import java.net.PasswordAuthentication;
 
 import org.apache.commons.httpclient.NTCredentials;
 

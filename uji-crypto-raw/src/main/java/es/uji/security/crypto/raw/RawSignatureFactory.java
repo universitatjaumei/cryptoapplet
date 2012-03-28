@@ -13,24 +13,24 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.util.i18n.LabelManager;
 
 public class RawSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(RawSignatureFactory.class);
-    
+
     public SignatureResult formatSignature(SignatureOptions signatureOptions)
             throws KeyStoreException, Exception
     {
-        byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
         X509Certificate certificate = signatureOptions.getCertificate();
         PrivateKey privateKey = signatureOptions.getPrivateKey();
         Provider provider = signatureOptions.getProvider();
 
         log.info("Init SHA1withRSA signature");
-        
-        Signature rsa = Signature.getInstance("SHA1withRSA", provider);                
+
+        Signature rsa = Signature.getInstance("SHA1withRSA", provider);
 
         SignatureResult signatureResult = new SignatureResult();
 
@@ -38,7 +38,7 @@ public class RawSignatureFactory implements ISignFormatProvider
         {
             signatureResult.setValid(false);
             signatureResult.addError(LabelManager.get("ERR_RAW_NOCERT"));
-            
+
             log.error(LabelManager.get("ERR_RAW_NOCERT"));
 
             return signatureResult;
@@ -48,7 +48,7 @@ public class RawSignatureFactory implements ISignFormatProvider
         {
             signatureResult.setValid(false);
             signatureResult.addError(LabelManager.get("ERR_RAW_NOKEY"));
-            
+
             log.error(LabelManager.get("ERR_RAW_NOCERT"));
 
             return signatureResult;
@@ -60,9 +60,9 @@ public class RawSignatureFactory implements ISignFormatProvider
         byte[] res = rsa.sign();
 
         // Verification
-        
+
         log.info("Trying to verify signed data");
-        
+
         Signature rsa_vfy = Signature.getInstance("SHA1withRSA", new BouncyCastleProvider());
         rsa_vfy.initVerify(certificate.getPublicKey());
         rsa_vfy.update(data);
@@ -71,14 +71,14 @@ public class RawSignatureFactory implements ISignFormatProvider
         {
             signatureResult.setValid(false);
             signatureResult.addError(LabelManager.get("ERROR_RAW_SIGNATURE"));
-            
+
             log.info(LabelManager.get("ERROR_RAW_SIGNATURE"));
         }
         else
         {
             signatureResult.setValid(true);
             signatureResult.setSignatureData(new ByteArrayInputStream(res));
-            
+
             log.info("Signature verified");
         }
 

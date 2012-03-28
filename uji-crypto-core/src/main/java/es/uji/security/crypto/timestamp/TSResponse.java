@@ -7,7 +7,6 @@
 
 package es.uji.security.crypto.timestamp;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import sun.security.pkcs.PKCS7;

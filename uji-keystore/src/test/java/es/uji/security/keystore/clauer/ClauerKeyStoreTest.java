@@ -1,6 +1,5 @@
 package es.uji.security.keystore.clauer;
 
-import es.uji.security.keystore.clauer.ClauerKeyStore;
 
 public class ClauerKeyStoreTest
 {

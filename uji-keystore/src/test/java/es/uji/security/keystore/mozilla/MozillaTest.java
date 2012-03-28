@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 
 import org.bouncycastle.util.encoders.HexEncoder;
 
-import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.util.Base64;
 import es.uji.security.util.RegQuery;
 

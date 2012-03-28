@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
@@ -37,7 +37,7 @@ public class OpenXAdESBugs
     @Test
     public void verificationErrorContentDettached() throws Exception
     {
-        byte[] data = OS.inputStreamToByteArray(new FileInputStream(
+        byte[] data = StreamUtils.inputStreamToByteArray(new FileInputStream(
                 "src/main/resources/out-openxades-error-dettached.xml"));
 
         OpenXAdESTest openXAdESTest = new OpenXAdESTest();

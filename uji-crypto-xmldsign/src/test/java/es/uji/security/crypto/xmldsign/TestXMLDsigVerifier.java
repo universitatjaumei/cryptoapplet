@@ -11,8 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.OS;
-import es.uji.security.crypto.xmldsign.XMLDsigVerifier;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class TestXMLDsigVerifier
 {
@@ -26,7 +25,7 @@ public class TestXMLDsigVerifier
         {
             System.out.println("Verify " + file);
 
-            byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(file));
+            byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(file));
 
             XMLDsigVerifier verifier = new XMLDsigVerifier();
             VerificationResult verificationResult = verifier.verify(signedData);

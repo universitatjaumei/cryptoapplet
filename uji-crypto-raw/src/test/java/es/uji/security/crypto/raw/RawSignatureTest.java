@@ -14,9 +14,7 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.OS;
-import es.uji.security.crypto.raw.RawSignatureFactory;
-import es.uji.security.crypto.raw.RawSignatureVerifier;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class RawSignatureTest
 {
@@ -47,7 +45,8 @@ public class RawSignatureTest
 
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-        byte[] signedData = OS.inputStreamToByteArray(signatureResult.getSignatureData());
+        byte[] signedData = StreamUtils.inputStreamToByteArray(signatureResult
+                .getSignatureData());
 
         RawSignatureVerifier rawSignatureVerifier = new RawSignatureVerifier();
 

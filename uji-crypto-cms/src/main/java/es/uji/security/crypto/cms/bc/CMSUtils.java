@@ -1,5 +1,20 @@
 package es.uji.security.crypto.cms.bc;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
+import java.security.Security;
+import java.security.cert.CRLException;
+import java.security.cert.CertStore;
+import java.security.cert.CertStoreException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
@@ -12,21 +27,6 @@ import org.bouncycastle.asn1.x509.CertificateList;
 import org.bouncycastle.asn1.x509.X509CertificateStructure;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.util.io.Streams;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
-import java.security.Provider;
-import java.security.Security;
-import java.security.NoSuchProviderException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 class CMSUtils
 {

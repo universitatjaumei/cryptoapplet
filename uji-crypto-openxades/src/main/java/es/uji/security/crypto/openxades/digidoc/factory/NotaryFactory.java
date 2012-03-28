@@ -21,11 +21,11 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
+import java.security.cert.X509Certificate;
+
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Notary;
 import es.uji.security.crypto.openxades.digidoc.Signature;
-
-import java.security.cert.X509Certificate;
 
 /**
  * Interface for notary functions

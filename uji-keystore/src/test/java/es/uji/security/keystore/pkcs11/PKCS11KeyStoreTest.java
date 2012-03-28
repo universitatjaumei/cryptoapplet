@@ -5,7 +5,6 @@ import java.security.cert.X509Certificate;
 
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
-import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 
 public class PKCS11KeyStoreTest
 {

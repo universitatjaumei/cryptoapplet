@@ -37,7 +37,7 @@ import com.sun.org.apache.xerces.internal.dom.DOMOutputImpl;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class XMLDsigSignatureFactory implements ISignFormatProvider
 {
@@ -65,7 +65,7 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
 
     public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
     {
-        byte[] toSign = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        byte[] toSign = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
         X509Certificate cer = signatureOptions.getCertificate();
         PrivateKey pk = signatureOptions.getPrivateKey();
 
@@ -73,20 +73,20 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 
         // XPath filtering for multiple enveloped signatures support
-        
+
         Transform transform = null;
-        
+
         if (signatureOptions.isCoSignEnabled())
         {
-            transform = fac.newTransform(Transform.XPATH, new XPathFilterParameterSpec(
-                "not(ancestor-or-self::dsig:Signature)", Collections.singletonMap("dsig",
-                        XMLSignature.XMLNS)));
+            transform = fac.newTransform(Transform.XPATH,
+                    new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
+                            Collections.singletonMap("dsig", XMLSignature.XMLNS)));
         }
         else
         {
-            transform = fac.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null);            
+            transform = fac.newTransform(Transform.ENVELOPED, (TransformParameterSpec) null);
         }
-        
+
         Reference ref = fac.newReference("", fac.newDigestMethod(DigestMethod.SHA1, null),
                 Collections.singletonList(transform), null, null);
 
@@ -121,9 +121,9 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
 
         // Output the resulting document.
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//        TransformerFactory tf = TransformerFactory.newInstance();
-//        Transformer trans = tf.newTransformer();
-//        trans.transform(new DOMSource(doc), new StreamResult(bos));
+        // TransformerFactory tf = TransformerFactory.newInstance();
+        // Transformer trans = tf.newTransformer();
+        // trans.transform(new DOMSource(doc), new StreamResult(bos));
 
         DOMImplementationLS domImplLS = (DOMImplementationLS) doc.getImplementation();
         LSSerializer serializer = domImplLS.createLSSerializer();
@@ -133,7 +133,7 @@ public class XMLDsigSignatureFactory implements ISignFormatProvider
         output.setCharacterStream(new PrintWriter(bos));
 
         serializer.write(doc, output);
-        
+
         SignatureResult signatureResult = new SignatureResult();
         signatureResult.setValid(true);
         signatureResult.setSignatureData(new ByteArrayInputStream(bos.toByteArray()));

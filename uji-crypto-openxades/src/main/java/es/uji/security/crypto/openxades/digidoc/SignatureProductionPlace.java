@@ -21,12 +21,11 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Models the SignatureProductionPlace element of an XML-DSIG/ETSI Signature.

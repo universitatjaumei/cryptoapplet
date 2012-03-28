@@ -1,7 +1,5 @@
 package es.uji.security.crypto.openxades.digidoc.c14n.common;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.common.Convert;
-import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 
 public class StringImplementation
 {

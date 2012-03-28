@@ -1,11 +1,6 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
 import java.util.ArrayList;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Attribute;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Fragment;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Node;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Tag;
-import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 
 public final class TinyXMLParser_Element extends TinyXMLParser_Node
 {

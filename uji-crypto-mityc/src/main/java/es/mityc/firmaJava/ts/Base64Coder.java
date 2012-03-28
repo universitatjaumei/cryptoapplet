@@ -1,6 +1,5 @@
 package es.mityc.firmaJava.ts;
 
-import es.mityc.firmaJava.ts.ConstantesTSA;
 
 /**
  * A Base64 Encoder/Decoder.

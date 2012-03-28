@@ -9,19 +9,19 @@ import javax.swing.JFileChooser;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class FileOutputParams implements OutputParams
 {
     private Logger log = Logger.getLogger(FileOutputParams.class);
-    
+
     public void setSignData(InputStream is) throws IOException
     {
         JFileChooser chooser = new JFileChooser();
         FileOutputStream fos = null;
 
-        byte[] data=  OS.inputStreamToByteArray(is);
-        
+        byte[] data = StreamUtils.inputStreamToByteArray(is);
+
         int returnVal = chooser.showSaveDialog(null);
 
         if (returnVal == JFileChooser.APPROVE_OPTION)

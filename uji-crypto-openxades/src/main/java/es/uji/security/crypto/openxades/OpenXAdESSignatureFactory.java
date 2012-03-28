@@ -20,7 +20,9 @@ import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.FileSystemUtils;
+import es.uji.security.crypto.config.OperatingSystemUtils;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
@@ -39,7 +41,7 @@ import es.uji.security.util.i18n.LabelManager;
 public class OpenXAdESSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(OpenXAdESSignatureFactory.class);
-    
+
     private String xadesFileName = "data.xml";
     private String xadesFileMimeType = "application/binary";
 
@@ -58,14 +60,14 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         log.debug("Using XAdESSignatureFactory");
 
         SignatureResult signatureResult = new SignatureResult();
-        
+
         // Signature data
-        Provider provider = signatureOptions.getProvider();        
+        Provider provider = signatureOptions.getProvider();
         X509Certificate certificate = signatureOptions.getCertificate();
         PrivateKey privateKey = signatureOptions.getPrivateKey();
 
         log.debug(provider.getName() + " provider found");
-        
+
         if (certificate == null)
         {
             signatureResult.setValid(false);
@@ -80,73 +82,75 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             signatureResult.addError(LabelManager.get("ERROR_DDOC_NOKEY"));
 
             return signatureResult;
-        }        
+        }
 
-        // Retrieve DigiDoc configuration        
-        ConfigManager conf = ConfigManager.getInstance();  
-        
-        // If the file to sign is big, prepare temporal files        
+        // Retrieve DigiDoc configuration
+        ConfigManager conf = ConfigManager.getInstance();
+
+        // If the file to sign is big, prepare temporal files
         File temporal = null;
         File ftoSign = new File("jar://data.xml");
-        
+
         if (signatureOptions.getSwapToFile())
         {
-            temporal = new File(OS.getSystemTmpDir() + "/signatureData.dat");
-            OS.dumpToFile(temporal, signatureOptions.getDataToSign());
+            temporal = new File(OperatingSystemUtils.getSystemTmpDir() + "/signatureData.dat");
+            FileSystemUtils.dumpToFile(temporal, signatureOptions.getDataToSign());
             xadesFileName = temporal.getAbsolutePath();
             ftoSign = temporal;
-        }		
+        }
 
-        // Check if input is a DigiDoc file for cosign        
+        // Check if input is a DigiDoc file for cosign
         SignedDoc signedDoc = null;
 
-        //TODO: This can cause problems with big file management
+        // TODO: This can cause problems with big file management
         // If byte[] is not retrieved, the stream gets empty when readSignedDoc
         // is executed
-        
-        byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
-        
+
+        byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
+
         try
         {
-        	DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        	documentBuilderFactory.setNamespaceAware(true);
-        	DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        	Document current = documentBuilder.parse(new ByteArrayInputStream(data));
-        	
-        	NodeList docs = current.getElementsByTagNameNS("http://www.sk.ee/DigiDoc/v1.3.0#", "SignedDoc");
-        	
-        	if (docs.getLength() == 1)
-        	{        	
-        		DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
-        		signedDoc = digFac.readSignedDoc(new ByteArrayInputStream(data));
-        	}
-        	else
-        	{
-        		throw new DigiDocException(-1, "", null);
-        	}
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setNamespaceAware(true);
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document current = documentBuilder.parse(new ByteArrayInputStream(data));
+
+            NodeList docs = current.getElementsByTagNameNS("http://www.sk.ee/DigiDoc/v1.3.0#",
+                    "SignedDoc");
+
+            if (docs.getLength() == 1)
+            {
+                DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
+                signedDoc = digFac.readSignedDoc(new ByteArrayInputStream(data));
+            }
+            else
+            {
+                throw new DigiDocException(-1, "", null);
+            }
         }
-        // Here we can get also SaxParseException. 
-       // catch (Exception dde)
+        // Here we can get also SaxParseException.
+        // catch (Exception dde)
         catch (Exception dde)
         {
             signedDoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
-            
-            // Add a new reference in Bas64 and establish body data        
-            DataFile df = signedDoc.addDataFile(ftoSign, this.xadesFileMimeType, DataFile.CONTENT_EMBEDDED_BASE64);
-            
+
+            // Add a new reference in Bas64 and establish body data
+            DataFile df = signedDoc.addDataFile(ftoSign, this.xadesFileMimeType,
+                    DataFile.CONTENT_EMBEDDED_BASE64);
+
             signedDoc.getDataFile(0).setFileName(xadesFileName);
             signedDoc.getDataFile(0).setMimeType(xadesFileMimeType);
-            
+
             if (!signatureOptions.getSwapToFile())
             {
                 df.setBody(data);
                 df.setSize(data.length);
-            }            
+            }
         }
-        
-        // Prepare the signature        
+
+        // Prepare the signature
         String[] roles;
-        
+
         if (signatureOptions.getSignerRole() != null)
         {
             roles = new String[] { signatureOptions.getSignerRole() };
@@ -155,14 +159,15 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         {
             roles = new String[] {};
         }
-        
-        Signature signature = signedDoc.prepareSignature((X509Certificate) certificate, roles, null);
+
+        Signature signature = signedDoc
+                .prepareSignature((X509Certificate) certificate, roles, null);
         CertValue certValue = null;
 
         // Sign
         byte[] sidigest = signature.getSignedContent();
-        
-        //System.out.println("Contenido a firmar: " + new String(sidigest));
+
+        // System.out.println("Contenido a firmar: " + new String(sidigest));
 
         if (sidigest == null)
         {
@@ -200,31 +205,32 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         {
             String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
             String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
-            
+
             byte[] signatureValue = signature.getSignatureValue().toString().getBytes();
 
-            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true);
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue,
+                    true);
 
             X509Certificate xcaCert = ConfigManager.getInstance().readCertificate(tsa1_ca);
             TSResponseToken responseToken = new TSResponseToken(response);
-            
-            TSResponse mmm = new TSResponse(Base64.decode(Base64.encodeBytes(response.getEncodedToken())));
-            
-            if (! responseToken.verify(xcaCert, signatureValue))
+
+            TSResponse mmm = new TSResponse(Base64.decode(Base64.encodeBytes(response
+                    .getEncodedToken())));
+
+            if (!responseToken.verify(xcaCert, signatureValue))
             {
                 signatureResult.setValid(false);
                 signatureResult.addError("Obtained timestamp is not valid");
-                
-                return signatureResult;                
+
+                return signatureResult;
             }
-            
+
             TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
             ts.setTimeStampResponse(response);
             ts.setSignature(signature);
             ts.setHash(responseToken.getMessageImprint());
 
             signature.addTimestampInfo(ts);
-
 
             if (tsa1_ca == null)
             {
@@ -272,14 +278,15 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             else
             {
                 signatureResult.setValid(false);
-                signatureResult.addError("Unknows DIGIDOC_CERT_VERIFIER option. Must be OCSP or POST");
-                
-                return signatureResult;                            	
+                signatureResult
+                        .addError("Unknows DIGIDOC_CERT_VERIFIER option. Must be OCSP or POST");
+
+                return signatureResult;
             }
 
             String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
             String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
-            
+
             byte[] completeCertificateRefs = signature.getUnsignedProperties()
                     .getCompleteCertificateRefs().toXML();
 
@@ -302,16 +309,16 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             X509Certificate xcaCert = ConfigManager.getInstance().readCertificate(tsa1_ca);
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
-            TSResponseToken responseToken = new TSResponseToken(response);            
+            TSResponseToken responseToken = new TSResponseToken(response);
 
-            if (! responseToken.verify(xcaCert, refsOnlyData))
+            if (!responseToken.verify(xcaCert, refsOnlyData))
             {
                 signatureResult.setValid(false);
                 signatureResult.addError("Obtained timestamp is not valid");
 
-                return signatureResult;                
+                return signatureResult;
             }
-            
+
             TimestampInfo ts = new TimestampInfo("TS2", TimestampInfo.TIMESTAMP_TYPE_REFS_ONLY);
             ts.setTimeStampResponse(response);
             ts.setSignature(signature);
@@ -357,29 +364,30 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         signatureResult.setValid(true);
 
         // If we sign a big file, we write the result into a file and get back a FileInputStream
-        File random = new File(OS.getSystemTmpDir() + "/signature.xsig");
+        File random = new File(OperatingSystemUtils.getSystemTmpDir() + "/signature.xsig");
 
         if (signatureOptions.getSwapToFile())
-        {            
+        {
             signedDoc.writeToFile(random);
             signatureResult.setSignatureData(new FileInputStream(random));
         }
         else
         {
-            signatureResult.setSignatureData(new ByteArrayInputStream(signedDoc.toXML().getBytes()));
+            signatureResult
+                    .setSignatureData(new ByteArrayInputStream(signedDoc.toXML().getBytes()));
         }
 
-        // Remove temporal files for big file signature        
+        // Remove temporal files for big file signature
         if (signatureOptions.getSwapToFile())
         {
-        	try
-        	{
-        		random.delete();
-        	}
-        	catch (Exception e)
-        	{
-        		e.printStackTrace();
-        	}
+            try
+            {
+                random.delete();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
 
         return signatureResult;

@@ -21,16 +21,14 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import java.math.BigInteger;
-import java.security.cert.X509Certificate;
-
-import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+
+import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 
 /**
  * Models the ETSI CompleteCertificateRefs element

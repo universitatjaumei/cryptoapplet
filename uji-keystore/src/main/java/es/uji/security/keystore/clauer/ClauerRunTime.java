@@ -1,10 +1,9 @@
 package es.uji.security.keystore.clauer;
 
-import es.uji.security.keystore.clauer.ClauerHandle;
-import es.uji.security.util.net.SocketDataInputStreamReader;
-
-import java.net.Socket;
 import java.io.IOException;
+import java.net.Socket;
+
+import es.uji.security.util.net.SocketDataInputStreamReader;
 
 /**
  * This class will implement all the functions of the protocol by the time it will implement just

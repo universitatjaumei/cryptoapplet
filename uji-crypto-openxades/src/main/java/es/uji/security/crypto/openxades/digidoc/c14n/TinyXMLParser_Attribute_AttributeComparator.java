@@ -1,7 +1,5 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Attribute;
-
 import java.util.Comparator;
 
 public class TinyXMLParser_Attribute_AttributeComparator implements Comparator

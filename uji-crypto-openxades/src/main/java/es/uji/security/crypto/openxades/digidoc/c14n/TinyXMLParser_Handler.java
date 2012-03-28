@@ -1,11 +1,5 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_CData;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Comment;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Element;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_NestedElement;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Tag;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_TextNode;
 
 public abstract interface TinyXMLParser_Handler
 {

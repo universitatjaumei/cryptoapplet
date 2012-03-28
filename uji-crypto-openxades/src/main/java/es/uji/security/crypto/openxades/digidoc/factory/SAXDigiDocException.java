@@ -21,10 +21,9 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.openxades.digidoc.DigiDocException;
-import es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocException;
-
 import org.xml.sax.SAXException;
+
+import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 
 /**
  * SAXExcepton subclass, that has the same data as DigiDocException

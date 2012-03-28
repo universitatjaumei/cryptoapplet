@@ -12,10 +12,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.OS;
-import es.uji.security.crypto.xmldsign.odf.ODFSignatureFactory;
-import es.uji.security.crypto.xmldsign.odf.ODFSignatureVerifier;
+import es.uji.security.crypto.config.FileSystemUtils;
 
 public class TestODFSignatureFactory
 {
@@ -44,8 +41,8 @@ public class TestODFSignatureFactory
 
         if (signatureResult.isValid())
         {
-            OS.dumpToFile(new File("src/main/resources/signed-cryptoapplet.odt"), signatureResult
-                    .getSignatureData());
+            FileSystemUtils.dumpToFile(new File("src/main/resources/signed-cryptoapplet.odt"),
+                    signatureResult.getSignatureData());
 
             signatureOptions = new SignatureOptions();
             signatureOptions.setDataToSign(new FileInputStream(
@@ -59,7 +56,7 @@ public class TestODFSignatureFactory
 
             if (signatureResult.isValid())
             {
-                OS.dumpToFile(new File("src/main/resources/signed2-cryptoapplet.odt"),
+                FileSystemUtils.dumpToFile(new File("src/main/resources/signed2-cryptoapplet.odt"),
                         signatureResult.getSignatureData());
             }
             else

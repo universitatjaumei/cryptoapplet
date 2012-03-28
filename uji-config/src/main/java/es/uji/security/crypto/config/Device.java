@@ -1,5 +1,7 @@
 package es.uji.security.crypto.config;
 
+import java.text.MessageFormat;
+
 public class Device
 {
     private String name;
@@ -48,7 +50,7 @@ public class Device
     {
         this.slot = slot;
     }
-    
+
     public boolean isDisableNativePasswordDialog()
     {
         return disableNativePasswordDialog;
@@ -57,6 +59,7 @@ public class Device
     @Override
     public String toString()
     {
-        return ("name = " + name + "\r" + "library = " + library + "\r\nslot = " + slot + "\r\n");
+        return MessageFormat.format("name = {0}\rlibrary = {1}\r\nslot = {2}\r\n", name, library,
+                slot);
     }
 }

@@ -1,6 +1,5 @@
 package es.mityc.firmaJava.ocsp;
 
-import es.mityc.firmaJava.ocsp.ConstantesOCSP;
 
 /**
  * A Base64 Encoder/Decoder.

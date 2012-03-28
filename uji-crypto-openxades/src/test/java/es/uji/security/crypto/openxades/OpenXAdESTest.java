@@ -12,7 +12,7 @@ import es.uji.security.crypto.BaseCryptoAppletTest;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class OpenXAdESTest extends BaseCryptoAppletTest
 {
@@ -35,7 +35,7 @@ public class OpenXAdESTest extends BaseCryptoAppletTest
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir
+        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-openxades.xml"));
 
         OpenXAdESSignatureVerifier signatureVerifier = new OpenXAdESSignatureVerifier();

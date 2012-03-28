@@ -2,9 +2,9 @@ package es.uji.security.ui.applet;
 
 import javax.swing.JApplet;
 
-import org.apache.log4j.Logger;
-
 import netscape.javascript.JSObject;
+
+import org.apache.log4j.Logger;
 
 public class JSCommands
 {

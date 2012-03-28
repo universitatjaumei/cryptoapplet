@@ -28,7 +28,7 @@ import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.Device;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.crypto.openxades.OpenXAdESSignatureVerifier;
 import es.uji.security.keystore.DeviceInitializationException;
 import es.uji.security.keystore.KeyStoreManager;
@@ -107,8 +107,7 @@ public class SignatureApplet extends JApplet
         }
         catch (Exception e)
         {
-            log.error(e.getMessage());
-            log.error("Stack Trace: " + OS.stackTraceToString(e));
+            log.error(e.getMessage(), e);
 
             JOptionPane.showMessageDialog(null, e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
 
@@ -928,7 +927,7 @@ public class SignatureApplet extends JApplet
                     uc.connect();
                     InputStream in = uc.getInputStream();
 
-                    byte[] data = OS.inputStreamToByteArray(in);
+                    byte[] data = StreamUtils.inputStreamToByteArray(in);
 
                     VerificationResult verificationDetails = sv.verify(data);
                     return verificationDetails.getErrorsAsStringArray();

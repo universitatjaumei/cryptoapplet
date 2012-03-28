@@ -9,11 +9,8 @@ import java.security.Provider;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-
 import java.util.Enumeration;
 import java.util.Vector;
-
-import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.IKeyStore;

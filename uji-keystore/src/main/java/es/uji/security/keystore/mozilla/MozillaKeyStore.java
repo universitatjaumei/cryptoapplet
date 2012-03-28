@@ -19,7 +19,7 @@ import java.util.Enumeration;
 import java.util.Random;
 
 import es.uji.security.crypto.SupportedKeystore;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.OperatingSystemUtils;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.util.RegQuery;
 
@@ -45,7 +45,7 @@ public class MozillaKeyStore implements IKeyStore
          * provider.
          */
 
-        if (OS.isWindowsUpperEqualToNT())
+        if (OperatingSystemUtils.isWindowsUpperEqualToNT())
         {
             _configName = rq.getCurrentUserPersonalFolderPath() + File.separator + "p11.cfg";
         }
@@ -68,17 +68,15 @@ public class MozillaKeyStore implements IKeyStore
          * Microsoft standar \ and spaces must be scaped too.
          */
 
-        if (OS.isWindowsUpperEqualToNT())
+        if (OperatingSystemUtils.isWindowsUpperEqualToNT())
         {
-            fos
-                    .write(("name = NSS\r" + "library = " + _pkcs11file + "\r"
-                            + "attributes= compatibility" + "\r" + "slot=2\r" + "nssArgs=\""
-                            + "configdir='"
-                            + _currentprofile.replace("\\", "/").replace(" ", "\\ ") + "' "
-                            + "certPrefix='' " + "keyPrefix='' " + "secmod=' secmod.db' " + "flags=readOnly\"\r")
-                            .getBytes());
+            fos.write(("name = NSS\r" + "library = " + _pkcs11file + "\r"
+                    + "attributes= compatibility" + "\r" + "slot=2\r" + "nssArgs=\""
+                    + "configdir='" + _currentprofile.replace("\\", "/").replace(" ", "\\ ") + "' "
+                    + "certPrefix='' " + "keyPrefix='' " + "secmod=' secmod.db' " + "flags=readOnly\"\r")
+                    .getBytes());
         }
-        else if (OS.isLinux())
+        else if (OperatingSystemUtils.isLinux())
         {
             /*
              * TODO:With Linux is pending to test what's up with the white spaces in the path.
@@ -127,7 +125,7 @@ public class MozillaKeyStore implements IKeyStore
         }
 
         Enumeration<String> e = _mozillaKeyStore.aliases();
-        
+
         while (e.hasMoreElements())
         {
             System.out.println("Alias: " + e.nextElement());
@@ -146,7 +144,7 @@ public class MozillaKeyStore implements IKeyStore
         String auxAlias = null;
 
         Enumeration<String> e = _mozillaKeyStore.aliases();
-        
+
         while (e.hasMoreElements())
         {
             auxAlias = (String) e.nextElement();
@@ -218,11 +216,11 @@ public class MozillaKeyStore implements IKeyStore
     {
         return _mozillaKeyStore.getProvider(); // _pk11provider;
     }
-    
+
     public void setProvider(Provider provider) throws Exception
     {
-        //Does nothing, seems non sense by this time.
-    	throw new Exception("Method not implemented");
+        // Does nothing, seems non sense by this time.
+        throw new Exception("Method not implemented");
     }
 
     public void cleanUp()
@@ -230,5 +228,5 @@ public class MozillaKeyStore implements IKeyStore
         File f = new File(_configName);
         f.delete();
         Security.removeProvider(_pk11provider.getName());
-    }    
+    }
 }

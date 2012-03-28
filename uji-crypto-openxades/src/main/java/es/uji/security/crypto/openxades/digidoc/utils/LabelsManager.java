@@ -21,11 +21,11 @@
 
 package es.uji.security.crypto.openxades.digidoc.utils;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.PropertyResourceBundle;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 

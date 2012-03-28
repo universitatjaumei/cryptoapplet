@@ -1,14 +1,11 @@
 package es.uji.security.keystore;
 
 import java.security.Provider;
-import java.security.cert.X509Certificate;
 import java.security.cert.CertificateParsingException;
-
+import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Iterator;
 
 import es.uji.security.crypto.SupportedKeystore;
-import es.uji.security.keystore.IKeyStore;
 
 /**
  * _keyUsage is a boolean array where positions are:

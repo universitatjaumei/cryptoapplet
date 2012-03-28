@@ -19,12 +19,12 @@
  */
 package es.uji.security.crypto.openxades.digidoc.factory;
 
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.TimestampInfo;
-
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 
 /**
  * Interface for timestamp functions

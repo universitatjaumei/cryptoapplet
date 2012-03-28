@@ -1,8 +1,6 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.EntityParser_Fragment;
 import es.uji.security.crypto.openxades.digidoc.c14n.common.Convert;
-import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 
 public class EntityParser_Entity
 {

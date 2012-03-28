@@ -1,9 +1,13 @@
 package es.uji.security.keystore;
 
-import java.io.*;
-import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.security.KeyFactory;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 /**
  * 

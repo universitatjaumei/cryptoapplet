@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import es.uji.security.crypto.BaseCryptoAppletTest;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class MITyCTest extends BaseCryptoAppletTest
 {
@@ -22,9 +22,9 @@ public class MITyCTest extends BaseCryptoAppletTest
     public void mityc() throws Exception
     {
         // Verify
-        
-        byte[] signedData = OS
-                .inputStreamToByteArray(new FileInputStream(baseDir + "out-mityc.xml"));
+
+        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
+                + "out-mityc.xml"));
 
         MitycXAdESSignatureValidator signatureValidator = new MitycXAdESSignatureValidator();
 

@@ -3,17 +3,7 @@ package es.uji.security.crypto.openxades.digidoc.c14n;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import es.uji.security.crypto.openxades.digidoc.c14n.EntityParser;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLCanonicalizerHandler_TextStringNormalizer;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Attribute;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Attribute_AttributeComparator;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_CData;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Comment;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Element;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Handler;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_NestedElement;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Tag;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_TextNode;
+
 import es.uji.security.crypto.openxades.digidoc.c14n.common.Convert;
 import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 

@@ -1,8 +1,5 @@
 package es.uji.security.crypto.openxades.digidoc.c14n;
 
-import es.uji.security.crypto.openxades.digidoc.c14n.FragmentBase;
-import es.uji.security.crypto.openxades.digidoc.c14n.TinyXMLParser_Fragment;
-import es.uji.security.crypto.openxades.digidoc.c14n.common.StringImplementation;
 
 public final class TinyXMLParser_CData
 {

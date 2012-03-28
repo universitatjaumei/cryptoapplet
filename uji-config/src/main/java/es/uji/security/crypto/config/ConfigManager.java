@@ -94,7 +94,8 @@ public class ConfigManager
     {
         properties.setProperty(key, value);
     }
-    //TODO: Correct here?
+
+    // TODO: Correct here?
     public ArrayList<Device> getDeviceConfig()
     {
         String deviceList = getProperty("cryptoapplet.devices");
@@ -108,7 +109,7 @@ public class ConfigManager
                 String deviceLibrariesList = "";
                 boolean disableNativePasswordDialog = false;
 
-                if (OS.isLinux())
+                if (OperatingSystemUtils.isLinux())
                 {
                     deviceLibrariesList = getProperty("cryptoapplet.devices." + device
                             + ".libraries.linux");
@@ -121,7 +122,7 @@ public class ConfigManager
                         disableNativePasswordDialog = true;
                     }
                 }
-                else if (OS.isWindowsUpperEqualToNT())
+                else if (OperatingSystemUtils.isWindowsUpperEqualToNT())
                 {
                     deviceLibrariesList = getProperty("cryptoapplet.devices." + device
                             + ".libraries.windows");
@@ -188,7 +189,7 @@ public class ConfigManager
         return result;
     }
 
-    //TODO: Correct here?
+    // TODO: Correct here?
     public X509Certificate readCertificate(String certLocation) throws KeyStoreException,
             IOException, CertificateException, NoSuchAlgorithmException
     {

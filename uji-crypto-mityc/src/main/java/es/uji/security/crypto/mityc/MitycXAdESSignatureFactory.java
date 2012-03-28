@@ -10,13 +10,13 @@ import es.mityc.firmaJava.libreria.xades.FirmaXML;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class MitycXAdESSignatureFactory implements ISignFormatProvider
 {
     public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
     {
-        byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
         X509Certificate certificate = signatureOptions.getCertificate();
         PrivateKey privateKey = signatureOptions.getPrivateKey();
 

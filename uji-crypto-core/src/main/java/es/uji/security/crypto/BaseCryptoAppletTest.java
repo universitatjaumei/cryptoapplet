@@ -12,7 +12,7 @@ import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.FileSystemUtils;
 
 public class BaseCryptoAppletTest
 {
@@ -96,7 +96,7 @@ public class BaseCryptoAppletTest
     {
         if (signatureResult.getSignatureData() != null)
         {
-            OS.dumpToFile(new File(dumpFile), signatureResult.getSignatureData());
+            FileSystemUtils.dumpToFile(new File(dumpFile), signatureResult.getSignatureData());
         }
 
         if (!signatureResult.isValid())

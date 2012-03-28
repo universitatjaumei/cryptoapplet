@@ -30,7 +30,6 @@ import org.w3c.dom.Element;
 import es.mityc.firmaJava.libreria.xades.ResultadoValidacion;
 import es.mityc.firmaJava.libreria.xades.XAdESSchemas;
 import es.mityc.firmaJava.libreria.xades.errores.PolicyException;
-import es.mityc.firmaJava.policy.ConstantesFacturaePolicy;
 
 /**
  * Implementación de la política de factura electrónica v 3.0:

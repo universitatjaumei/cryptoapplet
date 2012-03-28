@@ -21,15 +21,14 @@
 
 package es.uji.security.crypto.openxades.digidoc;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 
 import es.uji.security.crypto.openxades.digidoc.utils.ConvertUtils;
 import es.uji.security.util.Base64;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Models the ETSI CompleteRevocationRefs element This contains some data from the OCSP response and

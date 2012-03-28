@@ -9,14 +9,13 @@ package es.uji.security.crypto.timestamp;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 /**
  * A timestamper that communicates with a Timestamping Authority (TSA) over HTTP. It supports the
@@ -117,7 +116,7 @@ public class HttpTimestamper implements Timestamper
         
         verifyMimeType(connection.getContentType());
 
-        byte[] replyBuffer = OS.inputStreamToByteArray(input);
+        byte[] replyBuffer = StreamUtils.inputStreamToByteArray(input);
 
         if (DEBUG)
         {

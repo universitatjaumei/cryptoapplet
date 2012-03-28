@@ -2,12 +2,13 @@ package es.uji.security.ui.applet.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.ui.applet.SignatureApplet;
 
 public class FileInputParams extends AbstractData implements InputParams
@@ -18,30 +19,32 @@ public class FileInputParams extends AbstractData implements InputParams
         int returnVal = chooser.showOpenDialog(null);
 
         byte[] data = new byte[] {};
-        
+
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {
             File selectedFile = chooser.getSelectedFile().getAbsoluteFile();
-            
+
             System.out.println("You chose to open this file: " + selectedFile.getAbsolutePath());
 
-            if (! selectedFile.exists())
+            if (!selectedFile.exists())
             {
-                JOptionPane.showMessageDialog(null, "No se encontró fichero", "", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "No se encontró fichero", "",
+                        JOptionPane.ERROR_MESSAGE);
             }
             else
             {
                 if (mustHash)
                 {
-                    data = getMessageDigest(OS.getBytesFromFile(selectedFile));
+                    data = getMessageDigest(StreamUtils.inputStreamToByteArray(new FileInputStream(
+                            selectedFile)));
                 }
                 else
                 {
-                    data = OS.getBytesFromFile(selectedFile);
+                    data = StreamUtils.inputStreamToByteArray(new FileInputStream(selectedFile));
                 }
             }
         }
-        
+
         return new ByteArrayInputStream(data);
     }
 

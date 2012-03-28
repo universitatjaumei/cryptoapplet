@@ -16,7 +16,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import es.uji.security.crypto.SupportedKeystore;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.keystore.IKeyStore;
 
 public class PKCS11KeyStore implements IKeyStore
@@ -44,8 +44,8 @@ public class PKCS11KeyStore implements IKeyStore
     public PKCS11KeyStore(InputStream isP11Config, String p11LibPath, boolean helper)
             throws PKCS11HelperException
     {
-     	
-    	this.helper = helper;
+
+        this.helper = helper;
         if (helper == true)
         {
             pk11h = new PKCS11Helper(p11LibPath);
@@ -64,7 +64,7 @@ public class PKCS11KeyStore implements IKeyStore
     public PKCS11KeyStore(InputStream isP11Config, String p11LibPath, String initArgs)
             throws PKCS11HelperException
     {
-    	pk11h = new PKCS11Helper(p11LibPath, initArgs);
+        pk11h = new PKCS11Helper(p11LibPath, initArgs);
         _tokenName = pk11h.getName();
         _isP11Config = isP11Config;
     }
@@ -88,12 +88,16 @@ public class PKCS11KeyStore implements IKeyStore
     public void load(InputStream in, char[] pin) throws KeyStoreException,
             NoSuchAlgorithmException, IOException, CertificateException, Exception
     {
-    	 try{
-      		System.out.println("Input String initialized to: " + new String(OS.inputStreamToByteArray(in)));
-      		in.reset();
-      	}
-      	catch(Exception e){}
-    	
+        try
+        {
+            System.out.println("Input String initialized to: "
+                    + new String(StreamUtils.inputStreamToByteArray(in)));
+            in.reset();
+        }
+        catch (Exception e)
+        {
+        }
+
         if (!privateInitialize)
         {
             if (pin != null && in != null)
@@ -167,7 +171,7 @@ public class PKCS11KeyStore implements IKeyStore
         if (privateInitialize)
         {
             Enumeration<String> e = _p11KeyStore.aliases();
-            
+
             while (e.hasMoreElements())
             {
                 auxAlias = (String) e.nextElement();
@@ -196,10 +200,9 @@ public class PKCS11KeyStore implements IKeyStore
 
     public void setProvider(Provider provider) throws Exception
     {
-        //Does nothing, seems non sense by this time.
-    	throw new Exception("Method not implemented");
+        // Does nothing, seems non sense by this time.
+        throw new Exception("Method not implemented");
     }
-
 
     public SupportedKeystore getName()
     {

@@ -12,7 +12,7 @@ import es.uji.security.crypto.BaseCryptoAppletTest;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.config.StreamUtils;
 
 public class JXAdESTest extends BaseCryptoAppletTest
 {
@@ -34,7 +34,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir
+        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades.xml"));
 
         JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
@@ -57,7 +57,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir
+        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades.xml"));
 
         JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
@@ -81,19 +81,19 @@ public class JXAdESTest extends BaseCryptoAppletTest
         for (int i = 0; i < 3; i++)
         {
             signatureOptions.setDataToSign(new ByteArrayInputStream(data));
-            
+
             ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
             SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
             showErrors(signatureResult, baseDir + "out-jxades-detached-cosign.xml");
 
-            data = OS.inputStreamToByteArray(new FileInputStream(baseDir
+            data = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                     + "out-jxades-detached-cosign.xml"));
         }
 
         // Verify
 
-        data = OS.inputStreamToByteArray(new FileInputStream(baseDir
+        data = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades-detached-cosign.xml"));
 
         JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();

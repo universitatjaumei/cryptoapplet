@@ -12,8 +12,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.OS;
-import es.uji.security.crypto.xmldsign.XMLDsigSignatureFactory;
+import es.uji.security.crypto.config.FileSystemUtils;
 
 public class TestXMLDsigSignatureFactory
 {
@@ -42,8 +41,8 @@ public class TestXMLDsigSignatureFactory
 
         if (signatureResult.isValid())
         {
-            OS.dumpToFile(new File("src/main/resources/out1.xml"), signatureResult
-                    .getSignatureData());
+            FileSystemUtils.dumpToFile(new File("src/main/resources/out1.xml"),
+                    signatureResult.getSignatureData());
 
             signatureOptions = new SignatureOptions();
             signatureOptions.setDataToSign(new FileInputStream("src/main/resources/out1.xml"));
@@ -56,8 +55,8 @@ public class TestXMLDsigSignatureFactory
 
             if (signatureResult.isValid())
             {
-                OS.dumpToFile(new File("src/main/resources/out2.xml"), signatureResult
-                        .getSignatureData());
+                FileSystemUtils.dumpToFile(new File("src/main/resources/out2.xml"),
+                        signatureResult.getSignatureData());
             }
             else
             {
