@@ -38,6 +38,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import es.uji.security.crypto.CertificateUtils;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.CertID;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
@@ -191,7 +192,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     m_logger.info("CA: " + ("DIGIDOC_CA_CERT" + (i + 1)) + " file: " + certFile);
                 }
                 
-                X509Certificate cert = ConfigManager.getInstance().readCertificate(certFile);
+                X509Certificate cert = CertificateUtils.readCertificate(certFile);
                 
                 if (cert != null)
                 {

@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import es.uji.security.crypto.CertificateUtils;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
@@ -211,7 +212,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue,
                     true);
 
-            X509Certificate xcaCert = ConfigManager.getInstance().readCertificate(tsa1_ca);
+            X509Certificate xcaCert = CertificateUtils.readCertificate(tsa1_ca);
             TSResponseToken responseToken = new TSResponseToken(response);
 
             TSResponse mmm = new TSResponse(Base64.decode(Base64.encodeBytes(response
@@ -307,7 +308,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
                     canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
 
-            X509Certificate xcaCert = ConfigManager.getInstance().readCertificate(tsa1_ca);
+            X509Certificate xcaCert = CertificateUtils.readCertificate(tsa1_ca);
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
             TSResponseToken responseToken = new TSResponseToken(response);
 

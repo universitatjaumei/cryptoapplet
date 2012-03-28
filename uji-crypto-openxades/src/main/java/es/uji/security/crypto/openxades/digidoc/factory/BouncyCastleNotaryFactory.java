@@ -59,6 +59,7 @@ import org.bouncycastle.ocsp.RevokedStatus;
 import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
+import es.uji.security.crypto.CertificateUtils;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.ocsp.CryptoCoreOCSPException;
 import es.uji.security.crypto.ocsp.OCSPChecker;
@@ -1275,8 +1276,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                             + ocspCAFile);
                 // System.out.println("OCSP CERTFILE: " + ocspCertFile);
                 if (ocspCertFile != null)
-                    m_ocspCerts.put(ocspCN, ConfigManager.getInstance().readCertificate(ocspCertFile));
-                m_ocspCACerts.put(ocspCACN, ConfigManager.getInstance().readCertificate(ocspCAFile));
+                    m_ocspCerts.put(ocspCN, CertificateUtils.readCertificate(ocspCertFile));
+                m_ocspCACerts.put(ocspCACN, CertificateUtils.readCertificate(ocspCAFile));
                 // read any further certs if they exist
                 int j = 1;
                 String certFile = null;
@@ -1288,7 +1289,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                         if (m_logger.isDebugEnabled())
                             m_logger.debug("Responder: " + ocspCN + " cert: " + ocspCertFile
                                     + " ca-cert: " + ocspCAFile);
-                        m_ocspCerts.put(ocspCN + "-" + j, ConfigManager.getInstance().readCertificate(certFile));
+                        m_ocspCerts.put(ocspCN + "-" + j, CertificateUtils.readCertificate(certFile));
                     }
                     j++;
                 }

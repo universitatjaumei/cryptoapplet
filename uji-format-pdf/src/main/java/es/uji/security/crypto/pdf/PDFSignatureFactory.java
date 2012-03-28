@@ -41,6 +41,7 @@ import com.lowagie.text.pdf.PdfString;
 import com.lowagie.text.pdf.PdfTemplate;
 import com.lowagie.text.pdf.PdfWriter;
 
+import es.uji.security.crypto.CertificateUtils;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
@@ -291,8 +292,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             for (int i = 1; i <= n; i++)
             {
-                CACert = ConfigManager.getInstance().readCertificate(
-                        conf.getProperty("DIGIDOC_CA_CERT" + i));
+                CACert = CertificateUtils.readCertificate(conf.getProperty("DIGIDOC_CA_CERT" + i));
 
                 try
                 {

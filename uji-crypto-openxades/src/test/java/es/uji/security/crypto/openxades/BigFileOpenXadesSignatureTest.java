@@ -16,6 +16,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import es.uji.security.crypto.CertificateUtils;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
@@ -117,7 +118,7 @@ public class BigFileOpenXadesSignatureTest
 
             String tsa1_ca = conf.getProperty("DIGIDOC_TSA1_CA_CERT");
 
-            X509Certificate xcaCert = ConfigManager.getInstance().readCertificate(tsa1_ca);
+            X509Certificate xcaCert = CertificateUtils.readCertificate(tsa1_ca);
 
             cval = new CertValue();
             cval.setType(CertValue.CERTVAL_TYPE_TSA);

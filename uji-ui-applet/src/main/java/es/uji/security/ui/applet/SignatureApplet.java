@@ -170,9 +170,7 @@ public class SignatureApplet extends JApplet
         {
             this.keyStoreManager.initClauer();
 
-            ConfigManager conf = ConfigManager.getInstance();
-
-            for (Device device : conf.getDeviceConfig())
+            for (Device device : Device.getDevicesConfig())
             {
                 try
                 {

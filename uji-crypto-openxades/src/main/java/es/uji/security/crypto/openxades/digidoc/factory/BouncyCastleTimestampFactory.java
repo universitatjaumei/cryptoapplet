@@ -26,6 +26,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.crypto.CertificateUtils;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
@@ -146,7 +147,7 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
 
         try
         {
-            certificate = ConfigManager.getInstance().readCertificate(conf.getProperty("DIGIDOC_TSA" + idx
+            certificate = CertificateUtils.readCertificate(conf.getProperty("DIGIDOC_TSA" + idx
                     + "_CERT"));
         }
         catch (Exception e)
@@ -167,7 +168,7 @@ public class BouncyCastleTimestampFactory implements TimestampFactory
 
         try
         {
-            certificate = ConfigManager.getInstance().readCertificate(fname);
+            certificate = CertificateUtils.readCertificate(fname);
         }
         catch (Exception e)
         {

@@ -12,6 +12,7 @@ import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
 
+import es.uji.security.crypto.CertificateUtils;
 import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.config.ConfigManager;
 
@@ -57,7 +58,7 @@ public class PDFSignatureVerifier
             {
                 log.debug("Adding certificate DIGIDOC_CA_CERTS" + i + " to the global keystore");
 
-                Certificate certificate = conf.readCertificate(conf
+                Certificate certificate = CertificateUtils.readCertificate(conf
                         .getProperty("DIGIDOC_CA_CERT" + i));
 
                 kall.setCertificateEntry("host ca " + i, certificate);
