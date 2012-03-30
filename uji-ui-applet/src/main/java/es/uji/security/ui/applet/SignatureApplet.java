@@ -1,10 +1,14 @@
 package es.uji.security.ui.applet;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
+import java.security.KeyStore;
 import java.security.PrivilegedAction;
+import java.security.Provider;
+import java.security.Security;
 
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
@@ -164,44 +168,7 @@ public class SignatureApplet extends JApplet
     private void initKeystores(SupportedBrowser supportedBrowser)
     {
         this.keyStoreManager.flushKeyStoresTable();
-        this.keyStoreManager.initBrowserStores(apph.getNavigator());
-
-        if (!supportedBrowser.equals(SupportedBrowser.IEXPLORER))
-        {
-            this.keyStoreManager.initClauer();
-
-            for (Device device : Device.getDevicesConfig())
-            {
-                try
-                {
-                    keyStoreManager.initPKCS11Device(device, null);
-                }
-                catch (DeviceInitializationException die)
-                {
-                    if (!device.isDisableNativePasswordDialog())
-                    {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            PasswordPrompt passwordPrompt = new PasswordPrompt(null,
-                                    device.getName(), "Pin:");
-
-                            try
-                            {
-                                this.keyStoreManager.initPKCS11Device(device,
-                                        passwordPrompt.getPassword());
-                                break;
-                            }
-                            catch (Exception e)
-                            {
-                                JOptionPane.showMessageDialog(null,
-                                        LabelManager.get("ERROR_INCORRECT_DNIE_PWD"), "",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        this.keyStoreManager.initKeyStores(supportedBrowser);
     }
 
     public KeyStoreManager getKeyStoreManager()
