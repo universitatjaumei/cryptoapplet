@@ -1,202 +1,75 @@
 package es.uji.security.keystore.pkcs11;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
+import java.util.List;
 
-import es.uji.security.keystore.IKeyStore;
+import org.junit.Assert;
+import org.junit.Test;
+
+import es.uji.security.keystore.SimpleKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
 
 public class PKCS11KeyStoreTest
 {
+    private static final int NUM_CERTIFICATES_IN_STORE = 2;
+    private static final String SIGN_CERTIFICATE_ALIAS = "CIFRADO/c=es,o=generalitat valenciana,ou=pkigva,cn=accv-ca2/8890499274928531747";
 
-    public static void main(String[] args)
+    private String getDriverConfiguration()
     {
-        // Testing mozilla keystore for ffox 3.5.5
+        Mozilla mozilla = new Mozilla();
+        String pkcs11FilePath = "/usr/lib/i386-linux-gnu/nss/libsoftokn3.so";
+        String currentprofile = mozilla.getCurrentProfiledir();
 
-        try
-        {
-            Mozilla mozilla = new Mozilla();
+        StringBuilder config = new StringBuilder();
 
-            if (mozilla.isInitialized())
-            {
-                IKeyStore p11mozillaks = (IKeyStore) new PKCS11KeyStore(mozilla
-                        .getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(), mozilla
-                        .getPkcs11InitArgsString());
-                p11mozillaks.load(null);
+        config.append("name=NSS").append("\n");
+        config.append("library=").append(pkcs11FilePath).append("\n");
+        config.append("attributes=compatibility").append("\n");
+        config.append("slot=2").append("\n");
+        config.append("nssArgs=\"configdir='").append(currentprofile).append("' ");
+        config.append("certPrefix='' keyPrefix='' secmod='secmod.db' flags=readOnly\"");
+        config.append("\n");
 
-                for (Certificate cert : p11mozillaks.getUserCertificates())
-                {
-                    System.out.println(((X509Certificate) cert).getSubjectDN());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        return config.toString();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void shouldGetAndErrorAccessingAliasesIfKeyStoreIsNotLoaded() throws KeyStoreException
+    {
+        SimpleKeyStore keyStore = new PKCS11KeyStore();
+        keyStore.aliases();
+    }
+
+    @Test
+    public void shouldGetAliasesFromAPKCS11KeyStore() throws FileNotFoundException,
+            GeneralSecurityException, IOException
+    {
+        String driverConfiguration = getDriverConfiguration();
+
+        SimpleKeyStore keyStore = new PKCS11KeyStore();
+        keyStore.load(new ByteArrayInputStream(driverConfiguration.getBytes()), "");
+        List<String> aliases = keyStore.aliases();
+
+        Assert.assertEquals(NUM_CERTIFICATES_IN_STORE, aliases.size());
+        Assert.assertEquals(SIGN_CERTIFICATE_ALIAS, aliases.get(0));
+    }
+    
+    @Test
+    public void shouldPKCS11KeyStoreGetAliasFromCertificate() throws FileNotFoundException,
+            GeneralSecurityException, IOException
+    {
+        String driverConfiguration = getDriverConfiguration();
+        
+        SimpleKeyStore keyStore = new PKCS11KeyStore();
+        keyStore.load(new ByteArrayInputStream(driverConfiguration.getBytes()), "");
+
+        Certificate certificate = keyStore.getCertificate(SIGN_CERTIFICATE_ALIAS);
+
+        Assert.assertEquals(SIGN_CERTIFICATE_ALIAS, keyStore.getAliasFromCertificate(certificate));
     }
 }
-
-// if (Security.getProvider("BC") == null)
-// {
-// BouncyCastleProvider bcp = new BouncyCastleProvider();
-// Security.addProvider(bcp);
-// }
-//
-//
-// //String cfgDir= _mozilla.getCurrentProfiledir().replace("\\", "/").replace(" ", "\\ ");
-// String config= "name = Clauer\n" +
-// "library = /usr/local/lib/libclauerpkcs11.so\n" +
-// "attributes= compatibility\n" +
-// "slot=1\n";
-// //"nssArgs=\"configdir='" + cfgDir +
-// "' certPrefix='' keyPrefix='' secmod=' secmod.db' flags=readOnly\n";
-//
-// ByteArrayInputStream bais= new ByteArrayInputStream(config.getBytes());
-//
-// String lib= "/usr/local/lib/libclauerpkcs11.so.0.0.0";
-//
-// //ClauerKeyStore p11ks=null;
-// PKCS11KeyStore p11ks=null;
-//
-// try{
-// System.out.println("Trying against Clauer Pkcs#11");
-// p11ks= new PKCS11KeyStore(bais, lib, null);
-// System.out.println("instantiation passed");
-// //p11ks.load(null);
-// p11ks.load("123clauer".toCharArray());
-// /*for (Certificate c: p11ks.getUserCertificates()){
-// System.out.println("  Got Certificate with DN: " + ((X509Certificate)c).getSubjectDN());
-// System.out.println("With Alias: " + p11ks.getAliasFromCertificate(c));
-// }*/
-//			
-// //p11ks= new ClauerKeyStore();
-// //p11ks.load("123clauer".toCharArray());
-//			
-//			
-// /*for (Certificate c: p11ks.getUserCertificates()){
-// System.out.println("  Got Certificate with DN: " + ((X509Certificate)c).getSubjectDN());
-// System.out.println("With Alias: " + p11ks.getAliasFromCertificate(c));
-// }*/
-//			
-// }
-// catch (Exception e){
-// e.printStackTrace();
-// }
-// System.out.println("\n");
-//
-//
-// //Vamos a firmar:
-//
-// byte[] b = "hola que tal".getBytes();
-// MyCMSSignedDataGenerator gen = new MyCMSSignedDataGenerator();
-// try{
-// for (Enumeration e = p11ks.aliases(); e.hasMoreElements();)
-// {
-// String str = (String) e.nextElement();
-// Certificate cer = p11ks.getCertificate(str);
-// PrivateKey k = (PrivateKey) p11ks.getKey(str);
-// System.out.println("SubjectDN: " + ((X509Certificate) cer).getSubjectDN());
-// System.out.println("IssuerDN: " + ((X509Certificate) cer).getIssuerDN());
-// String IssuerDN = ((X509Certificate) cer).getIssuerDN().getName();
-// IssuerDN = IssuerDN.substring(IssuerDN.indexOf("O="));
-// IssuerDN = IssuerDN.replaceFirst("O=", "");
-//
-// if (IssuerDN.indexOf("=") > -1)
-// {
-// IssuerDN = IssuerDN.substring(0, IssuerDN.indexOf("=") - 3);
-// }
-//
-// IssuerDN = IssuerDN.replace('\"', ' ');
-// IssuerDN = IssuerDN.trim();
-//
-// System.out.println("O= " + IssuerDN);
-//
-// System.out.println("========KEY===========: " + k);
-// //System.out.println("========KEY2===========: " + k2);
-//
-// System.out.println("Certificado= " + cer.toString());
-// System.out.println("\n");
-// System.out.println("\nFIRMA: ");
-// // byte[] b= {'j','a','r','r','l'};
-//
-// //byte[] rs = p11ks.signMessage(b, str);
-//
-// gen.addSigner(k, (X509Certificate) cer, CMSSignedGenerator.DIGEST_SHA1);
-// byte[] b2= new byte[]
-// {0x73,0x1b,(byte)0xd7,(byte)0xd6,(byte)0xd5,0x30,0x29,(byte)0x84,0x67,(byte)0xc7,0x64,(byte)0x8d,(byte)0x89,0x39,0x12,(byte)0x8e,0x33,(byte)0xa2,(byte)0xb3,(byte)0x9d};
-// gen.setHash(b2);
-//				
-// CMSProcessableByteArray cba = new CMSProcessableByteArray(b);
-//
-// List<Certificate> certList = new ArrayList<Certificate>();
-// certList.add(cer);
-// CertStore certst = CertStore.getInstance("Collection", new
-// CollectionCertStoreParameters(certList), "BC");
-//
-// gen.addCertificatesAndCRLs(certst);
-// CMSSignedData data = gen.generate(cba, p11ks.getProvider().getName());
-//
-// File f2 = new File("caca.p7");
-// FileOutputStream fos2 = new FileOutputStream(f2);
-// fos2.write(data.getEncoded(), 0, data.getEncoded().length);
-// fos2.close();
-//
-// System.out.println(data.getEncoded().length);
-//
-// CMSSignedData s = data;
-// // Verification
-// CertStore certs = s.getCertificatesAndCRLs("Collection", "BC");
-// SignerInformationStore signers = s.getSignerInfos();
-// Collection c = signers.getSigners();
-// Iterator it = c.iterator();
-//
-// while (it.hasNext())
-// {
-// SignerInformation signer = (SignerInformation) it.next();
-// Collection certCollection = certs.getCertificates(signer.getSID());
-//
-// Iterator certIt = certCollection.iterator();
-// X509Certificate cert = (X509Certificate) certIt.next();
-//
-// if (signer.verify(cert.getPublicKey(), "BC"))
-// {
-// System.out.println("Verificado");
-// }
-// }
-//
-// // End of verification
-//
-// //System.out.println("Longitud: " + rs.length);
-// // System.out.println("\n\n\nFIRMA FIRMA FIRMA \n" + new
-// // String(b64.encode(rs)));
-// }
-//
-// } catch (Exception e) {
-// e.printStackTrace();
-// }
-// bais= new ByteArrayInputStream(config.getBytes());
-//
-// //String lib= "/usr/lib/libsoftokn3.so";
-// Mozilla _mozilla= new Mozilla();
-// try{
-// System.out.println("Trying against Mozilla NSS softkn library");
-//
-//
-// PKCS11KeyStore p11ks2= new PKCS11KeyStore(_mozilla.getPkcs11ConfigInputStream(),
-// "/usr/lib/libsoftokn3.so", _mozilla.getPkcs11InitArgsString());
-//
-// p11ks2.load(null);
-//
-// for (Certificate c: p11ks2.getUserCertificates()){
-// System.out.println("  Got Certificate with DN: " + ((X509Certificate)c).getSubjectDN());
-// System.out.println("With Alias: " + p11ks.getAliasFromCertificate(c));
-// }
-// p11ks2.load("pruebacert".toCharArray());
-// }
-// catch (Exception e){
-// e.printStackTrace();
-// }
-// System.out.println("\n");
-// }
-// }
