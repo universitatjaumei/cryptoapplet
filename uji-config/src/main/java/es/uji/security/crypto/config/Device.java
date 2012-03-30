@@ -2,29 +2,26 @@ package es.uji.security.crypto.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
 public class Device
 {
-    private static Logger log = Logger.getLogger(Device.class);
+    private Logger log = Logger.getLogger(Device.class);
 
     private String name;
     private String library;
-    private String slot;
+    private int slot;
     private boolean disableNativePasswordDialog;
 
     public Device()
     {
     }
 
-    public Device(String name, String library, String slot, boolean disableNativePasswordDialog)
+    public Device(String name, String library, int slot, boolean disableNativePasswordDialog)
     {
         this.name = name;
         this.library = library;
@@ -52,12 +49,12 @@ public class Device
         this.library = library;
     }
 
-    public String getSlot()
+    public int getSlot()
     {
         return slot;
     }
 
-    public void setSlot(String slot)
+    public void setSlot(int slot)
     {
         this.slot = slot;
     }
@@ -74,12 +71,11 @@ public class Device
                 slot);
     }
 
-    public static List<Device> getDevicesConfig()
+    public static Device getDeviceWithAvailableLibrary()
     {
         ConfigManager configManager = ConfigManager.getInstance();
 
         String deviceList = configManager.getProperty("cryptoapplet.devices");
-        List<Device> result = new ArrayList<Device>();
 
         if (deviceList != null)
         {
@@ -117,9 +113,6 @@ public class Device
                     }
                 }
 
-                String deviceLibrary = null;
-
-                // If only one OS is supported we can get null over the other
                 if (deviceLibrariesList != null)
                 {
                     for (String library : deviceLibrariesList.split(","))
@@ -128,45 +121,29 @@ public class Device
 
                         if (f.exists())
                         {
-                            deviceLibrary = library;
-                            break;
-                        }
-                    }
-                }
-
-                if (deviceLibrary != null)
-                {
-                    outerloop: for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
-                    {
-                        Device newDevice = new Device(deviceName, deviceLibrary,
-                                String.valueOf(deviceSlot), disableNativePasswordDialog);
-
-                        for (int i = 0; i < 3; i++)
-                        {
-                            try
-                            {
-                                Provider provider = new sun.security.pkcs11.SunPKCS11(
-                                        new ByteArrayInputStream(newDevice.toString().getBytes()));
-                                Security.addProvider(provider);
-
-                                KeyStore.getInstance("PKCS11", provider);
-                                log.info("Added provider " + provider.getName());
-
-                                result.add(newDevice);
-                                break outerloop;
-                            }
-                            catch (Exception e)
-                            {
-                                log.error("Could not initialize " + newDevice.getName()
-                                        + " in slot " + newDevice.getSlot() + " loading "
-                                        + newDevice.getLibrary());
-                            }
+                            return new Device(deviceName, library, 0, disableNativePasswordDialog);
                         }
                     }
                 }
             }
         }
 
-        return result;
+        return null;
+    }
+
+    @SuppressWarnings("restriction")
+    public void init()
+    {
+        try
+        {
+            Provider provider = new sun.security.pkcs11.SunPKCS11(new ByteArrayInputStream(this
+                    .toString().getBytes()));
+            Security.addProvider(provider);
+        }
+        catch (Exception e)
+        {
+            log.error("Could not initialize " + getName() + " in slot " + getSlot() + " loading "
+                    + getLibrary());
+        }
     }
 }
