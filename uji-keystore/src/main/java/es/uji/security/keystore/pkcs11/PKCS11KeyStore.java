@@ -3,227 +3,118 @@ package es.uji.security.keystore.pkcs11;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.Provider;
-import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.config.StreamUtils;
-import es.uji.security.keystore.IKeyStore;
+import es.uji.security.keystore.SimpleKeyStore;
 
-public class PKCS11KeyStore implements IKeyStore
+public class PKCS11KeyStore implements SimpleKeyStore
 {
-    InputStream _isP11Config = null;
-    char[] _pin = null;
-    PKCS11Helper pk11h;
-    String _name, _tokenName;
+    private Provider provider;
+    private KeyStore keyStore;
+    private String password;
 
-    private Provider _pk11provider = null;
-    private KeyStore _p11KeyStore = null;
-    private boolean helper = true;
-
-    boolean privateInitialize = false;
-
-    public PKCS11KeyStore(String p11LibPath) throws PKCS11HelperException
+    @SuppressWarnings("restriction")
+    public void load(InputStream input, String password) throws GeneralSecurityException,
+            IOException
     {
-        pk11h = new PKCS11Helper(p11LibPath);
-        _name = pk11h.getName();
-
-        _isP11Config = new ByteArrayInputStream(
-                ("name = USER-PKCS11\r" + "library = " + p11LibPath + "\r").getBytes());
+        byte[] config = StreamUtils.inputStreamToByteArray(input);
+        Provider provider = new sun.security.pkcs11.SunPKCS11(new ByteArrayInputStream(config));
+        
+        load(input, password, provider);
     }
 
-    public PKCS11KeyStore(InputStream isP11Config, String p11LibPath, boolean helper)
-            throws PKCS11HelperException
+    public void load(InputStream input, String password, Provider provider)
+            throws GeneralSecurityException, IOException
     {
+        this.password = password;
+        this.provider = provider;
 
-        this.helper = helper;
-        if (helper == true)
+        keyStore = KeyStore.getInstance("PKCS11", provider);
+        keyStore.load(input, password.toCharArray());
+    }
+
+    public List<String> aliases() throws KeyStoreException
+    {
+        checkKeyStoreIsLoaded();
+
+        return Collections.list(keyStore.aliases());
+    }
+
+    public Certificate getCertificate(String alias) throws KeyStoreException
+    {
+        checkKeyStoreIsLoaded();
+
+        return keyStore.getCertificate(alias);
+    }
+
+    public List<Certificate> getUserCertificates() throws KeyStoreException
+    {
+        List<Certificate> certificates = new ArrayList<Certificate>();
+
+        for (String alias : aliases())
         {
-            pk11h = new PKCS11Helper(p11LibPath);
-            _name = pk11h.getName();
-        }
-        _isP11Config = isP11Config;
-    }
-
-    public PKCS11KeyStore(InputStream isP11Config, String p11LibPath) throws PKCS11HelperException
-    {
-        pk11h = new PKCS11Helper(p11LibPath);
-        _name = pk11h.getName();
-        _isP11Config = isP11Config;
-    }
-
-    public PKCS11KeyStore(InputStream isP11Config, String p11LibPath, String initArgs)
-            throws PKCS11HelperException
-    {
-        pk11h = new PKCS11Helper(p11LibPath, initArgs);
-        _tokenName = pk11h.getName();
-        _isP11Config = isP11Config;
-    }
-
-    public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
-            CertificateException, Exception
-    {
-        if (!privateInitialize)
-        {
-            if (pin != null)
-            {
-                if (_isP11Config != null)
-                    load(_isP11Config, pin);
-                else
-                    throw new Exception(
-                            "Must use load(InputStream in, char[] pin) to initialize this kind of store");
-            }
-        }
-    }
-
-    public void load(InputStream in, char[] pin) throws KeyStoreException,
-            NoSuchAlgorithmException, IOException, CertificateException, Exception
-    {
-        try
-        {
-            System.out.println("Input String initialized to: "
-                    + new String(StreamUtils.inputStreamToByteArray(in)));
-            in.reset();
-        }
-        catch (Exception e)
-        {
+            certificates.add(getCertificate(alias));
         }
 
-        if (!privateInitialize)
+        return certificates;
+    }
+
+    public Key getKey(String alias) throws GeneralSecurityException
+    {
+        checkKeyStoreIsLoaded();
+
+        return keyStore.getKey(alias, password.toCharArray());
+    }
+
+    public Key getKey(String alias, String password) throws GeneralSecurityException
+    {
+        checkKeyStoreIsLoaded();
+
+        return keyStore.getKey(alias, password.toCharArray());
+    }
+
+    private void checkKeyStoreIsLoaded()
+    {
+        if (keyStore == null)
         {
-            if (pin != null && in != null)
-            {
-                if (_pk11provider == null)
-                {
-                    _pk11provider = new sun.security.pkcs11.SunPKCS11(in);
-                    Security.addProvider(_pk11provider);
-                    _p11KeyStore = KeyStore.getInstance("PKCS11", _pk11provider);
-                    if (!helper)
-                        _name = _pk11provider.getName();
-                }
-                _p11KeyStore.load(null, pin);
-                privateInitialize = true;
-            }
+            throw new IllegalStateException("You must load the keystore before using it");
         }
-    }
-
-    public void load(String in, char[] pin) throws KeyStoreException, NoSuchAlgorithmException,
-            IOException, CertificateException, Exception
-    {
-        ByteArrayInputStream inStream = new ByteArrayInputStream(in.getBytes());
-        load(inStream, pin);
-    }
-
-    public Enumeration<String> aliases() throws KeyStoreException, Exception
-    {
-
-        if (!privateInitialize)
-            throw (new Exception("UninitializedKeyStore"));
-
-        return _p11KeyStore.aliases();
-    }
-
-    public Certificate getCertificate(String alias) throws KeyStoreException, Exception
-    {
-
-        if (!privateInitialize)
-            throw (new Exception("UninitializedKeyStore"));
-
-        return _p11KeyStore.getCertificate(alias);
-    }
-
-    public Certificate[] getUserCertificates() throws KeyStoreException, Exception
-    {
-        if (helper)
-            return pk11h.getCertificates();
-        else
-        {
-            Vector<Certificate> certs = new Vector<Certificate>();
-            Certificate tmp_cert;
-
-            for (Enumeration<String> e = this.aliases(); e.hasMoreElements();)
-            {
-                tmp_cert = this.getCertificate((String) e.nextElement());
-                certs.add(tmp_cert);
-            }
-
-            Certificate[] res = new Certificate[certs.size()];
-            certs.toArray(res);
-
-            return res;
-        }
-    }
-
-    public String getAliasFromCertificate(Certificate cer) throws KeyStoreException
-    {
-        X509Certificate xcer = (X509Certificate) cer, auxCer = null;
-        String auxAlias = null;
-
-        if (privateInitialize)
-        {
-            Enumeration<String> e = _p11KeyStore.aliases();
-
-            while (e.hasMoreElements())
-            {
-                auxAlias = (String) e.nextElement();
-                auxCer = (X509Certificate) _p11KeyStore.getCertificate(auxAlias);
-                if ((auxCer.getIssuerDN().equals(xcer.getIssuerDN()))
-                        && (auxCer.getSerialNumber().equals(xcer.getSerialNumber())))
-                {
-                    return auxAlias;
-                }
-            }
-
-        }
-
-        return null;
-    }
-
-    public Key getKey(String alias) throws KeyStoreException, Exception
-    {
-        return _p11KeyStore.getKey(alias, _pin);
     }
 
     public Provider getProvider()
     {
-        return _pk11provider;
+        return provider;
     }
 
-    public void setProvider(Provider provider) throws Exception
+    public String getAliasFromCertificate(Certificate certificate) throws KeyStoreException
     {
-        // Does nothing, seems non sense by this time.
-        throw new Exception("Method not implemented");
-    }
+        X509Certificate referenceCertificate = (X509Certificate) certificate;
+        Principal issuerDN = referenceCertificate.getIssuerDN();
+        BigInteger serialNumber = referenceCertificate.getSerialNumber();
 
-    public SupportedKeystore getName()
-    {
-        return SupportedKeystore.PKCS11;
-    }
+        for (String alias : aliases())
+        {
+            X509Certificate currentCertificate = (X509Certificate) getCertificate(alias);
 
-    public String getTokenName()
-    {
-        return _tokenName;
-    }
+            if (currentCertificate.getIssuerDN().equals(issuerDN)
+                    && currentCertificate.getSerialNumber().equals(serialNumber))
+            {
+                return alias;
+            }
+        }
 
-    public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,
-            Exception
-    {
-        byte[] b = null;
-        return b;
+        return null;
     }
-
-    public void cleanUp()
-    {
-        _pin = null;
-    }
-
 }
