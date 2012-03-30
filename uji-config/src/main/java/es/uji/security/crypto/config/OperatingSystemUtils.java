@@ -1,7 +1,13 @@
 package es.uji.security.crypto.config;
 
+import java.io.InputStream;
+
 public class OperatingSystemUtils
 {
+    private final static String REGSTR_TOKEN = "REG_SZ";
+    private final static String APP_DATA_REGISTRY_KEY = "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v APPDATA";
+    private final static String APP_PATH_REGISTRY_KEY = "\"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\";
+
     public static String getSystemTmpDir()
     {
         return System.getProperty("java.io.tmpdir");
@@ -56,5 +62,37 @@ public class OperatingSystemUtils
     {
         return (isWindowsNT() || isWindows2000() || isWindowsXP() || isWindows2003()
                 || isWindowsVista() || isWindows7());
+    }
+
+    private static String executeWindowsRegistrySearch(String cmd)
+    {
+        try
+        {
+            InputStream commandOutput = Runtime.getRuntime().exec("reg query " + cmd)
+                    .getInputStream();
+            String result = new String(StreamUtils.inputStreamToByteArray(commandOutput));
+
+            if (result.contains(REGSTR_TOKEN))
+            {
+                return result.substring(result.indexOf(REGSTR_TOKEN) + REGSTR_TOKEN.length())
+                        .trim();
+            }
+        }
+        catch (Exception e)
+        {
+        }
+
+        return null;
+    }
+
+    public static String getCurrentUserApplicationDataDirectory()
+    {
+        return executeWindowsRegistrySearch(APP_DATA_REGISTRY_KEY);
+    }
+
+    public static String getAbsoluteApplicationDataDirectory(String execName)
+    {
+        String command = APP_PATH_REGISTRY_KEY + execName + "\"" + " /v Path";
+        return executeWindowsRegistrySearch(command);
     }
 }
