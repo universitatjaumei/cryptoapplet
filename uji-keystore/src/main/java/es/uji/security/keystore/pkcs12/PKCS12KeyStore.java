@@ -2,125 +2,115 @@ package es.uji.security.keystore.pkcs12;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.Provider;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import es.uji.security.crypto.SupportedKeystore;
-import es.uji.security.keystore.IKeyStore;
+import es.uji.security.keystore.SimpleKeyStore;
 
-public class PKCS12KeyStore implements IKeyStore
+public class PKCS12KeyStore implements SimpleKeyStore
 {
-    private KeyStore ks = null;
-    char[] _pin = null;
+    private Provider provider;
+    private KeyStore keyStore;
+    private String password;
 
-    public void load(char[] pin) throws KeyStoreException, NoSuchAlgorithmException, IOException,
-            CertificateException, Exception
+    public void load(InputStream input, String password)
+            throws GeneralSecurityException, IOException
     {
-        // Error, we need the path or the input stream of the pkcs12
+        load(input, password, new BouncyCastleProvider());
     }
 
-    public void load(InputStream in, char[] pin) throws KeyStoreException,
-            NoSuchAlgorithmException, IOException, CertificateException, Exception
+    public void load(InputStream input, String password, Provider provider)
+            throws GeneralSecurityException, IOException
     {
-        ks = KeyStore.getInstance("pkcs12");
-        ks.load(in, pin);
-        _pin = pin;
+        this.password = password;
+        this.provider = provider;
+
+        keyStore = KeyStore.getInstance("PKCS12", provider);
+        keyStore.load(input, password.toCharArray());
     }
 
-    public Enumeration<String> aliases() throws KeyStoreException, Exception
+    public List<String> aliases() throws KeyStoreException
     {
-        return ks.aliases();
+        checkKeyStoreIsLoaded();
+        
+        return Collections.list(keyStore.aliases());
     }
 
-    public Certificate getCertificate(String alias) throws KeyStoreException, Exception
+    public Certificate getCertificate(String alias) throws KeyStoreException
     {
-        return ks.getCertificate(alias);
+        checkKeyStoreIsLoaded();
+
+        return keyStore.getCertificate(alias);
     }
 
-    public Certificate[] getUserCertificates() throws KeyStoreException, Exception
-    {
-        Vector<Certificate> certs = new Vector<Certificate>();
-        Certificate tmp_cert;
+    public List<Certificate> getUserCertificates() throws KeyStoreException
+    {        
+        List<Certificate> certificates = new ArrayList<Certificate>();
 
-        for (Enumeration<String> e = this.aliases(); e.hasMoreElements();)
+        for (String alias : aliases())
         {
-            tmp_cert = this.getCertificate((String) e.nextElement());
-            certs.add(tmp_cert);
+            certificates.add(getCertificate(alias));
         }
 
-        Certificate[] res = new Certificate[certs.size()];
-        certs.toArray(res);
-
-        return res;
+        return certificates;
     }
 
-    public Key getKey(String alias) throws KeyStoreException, Exception
+    public Key getKey(String alias) throws GeneralSecurityException
     {
-        return ks.getKey(alias, _pin);
+        checkKeyStoreIsLoaded();
+        
+        return keyStore.getKey(alias, password.toCharArray());
+    }
+
+    public Key getKey(String alias, String password) throws GeneralSecurityException
+    {
+        checkKeyStoreIsLoaded();
+
+        return keyStore.getKey(alias, password.toCharArray());
+    }
+
+    private void checkKeyStoreIsLoaded()
+    {
+        if (keyStore == null)
+        {
+            throw new IllegalStateException("You must load the keystore before using it");
+        }
     }
 
     public Provider getProvider()
     {
-        return new BouncyCastleProvider();
-    }
-    
-    public void setProvider(Provider provider) throws Exception
-    {
-        //Does nothing, seems non sense by this time.
-    	throw new Exception("Method not implemented");
+        return provider;
     }
 
-
-    public SupportedKeystore getName()
+    public String getAliasFromCertificate(Certificate certificate) throws KeyStoreException
     {
-        return SupportedKeystore.PKCS12;
-    }
+        X509Certificate referenceCertificate = (X509Certificate) certificate;
+        Principal issuerDN = referenceCertificate.getIssuerDN();
+        BigInteger serialNumber = referenceCertificate.getSerialNumber();
 
-    public String getTokenName()
-    {
-        return "File";
-    }
-
-    public String getAliasFromCertificate(Certificate cer) throws KeyStoreException
-    {
-        X509Certificate xcer = (X509Certificate) cer, auxCer = null;
-        String auxAlias = null;
-
-        Enumeration<String> e = ks.aliases();
-        
-        while (e.hasMoreElements())
+        for (String alias : aliases())
         {
-            auxAlias = (String) e.nextElement();
-            auxCer = (X509Certificate) ks.getCertificate(auxAlias);
-            if ((auxCer.getIssuerDN().equals(xcer.getIssuerDN()))
-                    && (auxCer.getSerialNumber().equals(xcer.getSerialNumber())))
+            X509Certificate currentCertificate = (X509Certificate) getCertificate(alias);
+
+            if (currentCertificate.getIssuerDN().equals(issuerDN)
+                    && currentCertificate.getSerialNumber().equals(serialNumber))
             {
-                return auxAlias;
+                return alias;
             }
         }
 
         return null;
-    }
-
-    public byte[] signMessage(byte[] toSign, String alias) throws NoSuchAlgorithmException,
-            Exception
-    {
-        byte[] b = null;
-        return b;
-    }
-
-    public void cleanUp()
-    {
-        _pin = null;
     }
 }

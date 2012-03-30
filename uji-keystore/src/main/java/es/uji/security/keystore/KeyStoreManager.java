@@ -1,11 +1,9 @@
 package es.uji.security.keystore;
 
-import java.io.ByteArrayInputStream;
 import java.net.ConnectException;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.Security;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 
 import javax.swing.JOptionPane;
@@ -26,40 +24,40 @@ public class KeyStoreManager
 {
     private Logger log = Logger.getLogger(KeyStoreManager.class);
 
-    public Hashtable<SupportedKeystore, IKeyStore> keystores = new Hashtable<SupportedKeystore, IKeyStore>();
+    public Hashtable<SupportedKeystore, KeyStore> keystores;
+    private SupportedBrowser navigator;
+
+    public KeyStoreManager(SupportedBrowser navigator)
+    {
+        this.navigator = navigator;
+        this.keystores = new Hashtable<SupportedKeystore, KeyStore>();
+    }
 
     public void flushKeyStoresTable()
     {
         keystores.clear();
     }
 
-    public void initPKCS11Device(Device device, char[] password)
-            throws DeviceInitializationException
-    {
-        byte[] config = device.toString().getBytes();
+    /*
+     * public void initPKCS11Device(Device device, char[] password) throws
+     * DeviceInitializationException { byte[] config = device.toString().getBytes();
+     * 
+     * IKeyStore keystore = null;
+     * 
+     * try { keystore = (IKeyStore) new PKCS11KeyStore(new ByteArrayInputStream(config), null,
+     * false); keystore.load(password);
+     * 
+     * ArrayList<String> aliases = Collections.list(keystore.aliases());
+     * log.debug("Keystore available aliases: " + aliases); } catch (Exception e) {
+     * log.debug("Device " + device.getName() +
+     * " initialization error. Try to reload the device with the pin");
+     * 
+     * throw new DeviceInitializationException(e); }
+     * 
+     * keystores.put(SupportedKeystore.PKCS11, keystore); }
+     */
 
-        IKeyStore keystore = null;
-
-        try
-        {
-            keystore = (IKeyStore) new PKCS11KeyStore(new ByteArrayInputStream(config), null, false);
-            keystore.load(password);
-
-            ArrayList<String> aliases = Collections.list(keystore.aliases());
-            log.debug("Keystore available aliases: " + aliases);
-        }
-        catch (Exception e)
-        {
-            log.debug("Device " + device.getName()
-                    + " initialization error. Try to reload the device with the pin");
-
-            throw new DeviceInitializationException(e);
-        }
-
-        keystores.put(SupportedKeystore.PKCS11, keystore);
-    }
-
-    public void initBrowserStores(SupportedBrowser navigator)
+    public void initBrowserStores()
     {
         if (navigator.equals(SupportedBrowser.IEXPLORER))
         {
@@ -96,67 +94,80 @@ public class KeyStoreManager
                     keystores.put(SupportedKeystore.MOZILLA, p11mozillaks);
                 }
                 // We have to look here for spanish dnie and ask for the password.
-
             }
             catch (Exception ex)
             {
                 System.out.println("ERR_MOZ_KEYSTORE_LOAD");
                 ex.printStackTrace();
-                // JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                // .get("ERR_MOZ_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-                // throw new SignatureAppletException(LabelManager.get("ERR_MOZ_KEYSTORE_LOAD"));
             }
         }
     }
 
-    public void initClauer()
-    {
-        try
-        {
-            IKeyStore p11clauerks = (IKeyStore) new ClauerKeyStore();
-
-            try
-            {
-                p11clauerks.load(null);
-                keystores.put(SupportedKeystore.CLAUER, p11clauerks);
-            }
-            catch (KeyStoreException kex)
-            {
-                // Here do nothing because that mean
-                // that there is no clauer plugged on
-                // the system.
-            }
-            catch (ConnectException cex)
-            {
-                // Nothing to do also, clauer is not
-                // installed,go ahead!
-            }
-        }
-        catch (Exception ex)
-        {
-            JOptionPane.showMessageDialog(null, ex.getMessage(),
-                    LabelManager.get("ERR_CL_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-            // throw new SignatureAppletException(LabelManager.get("ERR_CL_KEYSTORE_LOAD"));
-        }
-    }
-
-    public IKeyStore getKeyStore(SupportedKeystore keystore)
+    public KeyStore getKeyStore(SupportedKeystore keystore)
     {
         return this.keystores.get(keystore);
     }
 
-    public Hashtable<SupportedKeystore, IKeyStore> getKeyStoreTable()
+    public Hashtable<SupportedKeystore, KeyStore> getKeyStoreTable()
     {
         return this.keystores;
     }
 
-    public void addP12KeyStore(IKeyStore pkcs12Store)
+    public void addP12KeyStore(KeyStore keyStore)
     {
-        keystores.put(SupportedKeystore.PKCS12, pkcs12Store);
+        keystores.put(SupportedKeystore.PKCS12, keyStore);
     }
 
-    public void addP11KeyStore(IKeyStore pkcs11Store)
+    public void addP11KeyStore(KeyStore keyStore)
     {
-        keystores.put(SupportedKeystore.PKCS11, pkcs11Store);
+        keystores.put(SupportedKeystore.PKCS11, keyStore);
+    }
+
+    public void initKeyStores()
+    {
+        initBrowserStores();
+        initPKCS11();
+
+        try
+        {
+            keyStoreManager.initPKCS11Device(device, null);
+        }
+        catch (DeviceInitializationException die)
+        {
+            if (!device.isDisableNativePasswordDialog())
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    PasswordPrompt passwordPrompt = new PasswordPrompt(null, device.getName(),
+                            "Pin:");
+
+                    try
+                    {
+                        this.keyStoreManager.initPKCS11Device(device, passwordPrompt.getPassword());
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                        JOptionPane.showMessageDialog(null,
+                                LabelManager.get("ERROR_INCORRECT_DNIE_PWD"), "",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        }
+    }
+
+    private void initPKCS11()
+    {
+        if (!SupportedBrowser.IEXPLORER.equals(navigator))
+        {
+            Device device = Device.getDeviceWithAvailableLibrary();
+
+            for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
+            {
+                device.setSlot(deviceSlot);
+                device.init();
+            }
+        }
     }
 }

@@ -20,10 +20,10 @@ import java.util.Random;
 
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.config.OperatingSystemUtils;
-import es.uji.security.keystore.IKeyStore;
+import es.uji.security.keystore.SimpleKeyStore;
 import es.uji.security.util.RegQuery;
 
-public class MozillaKeyStore implements IKeyStore
+public class MozillaKeyStore implements SimpleKeyStore
 {
     private Mozilla _mozilla;
     private String _pkcs11file;
