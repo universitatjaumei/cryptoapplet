@@ -1,4 +1,4 @@
-package es.uji.security.keystore.mozilla;
+package es.uji.security.keystore;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -8,12 +8,12 @@ import java.util.List;
 
 import es.uji.security.crypto.config.OperatingSystemUtils;
 
-public class Mozilla
+public class Firefox
 {
     private List<String> guessProfileDirectories;
     private String lockFile;
 
-    public Mozilla()
+    public Firefox()
     {
         String userHome = System.getProperty("user.home");
 
@@ -82,6 +82,7 @@ public class Mozilla
 
         return null;
     }
+
     /*
      * public ByteArrayInputStream getPkcs11ConfigInputStream() { String _pkcs11file =
      * getPkcs11FilePath(); String _currentprofile = getCurrentProfiledir(); ByteArrayInputStream
@@ -174,5 +175,20 @@ public class Mozilla
         }
 
         return paths;
+    }
+
+    public byte[] getPKCS11Configuration()
+    {
+        StringBuilder config = new StringBuilder();
+
+        config.append("name=NSS").append("\n");
+        config.append("library=").append(getPKCS11Library()).append("\n");
+        config.append("attributes=compatibility").append("\n");
+        config.append("slot=2").append("\n");
+        config.append("nssArgs=\"configdir='").append(getCurrentProfileDirectory()).append("' ");
+        config.append("certPrefix='' keyPrefix='' secmod='secmod.db' flags=readOnly\"");
+        config.append("\n");
+
+        return config.toString().getBytes();
     }
 }

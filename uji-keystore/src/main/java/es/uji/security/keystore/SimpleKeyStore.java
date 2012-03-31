@@ -13,9 +13,6 @@ public interface SimpleKeyStore
 {
     void load(InputStream input, String password) throws GeneralSecurityException, IOException;
 
-    void load(InputStream input, String password, Provider provider)
-            throws GeneralSecurityException, IOException;
-
     List<String> aliases() throws KeyStoreException;
 
     Certificate getCertificate(String alias) throws KeyStoreException;

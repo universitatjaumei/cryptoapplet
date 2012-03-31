@@ -1,29 +1,20 @@
 package es.uji.security.keystore;
 
-import java.net.ConnectException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.Security;
 import java.util.Hashtable;
-
-import javax.swing.JOptionPane;
-
-import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.config.Device;
-import es.uji.security.keystore.clauer.ClauerKeyStore;
-import es.uji.security.keystore.mozilla.Mozilla;
-import es.uji.security.keystore.mscapi.MSCAPIProvider;
-import es.uji.security.keystore.mscapi.MsCapiKeyStore;
+import es.uji.security.keystore.mscapi.SunMSCAPIKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
-import es.uji.security.util.i18n.LabelManager;
 
 public class KeyStoreManager
 {
-    private Logger log = Logger.getLogger(KeyStoreManager.class);
-
     public Hashtable<SupportedKeystore, KeyStore> keystores;
     private SupportedBrowser navigator;
 
@@ -33,73 +24,31 @@ public class KeyStoreManager
         this.keystores = new Hashtable<SupportedKeystore, KeyStore>();
     }
 
-    public void flushKeyStoresTable()
+    public void initBrowserStores() throws GeneralSecurityException, IOException
     {
-        keystores.clear();
+        initInternetExplorerStore();
+        initFirefoxStore();
     }
 
-    /*
-     * public void initPKCS11Device(Device device, char[] password) throws
-     * DeviceInitializationException { byte[] config = device.toString().getBytes();
-     * 
-     * IKeyStore keystore = null;
-     * 
-     * try { keystore = (IKeyStore) new PKCS11KeyStore(new ByteArrayInputStream(config), null,
-     * false); keystore.load(password);
-     * 
-     * ArrayList<String> aliases = Collections.list(keystore.aliases());
-     * log.debug("Keystore available aliases: " + aliases); } catch (Exception e) {
-     * log.debug("Device " + device.getName() +
-     * " initialization error. Try to reload the device with the pin");
-     * 
-     * throw new DeviceInitializationException(e); }
-     * 
-     * keystores.put(SupportedKeystore.PKCS11, keystore); }
-     */
+    private void initFirefoxStore() throws GeneralSecurityException, IOException
+    {
+        if (navigator.equals(SupportedBrowser.FIREFOX))
+        {
+            Firefox firefox = new Firefox();
+            InputStream pkcs11Configuration = new ByteArrayInputStream(
+                    firefox.getPKCS11Configuration());
 
-    public void initBrowserStores()
+            SimpleKeyStore keystore = new PKCS11KeyStore();
+            keystore.load(pkcs11Configuration, null);
+        }
+    }
+
+    private void initInternetExplorerStore() throws GeneralSecurityException, IOException
     {
         if (navigator.equals(SupportedBrowser.IEXPLORER))
         {
-            IKeyStore keystore = (IKeyStore) new MsCapiKeyStore();
-
-            try
-            {
-                keystore.load("".toCharArray());
-                keystores.put(SupportedKeystore.MSCAPI, keystore);
-
-                Security.addProvider(new MSCAPIProvider());
-            }
-            catch (Exception ex)
-            {
-                String error = LabelManager.get("ERR_MS_KEYSTORE_LOAD");
-
-                log.error(error, ex);
-                JOptionPane.showMessageDialog(null, ex.getMessage(), error,
-                        JOptionPane.WARNING_MESSAGE);
-            }
-        }
-        else if (navigator.equals(SupportedBrowser.MOZILLA))
-        {
-            try
-            {
-                Mozilla mozilla = new Mozilla();
-
-                if (mozilla.isInitialized())
-                {
-                    IKeyStore p11mozillaks = (IKeyStore) new PKCS11KeyStore(
-                            mozilla.getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(),
-                            mozilla.getPkcs11InitArgsString());
-                    p11mozillaks.load(null);
-                    keystores.put(SupportedKeystore.MOZILLA, p11mozillaks);
-                }
-                // We have to look here for spanish dnie and ask for the password.
-            }
-            catch (Exception ex)
-            {
-                System.out.println("ERR_MOZ_KEYSTORE_LOAD");
-                ex.printStackTrace();
-            }
+            SimpleKeyStore keystore = new SunMSCAPIKeyStore();
+            keystore.load(null, null);
         }
     }
 
@@ -123,11 +72,12 @@ public class KeyStoreManager
         keystores.put(SupportedKeystore.PKCS11, keyStore);
     }
 
-    public void initKeyStores()
+    public void initKeyStores() throws GeneralSecurityException, IOException
     {
         initBrowserStores();
         initPKCS11();
 
+        /*
         try
         {
             keyStoreManager.initPKCS11Device(device, null);
@@ -155,6 +105,7 @@ public class KeyStoreManager
                 }
             }
         }
+        */
     }
 
     private void initPKCS11()
@@ -169,5 +120,10 @@ public class KeyStoreManager
                 device.init();
             }
         }
+    }
+
+    public void flushKeyStoresTable()
+    {
+        keystores.clear();
     }
 }
