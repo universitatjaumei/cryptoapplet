@@ -11,10 +11,10 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import es.uji.security.keystore.Firefox;
 import es.uji.security.keystore.SimpleKeyStore;
+import es.uji.security.keystore.pkcs11.devices.Firefox;
 
-public class PKCS11KeyStoreTest
+public class FirefoxPKCS11KeyStoreTest
 {
     private static final int NUM_CERTIFICATES_IN_STORE = 2;
     private static final String SIGN_CERTIFICATE_ALIAS = "CIFRADO/c=es,o=generalitat valenciana,ou=pkigva,cn=accv-ca2/8890499274928531747";
@@ -38,7 +38,7 @@ public class PKCS11KeyStoreTest
         byte[] driverConfiguration = getDriverConfiguration();
 
         SimpleKeyStore keyStore = new PKCS11KeyStore();
-        keyStore.load(new ByteArrayInputStream(driverConfiguration), "");
+        keyStore.load(new ByteArrayInputStream(driverConfiguration), null);
         List<String> aliases = keyStore.aliases();
 
         Assert.assertEquals(NUM_CERTIFICATES_IN_STORE, aliases.size());
@@ -52,7 +52,7 @@ public class PKCS11KeyStoreTest
         byte[] driverConfiguration = getDriverConfiguration();
 
         SimpleKeyStore keyStore = new PKCS11KeyStore();
-        keyStore.load(new ByteArrayInputStream(driverConfiguration), "");
+        keyStore.load(new ByteArrayInputStream(driverConfiguration), null);
 
         Certificate certificate = keyStore.getCertificate(SIGN_CERTIFICATE_ALIAS);
 

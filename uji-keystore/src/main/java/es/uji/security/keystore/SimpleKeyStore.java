@@ -11,7 +11,8 @@ import java.util.List;
 
 public interface SimpleKeyStore
 {
-    void load(InputStream input, String password) throws GeneralSecurityException, IOException;
+    void load(InputStream input, String password)
+            throws GeneralSecurityException, IOException;
 
     List<String> aliases() throws KeyStoreException;
 

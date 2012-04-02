@@ -3,7 +3,7 @@ package es.uji.security.keystore.mozilla;
 import org.junit.Assert;
 import org.junit.Test;
 
-import es.uji.security.keystore.Firefox;
+import es.uji.security.keystore.pkcs11.devices.Firefox;
 
 public class MozillaTest
 {

@@ -12,6 +12,7 @@ import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.config.Device;
 import es.uji.security.keystore.mscapi.SunMSCAPIKeyStore;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.security.keystore.pkcs11.devices.Firefox;
 
 public class KeyStoreManager
 {

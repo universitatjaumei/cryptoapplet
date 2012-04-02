@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import es.uji.security.keystore.BaseKeyStore;
 import es.uji.security.keystore.SimpleKeyStore;
 
@@ -15,7 +17,7 @@ public class PKCS12KeyStore extends BaseKeyStore implements SimpleKeyStore
     {
         super.load(input, password);
 
-        keyStore = KeyStore.getInstance("PKCS12", provider);
+        keyStore = KeyStore.getInstance("PKCS12", new BouncyCastleProvider());
         keyStore.load(input, password.toCharArray());
     }
 }

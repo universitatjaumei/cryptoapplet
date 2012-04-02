@@ -1,4 +1,4 @@
-package es.uji.security.keystore;
+package es.uji.security.keystore.pkcs11.devices;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -7,10 +7,11 @@ import java.util.Collections;
 import java.util.List;
 
 import es.uji.security.crypto.config.OperatingSystemUtils;
+import es.uji.security.keystore.pkcs11.PKCS11Configurable;
+import es.uji.security.keystore.pkcs11.PKCS11Device;
 
-public class Firefox
+public class Firefox extends PKCS11Device implements PKCS11Configurable
 {
-    private List<String> guessProfileDirectories;
     private String lockFile;
 
     public Firefox()
@@ -74,7 +75,7 @@ public class Firefox
 
                     if (pathsWithLockFile != null && pathsWithLockFile.length > 0)
                     {
-                        return potentialProfileDirectory;
+                        return baseDirectory + potentialProfileDirectory;
                     }
                 }
             }
@@ -83,29 +84,7 @@ public class Firefox
         return null;
     }
 
-    /*
-     * public ByteArrayInputStream getPkcs11ConfigInputStream() { String _pkcs11file =
-     * getPkcs11FilePath(); String _currentprofile = getCurrentProfiledir(); ByteArrayInputStream
-     * bais = null;
-     * 
-     * if (OperatingSystemUtils.isWindowsUpperEqualToNT()) { bais = new
-     * ByteArrayInputStream(("name = NSS\r" + "library = " + _pkcs11file + "\r" +
-     * "attributes= compatibility" + "\r" + "slot=2\r" + "nssArgs=\"" + "configdir='" +
-     * _currentprofile.replace("\\", "/") + "' " + "certPrefix='' " + "keyPrefix='' " +
-     * "secmod=' secmod.db' " + "flags=readOnly\"\r").getBytes()); } else if
-     * (OperatingSystemUtils.isLinux() || OperatingSystemUtils.isMac()) { bais = new
-     * ByteArrayInputStream(("name = NSS\r" + "library = " + _pkcs11file + "\n" +
-     * "attributes= compatibility" + "\n" + "slot=2\n" + "nssArgs=\"" + "configdir='" +
-     * _currentprofile + "' " + "certPrefix='' " + "keyPrefix='' " + "secmod=' secmod.db' " +
-     * "flags=readOnly\"\n").getBytes()); }
-     * 
-     * return bais; }
-     * 
-     * public String getPkcs11InitArgsString() { return "configdir='" +
-     * getCurrentProfiledir().replace("\\", "/") +
-     * "' certPrefix='' keyPrefix='' secmod='secmod.db' flags="; }
-     */
-
+    @Override
     public String getPKCS11Library()
     {
         List<String> guessPaths = new ArrayList<String>();
@@ -114,69 +93,10 @@ public class Firefox
         guessPaths.addAll(getLibraryPaths("/usr/lib/", "*-linux-gnu", "/nss/"));
         guessPaths.addAll(getLibraryPaths("/usr/lib/", "firefox-*", "/"));
 
-        return getFirstExistingLibsoftokn3(guessPaths);
+        return getFirstExistingFileName(guessPaths, "libsoftokn3.so");
     }
 
-    private String getFirstExistingLibsoftokn3(List<String> guessPaths)
-    {
-        for (String path : guessPaths)
-        {
-            if (libsoftokn3ExistsInPath(path))
-            {
-                return path;
-            }
-        }
-
-        return null;
-    }
-
-    private boolean libsoftokn3ExistsInPath(String path)
-    {
-        File basePath = new File(path);
-        String[] fileList = basePath.list(new FilenameFilter()
-        {
-            @Override
-            public boolean accept(File dir, String name)
-            {
-                return name.equals("libsoftokn3.so");
-            }
-        });
-
-        return (fileList != null && fileList.length > 0);
-    }
-
-    private List<String> getLibraryPaths(String basePath, final String expression, String subPath)
-    {
-        String[] firefoxPaths = new File(basePath).list(new FilenameFilter()
-        {
-            @Override
-            public boolean accept(File dir, String name)
-            {
-                if (expression.startsWith("*"))
-                {
-                    return name.endsWith(expression.substring(1));
-                }
-                else if (expression.endsWith("*"))
-                {
-                    return name.startsWith(expression.substring(0, expression.length() - 2));
-                }
-                else
-                {
-                    return name.equals(expression);
-                }
-            }
-        });
-
-        List<String> paths = new ArrayList<String>();
-
-        for (String path : firefoxPaths)
-        {
-            paths.add("/usr/lib/" + path + subPath);
-        }
-
-        return paths;
-    }
-
+    @Override
     public byte[] getPKCS11Configuration()
     {
         StringBuilder config = new StringBuilder();
