@@ -1,6 +1,6 @@
 package es.uji.security.crypto;
 
-public enum SupportedSignatureFormat
+public enum SignatureFormat
 {
     RAW {
         public String toString() {

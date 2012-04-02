@@ -1,6 +1,6 @@
 package es.uji.security.crypto;
 
-public enum SupportedDataEncoding
+public enum DataEncoding
 {
     PLAIN,
     HEX, 
