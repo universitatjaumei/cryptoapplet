@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 import java.util.Hashtable;
 
 import es.uji.security.crypto.SupportedBrowser;
@@ -16,13 +15,13 @@ import es.uji.security.keystore.pkcs11.devices.Firefox;
 
 public class KeyStoreManager
 {
-    public Hashtable<SupportedKeystore, KeyStore> keystores;
+    public Hashtable<SupportedKeystore, SimpleKeyStore> keystores;
     private SupportedBrowser navigator;
 
     public KeyStoreManager(SupportedBrowser navigator)
     {
         this.navigator = navigator;
-        this.keystores = new Hashtable<SupportedKeystore, KeyStore>();
+        this.keystores = new Hashtable<SupportedKeystore, SimpleKeyStore>();
     }
 
     public void initBrowserStores() throws GeneralSecurityException, IOException
@@ -53,62 +52,27 @@ public class KeyStoreManager
         }
     }
 
-    public KeyStore getKeyStore(SupportedKeystore keystore)
+    public SimpleKeyStore getKeyStore(SupportedKeystore keystore)
     {
         return this.keystores.get(keystore);
     }
 
-    public Hashtable<SupportedKeystore, KeyStore> getKeyStoreTable()
+    public Hashtable<SupportedKeystore, SimpleKeyStore> getKeyStoreTable()
     {
         return this.keystores;
     }
 
-    public void addP12KeyStore(KeyStore keyStore)
+    public void addKeyStore(SupportedKeystore supportedKeystore, SimpleKeyStore keyStore)
     {
-        keystores.put(SupportedKeystore.PKCS12, keyStore);
-    }
-
-    public void addP11KeyStore(KeyStore keyStore)
-    {
-        keystores.put(SupportedKeystore.PKCS11, keyStore);
+        keystores.put(supportedKeystore, keyStore);
     }
 
     public void initKeyStores() throws GeneralSecurityException, IOException
     {
         initBrowserStores();
         initPKCS11();
-
-        /*
-        try
-        {
-            keyStoreManager.initPKCS11Device(device, null);
-        }
-        catch (DeviceInitializationException die)
-        {
-            if (!device.isDisableNativePasswordDialog())
-            {
-                for (int i = 0; i < 3; i++)
-                {
-                    PasswordPrompt passwordPrompt = new PasswordPrompt(null, device.getName(),
-                            "Pin:");
-
-                    try
-                    {
-                        this.keyStoreManager.initPKCS11Device(device, passwordPrompt.getPassword());
-                        break;
-                    }
-                    catch (Exception e)
-                    {
-                        JOptionPane.showMessageDialog(null,
-                                LabelManager.get("ERROR_INCORRECT_DNIE_PWD"), "",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-            }
-        }
-        */
     }
-
+    
     private void initPKCS11()
     {
         if (!SupportedBrowser.IEXPLORER.equals(navigator))
