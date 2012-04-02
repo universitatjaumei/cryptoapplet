@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
@@ -18,7 +19,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
 {
     private Logger log = Logger.getLogger(URLOutputParams.class);
 
-    private String[] urls = null;
+    private List<String> urls;
     private int current = 0;
     private boolean signOkInvoked = false;
     private int _count = 1;
@@ -27,12 +28,12 @@ public class URLOutputParams extends AbstractData implements OutputParams
     private int read_timeout = 60000;
     private String postVariable = "content";
 
-    public URLOutputParams(String[] urls)
+    public URLOutputParams(List<String> urls)
     {
         this(urls, "content");
     }
 
-    public URLOutputParams(String[] urls, String postVariable)
+    public URLOutputParams(List<String> urls, String postVariable)
     {
         this.urls = urls;
         this.postVariable = postVariable;
@@ -62,7 +63,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
             log.debug("Cookies can not be obtained", e);
         }
 
-        String currentURL = this.urls[current];
+        String currentURL = this.urls.get(current);
         String urlWithoutParams = currentURL.substring(0, currentURL.indexOf('?'));
         String urlParams = currentURL.substring(currentURL.indexOf('?') + 1);
 

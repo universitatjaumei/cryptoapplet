@@ -22,54 +22,62 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.util.i18n.LabelManager;
 
 public class MainWindow
 {
+    protected static MainWindow mainWindow;
+
+    protected final EventHandler eventHandler;
+
     protected JFrame mainFrame = null;
-    private JPanel mainContentPane = null;
-    private JScrollPane certificateJTreeScrollPane = null;
-    private JLabel labelSelectCertTop = null;
-    private JLabel labelInformation = null;
+    protected JPanel mainContentPane = null;
+    protected JScrollPane certificateJTreeScrollPane = null;
+    protected JLabel labelSelectCertTop = null;
+    protected JLabel labelInformation = null;
     protected JLabel labelPin = null;
     protected JPasswordField passwordAskField = null;
     protected TextField textField = null;
     protected JProgressBar globalProgressBar = null;
-    private JScrollPane contentScrollPane = null;
+    protected JScrollPane contentScrollPane = null;
     protected JLabel informationLabelField = null;
     protected JFormattedTextField contentTextField = null;
-    protected JButton SignButton = null;
-    private JButton cancelButton = null;
-    private JMenuBar mainMenuBar = null;
-    private JMenu FileMenu = null;
-    private JMenuItem loadPkcs11MenuItem = null;
-    private JMenuItem loadPkcs12MenuItem = null;
-    private JMenu helpAboutMenu = null;
-    private JMenuItem helpMenuItem = null;
-    private JMenuItem aboutMenuItem = null;
-    private JTextArea showDataTextArea = null;
-    private JCheckBox showSignatureCheckBox = null;
-
-    protected AppHandler _aph = null;
-    private EventActionHandler _evthandler = null;
+    protected JButton signButton = null;
+    protected JButton cancelButton = null;
+    protected JMenuBar mainMenuBar = null;
+    protected JMenu FileMenu = null;
+    protected JMenuItem loadPkcs11MenuItem = null;
+    protected JMenuItem loadPkcs12MenuItem = null;
+    protected JMenu helpAboutMenu = null;
+    protected JMenuItem helpMenuItem = null;
+    protected JMenuItem aboutMenuItem = null;
+    protected JTextArea showDataTextArea = null;
+    protected JCheckBox showSignatureCheckBox = null;
     protected JTree jTree = null;
-    private JScrollPane showDataScrollPane;
-    
-    private KeyStoreManager keyStoreManager;
-    
-    public MainWindow(KeyStoreManager keyStoreManager, AppHandler aph) throws Exception
-    {        
-        this.keyStoreManager = keyStoreManager;
-        this._aph = aph;
-        
-        _aph.setMainWindow(this);
-        _evthandler = new EventActionHandler(this);
+    protected JScrollPane showDataScrollPane;
+
+    public static MainWindow getInstance(KeyStoreManager keyStoreManager, JSCommands jsCommands)
+    {
+        if (mainWindow == null)
+        {
+            mainWindow = new MainWindow(keyStoreManager, jsCommands);
+        }
+
+        return mainWindow;
+    }
+
+    private MainWindow(KeyStoreManager keyStoreManager, JSCommands jsCommands)
+    {
+        this.eventHandler = new EventHandler(this, keyStoreManager, jsCommands);
+
         getMainFrame();
-        
-        // Bring to front
+        bringToFront();
+    }
+
+    private void bringToFront()
+    {
         java.awt.EventQueue.invokeLater(new Runnable()
         {
             public void run()
@@ -77,54 +85,41 @@ public class MainWindow
                 mainFrame.toFront();
                 mainFrame.repaint();
             }
-        });        
+        });
     }
 
-    /**
-     * This method initializes mainFrame
-     * 
-     * @return javax.swing.JFrame
-     */
-    JFrame getMainFrame() throws Exception
+    public JFrame getMainFrame()
     {
         if (mainFrame == null)
         {
-            // mainFrame = new JFrame();
             mainFrame = new JFrame();
-            // mainFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
             mainFrame.addWindowListener(new WindowAdapter()
             {
                 public void windowClosing(WindowEvent e)
                 {
                     mainFrame.setVisible(false);
-                    
-                    //TODO: How todo this call?
-                    //_aph.callJavaScriptCallbackFunction(_aph.getJsSignCancel(), null);
                 }
             });
             mainFrame.setResizable(false);
             mainFrame.setSize(new Dimension(582, 518));
-            mainFrame.setTitle("CryptoApplet Signer");
+            mainFrame.setTitle("CryptoApplet");
             mainFrame.setJMenuBar(getMainMenuBar());
+
             Toolkit toolkit = Toolkit.getDefaultToolkit();
             int _height = toolkit.getScreenSize().height;
             int _width = toolkit.getScreenSize().width;
+
             mainFrame.setLocation(_width / 2 - 582 / 2, _height / 2 - 518 / 2);
 
             mainFrame.setContentPane(getMainContentPane());
             mainFrame.setVisible(true);
         }
+
         return mainFrame;
     }
 
-    /**
-     * This method initializes mainContentPane
-     * 
-     * @return javax.swing.JPanel
-     */
-    private JPanel getMainContentPane() throws Exception
+    private JPanel getMainContentPane()
     {
         if (mainContentPane == null)
         {
@@ -153,11 +148,6 @@ public class MainWindow
             mainContentPane.add(labelInformation, null);
             mainContentPane.add(labelPin, null);
             mainContentPane.add(getPasswordTextField(), null);
-
-            // TODO: Research: This functions suffer some encoding problems
-            // when used under some 1.6 jvm.
-            // mainContentPane.add(getPasswordAskField(), null);
-
             mainContentPane.add(showSignatureCheckBox);
             mainContentPane.add(getGlobalProgressBar(), null);
             mainContentPane.add(getInformationLabelField(), null);
@@ -169,12 +159,7 @@ public class MainWindow
         return mainContentPane;
     }
 
-    /**
-     * This method initializes certificateJTreeScrollPane
-     * 
-     * @return javax.swing.JScrollPane
-     */
-    private JScrollPane getCertificateJTreeScrollPane() throws Exception
+    private JScrollPane getCertificateJTreeScrollPane()
     {
         if (certificateJTreeScrollPane == null)
         {
@@ -184,32 +169,11 @@ public class MainWindow
             certificateJTreeScrollPane
                     .setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         }
+
         return certificateJTreeScrollPane;
     }
 
-    /**
-     * This method initializes passwordAskField
-     * 
-     * @return javax.swing.JPasswordField
-     */
-    private JPasswordField getPasswordAskField()
-    {
-        if (passwordAskField == null)
-        {
-            passwordAskField = new JPasswordField();
-            passwordAskField.setBounds(new Rectangle(170, 412, 130, 24));
-            passwordAskField.setVisible(false);
-            passwordAskField.addActionListener(_evthandler.getdoSignActionListener());
-        }
-        return passwordAskField;
-    }
-
-    /**
-     * This method initializes the PasswordTextField
-     * 
-     * @return TextField
-     */
-    protected TextField getPasswordTextField()
+    public TextField getPasswordTextField()
     {
         if (textField == null)
         {
@@ -217,19 +181,13 @@ public class MainWindow
             textField.setEchoChar('*');
             textField.setBounds(new Rectangle(170, 423, 130, 24));
             textField.setVisible(false);
-            textField.addActionListener(_evthandler.getdoSignActionListener());
+            textField.addActionListener(eventHandler.getPasswordTextFieldActionListener());
         }
+
         return textField;
     }
 
-    // End Debug only purp.
-
-    /**
-     * This method initializes globalProgressBar
-     * 
-     * @return javax.swing.JProgressBar
-     */
-    protected JProgressBar getGlobalProgressBar()
+    public JProgressBar getGlobalProgressBar()
     {
         if (globalProgressBar == null)
         {
@@ -237,14 +195,10 @@ public class MainWindow
             globalProgressBar.setBounds(new Rectangle(311, 218, 255, 14));
             globalProgressBar.setVisible(false);
         }
+
         return globalProgressBar;
     }
 
-    /**
-     * This method initializes informationScrollPane
-     * 
-     * @return javax.swing.JScrollPane
-     */
     private JScrollPane getContentScrollPane()
     {
         if (contentScrollPane == null)
@@ -253,15 +207,11 @@ public class MainWindow
             contentScrollPane.setBounds(new Rectangle(9, 259, 558, 130));
             contentScrollPane.setViewportView(getContentTextField());
         }
+
         return contentScrollPane;
     }
 
-    /**
-     * This method initializes informationTextField
-     * 
-     * @return javax.swing.JTextField
-     */
-    protected JFormattedTextField getContentTextField()
+    private JFormattedTextField getContentTextField()
     {
         if (contentTextField == null)
         {
@@ -270,15 +220,11 @@ public class MainWindow
             contentTextField.setBounds(new Rectangle(9, 257, 558, 30));
             contentTextField.setValue(LabelManager.get("CERTIFICATE_CONTENT_FIELD"));
         }
+
         return contentTextField;
     }
 
-    /**
-     * This method initializes informationTextField
-     * 
-     * @return javax.swing.JTextField
-     */
-    protected JLabel getInformationLabelField()
+    public JLabel getInformationLabelField()
     {
         if (informationLabelField == null)
         {
@@ -286,50 +232,36 @@ public class MainWindow
             informationLabelField.setBounds(new Rectangle(9, 231, 558, 25));
             informationLabelField.setText(LabelManager.get("SELECT_A_CERTIFICATE"));
         }
+
         return informationLabelField;
     }
 
-    /**
-     * This method initializes SignButton
-     * 
-     * @return javax.swing.JButton
-     */
     private JButton getSignButton()
     {
-        if (SignButton == null)
+        if (signButton == null)
         {
-            SignButton = new JButton();
-            SignButton.setBounds(new Rectangle(329, 421, 110, 30));
-            SignButton.setText(LabelManager.get("BUTTON_SIGN"));
-            SignButton.addActionListener(_evthandler.getdoSignActionListener());
+            signButton = new JButton();
+            signButton.setBounds(new Rectangle(329, 421, 110, 30));
+            signButton.setText(LabelManager.get("BUTTON_SIGN"));
+            signButton.addActionListener(eventHandler.getSignButtonActionListener());
         }
-        return SignButton;
+
+        return signButton;
     }
 
-    /**
-     * This method initializes cancelButton
-     * 
-     * @return javax.swing.JButton
-     */
     private JButton getCancelButton()
     {
-
         if (cancelButton == null)
         {
             cancelButton = new JButton();
             cancelButton.setBounds(new Rectangle(453, 421, 110, 30));
             cancelButton.setText(LabelManager.get("BUTTON_CANCEL"));
-            cancelButton.addActionListener(_evthandler.getOnCloseActionListener());
-
+            cancelButton.addActionListener(eventHandler.getCancelButtonActionListener());
         }
+
         return cancelButton;
     }
 
-    /**
-     * This method initializes mainMenuBar
-     * 
-     * @return javax.swing.JMenuBar
-     */
     private JMenuBar getMainMenuBar()
     {
         if (mainMenuBar == null)
@@ -338,14 +270,10 @@ public class MainWindow
             mainMenuBar.add(getFileMenu());
             mainMenuBar.add(getHelpAboutMenu());
         }
+
         return mainMenuBar;
     }
 
-    /**
-     * This method initializes FileMenu
-     * 
-     * @return javax.swing.JMenu
-     */
     private JMenu getFileMenu()
     {
         if (FileMenu == null)
@@ -357,157 +285,85 @@ public class MainWindow
             FileMenu.add(getLoadPkcs12MenuItem());
             FileMenu.add(getLoadPkcs11MenuItem());
         }
+
         return FileMenu;
     }
 
-    /**
-     * This method initializes loadPkcs11MenuItem
-     * 
-     * @return javax.swing.JMenuItem
-     */
     private JMenuItem getLoadPkcs11MenuItem()
     {
         if (loadPkcs11MenuItem == null)
         {
             loadPkcs11MenuItem = new JMenuItem();
             loadPkcs11MenuItem.setText(LabelManager.get("MENU_LOAD_P11"));
-            loadPkcs11MenuItem.addActionListener(_evthandler.getLoadPKCS11ActionListener());
+            loadPkcs11MenuItem
+                    .addActionListener(eventHandler.getLoadPkcs11MenuItemActionListener());
         }
+
         return loadPkcs11MenuItem;
     }
 
-    /**
-     * This method initializes loadPkcs12MenuItem
-     * 
-     * @return javax.swing.JMenuItem
-     */
     private JMenuItem getLoadPkcs12MenuItem()
     {
         if (loadPkcs12MenuItem == null)
         {
             loadPkcs12MenuItem = new JMenuItem();
             loadPkcs12MenuItem.setText(LabelManager.get("MENU_LOAD_P12"));
-            loadPkcs12MenuItem.addActionListener(_evthandler.getLoadPKCS12ActionListener());
+            loadPkcs12MenuItem
+                    .addActionListener(eventHandler.getLoadPkcs12MenuItemActionListener());
         }
+
         return loadPkcs12MenuItem;
     }
 
-    /**
-     * This method initializes helpAboutMenu
-     * 
-     * @return javax.swing.JMenu
-     */
     private JMenu getHelpAboutMenu()
     {
         if (helpAboutMenu == null)
         {
             helpAboutMenu = new JMenu();
-            helpAboutMenu.setPreferredSize(new Dimension(20, 5));
-            helpAboutMenu.setText("?");
+            helpAboutMenu.setText(LabelManager.get("MENU_HELP"));
             helpAboutMenu.add(getHelpMenuItem());
             helpAboutMenu.add(getAboutMenuItem());
         }
+
         return helpAboutMenu;
     }
 
-    /**
-     * This method initializes helpMenuItem
-     * 
-     * @return javax.swing.JMenuItem
-     */
     private JMenuItem getHelpMenuItem()
     {
         if (helpMenuItem == null)
         {
             helpMenuItem = new JMenuItem();
             helpMenuItem.setText(LabelManager.get("MENU_HELP"));
-            helpMenuItem.addActionListener(_evthandler.getHelpActionListener());
+            helpMenuItem.addActionListener(eventHandler.getHelpMenuItemActionListener());
         }
+
         return helpMenuItem;
     }
 
-    /**
-     * This method initializes aboutMenuItem
-     * 
-     * @return javax.swing.JMenuItem
-     */
     private JMenuItem getAboutMenuItem()
     {
         if (aboutMenuItem == null)
         {
             aboutMenuItem = new JMenuItem();
             aboutMenuItem.setText(LabelManager.get("MENU_ABOUT"));
-            aboutMenuItem.addActionListener(_evthandler.getAboutActionListener());
+            aboutMenuItem.addActionListener(eventHandler.getAboutMenuItemActionListener());
         }
+
         return aboutMenuItem;
     }
 
-    /**
-     * This method initializes jTree
-     * 
-     * @return javax.swing.JTree
-     */
-    protected JTree getJTree() throws Exception
+    private JTree getJTree()
     {
-
         if (jTree == null)
         {
-            JTreeCertificateBuilder jbt = new JTreeCertificateBuilder();
-            DefaultMutableTreeNode dmf = jbt.build(this.keyStoreManager.getKeyStoreTable());
-            jTree = new JTree(dmf);
-            jTree.addTreeSelectionListener(_evthandler.getJTreeSectionListener());
+            jTree = new JTree(eventHandler.getDefaultMutableTreeNodeFromKeyStoreTable());
+            jTree.addTreeSelectionListener(eventHandler.getJTreeSelectionListener());
             jTree.expandRow(1);
         }
 
         return jTree;
     }
 
-    /**
-     * This method reloads a JTree
-     * 
-     * @return javax.swing.JScrollPane
-     */
-    protected void reloadCertificateJTree() throws Exception
-    {
-        jTree = null;
-        certificateJTreeScrollPane.setViewportView(getJTree());
-        certificateJTreeScrollPane.repaint();
-    }
-
-    /**
-     * Get method for pin label object
-     * 
-     * @return labelPin the JLabel object that represents the pin label.
-     */
-    public JLabel getLabelPin()
-    {
-        return this.labelPin;
-    }
-
-    /**
-     * Get method for password input object
-     * 
-     * @return passwordAskField the JPasswordField object that represents the pin label.
-     */
-    public JPasswordField getPasswordField()
-    {
-        return this.passwordAskField;
-    }
-
-    /**
-     * Method to get the associated AppHandler Object.
-     * 
-     * @return _aph The AppHandler object associated with MainWindow
-     */
-    protected AppHandler getAppHandler()
-    {
-        return this._aph;
-    }
-
-    /**
-     * @deprecated Init the indeterminate progress on the main window for version 1.
-     * 
-     */
     public void startIndeterminateProgressBar()
     {
         if (globalProgressBar != null)
@@ -520,14 +376,17 @@ public class MainWindow
     public void repaint()
     {
         if (mainFrame != null)
+        {
             mainFrame.repaint(0);
+        }
     }
 
     public JScrollPane getShowDataScrollPane(byte[] in)
     {
-
         if (showDataTextArea == null)
+        {
             showDataTextArea = new JTextArea();
+        }
 
         showDataTextArea.setText(LabelManager.get("LABEL_SHOW_DATA_DESCRIPTION") + "\n\n"
                 + new String(in));
@@ -545,19 +404,25 @@ public class MainWindow
         return showDataScrollPane;
     }
 
-    public boolean isShowSignatureEnabled()
-    {
-        return showSignatureCheckBox.isSelected();
-    }
-
     public JCheckBox getShowSignatureCheckBox()
     {
         return showSignatureCheckBox;
-
     }
 
-    public KeyStoreManager getKeyStoreManager()
+    public void reloadCertificateJTree()
     {
-        return this.keyStoreManager;
+        jTree = null;
+        certificateJTreeScrollPane.setViewportView(getJTree());
+        certificateJTreeScrollPane.repaint();
+    }
+
+    public void show()
+    {
+        getMainFrame().setVisible(true);
+    }
+
+    public void hide()
+    {
+        getMainFrame().setVisible(false);
     }
 }

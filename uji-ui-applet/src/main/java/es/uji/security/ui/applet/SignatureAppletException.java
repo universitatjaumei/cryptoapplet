@@ -2,10 +2,10 @@ package es.uji.security.ui.applet;
 
 import es.uji.security.util.i18n.LabelManager;
 
-//TODO: implement 
+@SuppressWarnings("serial")
 public class SignatureAppletException extends Exception
 {
-    String message;
+    private String message;
 
     public SignatureAppletException(String messageTag)
     {
@@ -15,9 +15,13 @@ public class SignatureAppletException extends Exception
     public SignatureAppletException(String messageTag, boolean translate)
     {
         if (translate)
+        {
             message = LabelManager.get(messageTag);
+        }
         else
+        {
             message = messageTag;
+        }
     }
 
     public String getMessage()

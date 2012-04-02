@@ -6,6 +6,8 @@ import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
+import es.uji.security.crypto.SupportedBrowser;
+
 public class JSCommands
 {
     private Logger log = Logger.getLogger(JSCommands.class);
@@ -33,5 +35,51 @@ public class JSCommands
     public JSObject getWindow()
     {
         return browserWindow;
+    }
+    
+    private void callJavaScriptFunction(String functionName, String[] params)
+    {
+        log.debug("Call JavaScript " + functionName);
+        getWindow().call(functionName, params);
+    }
+
+    public void onInitOk()
+    {
+        callJavaScriptFunction("onInitOk", new String[] {});
+    }
+
+    public void onSignError()
+    {
+        callJavaScriptFunction("onSignError", new String[] {});
+    }
+    
+    public void onSignCancel()
+    {
+        callJavaScriptFunction("onSignCancel", new String[] {});
+    }
+
+    public void onWindowShow()
+    {
+        callJavaScriptFunction("onWindowShow", new String[] {});
+    }
+
+    public SupportedBrowser getSupportedBrowser()
+    {
+        JSObject document = (JSObject) getWindow().getMember("navigator");
+        String userAgent = (String) document.getMember("userAgent");
+
+        if (userAgent != null)
+        {
+            userAgent = userAgent.toLowerCase();
+
+            log.debug("Detected user agent " + userAgent);
+
+            if (userAgent.contains("explorer") || userAgent.contains("msie"))
+            {
+                return SupportedBrowser.IEXPLORER;
+            }
+        }
+
+        return SupportedBrowser.FIREFOX;
     }
 }
