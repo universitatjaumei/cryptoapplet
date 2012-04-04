@@ -58,7 +58,7 @@ public class JTreeCertificateBuilder
 
                         if (xcert != null)
                         {
-                            certHandle = new X509CertificateHandler(xcert, "none", keystore);
+                            certHandle = new X509CertificateHandler(xcert);
 
                             for (int j = 0; j < caStrs.size(); j++)
                             {
