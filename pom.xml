@@ -138,6 +138,6 @@
         <uji.keytool.password>cryptoapplet</uji.keytool.password>
       </properties>
     </profile>
-  </profiles> 
+  </profiles>
 
 </project>
