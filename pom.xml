@@ -8,7 +8,7 @@
   <packaging>pom</packaging>
   <name>CryptoApplet</name>
   <url>https://universitatjaumei.jira.com/browse/CRYPTOAPPLET/</url>
-
+ 
   <properties>
     <bouncycastle.version>1.43</bouncycastle.version>
     <jxades.version>0.0.3</jxades.version>
