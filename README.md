@@ -2,7 +2,7 @@
 
 CryptoApplet is a Java applet for advanced digital signature creation developed by the [Universitat Jaume I](http://www.uji.es). The procedure is very simple: given a data input and a configuration determined by the server, the web client will create a digital signature of the data. The representation of the signature is obtained in the format specified in the configuration.
 
-![Screenshot](https://github.com/borillo/cryptoapplet/raw/master/cryptoapplet.png)
+![Screenshot](https://github.com/universitatjaumei/cryptoapplet/raw/master/cryptoapplet.png)
 
 The signature representation formats supported by CryptoApplet are the following:
 
