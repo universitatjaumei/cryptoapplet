@@ -12,10 +12,12 @@ import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -29,7 +31,9 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Phrase;
 import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.ColumnText;
+import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfDate;
 import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfName;
@@ -51,7 +55,7 @@ import es.uji.security.util.i18n.LabelManager;
 public class PDFSignatureFactory implements ISignFormatProvider
 {
     private Logger log = Logger.getLogger(PDFSignatureFactory.class);
-    
+
     private static final int PADDING = 3;
 
     private PrivateKey privateKey;
@@ -86,7 +90,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
         return sgn.getEncodedPKCS7(null, null, tsaUrl, null);
     }
 
-    private void sign(PdfStamper pdfStamper, PdfSignatureAppearance pdfSignatureAppearance) throws Exception
+    private void sign(PdfStamper pdfStamper, PdfSignatureAppearance pdfSignatureAppearance)
+            throws Exception
     {
         // Check if TSA support is enabled
 
@@ -165,7 +170,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         log.debug("VisibleArea: " + x1 + "," + y1 + "," + x2 + "," + y2 + " offsetX:" + offsetX
                 + ", offsetY:" + offsetY);
-        
+
         // Position of the visible signature
 
         Rectangle rectangle = null;
@@ -180,7 +185,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
         }
 
         log.debug("VisibleAreaPage: " + confAdapter.getVisibleAreaPage());
-        
+
         sap.setVisibleSignature(rectangle, confAdapter.getVisibleAreaPage(), null);
         sap.setAcro6Layers(true);
         sap.setLayer2Font(font);
@@ -223,11 +228,11 @@ public class PDFSignatureFactory implements ISignFormatProvider
         // Retrieve image
 
         log.debug("VisibleAreaImgFile: " + confAdapter.getVisibleAreaImgFile());
-        
+
         byte[] imageData = OS.inputStreamToByteArray(PDFSignatureFactory.class.getClassLoader()
                 .getResourceAsStream(confAdapter.getVisibleAreaImgFile()));
         Image image = Image.getInstance(imageData);
-        
+
         if (signatureText != null)
         {
             // Retrieve and reset Layer2
@@ -258,7 +263,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             throws KeyStoreException, Exception
     {
         log.debug("Init PDF signature configuration");
-        
+
         this.confAdapter = new ConfigurationAdapter(signatureOptions);
 
         initFontDefinition();
@@ -269,6 +274,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
             X509Certificate certificate = signatureOptions.getCertificate();
             this.privateKey = signatureOptions.getPrivateKey();
             this.provider = signatureOptions.getProvider();
+            String reference = signatureOptions.getDocumentReference();
+            String validationUrl = signatureOptions.getDocumentReferenceVerificationUrl();
 
             if (Security.getProvider(this.provider.getName()) == null && this.provider != null)
             {
@@ -321,11 +328,46 @@ public class PDFSignatureFactory implements ISignFormatProvider
             PdfReader reader = new PdfReader(datos);
             ByteArrayOutputStream sout = new ByteArrayOutputStream();
 
+            int numSignatures = reader.getAcroFields().getSignatureNames().size();
+
+            if (numSignatures == 0 && reference != null)
+            {
+                String footerMessage = "";
+
+                if (validationUrl != null)
+                {
+                    footerMessage = MessageFormat.format(
+                            "Puede validar este documento en {1} introduciendo la referencia {0}",
+                            reference, validationUrl);
+
+                }
+                else
+                {
+                    footerMessage = MessageFormat.format("La referencia de este documento es {0}",
+                            reference, validationUrl);
+                }
+
+                PdfStamper stamper = new PdfStamper(reader, sout);
+                PdfContentByte canvas = stamper.getOverContent(1);
+
+                Font font = new Font(BaseFont.createFont(BaseFont.TIMES_ROMAN, "Cp1252", false));
+                font.setSize(9);
+
+                ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT, new Phrase(footerMessage,
+                        font), 20, 20, 0);
+                stamper.close();
+
+                datos = sout.toByteArray();
+            }
+
+            reader = new PdfReader(datos);
+            sout = new ByteArrayOutputStream();
+
             PdfStamper pdfStamper = PdfStamper.createSignature(reader, sout, '\0', null, true);
             PdfSignatureAppearance pdfSignatureAppareance = pdfStamper.getSignatureAppearance();
 
             log.debug("VisibleSignature: " + confAdapter.isVisibleSignature());
-            
+
             if (confAdapter.isVisibleSignature())
             {
                 String pattern = confAdapter.getVisibleAreaTextPattern();
@@ -336,20 +378,19 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
                 if (bindValues != null)
                 {
-                    final X509Principal principal = PrincipalUtil.getSubjectX509Principal(certificate);
+                    final X509Principal principal = PrincipalUtil
+                            .getSubjectX509Principal(certificate);
                     final Vector<?> values = principal.getValues(X509Name.CN);
-                    
+
                     String certificateCN = (String) values.get(0);
                     bindValues.put("%s", certificateCN);
-                    log.debug("Bind value %s: " + certificateCN);                    
+                    log.debug("Bind value %s: " + certificateCN);
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                     String currentDate = simpleDateFormat.format(new Date());
                     bindValues.put("%t", currentDate);
                     log.debug("Bind value %t: " + currentDate);
                 }
-
-                int numSignatures = reader.getAcroFields().getSignatureNames().size();
 
                 createVisibleSignature(pdfSignatureAppareance, numSignatures, pattern, bindValues);
             }

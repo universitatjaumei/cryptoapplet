@@ -1200,6 +1200,34 @@ public class SignatureApplet extends JApplet
         });
     }
 
+    public void setDocumentReference(final String documentReference)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+                String[] values = documentReference.split(_separator);                
+                apph.setDocumentReference(values);
+                
+                return null;
+            }
+        });
+    }
+
+    public void setDocumentReferenceVerificationUrl(final String documentReferenceVerificationUrl)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+                String[] values = documentReferenceVerificationUrl.split(_separator);                
+                apph.setDocumentReferenceVerificationUrl(values);
+                
+                return null;
+            }
+        });
+    }
+    
     /**
      * Test the execution environment, is everything ok to do the signature.
      * 

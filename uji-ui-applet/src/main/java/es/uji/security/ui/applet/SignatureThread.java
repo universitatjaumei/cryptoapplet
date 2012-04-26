@@ -445,6 +445,18 @@ public class SignatureThread extends Thread
                                 sigOpt.setVisibleAreaTextPattern(getValue(_mw._aph.getVisibleAreaTextPattern()));
                                 log.debug("VisibleAreaTextPattern: " + getValue(_mw._aph.getVisibleAreaTextPattern()));
                             }
+                            
+                            if (hasValue(_mw._aph.getDocumentReference()))
+                            {
+                                sigOpt.setDocumentReference(getValue(_mw._aph.getDocumentReference()));
+                                log.debug("DocumentReference: " + getValue(_mw._aph.getDocumentReference()));
+                            }
+
+                            if (hasValue(_mw._aph.getDocumentReferenceVerificationUrl()))
+                            {
+                                sigOpt.setDocumentReferenceVerificationUrl(getValue(_mw._aph.getDocumentReferenceVerificationUrl()));
+                                log.debug("DocumentReferenceVerificationUrl: " + getValue(_mw._aph.getDocumentReferenceVerificationUrl()));
+                            }
                         }
 
                         log.debug("Signing data");

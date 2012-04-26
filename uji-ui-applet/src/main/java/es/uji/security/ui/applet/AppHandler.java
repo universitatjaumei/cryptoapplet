@@ -106,6 +106,9 @@ public class AppHandler
 
     private String dniToCheckAgainsCertificate;    
     
+    private String[] documentReference;
+    private String[] documentReferenceVerificationUrl;
+    
     public AppHandler() throws SignatureAppletException
     {
         this(null);
@@ -981,5 +984,25 @@ public class AppHandler
     public String getDniToCheckAgainsCertificate()
     {
         return this.dniToCheckAgainsCertificate;
+    }
+
+    public String[] getDocumentReference()
+    {
+        return documentReference;
+    }
+
+    public void setDocumentReference(String[] documentReference)
+    {
+        this.documentReference = documentReference;
+    }
+
+    public String[] getDocumentReferenceVerificationUrl()
+    {
+        return documentReferenceVerificationUrl;
+    }
+
+    public void setDocumentReferenceVerificationUrl(String[] documentReferenceVerificationUrl)
+    {
+        this.documentReferenceVerificationUrl = documentReferenceVerificationUrl;
     }
 }

@@ -24,6 +24,11 @@ public class SignatureOptions
     private boolean coSignEnabled = false;
     private boolean enveloped = true;
 
+    // Document options
+    
+    private String documentReference;
+    private String documentReferenceVerificationUrl;
+    
     // XML options
 
     private String policyIdentifier;
@@ -378,5 +383,25 @@ public class SignatureOptions
     public void setSignerRole(String signerRole)
     {
         this.signerRole = signerRole;
+    }
+
+    public void setDocumentReference(String documentReference)
+    {
+        this.documentReference = documentReference;
+    }
+
+    public String getDocumentReference()
+    {
+        return documentReference;
+    }
+
+    public void setDocumentReferenceVerificationUrl(String documentReferenceVerificationUrl)
+    {
+        this.documentReferenceVerificationUrl = documentReferenceVerificationUrl;
+    }
+
+    public String getDocumentReferenceVerificationUrl()
+    {
+        return documentReferenceVerificationUrl;
     }
 }
