@@ -28,48 +28,39 @@ import es.uji.security.util.i18n.LabelManager;
 
 public class MainWindow
 {
-    protected static MainWindow mainWindow;
-
-    protected final EventHandler eventHandler;
-
-    protected JFrame mainFrame = null;
-    protected JPanel mainContentPane = null;
-    protected JScrollPane certificateJTreeScrollPane = null;
-    protected JLabel labelSelectCertTop = null;
-    protected JLabel labelInformation = null;
-    protected JLabel labelPin = null;
-    protected JPasswordField passwordAskField = null;
-    protected TextField textField = null;
-    protected JProgressBar globalProgressBar = null;
-    protected JScrollPane contentScrollPane = null;
-    protected JLabel informationLabelField = null;
-    protected JFormattedTextField contentTextField = null;
-    protected JButton signButton = null;
-    protected JButton cancelButton = null;
-    protected JMenuBar mainMenuBar = null;
-    protected JMenu FileMenu = null;
-    protected JMenuItem loadPkcs11MenuItem = null;
-    protected JMenuItem loadPkcs12MenuItem = null;
-    protected JMenu helpAboutMenu = null;
-    protected JMenuItem helpMenuItem = null;
-    protected JMenuItem aboutMenuItem = null;
-    protected JTextArea showDataTextArea = null;
-    protected JCheckBox showSignatureCheckBox = null;
-    protected JTree jTree = null;
+    protected EventHandler eventHandler;
+    protected JFrame mainFrame;
+    protected JPanel mainContentPane;
+    protected JScrollPane certificateJTreeScrollPane;
+    protected JLabel labelSelectCertTop;
+    protected JLabel labelInformation;
+    protected JLabel labelPin;
+    protected JPasswordField passwordAskField;
+    protected TextField textField;
+    protected JProgressBar globalProgressBar;
+    protected JScrollPane contentScrollPane;
+    protected JLabel informationLabelField;
+    protected JFormattedTextField contentTextField;
+    protected JButton signButton;
+    protected JButton cancelButton;
+    protected JMenuBar mainMenuBar;
+    protected JMenu FileMenu;
+    protected JMenuItem loadPkcs11MenuItem;
+    protected JMenuItem loadPkcs12MenuItem;
+    protected JMenu helpAboutMenu;
+    protected JMenuItem helpMenuItem;
+    protected JMenuItem aboutMenuItem;
+    protected JTextArea showDataTextArea;
+    protected JCheckBox showSignatureCheckBox;
+    protected JTree jTree;
     protected JScrollPane showDataScrollPane;
+    private final JSCommands jsCommands;
+    
+    private SignatureConfiguration signatureConfiguration;
 
-    public static MainWindow getInstance(KeyStoreManager keyStoreManager, JSCommands jsCommands)
+    public MainWindow(KeyStoreManager keyStoreManager, JSCommands jsCommands)
     {
-        if (mainWindow == null)
-        {
-            mainWindow = new MainWindow(keyStoreManager, jsCommands);
-        }
-
-        return mainWindow;
-    }
-
-    private MainWindow(KeyStoreManager keyStoreManager, JSCommands jsCommands)
-    {
+        this.jsCommands = jsCommands;        
         this.eventHandler = new EventHandler(this, keyStoreManager, jsCommands);
 
         getMainFrame();
@@ -182,6 +173,7 @@ public class MainWindow
             textField.setBounds(new Rectangle(170, 423, 130, 24));
             textField.setVisible(false);
             textField.addActionListener(eventHandler.getPasswordTextFieldActionListener());
+            textField.setText("");
         }
 
         return textField;
@@ -194,6 +186,7 @@ public class MainWindow
             globalProgressBar = new JProgressBar();
             globalProgressBar.setBounds(new Rectangle(311, 218, 255, 14));
             globalProgressBar.setVisible(false);
+            globalProgressBar.setValue(0);
         }
 
         return globalProgressBar;
@@ -409,20 +402,25 @@ public class MainWindow
         return showSignatureCheckBox;
     }
 
-    public void reloadCertificateJTree()
+    public void loadCertificateTree()
     {
         jTree = null;
         certificateJTreeScrollPane.setViewportView(getJTree());
         certificateJTreeScrollPane.repaint();
     }
 
-    public void show()
-    {
-        getMainFrame().setVisible(true);
-    }
-
     public void hide()
     {
         getMainFrame().setVisible(false);
     }
+
+    public void show(SignatureConfiguration signatureConfiguration)
+    {        
+        this.signatureConfiguration = signatureConfiguration;
+        
+        getMainFrame().setVisible(true);
+        loadCertificateTree();        
+        
+        jsCommands.onWindowShow();        
+   }
 }

@@ -2,16 +2,7 @@ package es.uji.security.ui.applet;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.swing.JApplet;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -24,12 +15,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
-import es.uji.security.crypto.DataEncoding;
-import es.uji.security.crypto.SignatureFormat;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.keystore.KeyStoreManager;
-import es.uji.security.ui.applet.io.URLInputParams;
-import es.uji.security.ui.applet.io.URLOutputParams;
 import es.uji.security.util.i18n.LabelManager;
 
 @SuppressWarnings("serial")
@@ -38,20 +25,9 @@ public class SignatureApplet extends JApplet
     private Logger log = Logger.getLogger(SignatureApplet.class);
 
     private KeyStoreManager keyStoreManager;
-
     private JSCommands jsCommands;
-    private SSLSocketFactory defaultSocketFactory;
-
-    private SignatureFormat outputSignatureFormat;
-    private DataEncoding outputDataEncoding;
-    private DataEncoding inputDataEncoding;
-    private boolean sslCertificateVerfication;
-    private List<String> inputURLs;
-    private List<String> outputURLs;
-    private String dniToCheckCertificateAgainst;
-    private Map<String, List<String>> signatureProperties;
-
-    private MainWindow ui;
+    private SignatureConfiguration signatureConfiguration;
+    private HttpConnectionConfiguration connectionConfiguration;
 
     static
     {
@@ -86,7 +62,8 @@ public class SignatureApplet extends JApplet
 
     public SignatureApplet()
     {
-        this.signatureProperties = new HashMap<String, List<String>>();
+        this.signatureConfiguration = new SignatureConfiguration();
+        this.connectionConfiguration = new HttpConnectionConfiguration();
     }
 
     public SignatureApplet(JSCommands jsCommands)
@@ -112,8 +89,6 @@ public class SignatureApplet extends JApplet
             log.error(e);
             jsCommands.onSignError();
         }
-
-        defaultSocketFactory = HttpsURLConnection.getDefaultSSLSocketFactory();
     }
 
     private void initJavaScriptCommandExecution()
@@ -167,22 +142,7 @@ public class SignatureApplet extends JApplet
 
     public void showUI()
     {
-        try
-        {
-            ui = MainWindow.getInstance(keyStoreManager, jsCommands);
-            ui.getPasswordTextField().setText("");
-            ui.getGlobalProgressBar().setValue(0);
-            ui.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
-            ui.reloadCertificateJTree();
-            ui.show();
-
-            jsCommands.onWindowShow();
-        }
-        catch (Exception ex)
-        {
-            log.error(ex);
-            jsCommands.onSignError();
-        }
+        new MainWindow(keyStoreManager, jsCommands).show(signatureConfiguration);
     }
 
     public void setLanguage(final String lang)
@@ -203,7 +163,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                outputSignatureFormat = SignatureFormat.valueOf(format.toUpperCase());
+                signatureConfiguration.setOutputSignatureFormat(format);
                 return null;
             }
         });
@@ -215,7 +175,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                outputDataEncoding = DataEncoding.valueOf(encoding.toUpperCase());
+                signatureConfiguration.setOutputDataEncoding(encoding);
                 return null;
             }
         });
@@ -227,7 +187,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                inputDataEncoding = DataEncoding.valueOf(encoding);
+                signatureConfiguration.setInputDataEncoding(encoding);
                 return null;
             }
         });
@@ -239,49 +199,11 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                initSSLServerCertificateVerification(Boolean.parseBoolean(value));
+                connectionConfiguration.setSSLServerCertificateVerificationTo(Boolean
+                        .parseBoolean(value));
                 return null;
             }
         });
-    }
-
-    private void initSSLServerCertificateVerification(boolean validate)
-    {
-        if (validate)
-        {
-            HttpsURLConnection.setDefaultSSLSocketFactory(defaultSocketFactory);
-        }
-        else
-        {
-            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
-            {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers()
-                {
-                    return null;
-                }
-
-                public void checkClientTrusted(java.security.cert.X509Certificate[] certs,
-                        String authType)
-                {
-                }
-
-                public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
-                        String authType)
-                {
-                }
-            } };
-
-            try
-            {
-                SSLContext sc = SSLContext.getInstance("SSL");
-                sc.init(null, trustAllCerts, new java.security.SecureRandom());
-                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            }
-            catch (Exception e)
-            {
-                log.error(e);
-            }
-        }
     }
 
     public void addInputURL(final String inputURL)
@@ -290,7 +212,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                inputURLs.add(inputURL);
+                signatureConfiguration.addInputURL(inputURL);
                 return null;
             }
         });
@@ -302,7 +224,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                outputURLs.add(outputURL);
+                signatureConfiguration.addOutputURL(outputURL);
                 return null;
             }
         });
@@ -314,7 +236,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                dniToCheckCertificateAgainst = dni;
+                signatureConfiguration.setDniToCheckCertificateAgainst(dni);
                 return null;
             }
         });
@@ -326,15 +248,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                if (signatureProperties.containsKey(propertyName))
-                {
-                    signatureProperties.get(propertyName).add(propertyValue);
-                }
-                else
-                {
-                    signatureProperties.put(propertyName, Collections.singletonList(propertyValue));
-                }
-
+                signatureConfiguration.addSignatureProperty(propertyName, propertyValue);
                 return null;
             }
         });
@@ -346,11 +260,7 @@ public class SignatureApplet extends JApplet
         {
             public Object run()
             {
-                URLInputParams input = new URLInputParams(inputURLs);
-                URLOutputParams output = new URLOutputParams(outputURLs);
-
                 showUI();
-
                 return null;
             }
         });
