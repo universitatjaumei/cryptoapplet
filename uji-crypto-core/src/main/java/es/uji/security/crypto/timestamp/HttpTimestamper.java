@@ -15,7 +15,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 
 /**
  * A timestamper that communicates with a Timestamping Authority (TSA) over HTTP. It supports the

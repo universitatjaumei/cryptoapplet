@@ -15,7 +15,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.util.i18n.LabelManager;
 

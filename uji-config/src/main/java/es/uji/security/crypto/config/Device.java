@@ -1,149 +1,72 @@
 package es.uji.security.crypto.config;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.security.Provider;
-import java.security.Security;
-import java.text.MessageFormat;
-
-import org.apache.log4j.Logger;
 
 public class Device
 {
-    private Logger log = Logger.getLogger(Device.class);
+    private String id;
+    private Integer slot;
+    private Boolean disableNativePasswordDialog;
+    private LinuxLibraries linuxLibraries;
+    private WindowsLibraries windowsLibraries;
+    private MacOSXLibraries macOSXLibraries;
 
-    private String name;
-    private String library;
-    private int slot;
-    private boolean disableNativePasswordDialog;
-
-    public Device()
+    public String getId()
     {
+        return id;
     }
 
-    public Device(String name, String library, int slot, boolean disableNativePasswordDialog)
+    public void setId(String id)
     {
-        this.name = name;
-        this.library = library;
-        this.slot = slot;
-        this.disableNativePasswordDialog = disableNativePasswordDialog;
+        this.id = id;
     }
 
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public String getLibrary()
-    {
-        return library;
-    }
-
-    public void setLibrary(String library)
-    {
-        this.library = library;
-    }
-
-    public int getSlot()
+    public Integer getSlot()
     {
         return slot;
     }
 
-    public void setSlot(int slot)
+    public void setSlot(Integer slot)
     {
         this.slot = slot;
     }
 
-    public boolean isDisableNativePasswordDialog()
+    public Boolean getDisableNativePasswordDialog()
     {
         return disableNativePasswordDialog;
     }
 
-    @Override
-    public String toString()
+    public void setDisableNativePasswordDialog(Boolean disableNativePasswordDialog)
     {
-        return MessageFormat.format("name = {0}\rlibrary = {1}\r\nslot = {2}\r\n", name, library,
-                slot);
+        this.disableNativePasswordDialog = disableNativePasswordDialog;
     }
 
-    public static Device getDeviceWithAvailableLibrary()
+    public LinuxLibraries getLinuxLibraries()
     {
-        ConfigManager configManager = ConfigManager.getInstance();
-
-        String deviceList = configManager.getProperty("cryptoapplet.devices");
-
-        if (deviceList != null)
-        {
-            for (String device : deviceList.split(","))
-            {
-                String deviceName = configManager.getProperty("cryptoapplet.devices." + device
-                        + ".name");
-                String deviceLibrariesList = "";
-                boolean disableNativePasswordDialog = false;
-
-                if (OperatingSystemUtils.isLinux())
-                {
-                    deviceLibrariesList = configManager.getProperty("cryptoapplet.devices."
-                            + device + ".libraries.linux");
-
-                    String passwordProperty = configManager.getProperty("cryptoapplet.devices."
-                            + device + ".libraries.linux.disableNativePasswordDialog");
-
-                    if (passwordProperty != null && passwordProperty.equals("true"))
-                    {
-                        disableNativePasswordDialog = true;
-                    }
-                }
-                else if (OperatingSystemUtils.isWindowsUpperEqualToNT())
-                {
-                    deviceLibrariesList = configManager.getProperty("cryptoapplet.devices."
-                            + device + ".libraries.windows");
-
-                    String passwordProperty = configManager.getProperty("cryptoapplet.devices."
-                            + device + ".libraries.windows.disableNativePasswordDialog");
-
-                    if (passwordProperty != null && passwordProperty.equals("true"))
-                    {
-                        disableNativePasswordDialog = true;
-                    }
-                }
-
-                if (deviceLibrariesList != null)
-                {
-                    for (String library : deviceLibrariesList.split(","))
-                    {
-                        File f = new File(library);
-
-                        if (f.exists())
-                        {
-                            return new Device(deviceName, library, 0, disableNativePasswordDialog);
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
+        return linuxLibraries;
     }
 
-    @SuppressWarnings("restriction")
-    public void init()
+    public void setLinuxLibraries(LinuxLibraries linuxLibraries)
     {
-        try
-        {
-            Provider provider = new sun.security.pkcs11.SunPKCS11(new ByteArrayInputStream(this
-                    .toString().getBytes()));
-            Security.addProvider(provider);
-        }
-        catch (Exception e)
-        {
-            log.error("Could not initialize " + getName() + " in slot " + getSlot() + " loading "
-                    + getLibrary());
-        }
+        this.linuxLibraries = linuxLibraries;
+    }
+
+    public WindowsLibraries getWindowsLibraries()
+    {
+        return windowsLibraries;
+    }
+
+    public void setWindowsLibraries(WindowsLibraries windowsLibraries)
+    {
+        this.windowsLibraries = windowsLibraries;
+    }
+
+    public MacOSXLibraries getMacOSXLibraries()
+    {
+        return macOSXLibraries;
+    }
+
+    public void setMacOSXLibraries(MacOSXLibraries macOSXLibraries)
+    {
+        this.macOSXLibraries = macOSXLibraries;
     }
 }

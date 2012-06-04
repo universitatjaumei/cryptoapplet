@@ -21,7 +21,7 @@
 
 package es.uji.security.crypto.openxades.digidoc.factory;
 
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 
 /**

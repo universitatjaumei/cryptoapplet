@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import es.uji.security.crypto.BaseCryptoAppletTest;
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 
 public class MITyCTest extends BaseCryptoAppletTest
 {

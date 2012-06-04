@@ -25,8 +25,8 @@ import org.junit.Test;
 import es.uji.security.crypto.BaseCryptoAppletTest;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
-import es.uji.security.crypto.config.StreamUtils;
 import es.uji.security.util.Base64;
 
 public class CMSTest extends BaseCryptoAppletTest

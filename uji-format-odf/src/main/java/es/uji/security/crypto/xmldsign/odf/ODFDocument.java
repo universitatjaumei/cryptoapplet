@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 
 public class ODFDocument
 {

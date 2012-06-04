@@ -3,7 +3,7 @@ package es.uji.security.crypto.timestamp;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 
 public class TSResponseTest
 {

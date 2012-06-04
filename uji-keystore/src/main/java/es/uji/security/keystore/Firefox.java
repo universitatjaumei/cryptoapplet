@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import es.uji.security.crypto.config.OperatingSystemUtils;
+import es.uji.security.crypto.OperatingSystemUtils;
 
 public class Firefox
 {

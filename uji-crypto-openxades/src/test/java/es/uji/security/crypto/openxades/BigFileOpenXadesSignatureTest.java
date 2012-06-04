@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.security.crypto.CertificateUtils;
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;

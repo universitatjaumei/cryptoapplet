@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;

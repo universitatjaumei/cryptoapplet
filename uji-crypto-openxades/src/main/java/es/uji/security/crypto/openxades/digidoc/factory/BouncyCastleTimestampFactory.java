@@ -27,7 +27,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.CertificateUtils;
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;

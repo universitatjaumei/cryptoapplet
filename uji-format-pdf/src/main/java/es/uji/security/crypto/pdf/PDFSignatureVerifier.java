@@ -13,8 +13,8 @@ import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
 
 import es.uji.security.crypto.CertificateUtils;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.ConfigManager;
 
 public class PDFSignatureVerifier
 {

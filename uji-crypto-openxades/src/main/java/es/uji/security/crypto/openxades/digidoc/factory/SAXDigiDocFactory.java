@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import es.uji.security.crypto.CertificateUtils;
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.CertID;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.CompleteCertificateRefs;

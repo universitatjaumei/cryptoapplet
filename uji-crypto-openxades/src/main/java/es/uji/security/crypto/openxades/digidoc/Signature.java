@@ -32,7 +32,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.factory.CRLFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;

@@ -48,7 +48,7 @@ import javax.naming.ldap.InitialLdapContext;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 
 /**

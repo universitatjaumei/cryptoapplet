@@ -17,13 +17,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import es.uji.security.crypto.CertificateUtils;
+import es.uji.security.crypto.ConfigManager;
+import es.uji.security.crypto.FileSystemUtils;
 import es.uji.security.crypto.ISignFormatProvider;
+import es.uji.security.crypto.OperatingSystemUtils;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.FileSystemUtils;
-import es.uji.security.crypto.config.OperatingSystemUtils;
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.crypto.openxades.digidoc.CertValue;
 import es.uji.security.crypto.openxades.digidoc.DataFile;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;

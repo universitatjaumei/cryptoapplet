@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.ui.applet.SignatureApplet;
 
 public class FuncOutputParams implements OutputParams

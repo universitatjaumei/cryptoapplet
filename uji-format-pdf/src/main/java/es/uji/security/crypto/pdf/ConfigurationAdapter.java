@@ -1,7 +1,7 @@
 package es.uji.security.crypto.pdf;
 
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.config.ConfigManager;
 
 public class ConfigurationAdapter
 {

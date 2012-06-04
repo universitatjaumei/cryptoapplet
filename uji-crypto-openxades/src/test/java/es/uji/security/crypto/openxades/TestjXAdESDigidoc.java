@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import org.junit.Test;
 
 import es.uji.security.crypto.BaseCryptoAppletTest;
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;
 import es.uji.security.crypto.openxades.digidoc.factory.DigiDocFactory;
 import es.uji.security.crypto.openxades.digidoc.factory.FactoryManager;

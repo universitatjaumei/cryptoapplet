@@ -3,8 +3,8 @@ package es.uji.security.crypto.openxades;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;
 import es.uji.security.crypto.openxades.digidoc.Signature;
 import es.uji.security.crypto.openxades.digidoc.SignedDoc;

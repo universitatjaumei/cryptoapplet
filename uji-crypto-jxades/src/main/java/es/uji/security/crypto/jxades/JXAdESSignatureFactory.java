@@ -38,11 +38,11 @@ import net.java.xades.util.XMLUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.util.i18n.LabelManager;
 
 public class JXAdESSignatureFactory implements ISignFormatProvider

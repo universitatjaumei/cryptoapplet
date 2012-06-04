@@ -40,7 +40,7 @@ import javax.crypto.Cipher;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 
 /**
  * Represents an instance of signed doc in DIGIDOC format. Contains one or more DataFile -s and zero

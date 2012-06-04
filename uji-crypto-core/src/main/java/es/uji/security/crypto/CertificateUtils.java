@@ -11,7 +11,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import es.uji.security.crypto.config.ConfigManager;
 
 public class CertificateUtils
 {

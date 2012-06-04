@@ -10,9 +10,9 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import es.uji.security.crypto.FileSystemUtils;
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.config.FileSystemUtils;
 
 public class TestODFSignatureFactory
 {

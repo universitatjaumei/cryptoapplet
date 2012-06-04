@@ -8,7 +8,7 @@ import java.io.InputStream;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.ui.applet.SignatureApplet;
 
 public class FileInputParams extends AbstractData implements InputParams

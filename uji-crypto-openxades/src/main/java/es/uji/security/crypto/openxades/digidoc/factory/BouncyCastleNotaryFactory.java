@@ -60,7 +60,7 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.ocsp.UnknownStatus;
 
 import es.uji.security.crypto.CertificateUtils;
-import es.uji.security.crypto.config.ConfigManager;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.ocsp.CryptoCoreOCSPException;
 import es.uji.security.crypto.ocsp.OCSPChecker;
 import es.uji.security.crypto.openxades.digidoc.DigiDocException;

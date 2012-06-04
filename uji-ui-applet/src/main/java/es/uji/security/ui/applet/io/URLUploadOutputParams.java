@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.config.OperatingSystemUtils;
+import es.uji.security.crypto.OperatingSystemUtils;
 import es.uji.security.ui.applet.SignatureApplet;
 
 public class URLUploadOutputParams extends AbstractData implements OutputParams

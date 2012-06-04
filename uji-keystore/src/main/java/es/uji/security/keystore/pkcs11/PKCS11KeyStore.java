@@ -8,7 +8,7 @@ import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
 
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.keystore.BaseKeyStore;
 import es.uji.security.keystore.SimpleKeyStore;
 

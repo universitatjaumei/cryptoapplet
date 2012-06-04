@@ -10,8 +10,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.StreamUtils;
 
 public class TestXMLDsigVerifier
 {

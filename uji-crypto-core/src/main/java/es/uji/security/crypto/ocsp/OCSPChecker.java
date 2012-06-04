@@ -37,9 +37,9 @@ import sun.security.x509.AuthorityInfoAccessExtension;
 import sun.security.x509.GeneralNameInterface;
 import sun.security.x509.URIName;
 import sun.security.x509.X509CertImpl;
+import es.uji.security.crypto.ConfigManager;
 import es.uji.security.crypto.OCSPResponseDetails;
-import es.uji.security.crypto.config.ConfigManager;
-import es.uji.security.crypto.config.StreamUtils;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.util.Base64;
 
 public class OCSPChecker

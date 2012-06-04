@@ -13,8 +13,8 @@ import org.junit.Test;
 import es.uji.security.crypto.BaseCryptoAppletTest;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.StreamUtils;
 import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.StreamUtils;
 
 public class PDFTest extends BaseCryptoAppletTest
 {

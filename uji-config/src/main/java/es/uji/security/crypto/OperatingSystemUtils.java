@@ -1,4 +1,4 @@
-package es.uji.security.crypto.config;
+package es.uji.security.crypto;
 
 import java.io.InputStream;
 

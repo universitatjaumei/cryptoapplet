@@ -1,135 +1,76 @@
 package es.uji.security.crypto.config;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Properties;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.log4j.Logger;
-
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ConfigManager
 {
-    private static Logger log = Logger.getLogger(ConfigManager.class);
+    private Keystore keystore;
 
-    private static String DEFAULT_CONFIG_FILE = "ujiCrypto.conf";
+    private DeviceRegistry devices;
+    
+    @XmlElement(name = "certificationAuthorities")
+    private CertificationAuthorityRegistry certificationAuthoritiesRegistry;
+    
+    @XmlElement(name = "revocationServices")
+    private RevocationServiceRegistry revocationServicesRegistry;
+    
+    @XmlElement(name = "timestampingServices")
+    private TimestampingServiceRegistry timestampingServicesRegistry;
 
-    private static Properties properties;
-    private static ConfigManager instance;
-
-    public static Properties getDefaultProperties()
+    public Keystore getKeystore()
     {
-        Properties prop = new Properties();
-
-        prop.put("DIGIDOC_NOTARY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleNotaryFactory");
-        prop.put("DIGIDOC_FACTORY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocFactory");
-        prop.put("DIGIDOC_TIMESTAMP_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleSignatureTimestampFactory");
-        prop.put("CANONICALIZATION_FACTORY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.DOMCanonicalizationFactory");
-        prop.put("CRL_FACTORY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.CRLCheckerFactory");
-        prop.put("DIGIDOC_SECURITY_PROVIDER", "org.bouncycastle.jce.provider.BouncyCastleProvider");
-        prop.put("DIGIDOC_SECURITY_PROVIDER_NAME", "BC");
-        prop.put("DIGIDOC_VERIFY_ALGORITHM", "RSA//");
-
-        return prop;
+        return keystore;
     }
 
-    public String getProperty(String key)
+    public void setKeystore(Keystore keystore)
     {
-        return properties.getProperty(key);
+        this.keystore = keystore;
     }
 
-    public String getProperty(String key, String defaultValue)
+    public DeviceRegistry getDevices()
     {
-        String value = properties.getProperty(key);
-
-        if (value != null)
-        {
-            return value;
-        }
-        else
-        {
-            return defaultValue;
-        }
+        return devices;
     }
 
-    public String getStringProperty(String key, String defaultValue)
+    public void setDevices(DeviceRegistry devices)
     {
-        return properties.getProperty(key, defaultValue);
+        this.devices = devices;
     }
 
-    public int getIntProperty(String key, int defaultValue)
+    public CertificationAuthorityRegistry getCertificationAuthoritiesRegistry()
     {
-        int intValue = defaultValue;
-
-        try
-        {
-            intValue = Integer.parseInt(properties.getProperty(key));
-        }
-        catch (Exception e)
-        {
-            log.error("Error parsing number: " + key);
-        }
-
-        return intValue;
+        return certificationAuthoritiesRegistry;
     }
 
-    public void setProperty(String key, String value)
+    public void setCertificationAuthoritiesRegistry(
+            CertificationAuthorityRegistry certificationAuthoritiesRegistry)
     {
-        properties.setProperty(key, value);
+        this.certificationAuthoritiesRegistry = certificationAuthoritiesRegistry;
     }
 
-    private ConfigManager()
+    public RevocationServiceRegistry getRevocationServicesRegistry()
     {
-        properties = new Properties();
-        properties.putAll(getDefaultProperties());
-
-        try
-        {
-            properties.load(ConfigManager.class.getClassLoader().getResourceAsStream(
-                    DEFAULT_CONFIG_FILE));
-        }
-        catch (IOException e)
-        {
-            log.error("Cant not load ujiCrypto.conf file", e);
-        }
+        return revocationServicesRegistry;
     }
 
-    public static ConfigManager getInstance()
+    public void setRevocationServicesRegistry(RevocationServiceRegistry revocationServicesRegistry)
     {
-        if (instance == null)
-        {
-            instance = new ConfigManager();
-        }
-
-        return instance;
+        this.revocationServicesRegistry = revocationServicesRegistry;
     }
 
-    public void loadRemotePropertiesFile(String baseURL)
+    public TimestampingServiceRegistry getTimestampingServicesRegistry()
     {
-        log.debug("Trying to retrieve ujiCrypto.conf from server ...");
+        return timestampingServicesRegistry;
+    }
 
-        try
-        {
-            URL url = new URL(baseURL + "/" + DEFAULT_CONFIG_FILE);
-            URLConnection uc = url.openConnection();
-            uc.connect();
-
-            Properties remoteProperties = new Properties();
-            remoteProperties.load(uc.getInputStream());
-
-            log.debug("Remote ujiCrypto.conf loaded successfully!!");
-
-            properties.clear();
-            properties.putAll(getDefaultProperties());
-            properties.putAll(remoteProperties);
-        }
-        catch (Exception e)
-        {
-            log.error("Cann't load ujiCrypto.conf from server. WARNING: Bundled local file will be loaded.");
-        }
+    public void setTimestampingServicesRegistry(
+            TimestampingServiceRegistry timestampingServicesRegistry)
+    {
+        this.timestampingServicesRegistry = timestampingServicesRegistry;
     }
 }
