@@ -9,13 +9,8 @@ public class ObjectFactory
     {
     }
     
-    public ConfigManager createConfigManager()
+    public Configuration createConfigManager()
     {
-        return new ConfigManager();
-    }
-    
-    public Keystore createKeystore()
-    {
-        return new Keystore();
+        return new Configuration();
     }
 }

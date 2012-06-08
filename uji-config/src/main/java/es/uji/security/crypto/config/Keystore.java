@@ -1,7 +1,13 @@
 package es.uji.security.crypto.config;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Keystore
 {
+    @XmlAttribute
     private String id;
     private String type;
     private String fileName;

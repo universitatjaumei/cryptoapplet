@@ -1,14 +1,23 @@
 package es.uji.security.crypto.config;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Device
 {
+    @XmlAttribute
     private String id;
     private Integer slot;
-    private Boolean disableNativePasswordDialog;
-    private LinuxLibraries linuxLibraries;
-    private WindowsLibraries windowsLibraries;
-    private MacOSXLibraries macOSXLibraries;
+    private Boolean disableNativePasswordDialog;    
+    @XmlElement(name="linux")
+    private Libraries linuxLibraries;
+    @XmlElement(name="windows")
+    private Libraries windowsLibraries;
+    @XmlElement(name="macosx")
+    private Libraries macOSXLibraries;
 
     public String getId()
     {
@@ -40,32 +49,32 @@ public class Device
         this.disableNativePasswordDialog = disableNativePasswordDialog;
     }
 
-    public LinuxLibraries getLinuxLibraries()
+    public Libraries getLinuxLibraries()
     {
         return linuxLibraries;
     }
 
-    public void setLinuxLibraries(LinuxLibraries linuxLibraries)
+    public void setLinuxLibraries(Libraries linuxLibraries)
     {
         this.linuxLibraries = linuxLibraries;
     }
 
-    public WindowsLibraries getWindowsLibraries()
+    public Libraries getWindowsLibraries()
     {
         return windowsLibraries;
     }
 
-    public void setWindowsLibraries(WindowsLibraries windowsLibraries)
+    public void setWindowsLibraries(Libraries windowsLibraries)
     {
         this.windowsLibraries = windowsLibraries;
     }
 
-    public MacOSXLibraries getMacOSXLibraries()
+    public Libraries getMacOSXLibraries()
     {
         return macOSXLibraries;
     }
 
-    public void setMacOSXLibraries(MacOSXLibraries macOSXLibraries)
+    public void setMacOSXLibraries(Libraries macOSXLibraries)
     {
         this.macOSXLibraries = macOSXLibraries;
     }

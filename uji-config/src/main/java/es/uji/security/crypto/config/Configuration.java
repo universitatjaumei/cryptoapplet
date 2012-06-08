@@ -5,22 +5,22 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(name = "conf")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ConfigManager
+public class Configuration
 {
     private Keystore keystore;
 
-    private DeviceRegistry devices;
-    
+    @XmlElement(name = "devices")
+    private DeviceRegistry deviceRegistry;
     @XmlElement(name = "certificationAuthorities")
     private CertificationAuthorityRegistry certificationAuthoritiesRegistry;
-    
     @XmlElement(name = "revocationServices")
     private RevocationServiceRegistry revocationServicesRegistry;
-    
-    @XmlElement(name = "timestampingServices")
+    @XmlElement(name = "timestamping")
     private TimestampingServiceRegistry timestampingServicesRegistry;
+    @XmlElement(name = "formatters")
+    private FormatterRegistry formatterRegistry;
 
     public Keystore getKeystore()
     {
@@ -32,14 +32,14 @@ public class ConfigManager
         this.keystore = keystore;
     }
 
-    public DeviceRegistry getDevices()
+    public DeviceRegistry getDeviceRegistry()
     {
-        return devices;
+        return deviceRegistry;
     }
 
-    public void setDevices(DeviceRegistry devices)
+    public void setDeviceRegistry(DeviceRegistry deviceRegistry)
     {
-        this.devices = devices;
+        this.deviceRegistry = deviceRegistry;
     }
 
     public CertificationAuthorityRegistry getCertificationAuthoritiesRegistry()
@@ -72,5 +72,15 @@ public class ConfigManager
             TimestampingServiceRegistry timestampingServicesRegistry)
     {
         this.timestampingServicesRegistry = timestampingServicesRegistry;
+    }
+
+    public FormatterRegistry getFormatterRegistry()
+    {
+        return formatterRegistry;
+    }
+
+    public void setFormatterRegistry(FormatterRegistry formatterRegistry)
+    {
+        this.formatterRegistry = formatterRegistry;
     }
 }

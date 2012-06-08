@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class MacOSXLibraries
+public class Libraries
 {
-    @XmlElement(name="library")
+    @XmlElement(name="lib")
     private ArrayList<String> libraries;
 
     public ArrayList<String> getLibraries()

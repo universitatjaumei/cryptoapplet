@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CertificationAuthorityRegistry
 {
-    @XmlElement(name = "certificationAuthority")
+    @XmlElement(name = "ca")
     private ArrayList<CertificationAuthority> certificationAuthorities;
 
     public ArrayList<CertificationAuthority> getCertificationAuthorities()

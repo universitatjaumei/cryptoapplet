@@ -1,11 +1,18 @@
 package es.uji.security.crypto.config;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RevocationService
 {
+    @XmlAttribute(name = "ca")
+    private String caId;
+    @XmlAttribute
     private String id;
     private String url;
     private String certificateAlias;
-    private String caCertificateAlias;
     private Boolean signRequest;
     private Boolean useNonce;
 
@@ -39,14 +46,19 @@ public class RevocationService
         this.certificateAlias = certificateAlias;
     }
 
-    public String getCaCertificateAlias()
+    public String getCaId()
     {
-        return caCertificateAlias;
+        if (caId != null && !caId.isEmpty())
+        {
+            return caId.substring(1);
+        }
+        
+        return caId;
     }
 
-    public void setCaCertificateAlias(String caCertificateAlias)
+    public void setCaId(String caId)
     {
-        this.caCertificateAlias = caCertificateAlias;
+        this.caId = "#" + caId;
     }
 
     public Boolean getSignRequest()

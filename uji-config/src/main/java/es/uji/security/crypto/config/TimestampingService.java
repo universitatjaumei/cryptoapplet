@@ -1,11 +1,18 @@
 package es.uji.security.crypto.config;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class TimestampingService
 {
+    @XmlAttribute(name = "ca")
+    private String caId;
+    @XmlAttribute
     private String id;
     private String url;
     private String certificateAlias;
-    private CertificationAuthority ca;
     private Boolean askCert;
     private Boolean useNonce;
     private Integer sn;
@@ -41,14 +48,19 @@ public class TimestampingService
         this.certificateAlias = certificateAlias;
     }
 
-    public CertificationAuthority getCa()
+    public String getCaId()
     {
-        return ca;
+        if (caId != null && !caId.isEmpty())
+        {
+            return caId.substring(1);
+        }
+        
+        return caId;
     }
 
-    public void setCa(CertificationAuthority ca)
+    public void setCaId(String caId)
     {
-        this.ca = ca;
+        this.caId = "#" + caId;
     }
 
     public Boolean getAskCert()

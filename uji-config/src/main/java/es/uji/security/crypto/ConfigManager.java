@@ -1,135 +1,85 @@
 package es.uji.security.crypto;
 
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.apache.log4j.Logger;
+
+import es.uji.security.crypto.config.Configuration;
 
 public class ConfigManager
 {
     private static Logger log = Logger.getLogger(ConfigManager.class);
 
-    private static String DEFAULT_CONFIG_FILE = "ujiCrypto.conf";
+    private static String CONFIG_FILE = "conf.xml";
 
-    private static Properties properties;
     private static ConfigManager instance;
 
-    public static Properties getDefaultProperties()
+    private Configuration configuration;
+
+    // public static Properties getDefaultProperties()
+    // {
+    // Properties prop = new Properties();
+    //
+    // prop.put("DIGIDOC_NOTARY_IMPL",
+    // "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleNotaryFactory");
+    // prop.put("DIGIDOC_FACTORY_IMPL",
+    // "es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocFactory");
+    // prop.put("DIGIDOC_TIMESTAMP_IMPL",
+    // "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleSignatureTimestampFactory");
+    // prop.put("CANONICALIZATION_FACTORY_IMPL",
+    // "es.uji.security.crypto.openxades.digidoc.factory.DOMCanonicalizationFactory");
+    // prop.put("CRL_FACTORY_IMPL",
+    // "es.uji.security.crypto.openxades.digidoc.factory.CRLCheckerFactory");
+    // prop.put("DIGIDOC_SECURITY_PROVIDER", "org.bouncycastle.jce.provider.BouncyCastleProvider");
+    // prop.put("DIGIDOC_SECURITY_PROVIDER_NAME", "BC");
+    // prop.put("DIGIDOC_VERIFY_ALGORITHM", "RSA//");
+    //
+    // return prop;
+    // }
+
+    private ConfigManager() throws JAXBException
     {
-        Properties prop = new Properties();
-
-        prop.put("DIGIDOC_NOTARY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleNotaryFactory");
-        prop.put("DIGIDOC_FACTORY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocFactory");
-        prop.put("DIGIDOC_TIMESTAMP_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleSignatureTimestampFactory");
-        prop.put("CANONICALIZATION_FACTORY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.DOMCanonicalizationFactory");
-        prop.put("CRL_FACTORY_IMPL",
-                "es.uji.security.crypto.openxades.digidoc.factory.CRLCheckerFactory");
-        prop.put("DIGIDOC_SECURITY_PROVIDER", "org.bouncycastle.jce.provider.BouncyCastleProvider");
-        prop.put("DIGIDOC_SECURITY_PROVIDER_NAME", "BC");
-        prop.put("DIGIDOC_VERIFY_ALGORITHM", "RSA//");
-
-        return prop;
+        JAXBContext context = JAXBContext.newInstance("es.uji.security.crypto.config");
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        
+        configuration = (Configuration) unmarshaller.unmarshal(ConfigManager.class.getClassLoader()
+                .getResourceAsStream(CONFIG_FILE));
     }
 
-    public String getProperty(String key)
-    {
-        return properties.getProperty(key);
-    }
-
-    public String getProperty(String key, String defaultValue)
-    {
-        String value = properties.getProperty(key);
-
-        if (value != null)
-        {
-            return value;
-        }
-        else
-        {
-            return defaultValue;
-        }
-    }
-
-    public String getStringProperty(String key, String defaultValue)
-    {
-        return properties.getProperty(key, defaultValue);
-    }
-
-    public int getIntProperty(String key, int defaultValue)
-    {
-        int intValue = defaultValue;
-
-        try
-        {
-            intValue = Integer.parseInt(properties.getProperty(key));
-        }
-        catch (Exception e)
-        {
-            log.error("Error parsing number: " + key);
-        }
-
-        return intValue;
-    }
-
-    public void setProperty(String key, String value)
-    {
-        properties.setProperty(key, value);
-    }
-
-    private ConfigManager()
-    {
-        properties = new Properties();
-        properties.putAll(getDefaultProperties());
-
-        try
-        {
-            properties.load(ConfigManager.class.getClassLoader().getResourceAsStream(
-                    DEFAULT_CONFIG_FILE));
-        }
-        catch (IOException e)
-        {
-            log.error("Cant not load ujiCrypto.conf file", e);
-        }
-    }
-
-    public static ConfigManager getInstance()
+    public static Configuration getConfigurationInstance() throws JAXBException
     {
         if (instance == null)
         {
             instance = new ConfigManager();
         }
 
-        return instance;
+        return instance.configuration;
     }
 
-    public void loadRemotePropertiesFile(String baseURL)
+    public void loadFromRemote(String url)
     {
-        log.debug("Trying to retrieve ujiCrypto.conf from server ...");
+        log.debug("Trying to retrieve config.xml from server ...");
 
         try
         {
-            URL url = new URL(baseURL + "/" + DEFAULT_CONFIG_FILE);
-            URLConnection uc = url.openConnection();
+            URL configFileUrl = new URL(url + "/" + CONFIG_FILE);
+            URLConnection uc = configFileUrl.openConnection();
             uc.connect();
 
             Properties remoteProperties = new Properties();
             remoteProperties.load(uc.getInputStream());
 
-            log.debug("Remote ujiCrypto.conf loaded successfully!!");
-
-            properties.clear();
-            properties.putAll(getDefaultProperties());
-            properties.putAll(remoteProperties);
+            log.debug("Remote config.xml loaded successfully!!");
         }
         catch (Exception e)
         {
-            log.error("Cann't load ujiCrypto.conf from server. WARNING: Bundled local file will be loaded.");
+            log.error("Cann't load config.xml from server. WARNING: Bundled local file will be loaded.");
         }
     }
 }

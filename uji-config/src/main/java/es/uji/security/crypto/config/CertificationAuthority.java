@@ -1,11 +1,18 @@
 package es.uji.security.crypto.config;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CertificationAuthority
 {
+    @XmlAttribute(name = "ocsp")
+    private String ocspId;
+    @XmlAttribute
     private String id;
-    private String commonName;
     private String certificateAlias;
-    private RevocationService ocsp;
+    private String commonName;
 
     public String getId()
     {
@@ -37,13 +44,18 @@ public class CertificationAuthority
         this.certificateAlias = certificateAlias;
     }
 
-    public RevocationService getOcsp()
+    public String getOcspId()
     {
-        return ocsp;
+        if (ocspId != null && !ocspId.isEmpty())
+        {
+            return ocspId.substring(1);
+        }
+
+        return ocspId;
     }
 
-    public void setOcsp(RevocationService ocsp)
+    public void setOcspId(String ocspId)
     {
-        this.ocsp = ocsp;
+        this.ocspId = "#" + ocspId;
     }
 }

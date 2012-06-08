@@ -1,12 +1,27 @@
 package es.uji.security.crypto.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Formatter
 {
+    @XmlAttribute(name = "tsa")
+    private String tsaId;
+    @XmlAttribute
     private String id;
-    private TimestampingService tsa;
+    @XmlJavaTypeAdapter(MapAdapter.class)
     private Map<String, String> configuration;
+
+    public Formatter()
+    {
+        configuration = new HashMap<String, String>();
+    }
 
     public String getId()
     {
@@ -18,14 +33,19 @@ public class Formatter
         this.id = id;
     }
 
-    public TimestampingService getTsa()
+    public String getTsaId()
     {
-        return tsa;
+        if (tsaId != null && !tsaId.isEmpty())
+        {
+            return tsaId.substring(1);
+        }
+
+        return tsaId;
     }
 
-    public void setTsa(TimestampingService tsa)
+    public void setTsaId(String tsaId)
     {
-        this.tsa = tsa;
+        this.tsaId = "#" + tsaId;
     }
 
     public Map<String, String> getConfiguration()
