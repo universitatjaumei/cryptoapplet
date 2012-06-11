@@ -1,4 +1,4 @@
-package es.uji.security.util;
+package es.uji.apps.cryptoapplet.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,7 +11,7 @@ public class ISO8601DateParser
     // 2004-06-20T06:GMT22:01Z
 
     // http://www.cl.cam.ac.uk/~mgk25/iso-time.html
-    //    
+    //
     // http://www.intertwingly.net/wiki/pie/DateTime
     //
     // http://www.w3.org/TR/NOTE-datetime
@@ -56,7 +56,6 @@ public class ISO8601DateParser
     {
         // NOTE: SimpleDateFormat uses GMT[-+]hh:mm for the TZ which breaks
         // things a bit. Before we go on we have to repair this.
-        
 
         // this is zero time so we need to add that TZ indicator for
         if (input.endsWith("Z"))
@@ -90,7 +89,7 @@ public class ISO8601DateParser
                 result = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmz").parse(input);
             }
         }
-        
+
         return result;
     }
 
@@ -103,7 +102,7 @@ public class ISO8601DateParser
         df.setTimeZone(tz);
 
         String output = df.format(date);
-        
+
         int inset0 = 3;
         int inset1 = 3;
 

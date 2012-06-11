@@ -1,4 +1,4 @@
-package es.uji.security.util;
+package es.uji.apps.cryptoapplet.utils;
 
 /**
  * <p>
@@ -140,7 +140,6 @@ package es.uji.security.util;
  */
 public class Base64
 {
-
     /* ******** P U B L I C F I E L D S ******** */
 
     /** No options specified. Value is zero. */
@@ -1361,7 +1360,7 @@ public class Base64
         {
             bytes = s.getBytes();
         } // end catch
-        // </change>
+          // </change>
 
         // Decode
         bytes = decode(bytes, 0, bytes.length, options);

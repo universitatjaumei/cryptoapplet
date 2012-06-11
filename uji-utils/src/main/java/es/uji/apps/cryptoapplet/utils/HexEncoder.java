@@ -19,7 +19,7 @@
  *
  **/
 
-package es.uji.security.util;
+package es.uji.apps.cryptoapplet.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
