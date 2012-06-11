@@ -1,4 +1,4 @@
-package es.uji.security.crypto.config;
+package es.uji.apps.cryptoapplet.config;
 
 import java.util.HashMap;
 import java.util.Map;

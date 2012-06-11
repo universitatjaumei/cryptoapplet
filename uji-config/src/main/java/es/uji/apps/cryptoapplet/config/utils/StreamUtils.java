@@ -1,4 +1,4 @@
-package es.uji.security.crypto;
+package es.uji.apps.cryptoapplet.config.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

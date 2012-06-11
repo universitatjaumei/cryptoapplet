@@ -1,11 +1,11 @@
-package es.uji.security.crypto.config;
+package es.uji.apps.cryptoapplet.config;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class TimestampingService
+public class RevocationService
 {
     @XmlAttribute(name = "ca")
     private String caId;
@@ -13,10 +13,8 @@ public class TimestampingService
     private String id;
     private String url;
     private String certificateAlias;
-    private Boolean askCert;
+    private Boolean signRequest;
     private Boolean useNonce;
-    private Integer sn;
-    private Integer timeErrSecs;
 
     public String getId()
     {
@@ -63,14 +61,14 @@ public class TimestampingService
         this.caId = "#" + caId;
     }
 
-    public Boolean getAskCert()
+    public Boolean getSignRequest()
     {
-        return askCert;
+        return signRequest;
     }
 
-    public void setAskCert(Boolean askCert)
+    public void setSignRequest(Boolean signRequest)
     {
-        this.askCert = askCert;
+        this.signRequest = signRequest;
     }
 
     public Boolean getUseNonce()
@@ -81,25 +79,5 @@ public class TimestampingService
     public void setUseNonce(Boolean useNonce)
     {
         this.useNonce = useNonce;
-    }
-
-    public Integer getSn()
-    {
-        return sn;
-    }
-
-    public void setSn(Integer sn)
-    {
-        this.sn = sn;
-    }
-
-    public Integer getTimeErrSecs()
-    {
-        return timeErrSecs;
-    }
-
-    public void setTimeErrSecs(Integer timeErrSecs)
-    {
-        this.timeErrSecs = timeErrSecs;
     }
 }

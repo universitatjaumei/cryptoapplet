@@ -1,4 +1,4 @@
-package es.uji.security.crypto.config;
+package es.uji.apps.cryptoapplet.config;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

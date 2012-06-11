@@ -1,12 +1,10 @@
-package es.uji.security.crypto;
+package es.uji.apps.cryptoapplet.config;
 
 import java.io.File;
 
 import javax.xml.bind.JAXBException;
 
-import es.uji.security.crypto.config.Configuration;
-import es.uji.security.crypto.config.Device;
-import es.uji.security.crypto.config.Libraries;
+import es.uji.apps.cryptoapplet.config.utils.OperatingSystemUtils;
 
 public class DeviceDetector
 {

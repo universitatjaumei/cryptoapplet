@@ -1,4 +1,4 @@
-package es.uji.security.crypto;
+package es.uji.apps.cryptoapplet.config;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -10,7 +10,6 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
-import es.uji.security.crypto.config.Configuration;
 
 public class ConfigManager
 {
