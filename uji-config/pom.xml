@@ -6,14 +6,14 @@
   <name>uji-config</name>
 
   <parent>
-    <groupId>es.uji.security</groupId>
-    <artifactId>CryptoApplet</artifactId>
+    <groupId>es.uji.apps.cryptoapplet</groupId>
+    <artifactId>cryptoapplet-base</artifactId>
     <version>3.0.0-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
-      <groupId>es.uji.security</groupId>
+      <groupId>es.uji.apps.cryptoapplet</groupId>
       <artifactId>uji-utils</artifactId>
       <version>${project.version}</version>
     </dependency>
