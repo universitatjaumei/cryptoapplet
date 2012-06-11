@@ -1,4 +1,4 @@
-package es.uji.security.crypto.config;
+package es.uji.apps.cryptoapplet.config;
 
 import java.io.FileOutputStream;
 import java.util.ArrayList;
