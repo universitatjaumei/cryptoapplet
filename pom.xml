@@ -2,16 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>es.uji.security</groupId>
+  <groupId>es.uji.apps.cryptoapplet</groupId>
   <version>3.0.0-SNAPSHOT</version>
-  <artifactId>CryptoApplet</artifactId>
+  <artifactId>cryptoapplet-base</artifactId>
   <packaging>pom</packaging>
-  <name>CryptoApplet</name>
+  <name>cryptoapplet</name>
   <url>https://universitatjaumei.jira.com/browse/CRYPTOAPPLET/</url>
- 
+
   <properties>
-    <bouncycastle.version>1.43</bouncycastle.version>
-    <jxades.version>0.0.3</jxades.version>
+    <bouncycastle.version>1.46</bouncycastle.version>
+    <jxades.version>0.0.6</jxades.version>
     <junit.version>4.8.2</junit.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -51,8 +51,8 @@
   </build>
 
   <modules>
-    <module>uji-config</module>
     <module>uji-utils</module>
+    <module>uji-config</module>
     <module>uji-crypto-core</module>
     <module>uji-crypto-raw</module>
     <module>uji-crypto-cms</module>
