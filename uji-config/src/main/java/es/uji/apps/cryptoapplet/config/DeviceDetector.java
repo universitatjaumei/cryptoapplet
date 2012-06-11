@@ -4,7 +4,7 @@ import java.io.File;
 
 import javax.xml.bind.JAXBException;
 
-import es.uji.apps.cryptoapplet.config.utils.OperatingSystemUtils;
+import es.uji.apps.cryptoapplet.utils.OperatingSystemUtils;
 
 public class DeviceDetector
 {
