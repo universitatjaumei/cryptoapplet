@@ -1,26 +1,18 @@
 package es.uji.apps.cryptoapplet.crypto.ocsp;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Provider;
-import java.security.Security;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
 import org.bouncycastle.asn1.ocsp.OCSPResponse;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.ocsp.BasicOCSPResp;
 import org.bouncycastle.ocsp.CertificateID;
 import org.bouncycastle.ocsp.OCSPException;
@@ -37,8 +29,6 @@ import sun.security.x509.AuthorityInfoAccessExtension;
 import sun.security.x509.GeneralNameInterface;
 import sun.security.x509.URIName;
 import sun.security.x509.X509CertImpl;
-import es.uji.apps.cryptoapplet.config.ConfigManager;
-import es.uji.apps.cryptoapplet.config.Configuration;
 import es.uji.apps.cryptoapplet.utils.Base64;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
@@ -186,7 +176,7 @@ public class OCSPChecker
         return ocspResp;
     }
 
-    @SuppressWarnings({ "deprecation", "unchecked" })
+    @SuppressWarnings({ "deprecation", "unchecked", "restriction" })
     public OCSPResponseDetails getCertificateStatus(X509Certificate certificate,
             X509Certificate caCertificate, X509Certificate ocspCertificate, Provider provider)
     {
@@ -399,109 +389,5 @@ public class OCSPChecker
 
         responseDetails.setValid(true);
         return responseDetails;
-    }
-
-    private void showStatus(OCSPResponseDetails responseDetails)
-    {
-        if (responseDetails.isValid())
-        {
-            System.out.println("OK");
-        }
-        else
-        {
-            for (String e : responseDetails.getErrors())
-            {
-                System.out.println(e);
-            }
-        }
-    }
-
-    public static void main(String[] args) throws CertificateException, KeyStoreException,
-            NoSuchAlgorithmException, IOException
-    {
-        Provider provider = new BouncyCastleProvider();
-
-        if (Security.getProvider("BC") == null)
-        {
-            Security.addProvider(provider);
-        }
-
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-
-        String ocspURL = "http://ocsp.accv.es";
-
-        X509Certificate cagvaCertificate = (X509Certificate) certificateFactory
-                .generateCertificate(new FileInputStream("src/main/resources/cagva.pem"));
-        X509Certificate accvCertificate = (X509Certificate) certificateFactory
-                .generateCertificate(new FileInputStream("src/main/resources/accv-ca2.pem"));
-        X509Certificate ocspCertificate = (X509Certificate) certificateFactory
-                .generateCertificate(new FileInputStream("src/main/resources/ocsp-gva.crt"));
-
-        X509Certificate fnmtCertificate = (X509Certificate) certificateFactory
-                .generateCertificate(new FileInputStream("src/main/resources/fnmt-ca.der"));
-        X509Certificate ocspFnmtCertificate = (X509Certificate) certificateFactory
-                .generateCertificate(new FileInputStream("src/main/resources/fnmt-ocsp.cer"));
-
-        OCSPChecker oscp = new OCSPChecker();
-
-        KeyStore ks = KeyStore.getInstance("PKCS12");
-        ks.load(new FileInputStream("src/main/resources/fnmt.p12"), "makeall".toCharArray());
-        X509Certificate fnmt = (X509Certificate) ks.getCertificate(ks.aliases().nextElement());
-        oscp.showStatus(oscp.getCertificateStatus("", fnmt, fnmtCertificate, ocspFnmtCertificate,
-                provider));
-
-        /*
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/uactivo951v_firma.p12"), "1234" .toCharArray());
-         * X509Certificate cagvaFirma = (X509Certificate) ks
-         * .getCertificate(ks.aliases().nextElement());
-         * oscp.showStatus(oscp.getCertificateStatus(cagvaFirma, cagvaCertificate, ocspCertificate,
-         * provider)); oscp.showStatus(oscp.getCertificateStatus(ocspURL, cagvaFirma,
-         * cagvaCertificate, ocspCertificate, provider));
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/uactivo951v_cifrado.p12"), "1234" .toCharArray());
-         * X509Certificate cagvaCifrado = (X509Certificate) ks.getCertificate(ks.aliases()
-         * .nextElement()); oscp.showStatus(oscp.getCertificateStatus(ocspURL, cagvaCifrado,
-         * cagvaCertificate, ocspCertificate, provider));
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/urevocado952h_firma.p12"), "1234" .toCharArray());
-         * X509Certificate cagvaFirmaRevocado = (X509Certificate) ks.getCertificate(ks.aliases()
-         * .nextElement()); oscp.showStatus(oscp.getCertificateStatus(ocspURL, cagvaFirmaRevocado,
-         * cagvaCertificate, ocspCertificate, provider));
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/urevocado952h_cifrado.p12"), "1234" .toCharArray());
-         * X509Certificate cagvaCifradoRevocado = (X509Certificate) ks.getCertificate(ks.aliases()
-         * .nextElement()); oscp.showStatus(oscp.getCertificateStatus(ocspURL, cagvaCifradoRevocado,
-         * cagvaCertificate, ocspCertificate, provider));
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/cpruebas104p_firma.p12"), "1234" .toCharArray());
-         * X509Certificate accvFirma = (X509Certificate)
-         * ks.getCertificate(ks.aliases().nextElement());
-         * oscp.showStatus(oscp.getCertificateStatus(ocspURL, accvFirma, accvCertificate,
-         * ocspCertificate, provider));
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/cpruebas104p_cifrado.p12"), "1234" .toCharArray());
-         * X509Certificate accvCifrado = (X509Certificate) ks.getCertificate(ks.aliases()
-         * .nextElement()); oscp.showStatus(oscp.getCertificateStatus(ocspURL, accvCifrado,
-         * accvCertificate, ocspCertificate, provider));
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/AEATPF_F2.p12"), "AEATPF_F2".toCharArray());
-         * X509Certificate accvFirmaRevocado = (X509Certificate) ks.getCertificate(ks.aliases()
-         * .nextElement()); oscp.showStatus(oscp.getCertificateStatus(ocspURL, accvFirmaRevocado,
-         * accvCertificate, ocspCertificate, provider));
-         * 
-         * ks = KeyStore.getInstance("PKCS12"); ks.load(new
-         * FileInputStream("src/main/resources/AEATPF_C2.p12"), "AEATPF_C2".toCharArray());
-         * X509Certificate accvCifradoRevocado = (X509Certificate) ks.getCertificate(ks.aliases()
-         * .nextElement()); oscp.showStatus(oscp.getCertificateStatus(ocspURL, accvCifradoRevocado,
-         * accvCertificate, ocspCertificate, provider));
-         */
     }
 }
