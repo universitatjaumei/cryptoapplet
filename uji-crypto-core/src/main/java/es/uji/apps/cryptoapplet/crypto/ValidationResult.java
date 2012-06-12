@@ -3,18 +3,18 @@ package es.uji.apps.cryptoapplet.crypto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VerificationResult
+public class ValidationResult
 {
     private boolean valid;
     private List<String> errors;
     
-    public VerificationResult()
+    public ValidationResult()
     {
         this.valid = false;
         this.errors = new ArrayList<String>();
     }
     
-    public VerificationResult(boolean valid, List<String> errors)
+    public ValidationResult(boolean valid, List<String> errors)
     {
         this.valid = valid;
         this.errors = errors;
