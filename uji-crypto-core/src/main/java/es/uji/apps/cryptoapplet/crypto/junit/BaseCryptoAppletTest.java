@@ -14,7 +14,7 @@ import org.junit.Assert;
 
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
-import es.uji.apps.cryptoapplet.crypto.VerificationResult;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.utils.FileSystemUtils;
 
 public class BaseCryptoAppletTest
@@ -113,7 +113,7 @@ public class BaseCryptoAppletTest
         Assert.assertTrue(signatureResult.isValid());
     }
 
-    protected void showErrors(VerificationResult verificationResult)
+    protected void showErrors(ValidationResult verificationResult)
     {
         if (!verificationResult.isValid())
         {
