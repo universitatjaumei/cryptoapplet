@@ -51,11 +51,19 @@ public class ConfigManager
                 .getResourceAsStream(CONFIG_FILE));
     }
 
-    public static Configuration getConfigurationInstance() throws JAXBException
+    public static Configuration getConfigurationInstance()
     {
         if (instance == null)
         {
-            instance = new ConfigManager();
+            try
+            {
+                instance = new ConfigManager();
+            }
+            catch (JAXBException e)
+            {
+                log.error("Cann't unmarshall " + CONFIG_FILE, e);
+                return new Configuration();
+            }
         }
 
         return instance.configuration;
