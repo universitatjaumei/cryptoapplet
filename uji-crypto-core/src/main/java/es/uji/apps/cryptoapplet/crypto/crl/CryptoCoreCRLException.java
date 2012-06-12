@@ -5,11 +5,6 @@ import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
 @SuppressWarnings("serial")
 public class CryptoCoreCRLException extends CryptoAppletCoreException
 {
-    public CryptoCoreCRLException()
-    {
-        super();
-    }
-
     public CryptoCoreCRLException(String message)
     {
         super(message);
