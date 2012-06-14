@@ -1,4 +1,4 @@
-package es.uji.security.crypto.raw;
+package es.uji.apps.cryptoapplet.crypto.raw;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -9,16 +9,18 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.Test;
 
-import es.uji.security.crypto.ISignFormatProvider;
-import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.StreamUtils;
-import es.uji.security.crypto.VerificationResult;
+import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
+import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class RawSignatureTest
 {
-    public static void main(String[] args) throws Exception
+    @Test
+    public void raw() throws Exception
     {
         BouncyCastleProvider bcp = new BouncyCastleProvider();
         Security.addProvider(bcp);
@@ -35,7 +37,7 @@ public class RawSignatureTest
         byte[] data = "data to sign".getBytes();
 
         // Firmando documento
-        ISignFormatProvider signFormatProvider = new RawSignatureFactory();
+        Formatter signFormatProvider = new RawFormatter();
 
         SignatureOptions signatureOptions = new SignatureOptions();
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
@@ -43,14 +45,13 @@ public class RawSignatureTest
         signatureOptions.setPrivateKey((PrivateKey) key);
         signatureOptions.setProvider(bcp);
 
-        SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
-        byte[] signedData = StreamUtils.inputStreamToByteArray(signatureResult
-                .getSignatureData());
+        byte[] signedData = StreamUtils.inputStreamToByteArray(signatureResult.getSignatureData());
 
-        RawSignatureVerifier rawSignatureVerifier = new RawSignatureVerifier();
+        RawValidator rawSignatureVerifier = new RawValidator();
 
-        VerificationResult verificationDetails = rawSignatureVerifier.verify(data, signedData,
+        ValidationResult verificationDetails = rawSignatureVerifier.verify(data, signedData,
                 certificate, new BouncyCastleProvider());
 
         if (verificationDetails.isValid())

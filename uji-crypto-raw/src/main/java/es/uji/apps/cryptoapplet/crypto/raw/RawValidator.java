@@ -1,4 +1,4 @@
-package es.uji.security.crypto.raw;
+package es.uji.apps.cryptoapplet.crypto.raw;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -9,26 +9,26 @@ import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import es.uji.security.crypto.VerificationResult;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 
-public class RawSignatureVerifier
+public class RawValidator
 {
-    public VerificationResult verify(byte[] data, byte[] signature, X509Certificate caCertificate, Provider provider)
-            throws CertificateException, IOException, NoSuchAlgorithmException,
+    public ValidationResult verify(byte[] data, byte[] signature, X509Certificate caCertificate,
+            Provider provider) throws CertificateException, IOException, NoSuchAlgorithmException,
             InvalidKeyException, SignatureException
     {
         Signature rsa_vfy = Signature.getInstance("SHA1withRSA", provider);
         rsa_vfy.initVerify(caCertificate.getPublicKey());
         rsa_vfy.update(data);
 
-        VerificationResult verificationDetails = new VerificationResult();
-        verificationDetails.setValid(rsa_vfy.verify(signature));       
-        
-        if (! verificationDetails.isValid())
+        ValidationResult verificationDetails = new ValidationResult();
+        verificationDetails.setValid(rsa_vfy.verify(signature));
+
+        if (!verificationDetails.isValid())
         {
             verificationDetails.addError("RAW signature can not be verified");
         }
-        
+
         return verificationDetails;
     }
 }
