@@ -6,11 +6,11 @@
   <version>3.0.0-SNAPSHOT</version>
   <artifactId>cryptoapplet-base</artifactId>
   <packaging>pom</packaging>
-  <name>cryptoapplet</name>
+  <name>cryptoapplet-base</name>
   <url>https://universitatjaumei.jira.com/browse/CRYPTOAPPLET/</url>
 
   <properties>
-    <bouncycastle.version>1.46</bouncycastle.version>
+    <bouncycastle.version>1.43</bouncycastle.version>
     <jxades.version>0.0.6</jxades.version>
     <junit.version>4.8.2</junit.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -57,9 +57,7 @@
     <module>uji-crypto-raw</module>
     <module>uji-crypto-cms</module>
     <module>uji-crypto-xmldsign</module>
-    <module>uji-crypto-openxades</module>
     <module>uji-crypto-jxades</module>
-    <module>uji-crypto-mityc</module>
     <module>uji-format-pdf</module>
     <module>uji-format-odf</module>
     <module>uji-format-facturae</module>
@@ -139,5 +137,4 @@
       </properties>
     </profile>
   </profiles>
-
 </project>
