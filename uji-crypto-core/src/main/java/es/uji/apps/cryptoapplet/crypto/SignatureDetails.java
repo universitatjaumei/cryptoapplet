@@ -16,7 +16,7 @@ import org.w3c.dom.NodeList;
 
 import es.uji.apps.cryptoapplet.utils.ISO8601DateParser;
 
-public class SignatureDetailInformation
+public class SignatureDetails
 {
     private String signerCN;
     private Date signatureTime;
@@ -74,10 +74,10 @@ public class SignatureDetailInformation
     }
 
     @SuppressWarnings({ "deprecation", "unchecked" })
-    public static List<SignatureDetailInformation> getSignatureDetailInformation(byte[] data,
+    public static List<SignatureDetails> getSignatureDetailInformation(byte[] data,
             String xadesNamespace) throws CryptoAppletCoreException
     {
-        List<SignatureDetailInformation> result = new ArrayList<SignatureDetailInformation>();
+        List<SignatureDetails> result = new ArrayList<SignatureDetails>();
 
         if (data != null && data.length > 0)
         {
@@ -103,7 +103,7 @@ public class SignatureDetailInformation
                     NodeList nlRole = currentSignature.getElementsByTagNameNS(xadesNamespace,
                             "ClaimedRole");
 
-                    SignatureDetailInformation signatureDetailInformation = new SignatureDetailInformation();
+                    SignatureDetails signatureDetailInformation = new SignatureDetails();
 
                     if (nlCN != null && nlCN.getLength() > 0
                             && nlCN.item(0).getFirstChild() != null)

@@ -2,8 +2,8 @@ package es.uji.apps.cryptoapplet.crypto;
 
 import java.util.List;
 
-public interface DetailInformationGenerator
+public interface DetailsGenerator
 {
-    public List<SignatureDetailInformation> getDetails(byte[] data)
+    public List<SignatureDetails> getDetails(byte[] data)
             throws CryptoAppletCoreException;
 }
