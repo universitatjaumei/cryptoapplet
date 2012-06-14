@@ -1,4 +1,4 @@
-package es.uji.security.crypto.jxades;
+package es.uji.apps.cryptoapplet.crypto.jxades;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -8,11 +8,11 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import es.uji.security.crypto.BaseCryptoAppletTest;
-import es.uji.security.crypto.ISignFormatProvider;
-import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.StreamUtils;
-import es.uji.security.crypto.VerificationResult;
+import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class JXAdESTest extends BaseCryptoAppletTest
 {
@@ -27,8 +27,8 @@ public class JXAdESTest extends BaseCryptoAppletTest
     {
         // Sign
 
-        ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
-        SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+        Formatter signFormatProvider = new JXAdESFormatter();
+        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
         showErrors(signatureResult, baseDir + "out-jxades-enveloped.xml");
 
@@ -37,10 +37,10 @@ public class JXAdESTest extends BaseCryptoAppletTest
         byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades.xml"));
 
-        JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
-        VerificationResult verificationResult = signatureVerifier.verify(signedData);
+        JXAdESValidator signatureVerifier = new JXAdESValidator();
+        ValidationResult ValidationResult = signatureVerifier.verify(signedData);
 
-        showErrors(verificationResult);
+        showErrors(ValidationResult);
     }
 
     @Test
@@ -50,8 +50,8 @@ public class JXAdESTest extends BaseCryptoAppletTest
 
         signatureOptions.setCoSignEnabled(true);
 
-        ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
-        SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+        Formatter signFormatProvider = new JXAdESFormatter();
+        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
         showErrors(signatureResult, baseDir + "out-jxades-enveloped-cosign.xml");
 
@@ -60,10 +60,10 @@ public class JXAdESTest extends BaseCryptoAppletTest
         byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades.xml"));
 
-        JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
-        VerificationResult verificationResult = signatureVerifier.verify(signedData);
+        JXAdESValidator signatureVerifier = new JXAdESValidator();
+        ValidationResult ValidationResult = signatureVerifier.verify(signedData);
 
-        showErrors(verificationResult);
+        showErrors(ValidationResult);
     }
 
     @Test
@@ -82,8 +82,8 @@ public class JXAdESTest extends BaseCryptoAppletTest
         {
             signatureOptions.setDataToSign(new ByteArrayInputStream(data));
 
-            ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
-            SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+            Formatter signFormatProvider = new JXAdESFormatter();
+            SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
             showErrors(signatureResult, baseDir + "out-jxades-detached-cosign.xml");
 
@@ -96,9 +96,9 @@ public class JXAdESTest extends BaseCryptoAppletTest
         data = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades-detached-cosign.xml"));
 
-        JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
-        VerificationResult verificationResult = signatureVerifier.verify(data);
+        JXAdESValidator signatureVerifier = new JXAdESValidator();
+        ValidationResult ValidationResult = signatureVerifier.verify(data);
 
-        showErrors(verificationResult);
+        showErrors(ValidationResult);
     }
 }

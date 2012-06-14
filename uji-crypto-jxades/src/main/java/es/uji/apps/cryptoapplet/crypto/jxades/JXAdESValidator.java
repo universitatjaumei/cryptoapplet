@@ -1,4 +1,4 @@
-package es.uji.security.crypto.jxades;
+package es.uji.apps.cryptoapplet.crypto.jxades;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -18,11 +18,11 @@ import net.java.xades.security.xml.XAdES.XMLAdvancedSignature;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import es.uji.security.crypto.VerificationResult;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 
-public class JXAdESSignatureVerifier
+public class JXAdESValidator
 {
-    public VerificationResult verify(byte[] signedData) throws ParserConfigurationException,
+    public ValidationResult verify(byte[] signedData) throws ParserConfigurationException,
             SAXException, IOException, GeneralSecurityException
     {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -35,7 +35,7 @@ public class JXAdESSignatureVerifier
         XMLAdvancedSignature fileXML = XMLAdvancedSignature.newInstance(xades);
         List<SignatureStatus> st = fileXML.validate();
 
-        VerificationResult verificationDetails = new VerificationResult();
+        ValidationResult verificationDetails = new ValidationResult();
         verificationDetails.setValid(true);
 
         for (SignatureStatus status : st)
