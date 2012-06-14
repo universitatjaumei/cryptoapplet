@@ -1,7 +1,6 @@
-package es.uji.security.crypto.cms;
+package es.uji.apps.cryptoapplet.crypto.cms;
 
 import java.io.ByteArrayInputStream;
-import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.CertStore;
@@ -15,17 +14,19 @@ import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedGenerator;
 
-import es.uji.security.crypto.ISignFormatProvider;
-import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.StreamUtils;
+import es.uji.apps.cryptoapplet.config.i18n.LabelManager;
+import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
+import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
+import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
-import es.uji.security.util.i18n.LabelManager;
 
-public class CMSSignatureFactory implements ISignFormatProvider
+public class CMSFormatter implements Formatter
 {
-    public SignatureResult formatSignature(SignatureOptions signatureOptions)
-            throws KeyStoreException, Exception
+    @Override 
+    public SignatureResult format(SignatureOptions signatureOptions)
+            throws CryptoAppletCoreException
     {
         byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
         X509Certificate certificate = signatureOptions.getCertificate();
@@ -59,31 +60,39 @@ public class CMSSignatureFactory implements ISignFormatProvider
         // TODO: Add the intermediate CAs if we have them
         certList.add(certificate);
 
-        CertStore certst = CertStore.getInstance("Collection", new CollectionCertStoreParameters(
-                certList));
-
-        gen.addCertificatesAndCRLs(certst);
-
-        if (signatureOptions.isHash())
+        try
         {
-            gen.setHash(data);
+            CertStore certst = CertStore.getInstance("Collection",
+                    new CollectionCertStoreParameters(certList));
+
+            gen.addCertificatesAndCRLs(certst);
+
+            if (signatureOptions.isHash())
+            {
+                gen.setHash(data);
+            }
+
+            CMSSignedData cmsSignedData = gen.generate(cmsProcessableByteArray, provider);
+
+            if (data != null)
+            {
+                signatureResult.setValid(true);
+                signatureResult.setSignatureData(new ByteArrayInputStream(cmsSignedData
+                        .getEncoded()));
+
+                return signatureResult;
+            }
+            else
+            {
+                signatureResult.setValid(false);
+                signatureResult.addError(LabelManager.get("ERROR_CMS_SIGNATURE"));
+
+                return signatureResult;
+            }
         }
-
-        CMSSignedData cmsSignedData = gen.generate(cmsProcessableByteArray, provider);
-
-        if (data != null)
+        catch (Exception e)
         {
-            signatureResult.setValid(true);
-            signatureResult.setSignatureData(new ByteArrayInputStream(cmsSignedData.getEncoded()));
-
-            return signatureResult;
-        }
-        else
-        {
-            signatureResult.setValid(false);
-            signatureResult.addError(LabelManager.get("ERROR_CMS_SIGNATURE"));
-
-            return signatureResult;
+            throw new CryptoAppletCoreException(e);
         }
     }
 }

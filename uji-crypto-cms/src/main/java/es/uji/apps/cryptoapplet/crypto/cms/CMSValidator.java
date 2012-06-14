@@ -1,4 +1,4 @@
-package es.uji.security.crypto.cms;
+package es.uji.apps.cryptoapplet.crypto.cms;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -30,7 +30,7 @@ import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 
-public class CMSSignatureVerifier
+public class CMSValidator
 {
     private boolean verifyAgainstCA(X509Certificate[] caCertificates, CertStore certs,
             Provider provider) throws CertStoreException, InvalidAlgorithmParameterException,

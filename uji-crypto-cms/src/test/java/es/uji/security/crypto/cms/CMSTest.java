@@ -22,12 +22,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import es.uji.security.crypto.BaseCryptoAppletTest;
-import es.uji.security.crypto.ISignFormatProvider;
-import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.StreamUtils;
+import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.crypto.cms.CMSFormatter;
+import es.uji.apps.cryptoapplet.crypto.cms.CMSValidator;
+import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
+import es.uji.apps.cryptoapplet.utils.Base64;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
-import es.uji.security.util.Base64;
 
 public class CMSTest extends BaseCryptoAppletTest
 {
@@ -42,16 +44,17 @@ public class CMSTest extends BaseCryptoAppletTest
     {
         // Sign
 
-        ISignFormatProvider signFormatProvider = new CMSSignatureFactory();
-        SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+        Formatter signFormatProvider = new CMSFormatter();
+        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
         showErrors(signatureResult, baseDir + "out-cms.bin");
 
         // Verify
 
-        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir + "out-cms.bin"));
+        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
+                + "out-cms.bin"));
 
-        CMSSignatureVerifier signatureVerifier = new CMSSignatureVerifier();
+        CMSValidator signatureVerifier = new CMSValidator();
 
         Assert.assertTrue(signatureVerifier.verify(data, signedData, new X509Certificate[] {},
                 provider));

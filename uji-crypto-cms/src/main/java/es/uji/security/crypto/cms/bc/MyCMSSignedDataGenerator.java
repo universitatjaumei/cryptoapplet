@@ -189,7 +189,7 @@ public class MyCMSSignedDataGenerator extends CMSSignedGenerator
 
         CMSAttributeTableGenerator getUnsignedAttributes()
         {
-            return unsAttr;
+            return unsAttr; 
         }
 
         @SuppressWarnings("unchecked")

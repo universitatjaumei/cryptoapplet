@@ -43,9 +43,9 @@ class CMSSignedHelper
 {
     static final CMSSignedHelper INSTANCE = new CMSSignedHelper();
 
-    private static final Map     encryptionAlgs = new HashMap();
-    private static final Map     digestAlgs = new HashMap();
-    private static final Map     digestAliases = new HashMap();
+    private static final Map encryptionAlgs = new HashMap();
+    private static final Map digestAlgs = new HashMap();
+    private static final Map digestAliases = new HashMap();
 
     private static void addEntries(DERObjectIdentifier alias, String digest, String encryption)
     {
@@ -109,8 +109,8 @@ class CMSSignedHelper
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd128.getId(), "RIPEMD128");
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd160.getId(), "RIPEMD160");
         digestAlgs.put(TeleTrusTObjectIdentifiers.ripemd256.getId(), "RIPEMD256");
-        digestAlgs.put(CryptoProObjectIdentifiers.gostR3411.getId(),  "GOST3411");
-        digestAlgs.put("1.3.6.1.4.1.5849.1.2.1",  "GOST3411");
+        digestAlgs.put(CryptoProObjectIdentifiers.gostR3411.getId(), "GOST3411");
+        digestAlgs.put("1.3.6.1.4.1.5849.1.2.1", "GOST3411");
 
         digestAliases.put("SHA1", new String[] { "SHA-1" });
         digestAliases.put("SHA224", new String[] { "SHA-224" });
@@ -120,13 +120,12 @@ class CMSSignedHelper
     }
 
     /**
-     * Return the digest algorithm using one of the standard JCA string
-     * representations rather than the algorithm identifier (if possible).
+     * Return the digest algorithm using one of the standard JCA string representations rather than
+     * the algorithm identifier (if possible).
      */
-    String getDigestAlgName(
-        String digestAlgOID)
+    String getDigestAlgName(String digestAlgOID)
     {
-        String algName = (String)digestAlgs.get(digestAlgOID);
+        String algName = (String) digestAlgs.get(digestAlgOID);
 
         if (algName != null)
         {
@@ -136,10 +135,9 @@ class CMSSignedHelper
         return digestAlgOID;
     }
 
-    String[] getDigestAliases(
-        String algName)
+    String[] getDigestAliases(String algName)
     {
-        String[] aliases = (String[])digestAliases.get(algName);
+        String[] aliases = (String[]) digestAliases.get(algName);
 
         if (aliases != null)
         {
@@ -150,14 +148,12 @@ class CMSSignedHelper
     }
 
     /**
-     * Return the digest encryption algorithm using one of the standard
-     * JCA string representations rather the the algorithm identifier (if
-     * possible).
+     * Return the digest encryption algorithm using one of the standard JCA string representations
+     * rather the the algorithm identifier (if possible).
      */
-    String getEncryptionAlgName(
-        String encryptionAlgOID)
+    String getEncryptionAlgName(String encryptionAlgOID)
     {
-        String algName = (String)encryptionAlgs.get(encryptionAlgOID);
+        String algName = (String) encryptionAlgs.get(encryptionAlgOID);
 
         if (algName != null)
         {
@@ -167,10 +163,8 @@ class CMSSignedHelper
         return encryptionAlgOID;
     }
 
-    MessageDigest getDigestInstance(
-        String algorithm,
-        Provider provider)
-        throws NoSuchAlgorithmException
+    MessageDigest getDigestInstance(String algorithm, Provider provider)
+            throws NoSuchAlgorithmException
     {
         try
         {
@@ -198,10 +192,8 @@ class CMSSignedHelper
         }
     }
 
-    private MessageDigest createDigestInstance(
-        String algorithm,
-        Provider provider)
-        throws NoSuchAlgorithmException
+    private MessageDigest createDigestInstance(String algorithm, Provider provider)
+            throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
@@ -213,10 +205,8 @@ class CMSSignedHelper
         }
     }
 
-    Signature getSignatureInstance(
-        String algorithm,
-        Provider provider)
-        throws NoSuchAlgorithmException
+    Signature getSignatureInstance(String algorithm, Provider provider)
+            throws NoSuchAlgorithmException
     {
         if (provider != null)
         {
@@ -228,11 +218,8 @@ class CMSSignedHelper
         }
     }
 
-    X509Store createAttributeStore(
-        String type,
-        Provider provider,
-        ASN1Set certSet)
-        throws NoSuchStoreException, CMSException
+    X509Store createAttributeStore(String type, Provider provider, ASN1Set certSet)
+            throws NoSuchStoreException, CMSException
     {
         List certs = new ArrayList();
 
@@ -244,30 +231,30 @@ class CMSSignedHelper
             {
                 try
                 {
-                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                    DERObject obj = ((DEREncodable) e.nextElement()).getDERObject();
 
                     if (obj instanceof ASN1TaggedObject)
                     {
-                        ASN1TaggedObject tagged = (ASN1TaggedObject)obj;
+                        ASN1TaggedObject tagged = (ASN1TaggedObject) obj;
 
                         if (tagged.getTagNo() == 2)
                         {
-                            certs.add(new X509V2AttributeCertificate(ASN1Sequence.getInstance(tagged, false).getEncoded()));
+                            certs.add(new X509V2AttributeCertificate(ASN1Sequence.getInstance(
+                                    tagged, false).getEncoded()));
                         }
                     }
                 }
                 catch (IOException ex)
                 {
-                    throw new CMSException(
-                            "can't re-encode attribute certificate!", ex);
+                    throw new CMSException("can't re-encode attribute certificate!", ex);
                 }
             }
         }
 
         try
         {
-            return X509Store.getInstance(
-                         "AttributeCertificate/" +type, new X509CollectionStoreParameters(certs), provider);
+            return X509Store.getInstance("AttributeCertificate/" + type,
+                    new X509CollectionStoreParameters(certs), provider);
         }
         catch (IllegalArgumentException e)
         {
@@ -275,11 +262,8 @@ class CMSSignedHelper
         }
     }
 
-    X509Store createCertificateStore(
-        String type,
-        Provider provider,
-        ASN1Set certSet)
-        throws NoSuchStoreException, CMSException
+    X509Store createCertificateStore(String type, Provider provider, ASN1Set certSet)
+            throws NoSuchStoreException, CMSException
     {
         List certs = new ArrayList();
 
@@ -290,8 +274,8 @@ class CMSSignedHelper
 
         try
         {
-            return X509Store.getInstance(
-                         "Certificate/" +type, new X509CollectionStoreParameters(certs), provider);
+            return X509Store.getInstance("Certificate/" + type, new X509CollectionStoreParameters(
+                    certs), provider);
         }
         catch (IllegalArgumentException e)
         {
@@ -299,11 +283,8 @@ class CMSSignedHelper
         }
     }
 
-    X509Store createCRLsStore(
-        String type,
-        Provider provider,
-        ASN1Set crlSet)
-        throws NoSuchStoreException, CMSException
+    X509Store createCRLsStore(String type, Provider provider, ASN1Set crlSet)
+            throws NoSuchStoreException, CMSException
     {
         List crls = new ArrayList();
 
@@ -314,8 +295,8 @@ class CMSSignedHelper
 
         try
         {
-            return X509Store.getInstance(
-                         "CRL/" +type, new X509CollectionStoreParameters(crls), provider);
+            return X509Store.getInstance("CRL/" + type, new X509CollectionStoreParameters(crls),
+                    provider);
         }
         catch (IllegalArgumentException e)
         {
@@ -323,12 +304,8 @@ class CMSSignedHelper
         }
     }
 
-    CertStore createCertStore(
-        String type,
-        Provider provider,
-        ASN1Set certSet,
-        ASN1Set crlSet)
-        throws CMSException, NoSuchAlgorithmException
+    CertStore createCertStore(String type, Provider provider, ASN1Set certSet, ASN1Set crlSet)
+            throws CMSException, NoSuchAlgorithmException
     {
         List certsAndcrls = new ArrayList();
 
@@ -350,7 +327,8 @@ class CMSSignedHelper
         {
             if (provider != null)
             {
-                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls), provider);
+                return CertStore.getInstance(type, new CollectionCertStoreParameters(certsAndcrls),
+                        provider);
             }
             else
             {
@@ -364,7 +342,7 @@ class CMSSignedHelper
     }
 
     private void addCertsFromSet(List certs, ASN1Set certSet, Provider provider)
-        throws CMSException
+            throws CMSException
     {
         CertificateFactory cf;
 
@@ -389,29 +367,25 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                DERObject obj = ((DEREncodable) e.nextElement()).getDERObject();
 
                 if (obj instanceof ASN1Sequence)
                 {
-                    certs.add(cf.generateCertificate(
-                        new ByteArrayInputStream(obj.getEncoded())));
+                    certs.add(cf.generateCertificate(new ByteArrayInputStream(obj.getEncoded())));
                 }
             }
             catch (IOException ex)
             {
-                throw new CMSException(
-                        "can't re-encode certificate!", ex);
+                throw new CMSException("can't re-encode certificate!", ex);
             }
             catch (CertificateException ex)
             {
-                throw new CMSException(
-                        "can't re-encode certificate!", ex);
+                throw new CMSException("can't re-encode certificate!", ex);
             }
         }
     }
 
-    private void addCRLsFromSet(List crls, ASN1Set certSet, Provider provider)
-        throws CMSException
+    private void addCRLsFromSet(List crls, ASN1Set certSet, Provider provider) throws CMSException
     {
         CertificateFactory cf;
 
@@ -436,10 +410,9 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                DERObject obj = ((DEREncodable) e.nextElement()).getDERObject();
 
-                crls.add(cf.generateCRL(
-                    new ByteArrayInputStream(obj.getEncoded())));
+                crls.add(cf.generateCRL(new ByteArrayInputStream(obj.getEncoded())));
             }
             catch (IOException ex)
             {
@@ -475,5 +448,4 @@ class CMSSignedHelper
         // not supported
         return false;
     }
-
 }
