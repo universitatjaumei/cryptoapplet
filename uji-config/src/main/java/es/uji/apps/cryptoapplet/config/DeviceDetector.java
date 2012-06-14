@@ -48,6 +48,7 @@ public class DeviceDetector
         return (fileLibrary.exists());
     }
 
+    //TODO
 //    @SuppressWarnings("restriction")
 //    public void init()
 //    {

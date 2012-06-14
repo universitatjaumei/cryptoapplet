@@ -35,7 +35,7 @@ public class ConfigManagerTest
         conf.setTimestampingServicesRegistry(getTimestampingServicesRegistry());
         conf.setFormatterRegistry(getFormatterRegistry());
 
-        JAXBContext context = JAXBContext.newInstance("es.uji.security.crypto.config");
+        JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config");
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.marshal(conf, new FileOutputStream("target/conf.xml"));
