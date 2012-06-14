@@ -1,4 +1,4 @@
-package es.uji.security.keystore;
+package es.uji.apps.cryptoapplet.keystore;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -6,22 +6,21 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Hashtable;
 
-import es.uji.security.crypto.SupportedBrowser;
-import es.uji.security.crypto.SupportedKeystore;
-import es.uji.security.crypto.config.Device;
-import es.uji.security.keystore.mscapi.SunMSCAPIKeyStore;
-import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
-import es.uji.security.keystore.pkcs11.devices.Firefox;
+import es.uji.apps.cryptoapplet.crypto.Browser;
+import es.uji.apps.cryptoapplet.crypto.KeystoreType;
+import es.uji.apps.cryptoapplet.keystore.mscapi.SunMSCAPIKeyStore;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.devices.Firefox;
 
 public class KeyStoreManager
 {
-    public Hashtable<SupportedKeystore, SimpleKeyStore> keystores;
-    private SupportedBrowser navigator;
+    public Hashtable<KeystoreType, SimpleKeyStore> keystores;
+    private Browser navigator;
 
-    public KeyStoreManager(SupportedBrowser navigator)
+    public KeyStoreManager(Browser navigator)
     {
         this.navigator = navigator;
-        this.keystores = new Hashtable<SupportedKeystore, SimpleKeyStore>();
+        this.keystores = new Hashtable<KeystoreType, SimpleKeyStore>();
     }
 
     public void initBrowserStores() throws GeneralSecurityException, IOException
@@ -32,7 +31,7 @@ public class KeyStoreManager
 
     private void initFirefoxStore() throws GeneralSecurityException, IOException
     {
-        if (navigator.equals(SupportedBrowser.FIREFOX))
+        if (navigator.equals(Browser.FIREFOX))
         {
             Firefox firefox = new Firefox();
             InputStream pkcs11Configuration = new ByteArrayInputStream(
@@ -45,26 +44,26 @@ public class KeyStoreManager
 
     private void initInternetExplorerStore() throws GeneralSecurityException, IOException
     {
-        if (navigator.equals(SupportedBrowser.IEXPLORER))
+        if (navigator.equals(Browser.IEXPLORER))
         {
             SimpleKeyStore keystore = new SunMSCAPIKeyStore();
             keystore.load(null, null);
         }
     }
 
-    public SimpleKeyStore getKeyStore(SupportedKeystore keystore)
+    public SimpleKeyStore getKeyStore(KeystoreType keystore)
     {
         return this.keystores.get(keystore);
     }
 
-    public Hashtable<SupportedKeystore, SimpleKeyStore> getKeyStoreTable()
+    public Hashtable<KeystoreType, SimpleKeyStore> getKeyStoreTable()
     {
         return this.keystores;
     }
 
-    public void addKeyStore(SupportedKeystore supportedKeystore, SimpleKeyStore keyStore)
+    public void addKeyStore(KeystoreType KeystoreType, SimpleKeyStore keyStore)
     {
-        keystores.put(supportedKeystore, keyStore);
+        keystores.put(KeystoreType, keyStore);
     }
 
     public void initKeyStores() throws GeneralSecurityException, IOException
@@ -72,19 +71,20 @@ public class KeyStoreManager
         initBrowserStores();
         initPKCS11();
     }
-    
+
     private void initPKCS11()
     {
-        if (!SupportedBrowser.IEXPLORER.equals(navigator))
-        {
-            Device device = Device.getDeviceWithAvailableLibrary();
-
-            for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
-            {
-                device.setSlot(deviceSlot);
-                device.init();
-            }
-        }
+        //TODO
+//        if (!Browser.IEXPLORER.equals(navigator))
+//        {
+//            Device device = Device.getDeviceWithAvailableLibrary();
+//
+//            for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
+//            {
+//                device.setSlot(deviceSlot);
+//                device.init();
+//            }
+//        }
     }
 
     public void flushKeyStoresTable()

@@ -11,7 +11,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import es.uji.security.keystore.SimpleKeyStore;
+import es.uji.apps.cryptoapplet.keystore.SimpleKeyStore;
+import es.uji.apps.cryptoapplet.keystore.pkcs12.PKCS12KeyStore;
 
 public class PKCS12KeyStoreTest
 {

@@ -11,8 +11,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import es.uji.security.keystore.SimpleKeyStore;
-import es.uji.security.keystore.pkcs11.devices.Firefox;
+import es.uji.apps.cryptoapplet.keystore.SimpleKeyStore;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.devices.Firefox;
 
 public class FirefoxPKCS11KeyStoreTest
 {

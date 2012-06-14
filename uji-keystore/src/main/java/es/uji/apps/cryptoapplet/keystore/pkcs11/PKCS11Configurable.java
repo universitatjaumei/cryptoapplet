@@ -1,4 +1,4 @@
-package es.uji.security.keystore.pkcs11;
+package es.uji.apps.cryptoapplet.keystore.pkcs11;
 
 public interface PKCS11Configurable
 {

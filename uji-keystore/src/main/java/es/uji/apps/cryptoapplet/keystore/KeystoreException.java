@@ -1,9 +1,9 @@
-package es.uji.security.keystore;
+package es.uji.apps.cryptoapplet.keystore;
 
-import es.uji.security.crypto.CryptoCoreException;
+import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
 
 @SuppressWarnings("serial")
-public class KeystoreException extends CryptoCoreException 
+public class KeystoreException extends CryptoAppletCoreException
 {
     public KeystoreException()
     {

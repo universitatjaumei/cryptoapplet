@@ -1,4 +1,4 @@
-package es.uji.security.keystore;
+package es.uji.apps.cryptoapplet.keystore;
 
 import java.io.IOException;
 import java.io.InputStream;

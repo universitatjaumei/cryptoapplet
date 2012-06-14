@@ -1,10 +1,10 @@
-package es.uji.security.keystore.pkcs11.devices;
+package es.uji.apps.cryptoapplet.keystore.pkcs11.devices;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import es.uji.security.keystore.pkcs11.PKCS11Configurable;
-import es.uji.security.keystore.pkcs11.PKCS11Device;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.PKCS11Configurable;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.PKCS11Device;
 
 public class DNIe extends PKCS11Device implements PKCS11Configurable
 {

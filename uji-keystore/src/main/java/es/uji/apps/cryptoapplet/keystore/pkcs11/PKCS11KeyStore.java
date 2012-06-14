@@ -1,4 +1,4 @@
-package es.uji.security.keystore.pkcs11;
+package es.uji.apps.cryptoapplet.keystore.pkcs11;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
 
-import es.uji.security.crypto.StreamUtils;
-import es.uji.security.keystore.BaseKeyStore;
-import es.uji.security.keystore.SimpleKeyStore;
+import es.uji.apps.cryptoapplet.keystore.BaseKeyStore;
+import es.uji.apps.cryptoapplet.keystore.SimpleKeyStore;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class PKCS11KeyStore extends BaseKeyStore implements SimpleKeyStore
 {

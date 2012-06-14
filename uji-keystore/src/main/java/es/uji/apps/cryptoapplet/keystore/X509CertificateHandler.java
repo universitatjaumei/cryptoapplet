@@ -1,4 +1,4 @@
-package es.uji.security.keystore;
+package es.uji.apps.cryptoapplet.keystore;
 
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateParsingException;
