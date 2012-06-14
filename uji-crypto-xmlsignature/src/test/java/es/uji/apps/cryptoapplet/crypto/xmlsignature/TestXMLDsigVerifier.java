@@ -1,4 +1,4 @@
-package es.uji.security.crypto.xmldsign;
+package es.uji.apps.cryptoapplet.crypto.xmlsignature;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,8 +10,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
-import es.uji.security.crypto.VerificationResult;
 
 public class TestXMLDsigVerifier
 {
@@ -28,7 +28,7 @@ public class TestXMLDsigVerifier
             byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(file));
 
             XMLDsigVerifier verifier = new XMLDsigVerifier();
-            VerificationResult verificationResult = verifier.verify(signedData);
+            ValidationResult verificationResult = verifier.verify(signedData);
 
             if (verificationResult.isValid())
             {

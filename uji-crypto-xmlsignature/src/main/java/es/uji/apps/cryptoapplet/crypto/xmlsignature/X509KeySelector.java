@@ -1,4 +1,4 @@
-package es.uji.security.crypto.xmldsign;
+package es.uji.apps.cryptoapplet.crypto.xmlsignature;
 
 import java.security.Key;
 import java.security.PublicKey;

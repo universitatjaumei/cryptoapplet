@@ -1,4 +1,4 @@
-package es.uji.security.crypto.xmldsign;
+package es.uji.apps.cryptoapplet.crypto.xmlsignature;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,9 +10,9 @@ import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import es.uji.apps.cryptoapplet.config.FileSystemUtils;
-import es.uji.security.crypto.SignatureOptions;
-import es.uji.security.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
+import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.utils.FileSystemUtils;
 
 public class TestXMLDsigSignatureFactory
 {
@@ -37,7 +37,7 @@ public class TestXMLDsigSignatureFactory
         signatureOptions.setProvider(bcp);
 
         XMLDsigSignatureFactory xmlSignatureFactory = new XMLDsigSignatureFactory();
-        SignatureResult signatureResult = xmlSignatureFactory.formatSignature(signatureOptions);
+        SignatureResult signatureResult = xmlSignatureFactory.format(signatureOptions);
 
         if (signatureResult.isValid())
         {
@@ -51,7 +51,7 @@ public class TestXMLDsigSignatureFactory
             signatureOptions.setProvider(bcp);
 
             xmlSignatureFactory = new XMLDsigSignatureFactory();
-            signatureResult = xmlSignatureFactory.formatSignature(signatureOptions);
+            signatureResult = xmlSignatureFactory.format(signatureOptions);
 
             if (signatureResult.isValid())
             {
