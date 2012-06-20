@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<conf>
+    <keystore id="uji-test">
+        <type>JKS</type>
+        <fileName>cas.keystore</fileName>
+        <password>cryptoapplet</password>
+    </keystore>
+    <devices>
+        <device id="dnie">
+            <linux>
+                <lib>/usr/lib/opensc-pkcs11.so</lib>
+                <lib>/usr/local/lib/opensc-pkcs11.so</lib>
+                <lib>/lib/opensc-pkcs11.so</lib>
+            </linux>
+            <windows>
+                <lib>c:\windows\system32\UsrPkcs11.dll</lib>
+            </windows>
+        </device>
+        <device id="sermepa">
+            <windows>
+                <lib>c:\windows\system32\AdvantisPKCS11.dll</lib>
+            </windows>
+        </device>
+    </devices>
+    <certificationAuthorities>
+        <ca id="root-gva" ocsp="#ocsp-gva">
+            <certificateAlias>root-gva</certificateAlias>
+            <commonName>Root CA Generalitat Valenciana</commonName>
+        </ca>
+        <ca id="cagva" ocsp="#ocsp-dnie">
+            <certificateAlias>cagva</certificateAlias>
+            <commonName>CAGVA</commonName>
+        </ca>
+        <ca id="accv-ca2" ocsp="#ocsp-gva">
+            <certificateAlias>accv-ca2</certificateAlias>
+            <commonName>ACCV-CA2</commonName>
+        </ca>
+        <ca id="dnie-001" ocsp="#ocsp-dnie">
+            <certificateAlias>dnie-1</certificateAlias>
+            <commonName>AC DNIE 001</commonName>
+        </ca>
+        <ca id="dnie-002" ocsp="#ocsp-dnie">
+            <certificateAlias>dnie-2</certificateAlias>
+            <commonName>AC DNIE 002</commonName>
+        </ca>
+        <ca id="dnie-003" ocsp="#ocsp-dnie">
+            <certificateAlias>dnie-3</certificateAlias>
+            <commonName>AC DNIE 003</commonName>
+        </ca>
+    </certificationAuthorities>
+    <revocationServices>
+        <revocationService id="ocsp-gva" ca="#cagva">
+            <url>http://ocsp.accv.es</url>
+            <certificateAlias>ocsp-gva</certificateAlias>
+            <signRequest>false</signRequest>
+            <useNonce>false</useNonce>
+        </revocationService>
+        <revocationService id="ocsp-dnie" ca="#dnie-001">
+            <url>http://ocsp.dnie.es</url>
+            <certificateAlias>ocsp-dnie</certificateAlias>
+            <signRequest>false</signRequest>
+            <useNonce>false</useNonce>
+        </revocationService>
+    </revocationServices>
+    <timestamping>
+        <tsa id="tsa-gva" ca="#cagva">
+            <url>http://tss.accv.es:8318/tsa</url>
+            <certificateAlias>tsa1_accv</certificateAlias>
+            <askCert>false</askCert>
+            <useNonce>true</useNonce>
+            <sn>12</sn>
+            <timeErrSecs>60</timeErrSecs>
+        </tsa>
+    </timestamping>
+    <formatters>
+        <formatter id="pdf" tsa="#tsa-gva">
+            <configuration>
+                <item value="" key="signature.textPattern"/>
+                <item value="CryptoApplet digital signatures" key="reason"/>
+                <item value="Spain" key="location"/>
+                <item value="110" key="signature.x2"/>
+                <item value="uji.jpg" key="signature.imgFile"/>
+                <item value="X" key="signature.repeatAxis"/>
+                <item value="GRAPHIC_AND_DESCRIPTION" key="signature.type"/>
+                <item value="Universitat Jaume I" key="contact"/>
+                <item value="0" key="signature.x"/>
+                <item value="830" key="signature.y"/>
+                <item value="8" key="signature.textSize"/>
+                <item value="true" key="signature.visible"/>
+                <item value="1" key="signature.page"/>
+                <item value="785" key="signature.y2"/>
+            </configuration>
+        </formatter>
+        <formatter id="cms" tsa="#tsa-gva">
+            <configuration/>
+        </formatter>
+    </formatters>
+</conf>

@@ -8,10 +8,15 @@ import es.uji.apps.cryptoapplet.utils.OperatingSystemUtils;
 
 public class DeviceDetector
 {
-    public static Device getDeviceWithAvailableLibrary() throws JAXBException
-    {
-        Configuration configuration = ConfigManager.getConfigurationInstance();
+    private final Configuration configuration;
 
+    public DeviceDetector(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+    
+    public Device getDeviceWithAvailableLibrary() throws JAXBException
+    {
         for (Device device : configuration.getDeviceRegistry().getDevices())
         {
             for (String library : getSpecificOSLibraries(device).getLibraries())
@@ -26,7 +31,7 @@ public class DeviceDetector
         return null;
     }
 
-    private static Libraries getSpecificOSLibraries(Device device)
+    private Libraries getSpecificOSLibraries(Device device)
     {
         Libraries osLibraries = new Libraries();
 
@@ -42,7 +47,7 @@ public class DeviceDetector
         return osLibraries;
     }
 
-    private static boolean libraryExistsInTheFileSystem(String library)
+    private boolean libraryExistsInTheFileSystem(String library)
     {
         File fileLibrary = new File(library);
         return (fileLibrary.exists());

@@ -1,14 +1,18 @@
 package es.uji.apps.cryptoapplet.config;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Properties;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
+
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class ConfigManager
 {
@@ -17,7 +21,6 @@ public class ConfigManager
     private static String CONFIG_FILE = "conf.xml";
 
     private static ConfigManager instance;
-
     private Configuration configuration;
 
     // TODO
@@ -44,32 +47,44 @@ public class ConfigManager
 
     private ConfigManager() throws JAXBException
     {
-        JAXBContext context = JAXBContext.newInstance("es.uji.security.crypto.config");
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-
-        configuration = (Configuration) unmarshaller.unmarshal(ConfigManager.class.getClassLoader()
-                .getResourceAsStream(CONFIG_FILE));
+        loadLocalConfigurationFile();
     }
 
     private ConfigManager(String url) throws JAXBException
     {
-        log.debug("Trying to retrieve config.xml from server ...");
+        log.debug("Trying to retrieve configuration file from server url: " + url);
 
         try
         {
-            URL configFileUrl = new URL(url + "/" + CONFIG_FILE);
-            URLConnection uc = configFileUrl.openConnection();
-            uc.connect();
-
-            Properties remoteProperties = new Properties();
-            remoteProperties.load(uc.getInputStream());
-
+            loadRemoteConfigurationFile(url);
             log.debug("Remote config.xml loaded successfully!!");
         }
         catch (Exception e)
         {
-            log.error("Cann't load config.xml from server. WARNING: Bundled local file will be loaded.");
+            log.error("Cann't load configuration file from server. WARNING: Bundled local file will be loaded.");
+            loadLocalConfigurationFile();
         }
+    }
+
+    private void loadLocalConfigurationFile() throws JAXBException
+    {
+        loadXMLFile(ConfigManager.class.getClassLoader().getResourceAsStream(CONFIG_FILE));
+    }
+
+    private void loadRemoteConfigurationFile(String url) throws MalformedURLException, IOException,
+            JAXBException
+    {
+        URL configFileUrl = new URL(url);
+        byte[] configFile = StreamUtils.inputStreamToByteArray(configFileUrl.openStream());
+        loadXMLFile(new ByteArrayInputStream(configFile));
+    }
+
+    private void loadXMLFile(InputStream fileReference) throws JAXBException
+    {
+        JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config");
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+
+        configuration = (Configuration) unmarshaller.unmarshal(fileReference);
     }
 
     public static Configuration getConfigurationInstance()
@@ -90,7 +105,7 @@ public class ConfigManager
         return instance.configuration;
     }
 
-    public static Configuration getConfigurationInstance(String url)
+    public static Configuration getConfigurationInstanceFromURL(String url)
     {
         if (instance == null)
         {
@@ -100,11 +115,16 @@ public class ConfigManager
             }
             catch (JAXBException e)
             {
-                log.error("Cann't unmarshall " + CONFIG_FILE, e);
+                log.error("Cann't unmarshall " + url, e);
                 return new Configuration();
             }
         }
 
         return instance.configuration;
+    }
+    
+    public static void clearConfiguration()
+    {       
+        instance = null;
     }
 }
