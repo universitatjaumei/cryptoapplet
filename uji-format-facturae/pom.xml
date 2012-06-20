@@ -13,7 +13,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>es.uji.security</groupId>
+      <groupId>es.uji.apps.cryptoapplet</groupId>
       <artifactId>uji-crypto-xades</artifactId>
       <version>${project.version}</version>
     </dependency>

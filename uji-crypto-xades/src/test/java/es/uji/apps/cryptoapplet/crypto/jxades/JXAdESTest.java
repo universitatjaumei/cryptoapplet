@@ -12,6 +12,8 @@ import es.uji.apps.cryptoapplet.crypto.Formatter;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
+import es.uji.apps.cryptoapplet.crypto.xades.XAdESFormatter;
+import es.uji.apps.cryptoapplet.crypto.xades.XAdESValidator;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class JXAdESTest extends BaseCryptoAppletTest
@@ -27,7 +29,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
     {
         // Sign
 
-        Formatter signFormatProvider = new JXAdESFormatter();
+        Formatter signFormatProvider = new XAdESFormatter();
         SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
         showErrors(signatureResult, baseDir + "out-jxades-enveloped.xml");
@@ -37,7 +39,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
         byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades.xml"));
 
-        JXAdESValidator signatureVerifier = new JXAdESValidator();
+        XAdESValidator signatureVerifier = new XAdESValidator();
         ValidationResult ValidationResult = signatureVerifier.verify(signedData);
 
         showErrors(ValidationResult);
@@ -50,7 +52,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
 
         signatureOptions.setCoSignEnabled(true);
 
-        Formatter signFormatProvider = new JXAdESFormatter();
+        Formatter signFormatProvider = new XAdESFormatter();
         SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
         showErrors(signatureResult, baseDir + "out-jxades-enveloped-cosign.xml");
@@ -60,7 +62,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
         byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades.xml"));
 
-        JXAdESValidator signatureVerifier = new JXAdESValidator();
+        XAdESValidator signatureVerifier = new XAdESValidator();
         ValidationResult ValidationResult = signatureVerifier.verify(signedData);
 
         showErrors(ValidationResult);
@@ -82,7 +84,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
         {
             signatureOptions.setDataToSign(new ByteArrayInputStream(data));
 
-            Formatter signFormatProvider = new JXAdESFormatter();
+            Formatter signFormatProvider = new XAdESFormatter();
             SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
             showErrors(signatureResult, baseDir + "out-jxades-detached-cosign.xml");
@@ -96,7 +98,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
         data = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
                 + "out-jxades-detached-cosign.xml"));
 
-        JXAdESValidator signatureVerifier = new JXAdESValidator();
+        XAdESValidator signatureVerifier = new XAdESValidator();
         ValidationResult ValidationResult = signatureVerifier.verify(data);
 
         showErrors(ValidationResult);

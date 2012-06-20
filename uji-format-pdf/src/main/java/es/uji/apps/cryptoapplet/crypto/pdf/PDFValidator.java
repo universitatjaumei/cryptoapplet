@@ -1,0 +1,123 @@
+package es.uji.apps.cryptoapplet.crypto.pdf;
+
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import org.apache.log4j.Logger;
+
+import com.lowagie.text.pdf.AcroFields;
+import com.lowagie.text.pdf.PdfPKCS7;
+import com.lowagie.text.pdf.PdfReader;
+
+import es.uji.apps.cryptoapplet.config.ConfigManager;
+import es.uji.apps.cryptoapplet.config.Configuration;
+import es.uji.apps.cryptoapplet.crypto.CertificateUtils;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+
+public class PDFValidator
+{
+    private Logger log = Logger.getLogger(PDFValidator.class);
+
+    @SuppressWarnings("unchecked")
+    public ValidationResult verify(byte[] pdfData)
+    {
+        log.debug("Verifying PDF signature");
+
+        ValidationResult verificationResult = new ValidationResult();
+
+        log.debug("Loading default CA certificates");
+
+        KeyStore kall = PdfPKCS7.loadCacertsKeyStore();
+
+        // Add all configured certificates to the main keystore
+
+        Configuration conf = ConfigManager.getConfigurationInstance();
+
+        int numCertificates = 0;
+
+        try
+        {
+//TODO: Lista de certificados CA            
+//            numCertificates = Integer.parseInt(conf.getProperty("DIGIDOC_CA_CERTS"));
+            log.debug(numCertificates + " certificates configured in PDFSIG_CA_CERTS property");
+        }
+        catch (Exception e)
+        {
+            log.debug("Can not read DIGIDOC_CA_CERTS property", e);
+
+            verificationResult.setValid(false);
+            verificationResult.addError("Can not read DIGIDOC_CA_CERTS property");
+
+            return verificationResult;
+        }
+
+        //TODO Cargar del keystore general
+//        for (int i = 1; i <= numCertificates; i++)
+//        {
+//            try
+//            {
+//                log.debug("Adding certificate DIGIDOC_CA_CERTS" + i + " to the global keystore");
+//
+//                Certificate certificate = CertificateUtils.readCertificate(conf
+//                        .getProperty("DIGIDOC_CA_CERT" + i));
+//
+//                kall.setCertificateEntry("host ca " + i, certificate);
+//            }
+//            catch (Exception e)
+//            {
+//                log.error("CA certificate can not be added to global keystore", e);
+//            }
+//        }
+
+        PdfReader reader = null;
+
+        try
+        {
+            log.debug("Parsing input PDF document");
+
+            reader = new PdfReader(pdfData);
+        }
+        catch (IOException ioe)
+        {
+            log.error("Can not parse input PDF document", ioe);
+
+            verificationResult.setValid(false);
+            verificationResult.addError("Can not parse input PDF document");
+
+            return verificationResult;
+        }
+
+        AcroFields acroFields = reader.getAcroFields();
+        ArrayList<String> signatureNameList = acroFields.getSignatureNames();
+
+        for (String name : signatureNameList)
+        {
+            log.debug("Verifiying " + name + " signature");
+
+            PdfPKCS7 pdfPKCS7 = acroFields.verifySignature(name);
+            Calendar cal = pdfPKCS7.getSignDate();
+            Certificate pkc[] = pdfPKCS7.getCertificates();
+
+            Object fails[] = PdfPKCS7.verifyCertificates(pkc, kall, null, cal);
+
+            if (fails != null)
+            {
+                verificationResult.setValid(false);
+
+                for (Object error : fails)
+                {
+                    verificationResult.addError((String) error);
+                }
+
+                return verificationResult;
+            }
+        }
+
+        verificationResult.setValid(true);
+
+        return verificationResult;
+    }
+}

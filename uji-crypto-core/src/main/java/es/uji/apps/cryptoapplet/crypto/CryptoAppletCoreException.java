@@ -1,7 +1,7 @@
 package es.uji.apps.cryptoapplet.crypto;
 
 @SuppressWarnings("serial")
-public class CryptoAppletCoreException extends Exception
+public class CryptoAppletCoreException extends Exception 
 {
     public CryptoAppletCoreException()
     {

@@ -2,46 +2,39 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>es.uji.security</groupId>
   <artifactId>uji-ui-applet</artifactId>
   <name>uji-ui-applet</name>
 
   <parent>
-    <groupId>es.uji.security</groupId>
-    <artifactId>CryptoApplet</artifactId>
+    <groupId>es.uji.apps.cryptoapplet</groupId>
+    <artifactId>cryptoapplet-base</artifactId>
     <version>3.0.0-SNAPSHOT</version>
   </parent>
 
   <dependencies>
     <dependency>
-      <groupId>es.uji.security</groupId>
+      <groupId>es.uji.apps.cryptoapplet</groupId>
       <artifactId>uji-keystore</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>es.uji.security</groupId>
-      <artifactId>uji-crypto-openxades</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>es.uji.security</groupId>
-      <artifactId>uji-crypto-jxades</artifactId>
+      <groupId>es.uji.apps.cryptoapplet</groupId>
+      <artifactId>uji-crypto-xades</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>plugin</groupId>
       <artifactId>plugin</artifactId>
-      <version>1.5</version>
+      <version>1.6</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 

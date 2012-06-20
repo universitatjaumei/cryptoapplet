@@ -10,7 +10,6 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
-
 public class ConfigManager
 {
     private static Logger log = Logger.getLogger(ConfigManager.class);
@@ -21,7 +20,7 @@ public class ConfigManager
 
     private Configuration configuration;
 
-    //TODO
+    // TODO
     // public static Properties getDefaultProperties()
     // {
     // Properties prop = new Properties();
@@ -47,9 +46,30 @@ public class ConfigManager
     {
         JAXBContext context = JAXBContext.newInstance("es.uji.security.crypto.config");
         Unmarshaller unmarshaller = context.createUnmarshaller();
-        
+
         configuration = (Configuration) unmarshaller.unmarshal(ConfigManager.class.getClassLoader()
                 .getResourceAsStream(CONFIG_FILE));
+    }
+
+    private ConfigManager(String url) throws JAXBException
+    {
+        log.debug("Trying to retrieve config.xml from server ...");
+
+        try
+        {
+            URL configFileUrl = new URL(url + "/" + CONFIG_FILE);
+            URLConnection uc = configFileUrl.openConnection();
+            uc.connect();
+
+            Properties remoteProperties = new Properties();
+            remoteProperties.load(uc.getInputStream());
+
+            log.debug("Remote config.xml loaded successfully!!");
+        }
+        catch (Exception e)
+        {
+            log.error("Cann't load config.xml from server. WARNING: Bundled local file will be loaded.");
+        }
     }
 
     public static Configuration getConfigurationInstance()
@@ -70,24 +90,21 @@ public class ConfigManager
         return instance.configuration;
     }
 
-    public void loadFromRemote(String url)
+    public static Configuration getConfigurationInstance(String url)
     {
-        log.debug("Trying to retrieve config.xml from server ...");
-
-        try
+        if (instance == null)
         {
-            URL configFileUrl = new URL(url + "/" + CONFIG_FILE);
-            URLConnection uc = configFileUrl.openConnection();
-            uc.connect();
-
-            Properties remoteProperties = new Properties();
-            remoteProperties.load(uc.getInputStream());
-
-            log.debug("Remote config.xml loaded successfully!!");
+            try
+            {
+                instance = new ConfigManager(url);
+            }
+            catch (JAXBException e)
+            {
+                log.error("Cann't unmarshall " + CONFIG_FILE, e);
+                return new Configuration();
+            }
         }
-        catch (Exception e)
-        {
-            log.error("Cann't load config.xml from server. WARNING: Bundled local file will be loaded.");
-        }
+
+        return instance.configuration;
     }
 }

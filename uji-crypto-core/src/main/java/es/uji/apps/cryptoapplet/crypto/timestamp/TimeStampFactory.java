@@ -35,7 +35,7 @@
   53    3:   INTEGER 6455515                                    
     <18 0F>                                                     
   58   15:   GeneralizedTime 28/05/2009 12:26:13 GMT            
-*/
+ */
 
 /**
  * TODO: We must check the verification and parsing errors. The correct will be to define a 
@@ -46,41 +46,125 @@
 
 package es.uji.apps.cryptoapplet.crypto.timestamp;
 
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLConnection;
+
+import org.bouncycastle.asn1.cmp.PKIFailureInfo;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.tsp.TimeStampRequest;
+import org.bouncycastle.tsp.TimeStampRequestGenerator;
+import org.bouncycastle.tsp.TimeStampResponse;
+import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.tsp.TimeStampTokenInfo;
 
 public class TimeStampFactory
 {
-	public static TSResponse getTimeStampResponse(String strUrl, byte[] data, boolean calculateDigest) throws NoSuchAlgorithmException, IOException, SignatureException
+    public static TimeStampResponse getTimeStampResponse(String strUrl, byte[] data,
+            boolean calculateDigest) throws Exception
     {
-		return getTimeStampResponse(strUrl, data, calculateDigest, "SHA-1");
+        return getTimeStampResponse(strUrl, data, calculateDigest, "SHA-1");
     }
-	public static TSResponse getTimeStampResponse(String strUrl, byte[] data, boolean calculateDigest, String digestAlgorithm) throws NoSuchAlgorithmException, IOException, SignatureException
+
+    public static TimeStampResponse getTimeStampResponse(String strUrl, byte[] data,
+            boolean calculateDigest, String digestAlgorithm) throws Exception
     {
-        HttpTimestamper httpTimestamper = new HttpTimestamper(strUrl);
-        
-        byte[] digest = data;
-      
-        if (calculateDigest)
-        {
-            MessageDigest messageDigest = MessageDigest.getInstance(digestAlgorithm);
-            digest = messageDigest.digest(data);  
-        }
-        
-        
-        TSRequest request = new TSRequest(digest, digestAlgorithm );
-        request.requestCertificate(true);
-        
-        TSResponse response = httpTimestamper.generateTimestamp(request); 
-        
+        TimeStampRequestGenerator tsqGenerator = new TimeStampRequestGenerator();
+        tsqGenerator.setCertReq(true);
+
+        BigInteger nonce = BigInteger.valueOf(System.currentTimeMillis());
+        TimeStampRequest request = tsqGenerator.generate(X509ObjectIdentifiers.id_SHA1.getId(),
+                data, nonce);
+
+        byte[] requestBytes = request.getEncoded();
+
+        byte[] respBytes = getTSAResponse(strUrl, requestBytes);
+        TimeStampResponse response = new TimeStampResponse(respBytes);
+        // validate communication level attributes (RFC 3161 PKIStatus)
+        response.validate(request);
         return response;
     }
-    
-    public static byte[] getTimeStamp(String tsaURL, byte[] data, boolean calculateDigest) throws NoSuchAlgorithmException, IOException, SignatureException
+
+    public static byte[] getTimeStamp(String strUrl, byte[] data, boolean calculateDigest,
+            String digestAlgorithm) throws Exception
     {
-        TSResponse response = getTimeStampResponse(tsaURL, data, calculateDigest);
-        return response.getEncodedToken();
+        TimeStampResponse response = getTimeStampResponse(strUrl, data, calculateDigest,
+                digestAlgorithm);
+
+        PKIFailureInfo failure = response.getFailInfo();
+
+        int value = (failure == null) ? 0 : failure.intValue();
+
+        if (value != 0)
+        {
+            // @todo: Translate value of 15 error codes defined by PKIFailureInfo to string
+            throw new Exception("Invalid TSA '" + strUrl + "' response, code " + value);
+
+        }
+
+        // @todo: validate the time stap certificate chain (if we want
+        // assure we do not sign using an invalid timestamp).
+        // extract just the time stamp token (removes communication status info)
+
+        TimeStampToken tsToken = response.getTimeStampToken();
+
+        if (tsToken == null)
+        {
+            throw new Exception("TSA '" + strUrl + "' failed to return time stamp token");
+        }
+
+        TimeStampTokenInfo info = tsToken.getTimeStampInfo(); // to view details
+
+        byte[] encoded = tsToken.getEncoded();
+        long stop = System.currentTimeMillis();
+
+        // Update our token size estimate for the next call (padded to be safe)
+
+        return encoded;
+    }
+
+    private static byte[] getTSAResponse(String tsaURL, byte[] requestBytes) throws Exception
+    {
+        URL url = new URL(tsaURL);
+        URLConnection tsaConnection = (URLConnection) url.openConnection();
+        tsaConnection.setDoInput(true);
+        tsaConnection.setDoOutput(true);
+        tsaConnection.setUseCaches(false);
+        tsaConnection.setRequestProperty("Content-Type", "application/timestamp-query");
+        // tsaConnection.setRequestProperty("Content-Transfer-Encoding", "base64");
+        tsaConnection.setRequestProperty("Content-Transfer-Encoding", "binary");
+
+        OutputStream out = tsaConnection.getOutputStream();
+        out.write(requestBytes);
+        out.close();
+
+        // Get TSA response as a byte array
+
+        InputStream inp = tsaConnection.getInputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int bytesRead = 0;
+
+        while ((bytesRead = inp.read(buffer, 0, buffer.length)) >= 0)
+        {
+            baos.write(buffer, 0, bytesRead);
+        }
+
+        byte[] respBytes = baos.toByteArray();
+
+        String encoding = tsaConnection.getContentEncoding();
+
+        if (encoding != null && encoding.equalsIgnoreCase("base64"))
+        {
+            sun.misc.BASE64Decoder dec = new sun.misc.BASE64Decoder();
+            respBytes = dec.decodeBuffer(new String(respBytes));
+        }
+
+        return respBytes;
+
     }
 }
