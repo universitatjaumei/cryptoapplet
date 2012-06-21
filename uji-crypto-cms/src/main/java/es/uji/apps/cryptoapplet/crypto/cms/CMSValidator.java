@@ -2,7 +2,6 @@ package es.uji.apps.cryptoapplet.crypto.cms;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
@@ -23,21 +22,34 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 
-public class CMSValidator
+import es.uji.apps.cryptoapplet.crypto.BaseValidator;
+import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
+import es.uji.apps.cryptoapplet.crypto.ValidationException;
+import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+import es.uji.apps.cryptoapplet.crypto.Validator;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
+
+public class CMSValidator extends BaseValidator implements Validator
 {
+    public CMSValidator(X509Certificate certificate, X509Certificate[] caCertificates,
+            Provider provider) throws CertificateNotFoundException
+    {
+        super(certificate, caCertificates, provider);
+    }
+
     private boolean verifyAgainstCA(X509Certificate[] caCertificates, CertStore certs,
             Provider provider) throws CertStoreException, InvalidAlgorithmParameterException,
             NoSuchAlgorithmException, CertificateException, CertPathValidatorException
     {
         List<Certificate> certChain = new ArrayList<Certificate>();
-        
+
         if (caCertificates.length > 0)
         {
             X509Certificate rootCert = caCertificates[0];
@@ -50,7 +62,7 @@ public class CMSValidator
         }
 
         Collection<? extends Certificate> certCollection = certs.getCertificates(null);
-        
+
         for (Certificate c : certCollection)
         {
             certChain.add(c);
@@ -78,46 +90,58 @@ public class CMSValidator
      * 
      * Check the signature is correct, conform to plain data and the certificate chain is ok
      * 
-     * @throws CertPathValidatorException 
-     * @throws CertificateException 
-     * @throws InvalidAlgorithmParameterException 
+     * @throws CertPathValidatorException
+     * @throws CertificateException
+     * @throws InvalidAlgorithmParameterException
      * 
      */
 
     @SuppressWarnings("unchecked")
-    public boolean verify(byte[] data, byte[] signedData, X509Certificate[] caCertificates,
-            Provider provider) throws NoSuchProviderException, NoSuchAlgorithmException, CertStoreException, CMSException, InvalidAlgorithmParameterException, CertificateException, CertPathValidatorException
+    public ValidationResult validate(ValidationOptions validationOptions)
+            throws ValidationException
     {
-        CMSProcessableByteArray processableByteArray = new CMSProcessableByteArray(data);
+        byte[] originalData = StreamUtils.inputStreamToByteArray(validationOptions
+                .getOriginalData());
+        byte[] signedData = StreamUtils.inputStreamToByteArray(validationOptions.getSignedData());
 
-        CMSSignedData cmsSignedData = new CMSSignedData(processableByteArray, signedData);
-
-        CertStore certs = cmsSignedData.getCertificatesAndCRLs("Collection", provider);
-
-        SignerInformationStore signers = cmsSignedData.getSignerInfos();
-        Collection<SignerInformation> c = signers.getSigners();
-
-        boolean result = false;
-
-        for (SignerInformation signer : c)
+        try
         {
-            SignerId signerId = signer.getSID();
-            Collection certCollection = certs.getCertificates(signerId);
+            CMSProcessableByteArray processableByteArray = new CMSProcessableByteArray(originalData);
+            CMSSignedData cmsSignedData = new CMSSignedData(processableByteArray, signedData);
 
-            Iterator certIt = certCollection.iterator();
-            X509Certificate cert = (X509Certificate) certIt.next();
-            result = signer.verify(cert, provider);
+            CertStore certs = cmsSignedData.getCertificatesAndCRLs("Collection", provider);
 
-            if (result)
+            SignerInformationStore signers = cmsSignedData.getSignerInfos();
+            Collection<SignerInformation> c = signers.getSigners();
+
+            ValidationResult validationResult = new ValidationResult();
+            validationResult.setValid(true);
+
+            for (SignerInformation signer : c)
             {
-                result = verifyAgainstCA(caCertificates, certs, provider); 
+                SignerId signerId = signer.getSID();
+                Collection<Certificate> certCollection = (Collection<Certificate>) certs
+                        .getCertificates(signerId);
+
+                Iterator<Certificate> certIt = certCollection.iterator();
+                X509Certificate cert = (X509Certificate) certIt.next();
+
+                validationResult.setValid(validationResult.isValid()
+                        && signer.verify(cert, provider));
+                validationResult.setValid(validationResult.isValid()
+                        && verifyAgainstCA(caCertificates, certs, provider));
+
+                if (!validationResult.isValid())
+                {
+                    return new ValidationResult(false);
+                }
             }
-            else
-            {
-                return false;
-            }
+
+            return new ValidationResult(true);
         }
-
-        return result;
+        catch (Exception e)
+        {
+            throw new ValidationException(e);
+        }
     }
 }
