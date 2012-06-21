@@ -28,7 +28,8 @@ public class BaseCryptoAppletTest
 
     protected SignatureOptions signatureOptions;
 
-    public static String baseDir = "src/main/resources/";
+    public static String inputDir = "src/main/resources/";
+    public static String outputDir = "target/";
 
     public BaseCryptoAppletTest()
     {
@@ -85,9 +86,6 @@ public class BaseCryptoAppletTest
             privateKey = (PrivateKey) keystore.getKey(alias, keyPassword.toCharArray());
 
             signatureOptions = new SignatureOptions();
-            signatureOptions.setCertificate(certificate);
-            signatureOptions.setPrivateKey(privateKey);
-            signatureOptions.setProvider(provider);
         }
         catch (Exception e)
         {

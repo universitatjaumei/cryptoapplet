@@ -14,6 +14,7 @@ import org.bouncycastle.jce.X509Principal;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import es.uji.apps.cryptoapplet.config.CryptoAppletException;
 import es.uji.apps.cryptoapplet.utils.ISO8601DateParser;
 
 public class SignatureDetails
@@ -75,7 +76,7 @@ public class SignatureDetails
 
     @SuppressWarnings({ "deprecation", "unchecked" })
     public static List<SignatureDetails> getSignatureDetailInformation(byte[] data,
-            String xadesNamespace) throws CryptoAppletCoreException
+            String xadesNamespace) throws CryptoAppletException
     {
         List<SignatureDetails> result = new ArrayList<SignatureDetails>();
 
@@ -137,7 +138,7 @@ public class SignatureDetails
             }
             catch (Exception e)
             {
-                throw new CryptoAppletCoreException("Error parsing document");
+                throw new CryptoAppletException("Error parsing document");
             }
         }
 

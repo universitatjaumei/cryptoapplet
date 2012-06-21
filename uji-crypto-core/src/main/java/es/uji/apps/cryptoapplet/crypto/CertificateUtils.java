@@ -12,20 +12,21 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import es.uji.apps.cryptoapplet.config.ConfigManager;
-import es.uji.apps.cryptoapplet.config.Configuration;
 
 public class CertificateUtils
 {
-    public static X509Certificate readCertificate(String certLocation) throws KeyStoreException,
-            IOException, CertificateException, NoSuchAlgorithmException
+    public static X509Certificate readCertificate(String keyStoreFileName, String keyStoreType,
+            char[] keyStorePassword, String certLocation) throws KeyStoreException, IOException,
+            CertificateException, NoSuchAlgorithmException
     {
         if (isKeystoreAlias(certLocation))
         {
-            return loadCertificateFromKeystore(certLocation);
+            return loadCertificateFromKeystore(keyStoreFileName, keyStoreType, keyStorePassword,
+                    certLocation);
         }
 
         InputStream certificateStream = null;
-        
+
         if (isHttpReference(certLocation))
         {
             URL url = new URL(certLocation);
@@ -49,18 +50,17 @@ public class CertificateUtils
         return certificate;
     }
 
-    private static X509Certificate loadCertificateFromKeystore(String certLocation)
+    private static X509Certificate loadCertificateFromKeystore(String keyStoreFileName,
+            String keyStoreType, char[] keyStorePassword, String certLocation)
             throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException
     {
-        Configuration configManager = ConfigManager.getConfigurationInstance();
         ClassLoader classLoader = ConfigManager.class.getClassLoader();
-        InputStream certificateStream = classLoader.getResourceAsStream(configManager.getKeystore()
-                .getFileName());
+        InputStream certificateStream = classLoader.getResourceAsStream(keyStoreFileName);
 
         String str_cert = certLocation.substring(11);
-        KeyStore keystore = KeyStore.getInstance(configManager.getKeystore().getType());
+        KeyStore keystore = KeyStore.getInstance(keyStoreType);
 
-        keystore.load(certificateStream, configManager.getKeystore().getPassword().toCharArray());
+        keystore.load(certificateStream, keyStorePassword);
 
         return (X509Certificate) keystore.getCertificate(str_cert);
     }

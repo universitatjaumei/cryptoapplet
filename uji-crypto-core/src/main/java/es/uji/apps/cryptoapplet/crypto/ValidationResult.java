@@ -13,6 +13,12 @@ public class ValidationResult
         this.valid = false;
         this.errors = new ArrayList<String>();
     }
+
+    public ValidationResult(boolean valid)
+    {
+        this();
+        this.valid = valid;       
+    }
     
     public ValidationResult(boolean valid, List<String> errors)
     {

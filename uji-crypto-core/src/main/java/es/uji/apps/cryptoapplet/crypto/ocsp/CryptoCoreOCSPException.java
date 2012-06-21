@@ -1,9 +1,9 @@
 package es.uji.apps.cryptoapplet.crypto.ocsp;
 
-import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
+import es.uji.apps.cryptoapplet.config.CryptoAppletException;
 
 @SuppressWarnings("serial")
-public class CryptoCoreOCSPException extends CryptoAppletCoreException
+public class CryptoCoreOCSPException extends CryptoAppletException
 {
     public CryptoCoreOCSPException(String message)
     {

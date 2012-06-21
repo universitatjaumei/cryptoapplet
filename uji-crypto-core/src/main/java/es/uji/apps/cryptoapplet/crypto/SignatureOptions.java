@@ -13,9 +13,6 @@ public class SignatureOptions
 {
     // General options
 
-    private X509Certificate certificate;
-    private PrivateKey privateKey;
-    private Provider provider;
     private InputStream dataToSign;
 
     private boolean hash = false;
@@ -85,36 +82,6 @@ public class SignatureOptions
     public boolean getSwapToFile()
     {
         return this.swapToFile;
-    }
-
-    public X509Certificate getCertificate()
-    {
-        return certificate;
-    }
-
-    public void setCertificate(X509Certificate certificate)
-    {
-        this.certificate = certificate;
-    }
-
-    public PrivateKey getPrivateKey()
-    {
-        return privateKey;
-    }
-
-    public void setPrivateKey(PrivateKey privateKey)
-    {
-        this.privateKey = privateKey;
-    }
-
-    public Provider getProvider()
-    {
-        return provider;
-    }
-
-    public void setProvider(Provider provider)
-    {
-        this.provider = provider;
     }
 
     public InputStream getDataToSign()
