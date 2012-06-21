@@ -5,6 +5,9 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
+import es.uji.apps.cryptoapplet.config.model.Configuration;
+import es.uji.apps.cryptoapplet.config.model.Device;
+
 public class DeviceDectectorTest
 {
     @Test

@@ -1,9 +1,10 @@
-package es.uji.apps.cryptoapplet.config;
+package es.uji.apps.cryptoapplet.config.model;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+
 
 class MapAdapter extends XmlAdapter<MapElements[], Map<String, String>>
 {

@@ -10,6 +10,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
+import es.uji.apps.cryptoapplet.config.model.Configuration;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class ConfigManager
@@ -85,7 +86,7 @@ public class ConfigManager
     {
         try
         {
-            JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config");
+            JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config.model");
             Unmarshaller unmarshaller = context.createUnmarshaller();
 
             configuration = (Configuration) unmarshaller.unmarshal(fileReference);

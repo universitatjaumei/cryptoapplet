@@ -2,6 +2,11 @@ package es.uji.apps.cryptoapplet.config;
 
 import java.util.ArrayList;
 
+import es.uji.apps.cryptoapplet.config.model.Configuration;
+import es.uji.apps.cryptoapplet.config.model.Device;
+import es.uji.apps.cryptoapplet.config.model.DeviceRegistry;
+import es.uji.apps.cryptoapplet.config.model.Libraries;
+
 public class ConfigurationBuilder
 {
     private Configuration configuration;

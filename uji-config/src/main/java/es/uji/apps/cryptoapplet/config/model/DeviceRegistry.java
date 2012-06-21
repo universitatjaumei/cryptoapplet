@@ -1,4 +1,4 @@
-package es.uji.apps.cryptoapplet.config;
+package es.uji.apps.cryptoapplet.config.model;
 
 import java.util.ArrayList;
 

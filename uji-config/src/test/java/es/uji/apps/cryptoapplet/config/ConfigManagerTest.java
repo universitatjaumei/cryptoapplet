@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import es.uji.apps.cryptoapplet.config.model.Configuration;
+
 public class ConfigManagerTest
 {
     @Test

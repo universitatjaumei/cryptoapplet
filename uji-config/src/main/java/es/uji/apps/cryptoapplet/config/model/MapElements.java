@@ -1,4 +1,4 @@
-package es.uji.apps.cryptoapplet.config;
+package es.uji.apps.cryptoapplet.config.model;
 
 import javax.xml.bind.annotation.XmlAccessOrder;
 import javax.xml.bind.annotation.XmlAccessorOrder;

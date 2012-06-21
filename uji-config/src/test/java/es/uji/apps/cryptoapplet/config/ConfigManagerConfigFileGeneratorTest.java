@@ -8,19 +8,19 @@ import javax.xml.bind.Marshaller;
 
 import org.junit.Test;
 
-import es.uji.apps.cryptoapplet.config.CertificationAuthority;
-import es.uji.apps.cryptoapplet.config.CertificationAuthorityRegistry;
-import es.uji.apps.cryptoapplet.config.Configuration;
-import es.uji.apps.cryptoapplet.config.Device;
-import es.uji.apps.cryptoapplet.config.DeviceRegistry;
-import es.uji.apps.cryptoapplet.config.Formatter;
-import es.uji.apps.cryptoapplet.config.FormatterRegistry;
-import es.uji.apps.cryptoapplet.config.Keystore;
-import es.uji.apps.cryptoapplet.config.Libraries;
-import es.uji.apps.cryptoapplet.config.RevocationService;
-import es.uji.apps.cryptoapplet.config.RevocationServiceRegistry;
-import es.uji.apps.cryptoapplet.config.TimestampingService;
-import es.uji.apps.cryptoapplet.config.TimestampingServiceRegistry;
+import es.uji.apps.cryptoapplet.config.model.CertificationAuthority;
+import es.uji.apps.cryptoapplet.config.model.CertificationAuthorityRegistry;
+import es.uji.apps.cryptoapplet.config.model.Configuration;
+import es.uji.apps.cryptoapplet.config.model.Device;
+import es.uji.apps.cryptoapplet.config.model.DeviceRegistry;
+import es.uji.apps.cryptoapplet.config.model.Formatter;
+import es.uji.apps.cryptoapplet.config.model.FormatterRegistry;
+import es.uji.apps.cryptoapplet.config.model.Keystore;
+import es.uji.apps.cryptoapplet.config.model.Libraries;
+import es.uji.apps.cryptoapplet.config.model.RevocationService;
+import es.uji.apps.cryptoapplet.config.model.RevocationServiceRegistry;
+import es.uji.apps.cryptoapplet.config.model.TimestampingService;
+import es.uji.apps.cryptoapplet.config.model.TimestampingServiceRegistry;
 
 public class ConfigManagerConfigFileGeneratorTest
 {
@@ -35,7 +35,7 @@ public class ConfigManagerConfigFileGeneratorTest
         conf.setTimestampingServicesRegistry(getTimestampingServicesRegistry());
         conf.setFormatterRegistry(getFormatterRegistry());
 
-        JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config");
+        JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config.model");
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.marshal(conf, new FileOutputStream("target/conf.xml"));
