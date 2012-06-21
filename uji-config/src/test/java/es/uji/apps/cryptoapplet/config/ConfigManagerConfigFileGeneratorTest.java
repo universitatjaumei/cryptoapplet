@@ -38,7 +38,7 @@ public class ConfigManagerConfigFileGeneratorTest
         JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config");
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.marshal(conf, new FileOutputStream("src/main/resources/conf.xml"));
+        marshaller.marshal(conf, new FileOutputStream("target/conf.xml"));
     }
 
     private Keystore getKeystore()

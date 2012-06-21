@@ -2,30 +2,25 @@ package es.uji.apps.cryptoapplet.config;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class ConfigManagerTest
 {
-    @Before
-    public void initConfiguration()
-    {
-        ConfigManager.clearConfiguration();
-    }
-    
     @Test
     public void loadConfiguration() throws Exception
     {
-        Configuration configuration = ConfigManager.getConfigurationInstance();
+        ConfigManager configManager = new ConfigManager();
+        Configuration configuration = configManager.getConfiguration();
+        
         assertEquals("uji", configuration.getKeystore().getId());
     }
     
     @Test
     public void loadConfigurationFromRemoteFile() throws Exception
     {
-        String testResourcesPath = getTestResourcesPath();
-
-        Configuration configuration = ConfigManager.getConfigurationInstanceFromURL(testResourcesPath);
+        ConfigManager configManager = new ConfigManager(getTestResourcesPath());
+        Configuration configuration = configManager.getConfiguration();
+        
         assertEquals("uji-test", configuration.getKeystore().getId());
     }
     

@@ -1,9 +1,7 @@
 package es.uji.apps.cryptoapplet.config;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.bind.JAXBContext;
@@ -18,9 +16,7 @@ public class ConfigManager
 {
     private static Logger log = Logger.getLogger(ConfigManager.class);
 
-    private static String CONFIG_FILE = "conf.xml";
-
-    private static ConfigManager instance;
+    private String configFile = "conf.xml";
     private Configuration configuration;
 
     // TODO
@@ -45,12 +41,12 @@ public class ConfigManager
     // return prop;
     // }
 
-    private ConfigManager() throws JAXBException
+    public ConfigManager() throws ConfigurationLoadException
     {
         loadLocalConfigurationFile();
     }
 
-    private ConfigManager(String url) throws JAXBException
+    public ConfigManager(String url) throws ConfigurationLoadException
     {
         log.debug("Trying to retrieve configuration file from server url: " + url);
 
@@ -66,65 +62,42 @@ public class ConfigManager
         }
     }
 
-    private void loadLocalConfigurationFile() throws JAXBException
+    private void loadLocalConfigurationFile() throws ConfigurationLoadException
     {
-        loadXMLFile(ConfigManager.class.getClassLoader().getResourceAsStream(CONFIG_FILE));
+        loadXMLFile(ConfigManager.class.getClassLoader().getResourceAsStream(configFile));
     }
 
-    private void loadRemoteConfigurationFile(String url) throws MalformedURLException, IOException,
-            JAXBException
+    private void loadRemoteConfigurationFile(String url) throws ConfigurationLoadException
     {
-        URL configFileUrl = new URL(url);
-        byte[] configFile = StreamUtils.inputStreamToByteArray(configFileUrl.openStream());
-        loadXMLFile(new ByteArrayInputStream(configFile));
-    }
-
-    private void loadXMLFile(InputStream fileReference) throws JAXBException
-    {
-        JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config");
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-
-        configuration = (Configuration) unmarshaller.unmarshal(fileReference);
-    }
-
-    public static Configuration getConfigurationInstance()
-    {
-        if (instance == null)
+        try
         {
-            try
-            {
-                instance = new ConfigManager();
-            }
-            catch (JAXBException e)
-            {
-                log.error("Cann't unmarshall " + CONFIG_FILE, e);
-                return new Configuration();
-            }
+            URL configFileUrl = new URL(url);
+            byte[] configFile = StreamUtils.inputStreamToByteArray(configFileUrl.openStream());
+            loadXMLFile(new ByteArrayInputStream(configFile));
         }
-
-        return instance.configuration;
-    }
-
-    public static Configuration getConfigurationInstanceFromURL(String url)
-    {
-        if (instance == null)
+        catch (Exception e)
         {
-            try
-            {
-                instance = new ConfigManager(url);
-            }
-            catch (JAXBException e)
-            {
-                log.error("Cann't unmarshall " + url, e);
-                return new Configuration();
-            }
+            throw new ConfigurationLoadException(e);
         }
-
-        return instance.configuration;
     }
-    
-    public static void clearConfiguration()
-    {       
-        instance = null;
+
+    private void loadXMLFile(InputStream fileReference) throws ConfigurationLoadException
+    {
+        try
+        {
+            JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config");
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+
+            configuration = (Configuration) unmarshaller.unmarshal(fileReference);
+        }
+        catch (JAXBException e)
+        {
+            throw new ConfigurationLoadException(e);
+        }
+    }
+
+    public Configuration getConfiguration()
+    {
+        return configuration;
     }
 }
