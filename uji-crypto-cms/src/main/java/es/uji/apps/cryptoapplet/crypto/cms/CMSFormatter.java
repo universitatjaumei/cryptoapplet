@@ -24,8 +24,8 @@ import es.uji.apps.cryptoapplet.crypto.SignatureException;
 import es.uji.apps.cryptoapplet.crypto.SignatureFormatException;
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.crypto.cms.bc.MyCMSSignedDataGenerator;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
-import es.uji.security.crypto.cms.bc.MyCMSSignedDataGenerator;
 
 public class CMSFormatter extends BaseFormatter implements Formatter
 {

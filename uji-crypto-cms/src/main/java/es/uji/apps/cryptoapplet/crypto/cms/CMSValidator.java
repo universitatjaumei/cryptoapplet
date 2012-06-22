@@ -34,7 +34,6 @@ import es.uji.apps.cryptoapplet.crypto.ValidationException;
 import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.crypto.Validator;
-import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class CMSValidator extends BaseValidator implements Validator
 {
@@ -86,28 +85,16 @@ public class CMSValidator extends BaseValidator implements Validator
         return true;
     }
 
-    /**
-     * 
-     * Check the signature is correct, conform to plain data and the certificate chain is ok
-     * 
-     * @throws CertPathValidatorException
-     * @throws CertificateException
-     * @throws InvalidAlgorithmParameterException
-     * 
-     */
-
     @SuppressWarnings("unchecked")
     public ValidationResult validate(ValidationOptions validationOptions)
             throws ValidationException
     {
-        byte[] originalData = StreamUtils.inputStreamToByteArray(validationOptions
-                .getOriginalData());
-        byte[] signedData = StreamUtils.inputStreamToByteArray(validationOptions.getSignedData());
-
         try
         {
-            CMSProcessableByteArray processableByteArray = new CMSProcessableByteArray(originalData);
-            CMSSignedData cmsSignedData = new CMSSignedData(processableByteArray, signedData);
+            CMSProcessableByteArray processableByteArray = new CMSProcessableByteArray(
+                    validationOptions.getOriginalData());
+            CMSSignedData cmsSignedData = new CMSSignedData(processableByteArray,
+                    validationOptions.getSignedData());
 
             CertStore certs = cmsSignedData.getCertificatesAndCRLs("Collection", provider);
 

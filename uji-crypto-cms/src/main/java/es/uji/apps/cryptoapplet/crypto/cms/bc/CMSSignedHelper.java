@@ -1,4 +1,4 @@
-package es.uji.security.crypto.cms.bc;
+package es.uji.apps.cryptoapplet.crypto.cms.bc;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

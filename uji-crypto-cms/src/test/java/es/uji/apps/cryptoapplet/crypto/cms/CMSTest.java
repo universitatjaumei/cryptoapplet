@@ -12,6 +12,7 @@ import org.junit.Test;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
+import es.uji.apps.cryptoapplet.crypto.Validator;
 import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
@@ -30,8 +31,8 @@ public class CMSTest extends BaseCryptoAppletTest
     {
         // Sign
 
-        Formatter signFormatProvider = new CMSFormatter(certificate, privateKey, provider);
-        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
+        Formatter formatter = new CMSFormatter(certificate, privateKey, provider);
+        SignatureResult signatureResult = formatter.format(signatureOptions);
 
         showErrors(signatureResult, OUTPUT_FILE);
 
@@ -40,11 +41,10 @@ public class CMSTest extends BaseCryptoAppletTest
         byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(OUTPUT_FILE));
 
         ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setOriginalData(signatureOptions.getDataToSign());
-        validationOptions.setSignedData(new ByteArrayInputStream(signedData));
+        validationOptions.setOriginalData(data);
+        validationOptions.setSignedData(signedData);
 
-        CMSValidator signatureVerifier = new CMSValidator(certificate, new X509Certificate[] {},
-                provider);
-        assertTrue(signatureVerifier.validate(validationOptions).isValid());
+        Validator validator = new CMSValidator(certificate, new X509Certificate[] {}, provider);
+        assertTrue(validator.validate(validationOptions).isValid());
     }
 }
