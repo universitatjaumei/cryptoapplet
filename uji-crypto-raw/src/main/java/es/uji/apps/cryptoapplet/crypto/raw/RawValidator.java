@@ -1,34 +1,44 @@
 package es.uji.apps.cryptoapplet.crypto.raw;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import es.uji.apps.cryptoapplet.crypto.BaseValidator;
+import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
+import es.uji.apps.cryptoapplet.crypto.ValidationException;
+import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+import es.uji.apps.cryptoapplet.crypto.Validator;
 
-public class RawValidator
+public class RawValidator extends BaseValidator implements Validator
 {
-    public ValidationResult verify(byte[] data, byte[] signature, X509Certificate caCertificate,
-            Provider provider) throws CertificateException, IOException, NoSuchAlgorithmException,
-            InvalidKeyException, SignatureException
+    public RawValidator(X509Certificate certificate, Provider provider)
+            throws CertificateNotFoundException
     {
-        Signature rsa_vfy = Signature.getInstance("SHA1withRSA", provider);
-        rsa_vfy.initVerify(caCertificate.getPublicKey());
-        rsa_vfy.update(data);
+        super(certificate, provider);
+    }
 
-        ValidationResult verificationDetails = new ValidationResult();
-        verificationDetails.setValid(rsa_vfy.verify(signature));
-
-        if (!verificationDetails.isValid())
+    @Override
+    public ValidationResult validate(ValidationOptions validationOptions)
+            throws ValidationException
+    {
+        try
         {
-            verificationDetails.addError("RAW signature can not be verified");
-        }
+            Signature validator = Signature.getInstance("SHA1withRSA", provider);
+            validator.initVerify(certificate.getPublicKey());
+            validator.update(validationOptions.getOriginalData());
 
-        return verificationDetails;
+            if (validator.verify(validationOptions.getSignedData()))
+            {
+                return new ValidationResult(true);
+            }
+
+            return new ValidationResult(false);
+        }
+        catch (Exception e)
+        {
+            throw new ValidationException(e);
+        }
     }
 }

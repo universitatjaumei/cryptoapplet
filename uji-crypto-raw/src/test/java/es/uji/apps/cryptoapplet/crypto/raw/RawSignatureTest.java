@@ -1,66 +1,49 @@
 package es.uji.apps.cryptoapplet.crypto.raw;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.security.Key;
-import java.security.KeyStore;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.cert.X509Certificate;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.Before;
 import org.junit.Test;
 
 import es.uji.apps.cryptoapplet.crypto.Formatter;
-import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
-import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
+import es.uji.apps.cryptoapplet.crypto.Validator;
+import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
-public class RawSignatureTest
+public class RawSignatureTest extends BaseCryptoAppletTest
 {
+    private static final String OUTPUT_FILE = outputDir + "out-raw.bin";
+
+    @Before
+    public void init()
+    {
+        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
+    }
+
     @Test
     public void raw() throws Exception
     {
-        BouncyCastleProvider bcp = new BouncyCastleProvider();
-        Security.addProvider(bcp);
+        // Sign
 
-        // Cargando certificado de aplicacion
-        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keystore.load(new FileInputStream("../uji.keystore"), "cryptoapplet".toCharArray());
+        Formatter formatter = new RawFormatter(certificate, privateKey, provider);
+        SignatureResult signatureResult = formatter.format(signatureOptions);
 
-        // Recuperando clave privada para firmar
-        X509Certificate certificate = (X509Certificate) keystore.getCertificate(keystore.aliases()
-                .nextElement());
-        Key key = keystore.getKey("uji", "cryptoapplet".toCharArray());
+        showErrors(signatureResult, OUTPUT_FILE);
 
-        byte[] data = "data to sign".getBytes();
+        // Verify
 
-        // Firmando documento
-        Formatter signFormatProvider = new RawFormatter();
+        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(OUTPUT_FILE));
 
-        SignatureOptions signatureOptions = new SignatureOptions();
-        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
-        signatureOptions.setCertificate(certificate);
-        signatureOptions.setPrivateKey((PrivateKey) key);
-        signatureOptions.setProvider(bcp);
+        ValidationOptions validationOptions = new ValidationOptions();
+        validationOptions.setOriginalData(data);
+        validationOptions.setSignedData(signedData);
 
-        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
-
-        byte[] signedData = StreamUtils.inputStreamToByteArray(signatureResult.getSignatureData());
-
-        RawValidator rawSignatureVerifier = new RawValidator();
-
-        ValidationResult verificationDetails = rawSignatureVerifier.verify(data, signedData,
-                certificate, new BouncyCastleProvider());
-
-        if (verificationDetails.isValid())
-        {
-            System.out.println("OK");
-        }
-        else
-        {
-            System.out.println("BAD SIGNATURE");
-        }
+        Validator validator = new RawValidator(certificate, provider);
+        assertTrue(validator.validate(validationOptions).isValid());
     }
 }
