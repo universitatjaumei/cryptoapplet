@@ -15,6 +15,12 @@ public class SignatureResult
         this.valid = false;
         this.errors = new ArrayList<String>();
     }
+
+    public SignatureResult(boolean valid)
+    {
+        this();
+        this.valid = valid;
+    }
     
     public SignatureResult(boolean valid, ArrayList<String> errors)
     {

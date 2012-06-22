@@ -9,8 +9,14 @@ public class BaseValidator
     protected final X509Certificate certificate;
     protected final X509Certificate[] caCertificates;
 
-    public BaseValidator(X509Certificate certificate, X509Certificate[] caCertificates, Provider provider)
+    public BaseValidator(X509Certificate certificate, Provider provider)
             throws CertificateNotFoundException
+    {
+        this(certificate, new X509Certificate[] {}, provider);
+    }
+
+    public BaseValidator(X509Certificate certificate, X509Certificate[] caCertificates,
+            Provider provider) throws CertificateNotFoundException
     {
         if (certificate == null)
         {

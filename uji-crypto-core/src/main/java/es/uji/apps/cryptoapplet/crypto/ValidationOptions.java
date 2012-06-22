@@ -1,28 +1,26 @@
 package es.uji.apps.cryptoapplet.crypto;
 
-import java.io.InputStream;
-
 public class ValidationOptions
 {
-    private InputStream signedData;
-    private InputStream originalData;
-    
-    public void setSignedData(InputStream signedData)
+    private byte[] signedData;
+    private byte[] originalData;
+
+    public void setSignedData(byte[] signedData)
     {
         this.signedData = signedData;
     }
 
-    public InputStream getSignedData()
+    public byte[] getSignedData()
     {
         return this.signedData;
     }
 
-    public void setOriginalData(InputStream originalData)
+    public void setOriginalData(byte[] originalData)
     {
         this.originalData = originalData;
     }
 
-    public InputStream getOriginalData()
+    public byte[] getOriginalData()
     {
         return this.originalData;
     }
