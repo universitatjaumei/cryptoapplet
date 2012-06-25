@@ -3,24 +3,20 @@ package es.uji.apps.cryptoapplet.crypto.xades;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.spec.XPathFilterParameterSpec;
 import javax.xml.parsers.DocumentBuilder;
@@ -38,49 +34,31 @@ import net.java.xades.util.XMLUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import es.uji.apps.cryptoapplet.config.ConfigManager;
-import es.uji.apps.cryptoapplet.config.Configuration;
-import es.uji.apps.cryptoapplet.config.i18n.LabelManager;
-import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
+import es.uji.apps.cryptoapplet.crypto.BaseFormatter;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureException;
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
-public class XAdESFormatter implements Formatter
+public class XAdESFormatter extends BaseFormatter implements Formatter
 {
-    @Override
-    public SignatureResult format(SignatureOptions signatureOptions)
-            throws CryptoAppletCoreException
+    public XAdESFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
+            throws SignatureException
     {
+        super(certificate, privateKey, provider);
+    }
+
+    @Override
+    public SignatureResult format(SignatureOptions signatureOptions) throws SignatureException
+    {
+        checkSignatureOptions(signatureOptions);
+
         byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
-        X509Certificate certificate = signatureOptions.getCertificate();
-        PrivateKey privateKey = signatureOptions.getPrivateKey();
-        Provider provider = signatureOptions.getProvider();
 
         // TODO: KeyStore loaded in device init must store the reference
         Security.removeProvider(provider.getName());
         Security.insertProviderAt(provider, 1);
-
-        ByteArrayInputStream originalData = new ByteArrayInputStream(data);
-
-        SignatureResult signatureResult = new SignatureResult();
-
-        if (certificate == null)
-        {
-            signatureResult.setValid(false);
-            signatureResult.addError(LabelManager.get("ERROR_FACTURAE_NOCERT"));
-
-            return signatureResult;
-        }
-
-        if (privateKey == null)
-        {
-            signatureResult.setValid(false);
-            signatureResult.addError(LabelManager.get("ERROR_FACTURAE_NOKEY"));
-
-            return signatureResult;
-        }
 
         try
         {
@@ -88,24 +66,10 @@ public class XAdESFormatter implements Formatter
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Element element = db.parse(originalData).getDocumentElement();
+            Element element = db.parse(new ByteArrayInputStream(data)).getDocumentElement();
 
             // Create a XAdES-EPES profile
             XAdES_EPES xades = (XAdES_EPES) XAdES.newInstance(XAdES.EPES, element);
-
-            // SigningCertificate. Check the certificate validity (local)
-            try
-            {
-                certificate.checkValidity();
-            }
-            catch (CertificateException cex)
-            {
-                signatureResult.setValid(false);
-                signatureResult.addError(LabelManager.get("ERROR_CERTIFICATE_EXPIRED"));
-
-                return signatureResult;
-            }
-
             xades.setSigningCertificate(certificate);
 
             SignaturePolicyIdentifier spi;
@@ -130,82 +94,57 @@ public class XAdESFormatter implements Formatter
             // Sign data
             XMLAdvancedSignature xmlSignature = XMLAdvancedSignature.newInstance(xades);
 
-            try
+            NodeList result = element.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
+                    "Signature");
+            int numSignature = result.getLength();
+
+            List<String> references = signatureOptions.getReferences();
+
+            // If no there are no references, add enveloped reference
+            if (signatureOptions.isEnveloped() || references.isEmpty())
             {
-                NodeList result = element.getElementsByTagNameNS(
-                        "http://www.w3.org/2000/09/xmldsig#", "Signature");
-                int numSignature = result.getLength();
-
-                List<String> references = signatureOptions.getReferences();
-
-                // If no there are no references, add enveloped reference
-                if (signatureOptions.isEnveloped() || references.isEmpty())
-                {
-                    references.clear();
-                    references.add("");
-                }
-
-                // If enveloped+cosig construct special transformation
-                if (signatureOptions.isEnveloped() && signatureOptions.isCoSignEnabled())
-                {
-                    XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory
-                            .getInstance("DOM");
-                    DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(
-                            DigestMethod.SHA1, null);
-
-                    Transform transform = xmlSignatureFactory.newTransform(Transform.XPATH,
-                            new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
-                                    Collections.singletonMap("dsig", XMLSignature.XMLNS)));
-
-                    Reference reference = xmlSignatureFactory.newReference("", digestMethod,
-                            Collections.singletonList(transform), null, null);
-
-                    xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1,
-                            Arrays.asList(new Object[] { reference }), "S" + numSignature);
-                }
-                else
-                {
-                    xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1,
-                            references, "S" + numSignature);
-                }
+                references.clear();
+                references.add("");
             }
-            catch (MarshalException me)
+
+            // If enveloped+cosig construct special transformation
+            if (signatureOptions.isEnveloped() && signatureOptions.isCoSignEnabled())
             {
-                signatureResult.setValid(false);
-                signatureResult.addError(LabelManager.get("ERROR_FACTURAE_SIGNATURE"));
+                XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
+                DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(DigestMethod.SHA1,
+                        null);
 
-                return signatureResult;
+                Transform transform = xmlSignatureFactory.newTransform(Transform.XPATH,
+                        new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
+                                Collections.singletonMap("dsig", XMLSignature.XMLNS)));
+
+                Reference reference = xmlSignatureFactory.newReference("", digestMethod,
+                        Collections.singletonList(transform), null, null);
+
+                xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1,
+                        Arrays.asList(new Object[] { reference }), "S" + numSignature);
             }
-            catch (XMLSignatureException xmlse)
+            else
             {
-                signatureResult.setValid(false);
-                signatureResult.addError(LabelManager.get("ERROR_FACTURAE_SIGNATURE"));
-
-                return signatureResult;
+                xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, references,
+                        "S" + numSignature);
             }
-            catch (GeneralSecurityException gse)
-            {
-                signatureResult.setValid(false);
-                signatureResult.addError(LabelManager.get("ERROR_FACTURAE_SIGNATURE"));
 
-                return signatureResult;
-            }
-            
             // Return Results
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             BufferedOutputStream bos = new BufferedOutputStream(out);
-            
+
             XMLUtils.writeXML(bos, xmlSignature.getBaseElement(), false);
             bos.flush();
+
+            SignatureResult signatureResult = new SignatureResult(true);
+            signatureResult.setSignatureData(new ByteArrayInputStream(out.toByteArray()));
             
-            signatureResult.setValid(true);
-            signatureResult.setSignatureData(new ByteArrayInputStream(out.toString().getBytes()));
+            return signatureResult;
         }
         catch (Exception e)
         {
-            throw new CryptoAppletCoreException(e);
+            throw new SignatureException(e);
         }
-
-        return signatureResult;
     }
 }
