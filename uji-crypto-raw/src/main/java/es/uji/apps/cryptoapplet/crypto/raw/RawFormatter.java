@@ -7,9 +7,7 @@ import java.security.Signature;
 import java.security.cert.X509Certificate;
 
 import es.uji.apps.cryptoapplet.crypto.BaseFormatter;
-import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
-import es.uji.apps.cryptoapplet.crypto.PrivateKeyNotFoundException;
 import es.uji.apps.cryptoapplet.crypto.SignatureException;
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
@@ -18,7 +16,7 @@ import es.uji.apps.cryptoapplet.utils.StreamUtils;
 public class RawFormatter extends BaseFormatter implements Formatter
 {
     public RawFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
-            throws PrivateKeyNotFoundException, CertificateNotFoundException
+            throws SignatureException
     {
         super(certificate, privateKey, provider);
     }
