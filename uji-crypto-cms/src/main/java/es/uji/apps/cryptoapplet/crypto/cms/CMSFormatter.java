@@ -17,9 +17,7 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedGenerator;
 
 import es.uji.apps.cryptoapplet.crypto.BaseFormatter;
-import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
-import es.uji.apps.cryptoapplet.crypto.PrivateKeyNotFoundException;
 import es.uji.apps.cryptoapplet.crypto.SignatureException;
 import es.uji.apps.cryptoapplet.crypto.SignatureFormatException;
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
@@ -30,7 +28,7 @@ import es.uji.apps.cryptoapplet.utils.StreamUtils;
 public class CMSFormatter extends BaseFormatter implements Formatter
 {
     public CMSFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
-            throws PrivateKeyNotFoundException, CertificateNotFoundException
+            throws SignatureException
     {
         super(certificate, privateKey, provider);
     }
