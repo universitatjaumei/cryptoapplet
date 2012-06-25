@@ -2,6 +2,7 @@ package es.uji.apps.cryptoapplet.crypto;
 
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class BaseFormatter
@@ -11,11 +12,21 @@ public class BaseFormatter
     protected final X509Certificate certificate;
 
     public BaseFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
-            throws PrivateKeyNotFoundException, CertificateNotFoundException
+            throws PrivateKeyNotFoundException, CertificateNotFoundException,
+            CertificateExpiredException
     {
         if (certificate == null)
         {
             throw new CertificateNotFoundException();
+        }
+
+        try
+        {
+            certificate.checkValidity();
+        }
+        catch (CertificateException cex)
+        {
+            throw new CertificateExpiredException();
         }
 
         if (privateKey == null)

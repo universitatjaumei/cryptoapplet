@@ -14,4 +14,9 @@ public class ValidationException extends CryptoAppletException
     {
         super(e);
     }
+    
+    public ValidationException(String message)
+    {
+        super(message);
+    }    
 }
