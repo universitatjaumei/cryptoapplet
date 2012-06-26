@@ -1,6 +1,5 @@
 package es.uji.apps.cryptoapplet.crypto.xades;
 
-import java.io.ByteArrayInputStream;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -40,8 +39,7 @@ public class XAdESValidator extends BaseValidator implements Validator
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Element element = db.parse(new ByteArrayInputStream(validationOptions.getSignedData()))
-                    .getDocumentElement();
+            Element element = db.parse(validationOptions.getSignedData()).getDocumentElement();
 
             XAdES_BES xades = (XAdES_BES) XAdES.newInstance(XAdES.BES, element);
 

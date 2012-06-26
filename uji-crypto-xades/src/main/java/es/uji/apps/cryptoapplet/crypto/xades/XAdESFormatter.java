@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.Reference;
@@ -34,6 +35,7 @@ import net.java.xades.util.XMLUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import es.uji.apps.cryptoapplet.config.model.Configuration;
 import es.uji.apps.cryptoapplet.crypto.BaseFormatter;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
 import es.uji.apps.cryptoapplet.crypto.SignatureException;
@@ -43,6 +45,8 @@ import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class XAdESFormatter extends BaseFormatter implements Formatter
 {
+    private Map<String, String> options;
+
     public XAdESFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
             throws SignatureException
     {
@@ -74,19 +78,24 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
 
             SignaturePolicyIdentifier spi;
 
-            if (signatureOptions.getPolicyIdentifier() != null)
+            Configuration configuration = signatureOptions.getConfiguration();
+            es.uji.apps.cryptoapplet.config.model.Format formatter = configuration
+                    .getFormatRegistry().getFormat("XADES");
+            options = formatter.getConfiguration();
+
+            if (options.get("policyIdentifier") != null)
             {
                 spi = new SignaturePolicyIdentifierImpl(false);
-                spi.setIdentifier(signatureOptions.getPolicyIdentifier());
-                spi.setDescription(signatureOptions.getPolicyDescription());
+                spi.setIdentifier(options.get("policyIdentifier"));
+                spi.setDescription(options.get("policyDescription"));
                 xades.setSignaturePolicyIdentifier(spi);
             }
 
-            if (signatureOptions.getSignerRole() != null)
+            if (options.get("signerRole") != null)
             {
                 SignerRole role = new SignerRoleImpl();
-                role.setClaimedRole(new ArrayList<String>(Arrays
-                        .asList(new String[] { signatureOptions.getSignerRole() })));
+                role.setClaimedRole(new ArrayList<String>(Arrays.asList(new String[] { options
+                        .get("signerRole") })));
 
                 xades.setSignerRole(role);
             }
@@ -98,7 +107,7 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
                     "Signature");
             int numSignature = result.getLength();
 
-            List<String> references = signatureOptions.getReferences();
+            List<String> references = Arrays.asList(options.get("references").split(","));
 
             // If no there are no references, add enveloped reference
             if (signatureOptions.isEnveloped() || references.isEmpty())
@@ -139,7 +148,7 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
 
             SignatureResult signatureResult = new SignatureResult(true);
             signatureResult.setSignatureData(new ByteArrayInputStream(out.toByteArray()));
-            
+
             return signatureResult;
         }
         catch (Exception e)
