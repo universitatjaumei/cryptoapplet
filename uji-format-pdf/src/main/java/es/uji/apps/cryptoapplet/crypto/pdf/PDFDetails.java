@@ -10,14 +10,14 @@ import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPKCS7;
 import com.lowagie.text.pdf.PdfReader;
 
-import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
+import es.uji.apps.cryptoapplet.config.CryptoAppletException;
 import es.uji.apps.cryptoapplet.crypto.DetailsGenerator;
 import es.uji.apps.cryptoapplet.crypto.SignatureDetails;
 
 public class PDFDetails implements DetailsGenerator
 {
     @SuppressWarnings("unchecked")
-    public List<SignatureDetails> getDetails(byte[] data) throws CryptoAppletCoreException
+    public List<SignatureDetails> getDetails(byte[] data) throws CryptoAppletException
     {
         List<SignatureDetails> result = new ArrayList<SignatureDetails>();
 
