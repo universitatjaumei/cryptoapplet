@@ -54,13 +54,7 @@ public class CMSFormatter extends BaseFormatter implements Formatter
             CMSProcessableByteArray cmsProcessableByteArray = new CMSProcessableByteArray(data);
             CMSSignedData cmsSignedData = formatter.generate(cmsProcessableByteArray, provider);
 
-            if (data == null)
-            {
-                throw new SignatureFormatException();
-            }
-
-            SignatureResult signatureResult = new SignatureResult();
-            signatureResult.setValid(true);
+            SignatureResult signatureResult = new SignatureResult(true);
             signatureResult.setSignatureData(new ByteArrayInputStream(cmsSignedData.getEncoded()));
 
             return signatureResult;

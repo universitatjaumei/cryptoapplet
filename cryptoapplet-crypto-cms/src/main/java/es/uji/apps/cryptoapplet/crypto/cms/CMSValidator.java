@@ -94,7 +94,7 @@ public class CMSValidator extends BaseValidator implements Validator
         {
             byte[] originalData = StreamUtils.inputStreamToByteArray(validationOptions
                     .getOriginalData());
-            
+
             CMSProcessableByteArray processableByteArray = new CMSProcessableByteArray(originalData);
             CMSSignedData cmsSignedData = new CMSSignedData(processableByteArray,
                     validationOptions.getSignedData());
