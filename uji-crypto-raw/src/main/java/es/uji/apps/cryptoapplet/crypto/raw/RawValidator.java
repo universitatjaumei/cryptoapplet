@@ -10,6 +10,7 @@ import es.uji.apps.cryptoapplet.crypto.ValidationException;
 import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.crypto.Validator;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class RawValidator extends BaseValidator implements Validator
 {
@@ -25,11 +26,16 @@ public class RawValidator extends BaseValidator implements Validator
     {
         try
         {
+            byte[] originalData = StreamUtils.inputStreamToByteArray(validationOptions
+                    .getOriginalData());
+            byte[] signedData = StreamUtils.inputStreamToByteArray(validationOptions
+                    .getSignedData());
+
             Signature validator = Signature.getInstance("SHA1withRSA", provider);
             validator.initVerify(certificate.getPublicKey());
-            validator.update(validationOptions.getOriginalData());
+            validator.update(originalData);
 
-            if (validator.verify(validationOptions.getSignedData()))
+            if (validator.verify(signedData))
             {
                 return new ValidationResult(true);
             }
