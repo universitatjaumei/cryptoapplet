@@ -8,6 +8,11 @@ public class LabelManager
 {
     private Properties properties;
 
+    public LabelManager() throws TranslationFileNotFoundException, TranslationFileLoadException
+    {
+        this(Locale.getDefault());
+    }
+
     public LabelManager(Locale locale) throws TranslationFileNotFoundException,
             TranslationFileLoadException
     {
