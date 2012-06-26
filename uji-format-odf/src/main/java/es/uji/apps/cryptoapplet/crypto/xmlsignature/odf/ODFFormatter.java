@@ -10,6 +10,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,19 +60,29 @@ import org.xml.sax.SAXException;
 import com.sun.org.apache.xml.internal.security.Init;
 import com.sun.org.apache.xml.internal.security.c14n.Canonicalizer;
 
-import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
+import es.uji.apps.cryptoapplet.crypto.BaseFormatter;
+import es.uji.apps.cryptoapplet.crypto.CertificateExpiredException;
+import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
-import es.uji.apps.cryptoapplet.crypto.SignatureOptions; 
+import es.uji.apps.cryptoapplet.crypto.PrivateKeyNotFoundException;
+import es.uji.apps.cryptoapplet.crypto.SignatureException;
+import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 
-public class ODFFormatter implements Formatter
+public class ODFFormatter extends BaseFormatter implements Formatter
 {
     private static String OPENDOCUMENT_NAMESPACE = "urn:oasis:names:tc:opendocument:xmlns:digitalsignature:1.0";
 
+    public ODFFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
+            throws PrivateKeyNotFoundException, CertificateNotFoundException,
+            CertificateExpiredException
+    {
+        super(certificate, privateKey, provider);
+    }
+
     @Override
     @SuppressWarnings("restriction")
-    public SignatureResult format(SignatureOptions signatureOptions)
-            throws CryptoAppletCoreException
+    public SignatureResult format(SignatureOptions signatureOptions) throws SignatureException
     {
         try
         {
@@ -191,9 +203,6 @@ public class ODFFormatter implements Formatter
             // SignedInfo
             SignedInfo si = fac.newSignedInfo(cm, sm, referenceList);
 
-            // KeyInfo
-            X509Certificate certificate = signatureOptions.getCertificate();
-
             KeyInfoFactory kif = fac.getKeyInfoFactory();
             List<Object> x509Content = new ArrayList<Object>();
             x509Content.add(certificate.getSubjectX500Principal().getName());
@@ -227,8 +236,7 @@ public class ODFFormatter implements Formatter
             objectList.add(object);
 
             XMLSignature signature = fac.newXMLSignature(si, ki, objectList, signatureId, null);
-            DOMSignContext signContext = new DOMSignContext(signatureOptions.getPrivateKey(),
-                    rootSignatures);
+            DOMSignContext signContext = new DOMSignContext(privateKey, rootSignatures);
             signature.sign(signContext);
 
             // Generacion del ODF de salida
