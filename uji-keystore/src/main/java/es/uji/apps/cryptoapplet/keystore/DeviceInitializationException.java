@@ -1,7 +1,7 @@
 package es.uji.apps.cryptoapplet.keystore;
 
 @SuppressWarnings("serial")
-public class DeviceInitializationException extends KeystoreException 
+public class DeviceInitializationException extends KeystoreException
 {
     public DeviceInitializationException()
     {
