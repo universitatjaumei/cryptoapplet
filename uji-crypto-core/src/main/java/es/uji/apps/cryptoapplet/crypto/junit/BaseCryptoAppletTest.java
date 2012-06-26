@@ -12,12 +12,13 @@ import java.security.cert.X509Certificate;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.Assert;
 
+import es.uji.apps.cryptoapplet.config.model.Configuration;
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.utils.FileSystemUtils;
 
-public class BaseCryptoAppletTest
+public abstract class BaseCryptoAppletTest
 {
     protected Provider provider;
     protected KeyStore keystore;
@@ -27,6 +28,7 @@ public class BaseCryptoAppletTest
     protected byte[] data = "<root />".getBytes();
 
     protected SignatureOptions signatureOptions;
+    protected Configuration configuration;
 
     public static String inputDir = "src/main/resources/";
     public static String outputDir = "target/";
@@ -84,15 +86,13 @@ public class BaseCryptoAppletTest
 
             // Clave privada para firmar
             privateKey = (PrivateKey) keystore.getKey(alias, keyPassword.toCharArray());
-
-            signatureOptions = new SignatureOptions();
         }
         catch (Exception e)
         {
             throw new RuntimeException(e);
         }
     }
-
+    
     protected void showErrors(SignatureResult signatureResult, String dumpFile) throws IOException
     {
         if (signatureResult.getSignatureData() != null)
