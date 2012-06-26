@@ -43,7 +43,7 @@ public class RawSignatureTest extends BaseCryptoAppletTest
         // Verify
 
         ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setOriginalData(signatureOptions.getDataToSign());
+        validationOptions.setOriginalData(new ByteArrayInputStream(data));
         validationOptions.setSignedData(new FileInputStream(OUTPUT_FILE));
 
         Validator validator = new RawValidator(certificate, provider);

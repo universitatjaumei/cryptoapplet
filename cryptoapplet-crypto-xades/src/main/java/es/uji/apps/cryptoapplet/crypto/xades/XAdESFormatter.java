@@ -107,13 +107,19 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
                     "Signature");
             int numSignature = result.getLength();
 
-            List<String> references = Arrays.asList(options.get("references").split(","));
-
+            List<String> references = new ArrayList<String>();
+            
             // If no there are no references, add enveloped reference
-            if (signatureOptions.isEnveloped() || references.isEmpty())
+            if (signatureOptions.isEnveloped())
             {
-                references.clear();
                 references.add("");
+            }
+            else
+            {
+                if (options.get("references") != null)
+                {
+                    references = Arrays.asList(options.get("references").split(","));
+                }
             }
 
             // If enveloped+cosig construct special transformation

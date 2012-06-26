@@ -1,10 +1,7 @@
 package es.uji.apps.cryptoapplet.crypto.xmlsignature;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,11 +13,14 @@ import es.uji.apps.cryptoapplet.crypto.Formatter;
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
+import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.crypto.Validator;
 import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
 
 public class XMLSignatureTest extends BaseCryptoAppletTest
 {
+    private static final String OUTPUT_FILE = outputDir + "out-xmlsignature.xml";
+
     @Before
     public void init() throws ConfigurationLoadException
     {
@@ -37,19 +37,17 @@ public class XMLSignatureTest extends BaseCryptoAppletTest
         Formatter formatter = new XMLSignatureFormatter(certificate, privateKey, provider);
         SignatureResult signatureResult = formatter.format(signatureOptions);
 
-        showErrors(signatureResult, outputDir + "out1.xml");
-
-        signatureOptions.setDataToSign(new FileInputStream(outputDir + "out1.xml"));
-        signatureResult = formatter.format(signatureOptions);
-
-        showErrors(signatureResult, outputDir + "out2.xml");
+        showErrors(signatureResult, OUTPUT_FILE);
 
         // Verify
 
-        ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setSignedData(new FileInputStream(outputDir + "out2.xml"));
-
         Validator validator = new XMLSignatureValidator(certificate, provider);
-        assertTrue(validator.validate(validationOptions).isValid());
+        
+        ValidationOptions validationOptions = new ValidationOptions();
+        validationOptions.setSignedData(new FileInputStream(OUTPUT_FILE));
+
+        ValidationResult verificationResult = validator.validate(validationOptions);
+
+        showErrors(verificationResult);
     }
 }

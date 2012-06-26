@@ -256,10 +256,22 @@ public class ConfigManagerConfigFileGeneratorTest
         ArrayList<Format> formats = new ArrayList<Format>();
         formats.add(getPDFFormat());
         formats.add(getCMSFormat());
+        formats.add(getXADESFormat());
 
         formatterRegistry.setFormats(formats);
 
         return formatterRegistry;
+    }
+
+    private Format getXADESFormat()
+    {
+        Format formatter = new Format();
+        formatter.setId("xades");
+        formatter.setTsaId("tsa-gva");
+
+        formatter.getConfiguration().put("signerRole", "User");
+
+        return formatter;
     }
 
     private Format getPDFFormat()

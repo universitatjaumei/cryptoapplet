@@ -34,7 +34,7 @@ public class XAdESTest extends BaseCryptoAppletTest
         Configuration configuration = new ConfigManager().getConfiguration();
         signatureOptions = new SignatureOptions(configuration);
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
-        
+
         signAndVerify(OUTPUT_FILE + "enveloped.xml");
     }
 
@@ -44,7 +44,7 @@ public class XAdESTest extends BaseCryptoAppletTest
         Configuration configuration = new ConfigManager().getConfiguration();
         signatureOptions = new SignatureOptions(configuration);
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
-        
+
         signatureOptions.setCoSignEnabled(true);
         signAndVerify(OUTPUT_FILE + "enveloped-cosign.xml");
     }
@@ -62,7 +62,7 @@ public class XAdESTest extends BaseCryptoAppletTest
         // Verify
 
         ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setOriginalData(signatureOptions.getDataToSign());
+        validationOptions.setOriginalData(new ByteArrayInputStream(data));
         validationOptions.setSignedData(new FileInputStream(fileName));
 
         Validator validator = new XAdESValidator(certificate, provider);
@@ -73,12 +73,13 @@ public class XAdESTest extends BaseCryptoAppletTest
     public void jxadesDetachedCosign() throws Exception
     {
         Configuration configuration = new ConfigManager().getConfiguration();
-        Map<String, String> options = configuration.getFormatRegistry().getFormat("XADES").getConfiguration();
+        Map<String, String> options = configuration.getFormatRegistry().getFormat("XADES")
+                .getConfiguration();
         options.put("references", "D0,D1");
-        
+
         signatureOptions = new SignatureOptions(configuration);
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
-        
+
         // CoSign
 
         byte[] data = "<?xml version=\"1.0\"?><root><d id=\"D0\">a</d><d id=\"D1\">b</d></root>"
@@ -94,10 +95,10 @@ public class XAdESTest extends BaseCryptoAppletTest
             Formatter signFormatProvider = new XAdESFormatter(certificate, privateKey, provider);
             SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
 
-            showErrors(signatureResult, inputDir + "out-jxades-detached-cosign.xml");
+            showErrors(signatureResult, OUTPUT_FILE + "detached-cosign.xml");
 
-            data = StreamUtils.inputStreamToByteArray(new FileInputStream(inputDir
-                    + "out-jxades-detached-cosign.xml"));
+            data = StreamUtils.inputStreamToByteArray(new FileInputStream(OUTPUT_FILE
+                    + "detached-cosign.xml"));
         }
 
         // Verify
@@ -105,7 +106,7 @@ public class XAdESTest extends BaseCryptoAppletTest
         XAdESValidator validator = new XAdESValidator(certificate, provider);
 
         ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setSignedData(new FileInputStream(inputDir + "out-jxades-detached-cosign.xml"));
+        validationOptions.setSignedData(new FileInputStream(OUTPUT_FILE + "detached-cosign.xml"));
 
         ValidationResult validationResult = validator.validate(validationOptions);
         showErrors(validationResult);
