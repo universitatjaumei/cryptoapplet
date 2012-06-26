@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import es.uji.apps.cryptoapplet.config.i18n.LabelManager;
 import es.uji.apps.cryptoapplet.keystore.KeyStoreManager;
 
 public class EventHandler
@@ -65,9 +66,10 @@ public class EventHandler
         return null;
     }
 
-    public DefaultMutableTreeNode getDefaultMutableTreeNodeFromKeyStoreTable()
+    public DefaultMutableTreeNode getDefaultMutableTreeNodeFromKeyStoreTable(
+            LabelManager labelManager)
     {
-        JTreeCertificateBuilder jbt = new JTreeCertificateBuilder();
+        JTreeCertificateBuilder jbt = new JTreeCertificateBuilder(labelManager);
         return jbt.build(keyStoreManager.getKeyStoreTable());
     }
 

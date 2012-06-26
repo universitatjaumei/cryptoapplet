@@ -2,6 +2,7 @@ package es.uji.apps.cryptoapplet.ui.applet;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Locale;
 
 import javax.swing.JApplet;
 import javax.swing.UIManager;
@@ -16,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import es.uji.apps.cryptoapplet.config.ConfigManager;
+import es.uji.apps.cryptoapplet.config.ConfigurationLoadException;
 import es.uji.apps.cryptoapplet.config.i18n.LabelManager;
 import es.uji.apps.cryptoapplet.keystore.KeyStoreManager;
 
@@ -28,6 +30,9 @@ public class SignatureApplet extends JApplet
     private JSCommands jsCommands;
     private SignatureConfiguration signatureConfiguration;
     private HttpConnectionConfiguration connectionConfiguration;
+
+    private ConfigManager configManager;
+    private LabelManager labelManager;
 
     static
     {
@@ -79,6 +84,8 @@ public class SignatureApplet extends JApplet
 
         try
         {
+            labelManager = new LabelManager();
+
             keyStoreManager = new KeyStoreManager(jsCommands.getSupportedBrowser());
             keyStoreManager.initKeyStores();
 
@@ -108,7 +115,15 @@ public class SignatureApplet extends JApplet
             baseURL = this.getCodeBase().toString();
         }
 
-        ConfigManager.getConfigurationInstance(baseURL);
+        try
+        {
+            configManager = new ConfigManager(baseURL);
+        }
+        catch (ConfigurationLoadException e)
+        {
+            log.error("Problem loading configuration file", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private void initLookAndFeel()
@@ -136,16 +151,24 @@ public class SignatureApplet extends JApplet
 
     public void showUI()
     {
-        new MainWindow(keyStoreManager, jsCommands).show(signatureConfiguration);
+        new MainWindow(keyStoreManager, labelManager, jsCommands).show(signatureConfiguration);
     }
 
-    public void setLanguage(final String lang)
+    public void setLanguage(final String language)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                LabelManager.setLang(lang);
+                try
+                {
+                    labelManager = new LabelManager(new Locale(language));
+                }
+                catch (Exception e)
+                {
+                    log.error(e);
+                }
+
                 return null;
             }
         });

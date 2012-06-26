@@ -1,36 +1,15 @@
 package es.uji.apps.cryptoapplet.ui.applet;
 
-import es.uji.apps.cryptoapplet.config.i18n.LabelManager;
-
 @SuppressWarnings("serial")
 public class SignatureAppletException extends Exception
 {
-    private String message;
-
-    public SignatureAppletException(String messageTag)
+    public SignatureAppletException(String message)
     {
-        message = LabelManager.get(messageTag);
+        super(message);
     }
 
-    public SignatureAppletException(String messageTag, boolean translate)
+    public SignatureAppletException(String message, String lineNumber)
     {
-        if (translate)
-        {
-            message = LabelManager.get(messageTag);
-        }
-        else
-        {
-            message = messageTag;
-        }
-    }
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public SignatureAppletException(String messageTag, String lineNumber)
-    {
-        super("Line: " + lineNumber + "::" + LabelManager.get(messageTag));
+        super("Line: " + lineNumber + "::" + message);
     }
 }

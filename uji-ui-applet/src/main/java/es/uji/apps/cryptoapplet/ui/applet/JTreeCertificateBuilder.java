@@ -19,8 +19,11 @@ public class JTreeCertificateBuilder
 {
     private Logger log = Logger.getLogger(JTreeCertificateBuilder.class);
 
-    public JTreeCertificateBuilder()
+    private final LabelManager labelManager;
+
+    public JTreeCertificateBuilder(LabelManager labelManager)
     {
+        this.labelManager = labelManager;
     }
 
     public DefaultMutableTreeNode build(Hashtable<KeystoreType, SimpleKeyStore> ksh)
@@ -28,7 +31,7 @@ public class JTreeCertificateBuilder
         log.debug("Building certificate tree");
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(
-                LabelManager.get("LABEL_TREE_ROOT"));
+                labelManager.get("LABEL_TREE_ROOT"));
 
         if (ksh == null)
         {

@@ -55,13 +55,16 @@ public class MainWindow
     protected JTree jTree;
     protected JScrollPane showDataScrollPane;
     private final JSCommands jsCommands;
-    
-    private SignatureConfiguration signatureConfiguration;
 
-    public MainWindow(KeyStoreManager keyStoreManager, JSCommands jsCommands)
+    private SignatureConfiguration signatureConfiguration;
+    private final LabelManager labelManager;
+
+    public MainWindow(KeyStoreManager keyStoreManager, LabelManager labelManager,
+            JSCommands jsCommands)
     {
-        this.jsCommands = jsCommands;        
         this.eventHandler = new EventHandler(this, keyStoreManager, jsCommands);
+        this.labelManager = labelManager;
+        this.jsCommands = jsCommands;
 
         getMainFrame();
         bringToFront();
@@ -118,18 +121,18 @@ public class MainWindow
             labelPin.setBounds(new Rectangle(9, 421, 150, 24));
             labelPin.setHorizontalTextPosition(SwingConstants.TRAILING);
             labelPin.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelPin.setText(LabelManager.get("LABEL_PIN_CLAUER"));
+            labelPin.setText(labelManager.get("LABEL_PIN_CLAUER"));
             labelPin.setVisible(false);
 
             labelInformation = new JLabel();
             labelInformation.setBounds(new Rectangle(9, 208, 237, 20));
-            labelInformation.setText(LabelManager.get("INFORMATION"));
+            labelInformation.setText(labelManager.get("INFORMATION"));
 
             labelSelectCertTop = new JLabel();
             labelSelectCertTop.setBounds(new Rectangle(5, 10, 236, 18));
-            labelSelectCertTop.setText(LabelManager.get("LABEL_CERTIFICATE_SELECTION"));
+            labelSelectCertTop.setText(labelManager.get("LABEL_CERTIFICATE_SELECTION"));
 
-            showSignatureCheckBox = new JCheckBox(LabelManager.get("LABEL_SHOW_DATA_ASK"));
+            showSignatureCheckBox = new JCheckBox(labelManager.get("LABEL_SHOW_DATA_ASK"));
             showSignatureCheckBox.setBounds(new Rectangle(311, 398, 255, 14));
 
             mainContentPane = new JPanel();
@@ -211,7 +214,7 @@ public class MainWindow
             contentTextField = new JFormattedTextField();
             contentTextField.setEditable(false);
             contentTextField.setBounds(new Rectangle(9, 257, 558, 30));
-            contentTextField.setValue(LabelManager.get("CERTIFICATE_CONTENT_FIELD"));
+            contentTextField.setValue(labelManager.get("CERTIFICATE_CONTENT_FIELD"));
         }
 
         return contentTextField;
@@ -223,7 +226,7 @@ public class MainWindow
         {
             informationLabelField = new JLabel();
             informationLabelField.setBounds(new Rectangle(9, 231, 558, 25));
-            informationLabelField.setText(LabelManager.get("SELECT_A_CERTIFICATE"));
+            informationLabelField.setText(labelManager.get("SELECT_A_CERTIFICATE"));
         }
 
         return informationLabelField;
@@ -235,7 +238,7 @@ public class MainWindow
         {
             signButton = new JButton();
             signButton.setBounds(new Rectangle(329, 421, 110, 30));
-            signButton.setText(LabelManager.get("BUTTON_SIGN"));
+            signButton.setText(labelManager.get("BUTTON_SIGN"));
             signButton.addActionListener(eventHandler.getSignButtonActionListener());
         }
 
@@ -248,7 +251,7 @@ public class MainWindow
         {
             cancelButton = new JButton();
             cancelButton.setBounds(new Rectangle(453, 421, 110, 30));
-            cancelButton.setText(LabelManager.get("BUTTON_CANCEL"));
+            cancelButton.setText(labelManager.get("BUTTON_CANCEL"));
             cancelButton.addActionListener(eventHandler.getCancelButtonActionListener());
         }
 
@@ -273,7 +276,7 @@ public class MainWindow
         {
             FileMenu = new JMenu();
             FileMenu.setPreferredSize(new Dimension(51, 20));
-            FileMenu.setText(LabelManager.get("MENU_FILE"));
+            FileMenu.setText(labelManager.get("MENU_FILE"));
             FileMenu.setSize(new Dimension(71, 20));
             FileMenu.add(getLoadPkcs12MenuItem());
             FileMenu.add(getLoadPkcs11MenuItem());
@@ -287,7 +290,7 @@ public class MainWindow
         if (loadPkcs11MenuItem == null)
         {
             loadPkcs11MenuItem = new JMenuItem();
-            loadPkcs11MenuItem.setText(LabelManager.get("MENU_LOAD_P11"));
+            loadPkcs11MenuItem.setText(labelManager.get("MENU_LOAD_P11"));
             loadPkcs11MenuItem
                     .addActionListener(eventHandler.getLoadPkcs11MenuItemActionListener());
         }
@@ -300,7 +303,7 @@ public class MainWindow
         if (loadPkcs12MenuItem == null)
         {
             loadPkcs12MenuItem = new JMenuItem();
-            loadPkcs12MenuItem.setText(LabelManager.get("MENU_LOAD_P12"));
+            loadPkcs12MenuItem.setText(labelManager.get("MENU_LOAD_P12"));
             loadPkcs12MenuItem
                     .addActionListener(eventHandler.getLoadPkcs12MenuItemActionListener());
         }
@@ -313,7 +316,7 @@ public class MainWindow
         if (helpAboutMenu == null)
         {
             helpAboutMenu = new JMenu();
-            helpAboutMenu.setText(LabelManager.get("MENU_HELP"));
+            helpAboutMenu.setText(labelManager.get("MENU_HELP"));
             helpAboutMenu.add(getHelpMenuItem());
             helpAboutMenu.add(getAboutMenuItem());
         }
@@ -326,7 +329,7 @@ public class MainWindow
         if (helpMenuItem == null)
         {
             helpMenuItem = new JMenuItem();
-            helpMenuItem.setText(LabelManager.get("MENU_HELP"));
+            helpMenuItem.setText(labelManager.get("MENU_HELP"));
             helpMenuItem.addActionListener(eventHandler.getHelpMenuItemActionListener());
         }
 
@@ -338,7 +341,7 @@ public class MainWindow
         if (aboutMenuItem == null)
         {
             aboutMenuItem = new JMenuItem();
-            aboutMenuItem.setText(LabelManager.get("MENU_ABOUT"));
+            aboutMenuItem.setText(labelManager.get("MENU_ABOUT"));
             aboutMenuItem.addActionListener(eventHandler.getAboutMenuItemActionListener());
         }
 
@@ -349,7 +352,7 @@ public class MainWindow
     {
         if (jTree == null)
         {
-            jTree = new JTree(eventHandler.getDefaultMutableTreeNodeFromKeyStoreTable());
+            jTree = new JTree(eventHandler.getDefaultMutableTreeNodeFromKeyStoreTable(labelManager));
             jTree.addTreeSelectionListener(eventHandler.getJTreeSelectionListener());
             jTree.expandRow(1);
         }
@@ -381,7 +384,7 @@ public class MainWindow
             showDataTextArea = new JTextArea();
         }
 
-        showDataTextArea.setText(LabelManager.get("LABEL_SHOW_DATA_DESCRIPTION") + "\n\n"
+        showDataTextArea.setText(labelManager.get("LABEL_SHOW_DATA_DESCRIPTION") + "\n\n"
                 + new String(in));
 
         if (showDataScrollPane == null)
@@ -415,12 +418,12 @@ public class MainWindow
     }
 
     public void show(SignatureConfiguration signatureConfiguration)
-    {        
+    {
         this.signatureConfiguration = signatureConfiguration;
-        
+
         getMainFrame().setVisible(true);
-        loadCertificateTree();        
-        
-        jsCommands.onWindowShow();        
-   }
+        loadCertificateTree();
+
+        jsCommands.onWindowShow();
+    }
 }
