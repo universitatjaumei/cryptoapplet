@@ -2,34 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>uji-crypto-xades</artifactId>
-  <name>uji-crypto-xades</name>
+  <artifactId>cryptoapplet-utils</artifactId>
+  <name>cryptoapplet-utils</name>
 
   <parent>
     <groupId>es.uji.apps.cryptoapplet</groupId>
     <artifactId>cryptoapplet-base</artifactId>
     <version>3.0.0-SNAPSHOT</version>
   </parent>
-
-  <dependencies>
-    <dependency>
-      <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>uji-config</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>uji-crypto-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>net.java.xades</groupId>
-      <artifactId>jxades</artifactId>
-      <version>${jxades.version}</version>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>

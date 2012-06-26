@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>uji-keystore</artifactId>
-  <name>uji-keystore</name>
+  <artifactId>cryptoapplet-core</artifactId>
+  <name>cryptoapplet-core</name>
 
   <parent>
     <groupId>es.uji.apps.cryptoapplet</groupId>
@@ -14,8 +14,26 @@
   <dependencies>
     <dependency>
       <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>uji-crypto-core</artifactId>
+      <artifactId>cryptoapplet-config</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk16</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bctsp-jdk16</artifactId>
+      <version>${bouncycastle.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
     </dependency>
   </dependencies>
 

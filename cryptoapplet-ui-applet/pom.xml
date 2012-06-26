@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>uji-format-pdf</artifactId>
-  <name>uji-format-pdf</name>
+  <artifactId>cryptoapplet-ui-applet</artifactId>
+  <name>cryptoapplet-ui-applet</name>
 
   <parent>
     <groupId>es.uji.apps.cryptoapplet</groupId>
@@ -14,36 +14,21 @@
   <dependencies>
     <dependency>
       <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>uji-crypto-core</artifactId>
+      <artifactId>cryptoapplet-keystore</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>uji-crypto-cms</artifactId>
+      <artifactId>cryptoapplet-crypto-xades</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>com.lowagie</groupId>
-      <artifactId>itext</artifactId>
-      <version>2.1.5</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk14</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcmail-jdk14</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bcmail-jdk15</artifactId>
-      <version>${bouncycastle.version}</version>
+      <groupId>plugin</groupId>
+      <artifactId>plugin</artifactId>
+      <version>1.6</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
@@ -51,7 +36,14 @@
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

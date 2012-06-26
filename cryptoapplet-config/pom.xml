@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>uji-crypto-xmlsignature</artifactId>
-  <name>uji-crypto-xmlsignature</name>
+  <artifactId>cryptoapplet-config</artifactId>
+  <name>cryptoapplet-config</name>
 
   <parent>
     <groupId>es.uji.apps.cryptoapplet</groupId>
@@ -15,8 +14,21 @@
   <dependencies>
     <dependency>
       <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>uji-crypto-core</artifactId>
+      <artifactId>cryptoapplet-utils</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.14</version>
     </dependency>
   </dependencies>
 

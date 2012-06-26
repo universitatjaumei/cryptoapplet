@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>uji-format-odf</artifactId>
-  <name>uji-format-odf</name>
+  <artifactId>cryptoapplet-format-odf</artifactId>
+  <name>cryptoapplet-format-odf</name>
 
   <parent>
     <groupId>es.uji.apps.cryptoapplet</groupId>
@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>uji-crypto-core</artifactId>
+      <artifactId>cryptoapplet-core</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

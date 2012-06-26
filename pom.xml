@@ -11,7 +11,7 @@
 
   <properties>
     <bouncycastle.version>1.43</bouncycastle.version>
-    <jxades.version>0.0.6</jxades.version>
+    <jxades.version>0.0.7-SNAPSHOT</jxades.version>
     <junit.version>4.8.2</junit.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -36,6 +36,10 @@
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
+          <compilerArguments>
+            <verbose />
+            <bootclasspath>${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jsse.jar</bootclasspath>
+          </compilerArguments>
         </configuration>
       </plugin>
 
@@ -51,18 +55,18 @@
   </build>
 
   <modules>
-    <module>uji-utils</module>
-    <module>uji-config</module>
-    <module>uji-crypto-core</module>
-    <module>uji-crypto-raw</module>
-    <module>uji-crypto-cms</module>
-    <module>uji-crypto-xmldsign</module>
-    <module>uji-crypto-jxades</module>
-    <module>uji-format-pdf</module>
-    <module>uji-format-odf</module>
-    <module>uji-format-facturae</module>
-    <module>uji-keystore</module>
-    <module>uji-ui-applet</module>
+    <module>cryptoapplet-utils</module>
+    <module>cryptoapplet-config</module>
+    <module>cryptoapplet-core</module>
+    <module>cryptoapplet-crypto-raw</module>
+    <module>cryptoapplet-crypto-cms</module>
+    <module>cryptoapplet-crypto-xmlsignature</module>
+    <module>cryptoapplet-crypto-xades</module>
+    <module>cryptoapplet-format-pdf</module>
+    <module>cryptoapplet-format-odf</module>
+    <module>cryptoapplet-format-facturae</module>
+    <module>cryptoapplet-keystore</module>
+    <module>cryptoapplet-ui-applet</module>
   </modules>
 
   <issueManagement>
