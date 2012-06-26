@@ -1,21 +1,36 @@
 package es.uji.apps.cryptoapplet.crypto.facturae;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.security.Provider;
+import java.security.cert.X509Certificate;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
+import es.uji.apps.cryptoapplet.crypto.BaseValidator;
+import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
+import es.uji.apps.cryptoapplet.crypto.ValidationException;
+import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+import es.uji.apps.cryptoapplet.crypto.Validator;
 import es.uji.apps.cryptoapplet.crypto.xades.XAdESValidator;
 
-public class FacturaeValidator
+public class FacturaeValidator extends BaseValidator implements Validator
 {
-    public ValidationResult verify(byte[] signedData) throws ParserConfigurationException,
-            SAXException, IOException, GeneralSecurityException
+    public FacturaeValidator(X509Certificate certificate, Provider provider)
+            throws CertificateNotFoundException
     {
-        XAdESValidator signatureVerifier = new XAdESValidator();
-        return signatureVerifier.verify(signedData);
+        super(certificate, provider);
+    }
+
+    @Override
+    public ValidationResult validate(ValidationOptions validationOptions)
+            throws ValidationException
+    {
+        try
+        {
+            Validator validator = new XAdESValidator(certificate, provider);
+            return validator.validate(validationOptions);
+        }
+        catch (Exception e)
+        {
+            throw new ValidationException(e);
+        }
     }
 }

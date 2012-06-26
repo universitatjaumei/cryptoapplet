@@ -8,16 +8,17 @@ import org.junit.Test;
 
 import es.uji.apps.cryptoapplet.crypto.Formatter;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
+import es.uji.apps.cryptoapplet.crypto.Validator;
 import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
-import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class FacturaeTest extends BaseCryptoAppletTest
 {
     @Before
     public void init() throws FileNotFoundException
     {
-        signatureOptions.setDataToSign(new FileInputStream(baseDir + "in-facturae.xml"));
+        signatureOptions.setDataToSign(new FileInputStream(inputDir + "in-facturae.xml"));
     }
 
     @Test
@@ -25,18 +26,19 @@ public class FacturaeTest extends BaseCryptoAppletTest
     {
         // Sign
 
-        Formatter signFormatProvider = new FacturaeFormatter();
-        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
+        Formatter formatter = new FacturaeFormatter(certificate, privateKey, provider);
+        SignatureResult signatureResult = formatter.format(signatureOptions);
 
-        showErrors(signatureResult, baseDir + "out-facturae.xml");
+        showErrors(signatureResult, inputDir + "out-facturae.xml");
 
         // Verify
 
-        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(baseDir
-                + "out-facturae.xml"));
+        Validator validator = new FacturaeValidator(certificate, provider);
 
-        FacturaeValidator signatureVerifier = new FacturaeValidator();
-        ValidationResult verificationResult = signatureVerifier.verify(signedData);
+        ValidationOptions validationOptions = new ValidationOptions();
+        validationOptions.setSignedData(new FileInputStream(inputDir + "out-facturae.xml"));
+
+        ValidationResult verificationResult = validator.validate(validationOptions);
 
         showErrors(verificationResult);
     }
