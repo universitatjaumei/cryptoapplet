@@ -34,6 +34,7 @@ import es.uji.apps.cryptoapplet.crypto.ValidationException;
 import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.ValidationResult;
 import es.uji.apps.cryptoapplet.crypto.Validator;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class CMSValidator extends BaseValidator implements Validator
 {
@@ -91,8 +92,10 @@ public class CMSValidator extends BaseValidator implements Validator
     {
         try
         {
-            CMSProcessableByteArray processableByteArray = new CMSProcessableByteArray(
-                    validationOptions.getOriginalData());
+            byte[] originalData = StreamUtils.inputStreamToByteArray(validationOptions
+                    .getOriginalData());
+            
+            CMSProcessableByteArray processableByteArray = new CMSProcessableByteArray(originalData);
             CMSSignedData cmsSignedData = new CMSSignedData(processableByteArray,
                     validationOptions.getSignedData());
 

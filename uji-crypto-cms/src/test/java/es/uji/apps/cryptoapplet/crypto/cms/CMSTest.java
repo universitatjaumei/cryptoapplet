@@ -9,20 +9,25 @@ import java.security.cert.X509Certificate;
 import org.junit.Before;
 import org.junit.Test;
 
+import es.uji.apps.cryptoapplet.config.ConfigManager;
+import es.uji.apps.cryptoapplet.config.ConfigurationLoadException;
+import es.uji.apps.cryptoapplet.config.model.Configuration;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.Validator;
 import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
-import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 public class CMSTest extends BaseCryptoAppletTest
 {
     private static final String OUTPUT_FILE = outputDir + "out-cms.bin";
-
+    
     @Before
-    public void init()
+    public void init() throws ConfigurationLoadException
     {
+        Configuration configuration = new ConfigManager().getConfiguration();
+        signatureOptions = new SignatureOptions(configuration);
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
     }
 
@@ -38,11 +43,9 @@ public class CMSTest extends BaseCryptoAppletTest
 
         // Verify
 
-        byte[] signedData = StreamUtils.inputStreamToByteArray(new FileInputStream(OUTPUT_FILE));
-
         ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setOriginalData(data);
-        validationOptions.setSignedData(signedData);
+        validationOptions.setOriginalData(signatureOptions.getDataToSign());
+        validationOptions.setSignedData(new FileInputStream(OUTPUT_FILE));
 
         Validator validator = new CMSValidator(certificate, new X509Certificate[] {}, provider);
         assertTrue(validator.validate(validationOptions).isValid());
