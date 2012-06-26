@@ -21,4 +21,18 @@ public class TimestampingServiceRegistry
     {
         this.timestampingServices = timestampingServices;
     }
+
+    public TimestampingService getTimestampingService(String id)
+    {
+        for (TimestampingService timestampingService : timestampingServices)
+        {
+            if (timestampingService != null && id != null
+                    && id.equalsIgnoreCase(timestampingService.getId()))
+            {
+                return timestampingService;
+            }
+        }
+
+        return new TimestampingService();
+    }
 }

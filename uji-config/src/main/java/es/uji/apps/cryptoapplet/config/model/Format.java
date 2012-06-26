@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Formatter
+public class Format
 {
     @XmlAttribute(name = "tsa")
     private String tsaId;
@@ -18,7 +18,7 @@ public class Formatter
     @XmlJavaTypeAdapter(MapAdapter.class)
     private Map<String, String> configuration;
 
-    public Formatter()
+    public Format()
     {
         configuration = new HashMap<String, String>();
     }

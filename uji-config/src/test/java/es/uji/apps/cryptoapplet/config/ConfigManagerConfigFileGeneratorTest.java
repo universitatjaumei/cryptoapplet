@@ -13,8 +13,8 @@ import es.uji.apps.cryptoapplet.config.model.CertificationAuthorityRegistry;
 import es.uji.apps.cryptoapplet.config.model.Configuration;
 import es.uji.apps.cryptoapplet.config.model.Device;
 import es.uji.apps.cryptoapplet.config.model.DeviceRegistry;
-import es.uji.apps.cryptoapplet.config.model.Formatter;
-import es.uji.apps.cryptoapplet.config.model.FormatterRegistry;
+import es.uji.apps.cryptoapplet.config.model.Format;
+import es.uji.apps.cryptoapplet.config.model.FormatRegistry;
 import es.uji.apps.cryptoapplet.config.model.Keystore;
 import es.uji.apps.cryptoapplet.config.model.Libraries;
 import es.uji.apps.cryptoapplet.config.model.RevocationService;
@@ -33,7 +33,7 @@ public class ConfigManagerConfigFileGeneratorTest
         conf.setCertificationAuthoritiesRegistry(getCertificationAuthoritiesRegistry());
         conf.setRevocationServicesRegistry(getRevocationServicesRegistry());
         conf.setTimestampingServicesRegistry(getTimestampingServicesRegistry());
-        conf.setFormatterRegistry(getFormatterRegistry());
+        conf.setFormatRegistry(getFormatterRegistry());
 
         JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config.model");
         Marshaller marshaller = context.createMarshaller();
@@ -249,22 +249,22 @@ public class ConfigManagerConfigFileGeneratorTest
         return timestampingService;
     }
 
-    private FormatterRegistry getFormatterRegistry()
+    private FormatRegistry getFormatterRegistry()
     {
-        FormatterRegistry formatterRegistry = new FormatterRegistry();
+        FormatRegistry formatterRegistry = new FormatRegistry();
 
-        ArrayList<Formatter> formatters = new ArrayList<Formatter>();
-        formatters.add(getPDFFormatter());
-        formatters.add(getCMSFormatter());
+        ArrayList<Format> formats = new ArrayList<Format>();
+        formats.add(getPDFFormat());
+        formats.add(getCMSFormat());
 
-        formatterRegistry.setFormatters(formatters);
+        formatterRegistry.setFormats(formats);
 
         return formatterRegistry;
     }
 
-    private Formatter getPDFFormatter()
+    private Format getPDFFormat()
     {
-        Formatter formatter = new Formatter();
+        Format formatter = new Format();
         formatter.setId("pdf");
         formatter.setTsaId("tsa-gva");
 
@@ -287,9 +287,9 @@ public class ConfigManagerConfigFileGeneratorTest
         return formatter;
     }
     
-    private Formatter getCMSFormatter()
+    private Format getCMSFormat()
     {
-        Formatter formatter = new Formatter();
+        Format formatter = new Format();
         formatter.setId("cms");
         formatter.setTsaId("tsa-gva");
 

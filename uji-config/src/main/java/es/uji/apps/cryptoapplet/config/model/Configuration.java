@@ -20,8 +20,8 @@ public class Configuration
     private RevocationServiceRegistry revocationServicesRegistry;
     @XmlElement(name = "timestamping")
     private TimestampingServiceRegistry timestampingServicesRegistry;
-    @XmlElement(name = "formatters")
-    private FormatterRegistry formatterRegistry;
+    @XmlElement(name = "formats")
+    private FormatRegistry formatRegistry;
 
     public Keystore getKeystore()
     {
@@ -75,13 +75,13 @@ public class Configuration
         this.timestampingServicesRegistry = timestampingServicesRegistry;
     }
 
-    public FormatterRegistry getFormatterRegistry()
+    public FormatRegistry getFormatRegistry()
     {
-        return formatterRegistry;
+        return formatRegistry;
     }
 
-    public void setFormatterRegistry(FormatterRegistry formatterRegistry)
+    public void setFormatRegistry(FormatRegistry formatRegistry)
     {
-        this.formatterRegistry = formatterRegistry;
+        this.formatRegistry = formatRegistry;
     }
 }
