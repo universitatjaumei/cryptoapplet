@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,23 +31,28 @@ import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import com.sun.org.apache.xerces.internal.dom.DOMOutputImpl;
-
-import es.uji.apps.cryptoapplet.crypto.CryptoAppletCoreException;
+import es.uji.apps.cryptoapplet.crypto.BaseFormatter;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureException;
 import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.SignatureResult;
+import es.uji.apps.cryptoapplet.utils.DOMOutputImpl;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
-public class XMLDsigSignatureFactory implements Formatter
+public class XMLSignatureFormatter extends BaseFormatter implements Formatter
 {
-    @Override
-    public SignatureResult format(SignatureOptions signatureOptions)
-            throws CryptoAppletCoreException
+    public XMLSignatureFormatter(X509Certificate certificate, PrivateKey privateKey,
+            Provider provider) throws SignatureException
     {
-        byte[] toSign = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
-        X509Certificate cer = signatureOptions.getCertificate();
-        PrivateKey pk = signatureOptions.getPrivateKey();
+        super(certificate, privateKey, provider);
+    }
+
+    @Override
+    public SignatureResult format(SignatureOptions signatureOptions) throws SignatureException
+    {
+        checkSignatureOptions(signatureOptions);
+
+        byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
 
         try
         {
@@ -79,19 +85,19 @@ public class XMLDsigSignatureFactory implements Formatter
             // Create the KeyInfo containing the X509Data.
             KeyInfoFactory kif = fac.getKeyInfoFactory();
             List<Object> x509Content = new ArrayList<Object>();
-            x509Content.add(cer.getSubjectX500Principal().getName());
-            x509Content.add(cer);
+            x509Content.add(certificate.getSubjectX500Principal().getName());
+            x509Content.add(certificate);
             X509Data xd = kif.newX509Data(x509Content);
             KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
 
             // Instantiate the document to be signed.
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
-            Document doc = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(toSign));
+            Document doc = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(data));
 
             // Create a DOMSignContext and specify the RSA PrivateKey and
             // location of the resulting XMLSignature's parent element.
-            DOMSignContext dsc = new DOMSignContext(pk, doc.getDocumentElement());
+            DOMSignContext dsc = new DOMSignContext(privateKey, doc.getDocumentElement());
 
             // Create the XMLSignature, but don't sign it yet.
             XMLSignature signature = fac.newXMLSignature(si, ki, null, "first", null);
@@ -121,7 +127,7 @@ public class XMLDsigSignatureFactory implements Formatter
         }
         catch (Exception e)
         {
-            throw new CryptoAppletCoreException(e);
+            throw new SignatureException(e);
         }
     }
 }
