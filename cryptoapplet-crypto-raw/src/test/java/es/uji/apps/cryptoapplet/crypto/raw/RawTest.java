@@ -18,7 +18,7 @@ import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
 import es.uji.apps.cryptoapplet.crypto.Validator;
 import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
 
-public class RawSignatureTest extends BaseCryptoAppletTest
+public class RawTest extends BaseCryptoAppletTest
 {
     private static final String OUTPUT_FILE = outputDir + "out-raw.bin";
 
