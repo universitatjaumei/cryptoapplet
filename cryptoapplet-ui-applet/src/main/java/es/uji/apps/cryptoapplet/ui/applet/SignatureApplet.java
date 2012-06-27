@@ -64,7 +64,7 @@ public class SignatureApplet extends JApplet
 
         BasicConfigurator.resetConfiguration();
 
-        Layout layout = new PatternLayout("%p %t %c [%d{HH:mm:ss,SSS}] - %m%n");
+        Layout layout = new PatternLayout("%d %-5p %c:%L - %m%n");
         Appender appender = new ConsoleAppender(layout);
         BasicConfigurator.configure(appender);
 
@@ -94,7 +94,7 @@ public class SignatureApplet extends JApplet
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error("", e);
             browser.signError();
         }
     }
