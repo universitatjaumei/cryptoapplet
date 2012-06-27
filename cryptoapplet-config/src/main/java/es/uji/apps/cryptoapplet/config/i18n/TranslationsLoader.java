@@ -6,8 +6,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 public class TranslationsLoader
 {
+    private Logger log = Logger.getLogger(TranslationsLoader.class);
+
     private Map<String, InputStream> bundles;
 
     public TranslationsLoader()
@@ -17,7 +21,7 @@ public class TranslationsLoader
 
     public InputStream getBundle(Locale locale) throws TranslationFileNotFoundException
     {
-        String bundleKey = locale.getLanguage();
+        String bundleKey = locale.toString().toLowerCase();
 
         if (bundles.get(bundleKey) == null)
         {
@@ -38,7 +42,9 @@ public class TranslationsLoader
 
     private InputStream loadBundle(String bundleName)
     {
-        return ClassLoader.getSystemResourceAsStream(MessageFormat.format("i18n/{0}.properties",
-                bundleName));
+        log.info(MessageFormat.format("Loading i18n/{0}.properties", bundleName));
+
+        return ClassLoader.getSystemClassLoader().getResourceAsStream(
+                MessageFormat.format("i18n/{0}.properties", bundleName));
     }
 }
