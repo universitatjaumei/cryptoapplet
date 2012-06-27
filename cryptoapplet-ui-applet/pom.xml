@@ -20,7 +20,7 @@
 
     <dependency>
       <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>cryptoapplet-crypto-xades</artifactId>
+      <artifactId>cryptoapplet-crypto-raw</artifactId>
       <version>${project.version}</version>
     </dependency>
 

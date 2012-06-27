@@ -1,5 +1,7 @@
 package es.uji.apps.cryptoapplet.ui.applet;
 
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +21,7 @@ public class SignatureConfiguration
     private List<String> outputURLs;
     private String dniToCheckCertificateAgainst;
     private Map<String, List<String>> signatureProperties;
+    private PrivateKeyEntry privateKeyEntry;
 
     public SignatureConfiguration()
     {
@@ -67,5 +70,15 @@ public class SignatureConfiguration
         {
             signatureProperties.put(propertyName, Collections.singletonList(propertyValue));
         }
+    }
+
+    public void setPrivateKeyEntry(PrivateKeyEntry privateKeyEntry)
+    {
+        this.privateKeyEntry = privateKeyEntry;
+    }
+
+    public PrivateKeyEntry getPrivateKeyEntry()
+    {
+        return privateKeyEntry;
     }
 }

@@ -1,12 +1,13 @@
 package es.uji.apps.cryptoapplet.ui.applet;
 
 import java.security.AccessController;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivilegedAction;
+import java.security.Provider;
+import java.security.cert.X509Certificate;
 import java.util.Locale;
 
 import javax.swing.JApplet;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
@@ -15,10 +16,14 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.apps.cryptoapplet.config.ConfigManager;
 import es.uji.apps.cryptoapplet.config.ConfigurationLoadException;
 import es.uji.apps.cryptoapplet.config.i18n.LabelManager;
+import es.uji.apps.cryptoapplet.crypto.Formatter;
+import es.uji.apps.cryptoapplet.crypto.SignatureException;
+import es.uji.apps.cryptoapplet.crypto.raw.RawFormatter;
 import es.uji.apps.cryptoapplet.keystore.KeyStoreManager;
 
 @SuppressWarnings("serial")
@@ -27,12 +32,13 @@ public class SignatureApplet extends JApplet
     private Logger log = Logger.getLogger(SignatureApplet.class);
 
     private KeyStoreManager keyStoreManager;
-    private JSCommands jsCommands;
     private SignatureConfiguration signatureConfiguration;
     private HttpConnectionConfiguration connectionConfiguration;
 
     private ConfigManager configManager;
     private LabelManager labelManager;
+
+    private Browser browser;
 
     static
     {
@@ -71,42 +77,29 @@ public class SignatureApplet extends JApplet
         this.connectionConfiguration = new HttpConnectionConfiguration();
     }
 
-    public SignatureApplet(JSCommands jsCommands)
-    {
-        this.jsCommands = jsCommands;
-    }
-
     public void init()
     {
-        initLookAndFeel();
-        initJavaScriptCommandExecution();
-        loadRemotePropertiesConfigFile();
+        loadConfiguration();
+
+        browser = Browser.getInstance(this);
 
         try
         {
             labelManager = new LabelManager();
 
-            keyStoreManager = new KeyStoreManager(jsCommands.getSupportedBrowser());
+            keyStoreManager = new KeyStoreManager(browser.getDetectedBrowser());
             keyStoreManager.initKeyStores();
 
-            jsCommands.onInitOk();
+            browser.initOk();
         }
         catch (Exception e)
         {
             log.error(e);
-            jsCommands.onSignError();
+            browser.signError();
         }
     }
 
-    private void initJavaScriptCommandExecution()
-    {
-        if (jsCommands == null)
-        {
-            jsCommands = JSCommands.getInstance(this);
-        }
-    }
-
-    private void loadRemotePropertiesConfigFile()
+    private void loadConfiguration()
     {
         String baseURL = ".";
 
@@ -124,34 +117,6 @@ public class SignatureApplet extends JApplet
             log.error("Problem loading configuration file", e);
             throw new RuntimeException(e);
         }
-    }
-
-    private void initLookAndFeel()
-    {
-        try
-        {
-            log.debug("Looking for suitable Look&Feels");
-
-            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
-            {
-                if ("Nimbus".equals(info.getName()))
-                {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    log.debug("Nimbus Look&Feel loaded");
-
-                    break;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            log.error("Nimbus Look&Feel is not present. Using default Look&Feel");
-        }
-    }
-
-    public void showUI()
-    {
-        new MainWindow(keyStoreManager, labelManager, jsCommands).show(signatureConfiguration);
     }
 
     public void setLanguage(final String language)
@@ -271,13 +236,43 @@ public class SignatureApplet extends JApplet
         });
     }
 
+    public void setCertificate(final String certificateDN)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+                PrivateKeyEntry privateKeyEntry = keyStoreManager
+                        .getPrivateKeyEntryByDN(certificateDN);
+
+                // TODO check usage with X509CertificateHandler
+                // TODO check cert is valid
+
+                signatureConfiguration.setPrivateKeyEntry(privateKeyEntry);
+
+                return null;
+            }
+        });
+    }
+
     public void sign()
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                showUI();
+                try
+                {
+                    PrivateKeyEntry privateKeyEntry = signatureConfiguration.getPrivateKeyEntry();
+                    Formatter formatter = new RawFormatter((X509Certificate) privateKeyEntry
+                            .getCertificate(), privateKeyEntry.getPrivateKey(),
+                            (Provider) new BouncyCastleProvider());
+                }
+                catch (SignatureException e)
+                {
+                    e.printStackTrace();
+                }
+
                 return null;
             }
         });

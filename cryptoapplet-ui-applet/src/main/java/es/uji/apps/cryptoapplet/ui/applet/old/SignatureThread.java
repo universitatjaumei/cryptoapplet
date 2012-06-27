@@ -1,6 +1,5 @@
-package es.uji.apps.cryptoapplet.ui.applet;
-//package es.uji.security.ui.applet;
-//
+package es.uji.apps.cryptoapplet.ui.applet.old;
+
 //import java.io.ByteArrayInputStream;
 //import java.io.ByteArrayOutputStream;
 //import java.io.IOException;
@@ -21,6 +20,7 @@ package es.uji.apps.cryptoapplet.ui.applet;
 //
 //import org.apache.log4j.Logger;
 //
+//import es.uji.apps.cryptoapplet.ui.applet.SignatureAppletException;
 //import es.uji.security.crypto.ISignFormatProvider;
 //import es.uji.security.crypto.SignatureOptions;
 //import es.uji.security.crypto.SignatureResult;
