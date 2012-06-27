@@ -29,7 +29,7 @@ public class TranslationsLoader
 
             if (resource != null)
             {
-                bundles.put(locale.getLanguage(), resource);
+                bundles.put(bundleKey, resource);
             }
             else
             {
@@ -40,11 +40,19 @@ public class TranslationsLoader
         return bundles.get(bundleKey);
     }
 
+    private static ClassLoader getContextClassLoader()
+    {
+        return Thread.currentThread().getContextClassLoader() != null ? Thread.currentThread()
+                .getContextClassLoader()
+                : TranslationsLoader.class.getClassLoader() != null ? TranslationsLoader.class
+                        .getClassLoader() : ClassLoader.getSystemClassLoader();
+    }
+
     private InputStream loadBundle(String bundleName)
     {
         log.info(MessageFormat.format("Loading i18n/{0}.properties", bundleName));
 
-        return ClassLoader.getSystemClassLoader().getResourceAsStream(
+        return getContextClassLoader().getResourceAsStream(
                 MessageFormat.format("i18n/{0}.properties", bundleName));
     }
 }
