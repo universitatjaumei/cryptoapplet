@@ -39,7 +39,7 @@ public class SignatureApplet extends JApplet
     private HttpConnectionConfiguration connectionConfiguration;
 
     private ConfigManager configManager;
-    private LabelManager labelManager;
+//    private LabelManager labelManager;
 
     private Browser browser;
 
@@ -88,7 +88,7 @@ public class SignatureApplet extends JApplet
 
         try
         {
-            labelManager = new LabelManager();
+//            labelManager = new LabelManager();
             keyStoreManager = new KeyStoreManager(browser.getDetectedBrowser());
 
             browser.initOk();
@@ -120,25 +120,25 @@ public class SignatureApplet extends JApplet
         }
     }
 
-    public void setLanguage(final String language)
-    {
-        AccessController.doPrivileged(new PrivilegedAction<Object>()
-        {
-            public Object run()
-            {
-                try
-                {
-                    labelManager = new LabelManager(new Locale(language));
-                }
-                catch (Exception e)
-                {
-                    log.error(e);
-                }
-
-                return null;
-            }
-        });
-    }
+//    public void setLanguage(final String language)
+//    {
+//        AccessController.doPrivileged(new PrivilegedAction<Object>()
+//        {
+//            public Object run()
+//            {
+//                try
+//                {
+//                    labelManager = new LabelManager(new Locale(language));
+//                }
+//                catch (Exception e)
+//                {
+//                    log.error(e);
+//                }
+//
+//                return null;
+//            }
+//        });
+//    }
 
     public void setOutputSignatureFormat(final String format)
     {
