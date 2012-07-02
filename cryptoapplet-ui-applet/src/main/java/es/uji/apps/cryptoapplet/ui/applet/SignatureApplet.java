@@ -1,11 +1,13 @@
 package es.uji.apps.cryptoapplet.ui.applet;
 
+import java.io.ByteArrayInputStream;
 import java.security.AccessController;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivilegedAction;
 import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.Locale;
+import java.util.Map.Entry;
 
 import javax.swing.JApplet;
 
@@ -16,13 +18,14 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import es.uji.apps.cryptoapplet.config.ConfigManager;
 import es.uji.apps.cryptoapplet.config.ConfigurationLoadException;
 import es.uji.apps.cryptoapplet.config.i18n.LabelManager;
 import es.uji.apps.cryptoapplet.crypto.Formatter;
 import es.uji.apps.cryptoapplet.crypto.SignatureException;
+import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
+import es.uji.apps.cryptoapplet.crypto.SignatureResult;
 import es.uji.apps.cryptoapplet.crypto.raw.RawFormatter;
 import es.uji.apps.cryptoapplet.keystore.KeyStoreManager;
 
@@ -86,9 +89,7 @@ public class SignatureApplet extends JApplet
         try
         {
             labelManager = new LabelManager();
-
             keyStoreManager = new KeyStoreManager(browser.getDetectedBrowser());
-            keyStoreManager.initKeyStores();
 
             browser.initOk();
         }
@@ -236,13 +237,50 @@ public class SignatureApplet extends JApplet
         });
     }
 
+    public String getCertificates()
+    {
+        return AccessController.doPrivileged(new PrivilegedAction<String>()
+        {
+            public String run()
+            {
+                StringBuffer output = new StringBuffer();
+
+                output.append("[");
+
+                int length = keyStoreManager.getCertificates().size();
+                int index = 0;
+
+                for (X509Certificate certificate : keyStoreManager.getCertificates())
+                {
+                    output.append("{");
+                    output.append("  dn: \"");
+                    output.append(certificate.getSubjectDN().toString());
+                    output.append("\", serial : ");
+                    output.append(certificate.getSerialNumber());
+                    output.append("}");
+
+                    index++;
+
+                    if (index != length)
+                    {
+                        output.append(",");
+                    }
+                }
+
+                output.append("]");
+
+                return output.toString();
+            }
+        });
+    }
+
     public void setCertificate(final String certificateDN)
     {
         AccessController.doPrivileged(new PrivilegedAction<Object>()
         {
             public Object run()
             {
-                PrivateKeyEntry privateKeyEntry = keyStoreManager
+                Entry<PrivateKeyEntry, Provider> privateKeyEntry = keyStoreManager
                         .getPrivateKeyEntryByDN(certificateDN);
 
                 // TODO check usage with X509CertificateHandler
@@ -255,18 +293,26 @@ public class SignatureApplet extends JApplet
         });
     }
 
-    public void sign()
+    public boolean sign()
     {
-        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        return AccessController.doPrivileged(new PrivilegedAction<Boolean>()
         {
-            public Object run()
+            public Boolean run()
             {
                 try
                 {
-                    PrivateKeyEntry privateKeyEntry = signatureConfiguration.getPrivateKeyEntry();
+                    Entry<PrivateKeyEntry, Provider> privateKeyEntry = signatureConfiguration
+                            .getPrivateKeyEntry();
                     Formatter formatter = new RawFormatter((X509Certificate) privateKeyEntry
-                            .getCertificate(), privateKeyEntry.getPrivateKey(),
-                            (Provider) new BouncyCastleProvider());
+                            .getKey().getCertificate(), privateKeyEntry.getKey().getPrivateKey(),
+                            privateKeyEntry.getValue());
+
+                    SignatureOptions signatureOptions = new SignatureOptions(configManager
+                            .getConfiguration());
+                    signatureOptions.setDataToSign(new ByteArrayInputStream("test".getBytes()));
+                    SignatureResult signatureResult = formatter.format(signatureOptions);
+
+                    return signatureResult.isValid();
                 }
                 catch (SignatureException e)
                 {
@@ -297,15 +343,5 @@ public class SignatureApplet extends JApplet
     public String getJavaVersion()
     {
         return System.getProperty("java.version");
-    }
-
-    public KeyStoreManager getKeyStoreManager()
-    {
-        return keyStoreManager;
-    }
-
-    public void setKeyStoreManager(KeyStoreManager keyStoreManager)
-    {
-        this.keyStoreManager = keyStoreManager;
     }
 }

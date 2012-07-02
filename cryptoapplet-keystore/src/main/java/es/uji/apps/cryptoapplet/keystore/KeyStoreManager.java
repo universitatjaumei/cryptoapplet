@@ -6,14 +6,15 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
 import es.uji.apps.cryptoapplet.crypto.BrowserType;
-import es.uji.apps.cryptoapplet.crypto.KeystoreType;
 import es.uji.apps.cryptoapplet.keystore.mscapi.SunMSCAPIKeyStore;
 import es.uji.apps.cryptoapplet.keystore.pkcs11.PKCS11KeyStore;
 import es.uji.apps.cryptoapplet.keystore.pkcs11.devices.Firefox;
@@ -23,25 +24,33 @@ public class KeyStoreManager
 {
     private Logger log = Logger.getLogger(KeyStoreManager.class);
 
-    public Hashtable<KeystoreType, SimpleKeyStore> keystores;
+    public List<SimpleKeyStore> keystores;
     private BrowserType navigator;
 
-    public KeyStoreManager(BrowserType navigator)
+    public KeyStoreManager(BrowserType navigator) throws GeneralSecurityException, IOException
     {
         this.navigator = navigator;
-        this.keystores = new Hashtable<KeystoreType, SimpleKeyStore>();
+        this.keystores = new ArrayList<SimpleKeyStore>();
+
+        initKeyStores();
     }
 
     private void initFirefoxStore() throws GeneralSecurityException, IOException
     {
         if (navigator.equals(BrowserType.FIREFOX))
         {
+            log.info("Loading FIREFOX keystore through PKCS11 interface ...");
+
             Firefox firefox = new Firefox();
             InputStream pkcs11Configuration = new ByteArrayInputStream(
                     firefox.getPKCS11Configuration());
 
             SimpleKeyStore keystore = new PKCS11KeyStore();
             keystore.load(pkcs11Configuration, null);
+
+            log.info("Keystore loaded and added to KeyStoreManager!!");
+
+            keystores.add(keystore);
         }
     }
 
@@ -56,22 +65,12 @@ public class KeyStoreManager
         }
     }
 
-    public SimpleKeyStore getKeyStore(KeystoreType keystore)
+    public void addKeyStore(SimpleKeyStore keyStore)
     {
-        return this.keystores.get(keystore);
+        keystores.add(keyStore);
     }
 
-    public Hashtable<KeystoreType, SimpleKeyStore> getKeyStoreTable()
-    {
-        return this.keystores;
-    }
-
-    public void addKeyStore(KeystoreType KeystoreType, SimpleKeyStore keyStore)
-    {
-        keystores.put(KeystoreType, keyStore);
-    }
-
-    public void initKeyStores() throws GeneralSecurityException, IOException
+    private void initKeyStores() throws GeneralSecurityException, IOException
     {
         initInternetExplorerStore();
         initFirefoxStore();
@@ -98,31 +97,80 @@ public class KeyStoreManager
         keystores.clear();
     }
 
-    public PrivateKeyEntry getPrivateKeyEntryByDN(String certificateDN)
+    public List<X509Certificate> getCertificates()
     {
-        
+        List<X509Certificate> certificates = new ArrayList<X509Certificate>();
+
         try
         {
-            for (Entry<KeystoreType, SimpleKeyStore> keystore : keystores.entrySet())
+            for (SimpleKeyStore keystore : keystores)
             {
-                SimpleKeyStore simpleKeyStore = keystore.getValue();
-                
-                for (String alias : keystore.getValue().aliases())
+                for (String alias : keystore.aliases())
                 {
-                    X509Certificate certificate = (X509Certificate) simpleKeyStore.getCertificate(alias);
+                    certificates.add((X509Certificate) keystore.getCertificate(alias));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("Error retrieving certificate list", e);
+        }
 
-                    if (certificateDN
-                            .equalsIgnoreCase(certificate.getSubjectDN().toString()))
+        return certificates;
+    }
+
+    public Entry<PrivateKeyEntry, Provider> getPrivateKeyEntryByDN(String certificateDN)
+    {
+        try
+        {
+            for (final SimpleKeyStore keystore : keystores)
+            {
+                for (final String alias : keystore.aliases())
+                {
+                    final X509Certificate certificate = (X509Certificate) keystore
+                            .getCertificate(alias);
+
+                    if (certificateDN.equalsIgnoreCase(certificate.getSubjectDN().toString()))
                     {
-                        PrivateKey privateKey = (PrivateKey) simpleKeyStore.getKey(alias);
-                        return new PrivateKeyEntry(privateKey, new X509Certificate[] {certificate});
+                        return new Entry<PrivateKeyEntry, Provider>()
+                        {
+                            @Override
+                            public Provider getValue()
+                            {
+                                return keystore.getProvider();
+                            }
+
+                            @Override
+                            public PrivateKeyEntry getKey()
+                            {
+                                PrivateKey privateKey = null;
+
+                                try
+                                {
+                                    privateKey = (PrivateKey) keystore.getKey(alias);
+                                }
+                                catch (GeneralSecurityException e)
+                                {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
+                                return new PrivateKeyEntry(privateKey,
+                                        new X509Certificate[] { certificate });
+                            }
+
+                            @Override
+                            public Provider setValue(Provider value)
+                            {
+                                return null;
+                            }
+                        };
                     }
                 }
             }
         }
         catch (Exception e)
         {
-            log.warn(e);
+            log.error("Error retrieveing privateKeyByDN", e);
         }
 
         return null;

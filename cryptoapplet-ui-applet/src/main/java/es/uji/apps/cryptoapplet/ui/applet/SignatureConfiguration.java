@@ -1,12 +1,14 @@
 package es.uji.apps.cryptoapplet.ui.applet;
 
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import es.uji.apps.cryptoapplet.crypto.DataEncoding;
 import es.uji.apps.cryptoapplet.crypto.SignatureFormat;
@@ -21,7 +23,7 @@ public class SignatureConfiguration
     private List<String> outputURLs;
     private String dniToCheckCertificateAgainst;
     private Map<String, List<String>> signatureProperties;
-    private PrivateKeyEntry privateKeyEntry;
+    private Entry<PrivateKeyEntry, Provider> privateKeyEntry;
 
     public SignatureConfiguration()
     {
@@ -72,12 +74,12 @@ public class SignatureConfiguration
         }
     }
 
-    public void setPrivateKeyEntry(PrivateKeyEntry privateKeyEntry)
-    {
+    public void setPrivateKeyEntry(Entry<PrivateKeyEntry, Provider> privateKeyEntry)
+    {        
         this.privateKeyEntry = privateKeyEntry;
     }
 
-    public PrivateKeyEntry getPrivateKeyEntry()
+    public Entry<PrivateKeyEntry, Provider> getPrivateKeyEntry()
     {
         return privateKeyEntry;
     }
