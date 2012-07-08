@@ -4,5 +4,8 @@ public enum SupportedBrowser
 {
     IEXPLORER,
     MOZILLA,
-    OTHERS
+    OTHERS, 
+    CHROME,
+    SAFARI,
+    OPERA
 }

@@ -145,8 +145,13 @@ public class AppHandler
                 userAgent = userAgent.toLowerCase();
 
                 log.debug("Detected user agent " + userAgent);
+                log.debug("Is IE? " + userAgent.indexOf("explorer"));
+                log.debug("Is IE? " + userAgent.indexOf("msie"));
+                log.debug("Is Win? " + OS.isWindowsUpperEqualToNT());
+                log.debug("Is Chrome? " + userAgent.indexOf("chrome/"));
 
-                if (userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1)
+                if ((userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1) || 
+                    (OS.isWindowsUpperEqualToNT() && userAgent.indexOf("chrome/") > -1))
                 {
                     this.navigator = SupportedBrowser.IEXPLORER;
 
