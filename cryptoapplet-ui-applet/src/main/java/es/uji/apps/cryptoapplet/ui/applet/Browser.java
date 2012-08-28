@@ -94,19 +94,19 @@ public class Browser
         {
             userAgent = userAgent.toLowerCase();
 
-            if (userAgent.contains("Chrome/"))
+            if (userAgent.contains("chrome/"))
             {
                 navigator = BrowserType.CHROME;
             }
-            else if (userAgent.contains("Safari/"))
+            else if (userAgent.contains("safari/"))
             {
                 navigator = BrowserType.SAFARI;
             }
-            else if (userAgent.contains("Opera ") || userAgent.contains("Opera/"))
+            else if (userAgent.contains("opera ") || userAgent.contains("opera/"))
             {
                 navigator = BrowserType.OPERA;
             }
-            else if (userAgent.contains("MSIE "))
+            else if (userAgent.contains("msie "))
             {
                 navigator = BrowserType.IEXPLORER;
             }
