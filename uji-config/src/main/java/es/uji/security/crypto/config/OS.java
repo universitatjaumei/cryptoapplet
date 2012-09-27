@@ -1,16 +1,20 @@
 package es.uji.security.crypto.config;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 public class OS
 {
@@ -145,6 +149,50 @@ public class OS
     	}
     }
     
+    public static String[] getAllSystemLibDirectories(){
+
+    	ArrayList<String> res = new ArrayList<String>();
+
+    	if (OS.isLinux()){
+    		File folder = new File("/etc/ld.so.conf.d/");
+    		File[] listOfFiles = folder.listFiles();
+    		if (listOfFiles !=null){
+    			for (int i = 0; i < listOfFiles.length; i++) {
+    				if (listOfFiles[i].isFile()) {
+    					try{
+    						FileInputStream fstream = new FileInputStream(listOfFiles[i]);
+    						DataInputStream in = new DataInputStream(fstream);
+    						BufferedReader br = new BufferedReader(new InputStreamReader(in));
+    						String strLine;
+    						while ((strLine = br.readLine()) != null)   {
+    							if (!strLine.trim().startsWith("#")){
+    								res.add(strLine);
+    								//System.out.println (strLine);
+    							}
+    						}
+    						in.close();
+    					}catch (Exception e){
+    						// Just doing nothing, without adding anything to res.
+    						// System.err.println("Error: " + e.getMessage());
+    					}
+    				}
+    			}
+    		}
+    	}
+    	else if (OS.isMac()){
+    		res.add("/Library");
+    	}
+    	else{
+    		res.add(System.getenv("SystemDirectory"));
+    	}
+
+    	String[] sRes= new String[res.size()]; 
+    	res.toArray(sRes);
+
+    	return sRes;
+    }
+    
+    
     public static String getOS()
     {
         return System.getProperty("os.name").toLowerCase();
@@ -205,5 +253,11 @@ public class OS
     	 String version = System.getProperty("java.version");
          return (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1);
     }
-    
+ 
+    /*public static void main(String[] args){
+    	String[] all= OS.getAllSystemLibDirectories();
+    	for (String i: all){
+    		System.out.println(i);
+    	}
+    }*/
 }

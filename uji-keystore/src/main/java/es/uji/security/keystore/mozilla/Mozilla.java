@@ -230,21 +230,35 @@ public class Mozilla
         }
         else if (_linux)
         {
+        	String[] libDirs= OS.getAllSystemLibDirectories();
+        	
             String dirs[] = { "/usr/lib/nss/libsoftokn3.so",
                     getAbsoluteApplicationPath() + "libsoftokn3.so", "/usr/lib/libsoftokn3.so",
                     "/lib/libsoftokn3.so", "/usr/lib/iceweasel/libsoftokn3.so",
                     "/usr/lib/mozilla//libsoftokn3.so", "/usr/lib/firefox/libsoftokn3.so",
                     "/usr/lib/iceape/libsoftokn3.so", "/usr/lib/seamonkey/libsoftokn3.so" };
 
-            for (int i = 0; i < dirs.length; i++)
+            String[] allDirs= new String[libDirs.length + dirs.length];
+            
+            for (int i = 0; i < libDirs.length; i++){
+            	allDirs[i]= libDirs[i] + "/libsoftokn3.so";
+            }
+            
+            for (int i=libDirs.length; i < libDirs.length + dirs.length; i++){
+            	allDirs[i]= dirs[i-libDirs.length];
+            }
+            
+            
+            for (int i = 0; i < allDirs.length; i++)
             {
-                File f = new File(dirs[i]);
+                File f = new File(allDirs[i]);
+                System.out.println("Testing with: " + f.getPath());
                 if (f.exists())
                 {
                     String res;
                     try
                     {
-                        res = new File(dirs[i]).getCanonicalPath();
+                        res = new File(allDirs[i]).getCanonicalPath();
                     }
                     catch (IOException e)
                     {
@@ -338,4 +352,9 @@ public class Mozilla
             return true;
         }
     }    
+    
+    public static void main(String[] args){
+    	Mozilla m= new Mozilla();
+    	m.getPkcs11FilePath();
+    }
 }
