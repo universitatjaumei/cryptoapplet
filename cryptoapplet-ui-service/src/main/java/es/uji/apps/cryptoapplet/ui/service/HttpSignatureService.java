@@ -32,14 +32,7 @@ public class HttpSignatureService implements Runnable
             try
             {
                 Socket connection = this.socket.accept();
-                Request request = new Request(connection.getInputStream());
-
-                if (request.isInvalid())
-                {
-                    continue;
-                }
-
-                service.doService(request, connection.getOutputStream());
+                service.doService(connection);
                 connection.close();
             }
             catch (Exception e)

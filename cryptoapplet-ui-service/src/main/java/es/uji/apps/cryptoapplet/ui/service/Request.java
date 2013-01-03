@@ -32,9 +32,9 @@ public class Request
         return Command.valueOf(url.getPath().split("/")[2]);
     }
 
-    public boolean isInvalid()
+    public boolean isValid()
     {
-        return requestText == null || requestText.length() == 0;
+        return requestText != null && requestText.length() > 0;
     }
 
     private String extractUrlFromRequest()

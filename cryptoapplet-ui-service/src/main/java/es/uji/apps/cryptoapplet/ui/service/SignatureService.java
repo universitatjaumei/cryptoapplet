@@ -5,24 +5,11 @@ import es.uji.apps.cryptoapplet.ui.service.commands.Command;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.net.Socket;
 import java.security.GeneralSecurityException;
 
 public class SignatureService
 {
-    public void doService(Request request, OutputStream outputStream) throws IOException, GeneralSecurityException
-    {
-        DataObject data = getData(request);
-
-        Response response = new Response(request.getCallBack());
-        String responseText = response.build(data);
-
-        DataOutputStream writer = new DataOutputStream(outputStream);
-        writer.writeBytes(responseText);
-        writer.flush();
-        writer.close();
-    }
-
     private DataObject getData(Request request) throws IOException, GeneralSecurityException
     {
         DataObject data = new DataObject();
@@ -33,5 +20,23 @@ public class SignatureService
         }
 
         return data;
+    }
+
+    public void doService(Socket connection) throws IOException, GeneralSecurityException
+    {
+        Request request = new Request(connection.getInputStream());
+
+        if (request.isValid())
+        {
+            Response response = new Response(request.getCallBack());
+
+            DataObject data = getData(request);
+            String responseText = response.build(data);
+
+            DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+            writer.writeBytes(responseText);
+            writer.flush();
+            writer.close();
+        }
     }
 }
