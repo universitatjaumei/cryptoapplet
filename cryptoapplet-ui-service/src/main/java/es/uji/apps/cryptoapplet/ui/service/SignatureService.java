@@ -2,27 +2,29 @@ package es.uji.apps.cryptoapplet.ui.service;
 
 import es.uji.apps.cryptoapplet.ui.service.commands.CertificateListCommand;
 import es.uji.apps.cryptoapplet.ui.service.commands.Command;
+import es.uji.apps.cryptoapplet.ui.service.commands.SignCommand;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.Socket;
-import java.security.GeneralSecurityException;
 
 public class SignatureService
 {
-    private DataObject getData(Request request) throws IOException, GeneralSecurityException
+    private DataObject getData(Request request) throws Exception
     {
-        DataObject data = new DataObject();
-
         if (Command.certificates.equals(request.getCommand()))
         {
-            data = new CertificateListCommand().execute();
+            return new CertificateListCommand().execute();
         }
 
-        return data;
+        if (Command.signraw.equals(request.getCommand()))
+        {
+            return new SignCommand(request.getData(), request.getQueryParams()).execute();
+        }
+
+        throw new RuntimeException("Command not defined");
     }
 
-    public void doService(Socket connection) throws IOException, GeneralSecurityException
+    public void doService(Socket connection) throws Exception
     {
         Request request = new Request(connection.getInputStream());
 

@@ -1,33 +1,20 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script src="http://code.jquery.com/jquery-latest.js"></script>
-        <script src="cryptoapplet.js"></script>
+  <head>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="cryptoapplet.js"></script>
+  </head>
 
-        <script>
-            $(document).ready(function() {
-                $('#btnEnviar').bind('click', function() {
-                   CryptoApplet.API.getCertificates(function(data) {
-                       var output = "";
+  <body>
+    <h1>CryptoApplet API</h1>
 
-                       for (var i= 0, len = data.certificate.length ; i<len ; i++) {
-                            output+= '<li>';
-                            output+= data.certificate[i].dn;
-                            output+= '</li>';
-                       }
+    <h2>Certificate list</h2>
+    <div id="certificateList"></div>
 
-                       $('#certificateList').html("<ul>" + output + "</ul>");
-                   });
-                });
-            });
-        </script>
-    </head>
+    <h2>Data to sign</h2>
+    <input id="inputUrl" type="text" value="http://www.uji.es/">    
 
-    <body>
-        <h1>CryptoApplet API</h1>
-
-        <h2>Certificate list</h2>
-        <div id="certificateList"></div>
-        <input id="btnEnviar"  type="button" value="Get certificate list">
-    </body>
+    <h2>Signature result</h2>
+    <textarea id="signatureResult" rows="5" cols="60"></textarea>
+  </body>
 </html>

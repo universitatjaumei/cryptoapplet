@@ -1,13 +1,15 @@
 package es.uji.apps.cryptoapplet.ui.service;
 
 import es.uji.apps.cryptoapplet.ui.service.commands.Command;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Request
 {
@@ -32,9 +34,38 @@ public class Request
         return Command.valueOf(url.getPath().split("/")[2]);
     }
 
+    public Map<String, String> getQueryParams() throws UnsupportedEncodingException
+    {
+        Map<String, String> params = new HashMap<String, String>();
+
+        for (String param : this.url.getQuery().split("&"))
+        {
+            String[] values = param.split("=");
+            params.put(values[0], URLDecoder.decode(values[1], "UTF-8"));
+        }
+
+        return params;
+    }
+
     public boolean isValid()
     {
         return requestText != null && requestText.length() > 0;
+    }
+
+    public byte[] getData() throws Exception
+    {
+        Map<String, String> params = getQueryParams();
+        String inputUrl = params.get("inputUrl");
+
+        URL url = new URL(inputUrl);
+        URLConnection uc = url.openConnection();
+
+        uc.setConnectTimeout(10000);
+        uc.setReadTimeout(10000);
+
+        uc.connect();
+
+        return StreamUtils.inputStreamToByteArray(uc.getInputStream());
     }
 
     private String extractUrlFromRequest()

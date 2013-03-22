@@ -1,5 +1,11 @@
 package es.uji.apps.cryptoapplet.keystore;
 
+import es.uji.apps.cryptoapplet.keystore.mscapi.SunMSCAPIKeyStore;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.PKCS11KeyStore;
+import es.uji.apps.cryptoapplet.keystore.pkcs11.devices.Firefox;
+import es.uji.apps.cryptoapplet.utils.OperatingSystemUtils;
+import org.apache.log4j.Logger;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,24 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
-
-import es.uji.apps.cryptoapplet.crypto.BrowserType;
-import es.uji.apps.cryptoapplet.keystore.mscapi.SunMSCAPIKeyStore;
-import es.uji.apps.cryptoapplet.keystore.pkcs11.PKCS11KeyStore;
-import es.uji.apps.cryptoapplet.keystore.pkcs11.devices.Firefox;
-import es.uji.apps.cryptoapplet.utils.OperatingSystemUtils;
-
 public class KeyStoreManager
 {
     private Logger log = Logger.getLogger(KeyStoreManager.class);
 
     public List<SimpleKeyStore> keystores;
-    private BrowserType navigator;
 
-    public KeyStoreManager(BrowserType navigator) throws GeneralSecurityException, IOException
+    public KeyStoreManager() throws GeneralSecurityException, IOException
     {
-        this.navigator = navigator;
         this.keystores = new ArrayList<SimpleKeyStore>();
 
         initKeyStores();
@@ -37,28 +33,23 @@ public class KeyStoreManager
 
     private void initFirefoxStore() throws GeneralSecurityException, IOException
     {
-        if (navigator.equals(BrowserType.FIREFOX))
-        {
-            log.info("Loading FIREFOX keystore through PKCS11 interface ...");
+        log.info("Loading FIREFOX keystore through PKCS11 interface ...");
 
-            Firefox firefox = new Firefox();
-            InputStream pkcs11Configuration = new ByteArrayInputStream(
-                    firefox.getPKCS11Configuration());
+        Firefox firefox = new Firefox();
+        InputStream pkcs11Configuration = new ByteArrayInputStream(
+                firefox.getPKCS11Configuration());
 
-            SimpleKeyStore keystore = new PKCS11KeyStore();
-            keystore.load(pkcs11Configuration, null);
+        SimpleKeyStore keystore = new PKCS11KeyStore();
+        keystore.load(pkcs11Configuration, null);
 
-            log.info("Keystore loaded and added to KeyStoreManager!!");
+        log.info("Keystore loaded and added to KeyStoreManager!!");
 
-            keystores.add(keystore);
-        }
+        keystores.add(keystore);
     }
 
     private void initInternetExplorerStore() throws GeneralSecurityException, IOException
     {
-        if (navigator.equals(BrowserType.IEXPLORER)
-                || (navigator.equals(BrowserType.CHROME) && OperatingSystemUtils
-                        .isWindowsUpperEqualToNT()))
+        if (OperatingSystemUtils.isWindowsUpperEqualToNT())
         {
             SimpleKeyStore keystore = new SunMSCAPIKeyStore();
             keystore.load(null, null);
@@ -74,22 +65,6 @@ public class KeyStoreManager
     {
         initInternetExplorerStore();
         initFirefoxStore();
-        initPKCS11();
-    }
-
-    private void initPKCS11()
-    {
-        // TODO
-        // if (!Browser.IEXPLORER.equals(navigator))
-        // {
-        // Device device = Device.getDeviceWithAvailableLibrary();
-        //
-        // for (int deviceSlot = 0; deviceSlot < 4; deviceSlot++)
-        // {
-        // device.setSlot(deviceSlot);
-        // device.init();
-        // }
-        // }
     }
 
     public void flushKeyStoresTable()
@@ -119,7 +94,7 @@ public class KeyStoreManager
         return certificates;
     }
 
-    public Entry<PrivateKeyEntry, Provider> getPrivateKeyEntryByDN(String certificateDN)
+    public Entry<PrivateKeyEntry, Provider> getPrivateKeyEntryByDn(String dn)
     {
         try
         {
@@ -130,7 +105,7 @@ public class KeyStoreManager
                     final X509Certificate certificate = (X509Certificate) keystore
                             .getCertificate(alias);
 
-                    if (certificateDN.equalsIgnoreCase(certificate.getSubjectDN().toString()))
+                    if (certificate.getSubjectDN().toString().equalsIgnoreCase(dn))
                     {
                         return new Entry<PrivateKeyEntry, Provider>()
                         {
@@ -151,11 +126,10 @@ public class KeyStoreManager
                                 }
                                 catch (GeneralSecurityException e)
                                 {
-                                    // TODO Auto-generated catch block
                                     e.printStackTrace();
                                 }
                                 return new PrivateKeyEntry(privateKey,
-                                        new X509Certificate[] { certificate });
+                                        new X509Certificate[]{certificate});
                             }
 
                             @Override

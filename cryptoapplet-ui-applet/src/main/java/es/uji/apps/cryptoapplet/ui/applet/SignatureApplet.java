@@ -89,7 +89,7 @@ public class SignatureApplet extends JApplet
         try
         {
 //            labelManager = new LabelManager();
-            keyStoreManager = new KeyStoreManager(browser.getDetectedBrowser());
+            keyStoreManager = new KeyStoreManager();
 
             browser.initOk();
         }
@@ -281,7 +281,7 @@ public class SignatureApplet extends JApplet
             public Object run()
             {
                 Entry<PrivateKeyEntry, Provider> privateKeyEntry = keyStoreManager
-                        .getPrivateKeyEntryByDN(certificateDN);
+                        .getPrivateKeyEntryByDn(certificateDN);
 
                 // TODO check usage with X509CertificateHandler
                 // TODO check cert is valid

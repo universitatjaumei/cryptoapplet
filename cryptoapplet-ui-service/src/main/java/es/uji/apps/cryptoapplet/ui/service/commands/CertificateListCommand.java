@@ -14,15 +14,12 @@ public class CertificateListCommand implements ServiceCommand
 
     public CertificateListCommand() throws GeneralSecurityException, IOException
     {
-        keyStoreManager = new KeyStoreManager(BrowserType.FIREFOX);
+        keyStoreManager = new KeyStoreManager();
     }
 
     public DataObject execute()
     {
         DataObject data = new DataObject();
-
-        int length = keyStoreManager.getCertificates().size();
-        int index = 0;
 
         for (X509Certificate certificate : keyStoreManager.getCertificates())
         {
