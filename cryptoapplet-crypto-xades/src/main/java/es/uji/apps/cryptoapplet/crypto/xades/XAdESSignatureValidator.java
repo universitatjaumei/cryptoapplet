@@ -1,37 +1,34 @@
 package es.uji.apps.cryptoapplet.crypto.xades;
 
-import java.security.Provider;
-import java.security.cert.X509Certificate;
-import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import es.uji.apps.cryptoapplet.crypto.exceptions.CertificateNotFoundException;
+import es.uji.apps.cryptoapplet.crypto.exceptions.ValidationException;
+import es.uji.apps.cryptoapplet.crypto.signature.validate.AbstractSignatureValidator;
+import es.uji.apps.cryptoapplet.crypto.signature.validate.SignatureValidationOptions;
+import es.uji.apps.cryptoapplet.crypto.signature.validate.SignatureValidationResult;
+import es.uji.apps.cryptoapplet.crypto.signature.validate.SignatureValidator;
 import net.java.xades.security.xml.SignatureStatus;
 import net.java.xades.security.xml.ValidateResult;
 import net.java.xades.security.xml.XAdES.XAdES;
 import net.java.xades.security.xml.XAdES.XAdES_BES;
 import net.java.xades.security.xml.XAdES.XMLAdvancedSignature;
-
 import org.w3c.dom.Element;
 
-import es.uji.apps.cryptoapplet.crypto.BaseValidator;
-import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
-import es.uji.apps.cryptoapplet.crypto.ValidationException;
-import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
-import es.uji.apps.cryptoapplet.crypto.ValidationResult;
-import es.uji.apps.cryptoapplet.crypto.Validator;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.security.Provider;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
-public class XAdESValidator extends BaseValidator implements Validator
+public class XAdESSignatureValidator extends AbstractSignatureValidator implements SignatureValidator
 {
-    public XAdESValidator(X509Certificate certificate, Provider provider)
+    public XAdESSignatureValidator(X509Certificate certificate, Provider provider)
             throws CertificateNotFoundException
     {
         super(certificate, provider);
     }
 
     @Override
-    public ValidationResult validate(ValidationOptions validationOptions)
+    public SignatureValidationResult validate(SignatureValidationOptions signatureValidationOptions)
             throws ValidationException
     {
         try
@@ -39,7 +36,7 @@ public class XAdESValidator extends BaseValidator implements Validator
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Element element = db.parse(validationOptions.getSignedData()).getDocumentElement();
+            Element element = db.parse(signatureValidationOptions.getSignedData()).getDocumentElement();
 
             XAdES_BES xades = (XAdES_BES) XAdES.newInstance(XAdES.BES, element);
 
@@ -55,7 +52,7 @@ public class XAdESValidator extends BaseValidator implements Validator
                 }
             }
 
-            return new ValidationResult(true);
+            return new SignatureValidationResult(true);
         }
         catch (Exception e)
         {

@@ -1,114 +1,94 @@
 package es.uji.apps.cryptoapplet.crypto.xades;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Map;
-
+import es.uji.apps.cryptoapplet.config.model.Configuration;
+import es.uji.apps.cryptoapplet.crypto.junit.AbstractCryptoTest;
+import es.uji.apps.cryptoapplet.crypto.junit.KeyStoreAnfActivo;
+import es.uji.apps.cryptoapplet.crypto.junit.SignEnvironment;
+import es.uji.apps.cryptoapplet.crypto.signature.format.SignatureFormatter;
+import es.uji.apps.cryptoapplet.crypto.signature.validate.SignatureValidationOptions;
+import es.uji.apps.cryptoapplet.crypto.signature.validate.SignatureValidationResult;
+import org.junit.Before;
 import org.junit.Test;
 
-import es.uji.apps.cryptoapplet.config.ConfigManager;
-import es.uji.apps.cryptoapplet.config.model.Configuration;
-import es.uji.apps.cryptoapplet.crypto.CertificateNotFoundException;
-import es.uji.apps.cryptoapplet.crypto.Formatter;
-import es.uji.apps.cryptoapplet.crypto.SignatureException;
-import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
-import es.uji.apps.cryptoapplet.crypto.SignatureResult;
-import es.uji.apps.cryptoapplet.crypto.ValidationException;
-import es.uji.apps.cryptoapplet.crypto.ValidationOptions;
-import es.uji.apps.cryptoapplet.crypto.ValidationResult;
-import es.uji.apps.cryptoapplet.crypto.Validator;
-import es.uji.apps.cryptoapplet.crypto.junit.BaseCryptoAppletTest;
-import es.uji.apps.cryptoapplet.utils.StreamUtils;
+import java.io.ByteArrayInputStream;
+import java.util.Map;
 
-public class XAdESTest extends BaseCryptoAppletTest
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+public class XAdESTest extends AbstractCryptoTest
 {
-    private static final String OUTPUT_FILE = outputDir + "out-xades-";
+    private SignEnvironment environment;
 
-    @Test
-    public void jxadesEnvelopedWithoutCosign() throws Exception
+    @Before
+    public void init() throws Exception
     {
-        Configuration configuration = new ConfigManager().getConfiguration();
-        signatureOptions = new SignatureOptions(configuration);
-        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
-
-        signAndVerify(OUTPUT_FILE + "enveloped.xml");
+        environment = new SignEnvironment(new KeyStoreAnfActivo());
     }
 
     @Test
-    public void jxadesEnvelopedCosign() throws Exception
+    public void xadesEnvelopedWithoutCosign() throws Exception
     {
-        Configuration configuration = new ConfigManager().getConfiguration();
-        signatureOptions = new SignatureOptions(configuration);
-        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
+        byte[] signedData = sign(XAdESSignatureFormatter.class, environment);
+        System.out.println(new String(signedData));
+        assertNotNull(signedData);
+        assertTrue(signedData.length > 0);
 
-        signatureOptions.setCoSignEnabled(true);
-        signAndVerify(OUTPUT_FILE + "enveloped-cosign.xml");
-    }
-
-    private void signAndVerify(String fileName) throws SignatureException, IOException,
-            FileNotFoundException, CertificateNotFoundException, ValidationException
-    {
-        // Sign
-
-        Formatter signFormatProvider = new XAdESFormatter(certificate, privateKey, provider);
-        SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
-
-        showErrors(signatureResult, fileName);
-
-        // Verify
-
-        ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setOriginalData(new ByteArrayInputStream(data));
-        validationOptions.setSignedData(new FileInputStream(fileName));
-
-        Validator validator = new XAdESValidator(certificate, provider);
-        assertTrue(validator.validate(validationOptions).isValid());
+        SignatureValidationResult validationResult = validate(XAdESSignatureValidator.class, environment, signedData);
+        assertTrue(validationResult.isValid());
     }
 
     @Test
-    public void jxadesDetachedCosign() throws Exception
+    public void xadesEnvelopedCosign() throws Exception
     {
-        Configuration configuration = new ConfigManager().getConfiguration();
+        environment.enableCosign();
+
+        byte[] signedData = sign(XAdESSignatureFormatter.class, environment);
+        System.out.println(new String(signedData));
+        assertNotNull(signedData);
+        assertTrue(signedData.length > 0);
+
+        SignatureValidationResult validationResult = validate(XAdESSignatureValidator.class, environment, signedData);
+        assertTrue(validationResult.isValid());
+    }
+
+    @Test
+    public void xadesDetachedCosign() throws Exception
+    {
+        Configuration configuration = environment.getConfiguration();
         Map<String, String> options = configuration.getFormatRegistry().getFormat("XADES")
-                .getConfiguration();
+                .getConfigurationOptions();
         options.put("references", "D0,D1");
 
-        signatureOptions = new SignatureOptions(configuration);
-        signatureOptions.setDataToSign(new ByteArrayInputStream(data));
+        environment.enableCosign();
+        environment.disableEnveloped();
 
         // CoSign
 
         byte[] data = "<?xml version=\"1.0\"?><root><d id=\"D0\">a</d><d id=\"D1\">b</d></root>"
                 .getBytes();
 
-        signatureOptions.setEnveloped(false);
-        signatureOptions.setCoSignEnabled(true);
-
         for (int i = 0; i < 3; i++)
         {
-            signatureOptions.setDataToSign(new ByteArrayInputStream(data));
+            environment.setData(data);
 
-            Formatter signFormatProvider = new XAdESFormatter(certificate, privateKey, provider);
-            SignatureResult signatureResult = signFormatProvider.format(signatureOptions);
-
-            showErrors(signatureResult, OUTPUT_FILE + "detached-cosign.xml");
-
-            data = StreamUtils.inputStreamToByteArray(new FileInputStream(OUTPUT_FILE
-                    + "detached-cosign.xml"));
+            SignatureFormatter signFormatProvider = new XAdESSignatureFormatter(environment.getCertificate(),
+                    environment.getPrivateKey(), environment.getProvider());
+            data = signFormatProvider.format(environment.getSignatureOptions());
         }
+
+        System.out.println(new String(data));
+        assertNotNull(data);
+        assertTrue(data.length > 0);
 
         // Verify
 
-        XAdESValidator validator = new XAdESValidator(certificate, provider);
+        XAdESSignatureValidator validator = new XAdESSignatureValidator(environment.getCertificate(),
+                environment.getProvider());
 
-        ValidationOptions validationOptions = new ValidationOptions();
-        validationOptions.setSignedData(new FileInputStream(OUTPUT_FILE + "detached-cosign.xml"));
+        SignatureValidationOptions signatureValidationOptions = new SignatureValidationOptions();
+        signatureValidationOptions.setSignedData(new ByteArrayInputStream(data));
 
-        ValidationResult validationResult = validator.validate(validationOptions);
-        showErrors(validationResult);
+        validator.validate(signatureValidationOptions);
     }
 }

@@ -1,5 +1,20 @@
 package es.uji.apps.cryptoapplet.crypto.xades;
 
+import es.uji.apps.cryptoapplet.config.model.Configuration;
+import es.uji.apps.cryptoapplet.crypto.exceptions.SignatureException;
+import es.uji.apps.cryptoapplet.crypto.signature.format.AbstractSignatureFormatter;
+import es.uji.apps.cryptoapplet.crypto.signature.format.SignatureFormatter;
+import es.uji.apps.cryptoapplet.crypto.signature.format.SignatureOptions;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
+import net.java.xades.security.xml.XAdES.*;
+import net.java.xades.util.XMLUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.crypto.dsig.*;
+import javax.xml.crypto.dsig.spec.XPathFilterParameterSpec;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,62 +22,24 @@ import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import javax.xml.crypto.dsig.DigestMethod;
-import javax.xml.crypto.dsig.Reference;
-import javax.xml.crypto.dsig.SignatureMethod;
-import javax.xml.crypto.dsig.Transform;
-import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureFactory;
-import javax.xml.crypto.dsig.spec.XPathFilterParameterSpec;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import net.java.xades.security.xml.XAdES.SignaturePolicyIdentifier;
-import net.java.xades.security.xml.XAdES.SignaturePolicyIdentifierImpl;
-import net.java.xades.security.xml.XAdES.SignerRole;
-import net.java.xades.security.xml.XAdES.SignerRoleImpl;
-import net.java.xades.security.xml.XAdES.XAdES;
-import net.java.xades.security.xml.XAdES.XAdES_EPES;
-import net.java.xades.security.xml.XAdES.XMLAdvancedSignature;
-import net.java.xades.util.XMLUtils;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import es.uji.apps.cryptoapplet.config.model.Configuration;
-import es.uji.apps.cryptoapplet.crypto.BaseFormatter;
-import es.uji.apps.cryptoapplet.crypto.Formatter;
-import es.uji.apps.cryptoapplet.crypto.SignatureException;
-import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
-import es.uji.apps.cryptoapplet.crypto.SignatureResult;
-import es.uji.apps.cryptoapplet.utils.StreamUtils;
-
-public class XAdESFormatter extends BaseFormatter implements Formatter
+public class XAdESSignatureFormatter extends AbstractSignatureFormatter implements SignatureFormatter
 {
     private Map<String, String> options;
 
-    public XAdESFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
+    public XAdESSignatureFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
             throws SignatureException
     {
         super(certificate, privateKey, provider);
     }
 
     @Override
-    public SignatureResult format(SignatureOptions signatureOptions) throws SignatureException
+    public byte[] format(SignatureOptions signatureOptions) throws SignatureException
     {
         checkSignatureOptions(signatureOptions);
 
         byte[] data = StreamUtils.inputStreamToByteArray(signatureOptions.getDataToSign());
-
-        // TODO: KeyStore loaded in device init must store the reference
-        Security.removeProvider(provider.getName());
-        Security.insertProviderAt(provider, 1);
 
         try
         {
@@ -81,7 +58,7 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
             Configuration configuration = signatureOptions.getConfiguration();
             es.uji.apps.cryptoapplet.config.model.Format formatter = configuration
                     .getFormatRegistry().getFormat("XADES");
-            options = formatter.getConfiguration();
+            options = formatter.getConfigurationOptions();
 
             if (options.get("policyIdentifier") != null)
             {
@@ -94,8 +71,8 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
             if (options.get("signerRole") != null)
             {
                 SignerRole role = new SignerRoleImpl();
-                role.setClaimedRole(new ArrayList<String>(Arrays.asList(new String[] { options
-                        .get("signerRole") })));
+                role.setClaimedRole(new ArrayList<String>(Arrays.asList(new String[]{options
+                        .get("signerRole")})));
 
                 xades.setSignerRole(role);
             }
@@ -108,7 +85,7 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
             int numSignature = result.getLength();
 
             List<String> references = new ArrayList<String>();
-            
+
             // If no there are no references, add enveloped reference
             if (signatureOptions.isEnveloped())
             {
@@ -137,7 +114,7 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
                         Collections.singletonList(transform), null, null);
 
                 xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1,
-                        Arrays.asList(new Object[] { reference }), "S" + numSignature);
+                        Arrays.asList(new Object[]{reference}), "S" + numSignature);
             }
             else
             {
@@ -152,10 +129,7 @@ public class XAdESFormatter extends BaseFormatter implements Formatter
             XMLUtils.writeXML(bos, xmlSignature.getBaseElement(), false);
             bos.flush();
 
-            SignatureResult signatureResult = new SignatureResult(true);
-            signatureResult.setSignatureData(new ByteArrayInputStream(out.toByteArray()));
-
-            return signatureResult;
+            return out.toByteArray();
         }
         catch (Exception e)
         {
