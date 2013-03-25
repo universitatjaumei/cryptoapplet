@@ -74,7 +74,7 @@
     </timestamping>
     <formatters>
         <formatter id="pdf" tsa="#tsa-gva">
-            <configuration>
+            <configurationOptions>
                 <item value="" key="signature.textPattern"/>
                 <item value="CryptoApplet digital signatures" key="reason"/>
                 <item value="Spain" key="location"/>
@@ -89,10 +89,13 @@
                 <item value="true" key="signature.visible"/>
                 <item value="1" key="signature.page"/>
                 <item value="785" key="signature.y2"/>
-            </configuration>
+            </configurationOptions>
         </formatter>
         <formatter id="cms" tsa="#tsa-gva">
-            <configuration/>
+            <configurationOptions/>
         </formatter>
+      <formatter id="xades" tsa="#tsa-gva">
+        <configurationOptions/>
+      </formatter>
     </formatters>
 </conf>

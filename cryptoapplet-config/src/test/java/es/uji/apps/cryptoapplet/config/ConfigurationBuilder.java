@@ -18,9 +18,12 @@ public class ConfigurationBuilder
     
     public ConfigurationBuilder withDeviceRegistry(String deviceId, String libraryPath)
     {
+        String currentPath = this.getClass().getResource("/").getPath();
+        currentPath = currentPath.replaceAll("target/test-classes", "src/test/resources/");
+
         Libraries linuxLibraries = new Libraries();
         ArrayList<String> libraries = new ArrayList<String>();
-        libraries.add(libraryPath);
+        libraries.add(currentPath + libraryPath);
         linuxLibraries.setLibraries(libraries);
         
         Device device = new Device();

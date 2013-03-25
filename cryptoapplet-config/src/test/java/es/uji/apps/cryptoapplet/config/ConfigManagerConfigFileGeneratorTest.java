@@ -38,7 +38,7 @@ public class ConfigManagerConfigFileGeneratorTest
         JAXBContext context = JAXBContext.newInstance("es.uji.apps.cryptoapplet.config.model");
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.marshal(conf, new FileOutputStream("target/conf.xml"));
+        marshaller.marshal(conf, new FileOutputStream("conf.xml"));
     }
 
     private Keystore getKeystore()
@@ -269,7 +269,7 @@ public class ConfigManagerConfigFileGeneratorTest
         formatter.setId("xades");
         formatter.setTsaId("tsa-gva");
 
-        formatter.getConfiguration().put("signerRole", "User");
+        formatter.getConfigurationOptions().put("signerRole", "User");
 
         return formatter;
     }
@@ -280,21 +280,21 @@ public class ConfigManagerConfigFileGeneratorTest
         formatter.setId("pdf");
         formatter.setTsaId("tsa-gva");
 
-        formatter.getConfiguration().put("reason", "CryptoApplet digital signatures");
-        formatter.getConfiguration().put("location", "Spain");
-        formatter.getConfiguration().put("contact", "Universitat Jaume I");
+        formatter.getConfigurationOptions().put("reason", "CryptoApplet digital signatures");
+        formatter.getConfigurationOptions().put("location", "Spain");
+        formatter.getConfigurationOptions().put("contact", "Universitat Jaume I");
         
-        formatter.getConfiguration().put("signature.visible", "true");
-        formatter.getConfiguration().put("signature.type", "GRAPHIC_AND_DESCRIPTION");
-        formatter.getConfiguration().put("signature.x", "0");
-        formatter.getConfiguration().put("signature.y", "830");
-        formatter.getConfiguration().put("signature.x2", "110");
-        formatter.getConfiguration().put("signature.y2", "785");
-        formatter.getConfiguration().put("signature.page", "1");
-        formatter.getConfiguration().put("signature.imgFile", "uji.jpg");
-        formatter.getConfiguration().put("signature.textSize", "8");
-        formatter.getConfiguration().put("signature.repeatAxis", "X");
-        formatter.getConfiguration().put("signature.textPattern", "");
+        formatter.getConfigurationOptions().put("signature.visible", "true");
+        formatter.getConfigurationOptions().put("signature.type", "GRAPHIC_AND_DESCRIPTION");
+        formatter.getConfigurationOptions().put("signature.x", "0");
+        formatter.getConfigurationOptions().put("signature.y", "830");
+        formatter.getConfigurationOptions().put("signature.x2", "110");
+        formatter.getConfigurationOptions().put("signature.y2", "785");
+        formatter.getConfigurationOptions().put("signature.page", "1");
+        formatter.getConfigurationOptions().put("signature.imgFile", "uji.jpg");
+        formatter.getConfigurationOptions().put("signature.textSize", "8");
+        formatter.getConfigurationOptions().put("signature.repeatAxis", "X");
+        formatter.getConfigurationOptions().put("signature.textPattern", "");
 
         return formatter;
     }

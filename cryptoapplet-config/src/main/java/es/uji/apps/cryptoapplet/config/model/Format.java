@@ -16,11 +16,11 @@ public class Format
     @XmlAttribute
     private String id;
     @XmlJavaTypeAdapter(MapAdapter.class)
-    private Map<String, String> configuration;
+    private Map<String, String> configurationOptions;
 
     public Format()
     {
-        configuration = new HashMap<String, String>();
+        configurationOptions = new HashMap<String, String>();
     }
 
     public String getId()
@@ -48,13 +48,13 @@ public class Format
         this.tsaId = "#" + tsaId;
     }
 
-    public Map<String, String> getConfiguration()
+    public Map<String, String> getConfigurationOptions()
     {
-        return configuration;
+        return configurationOptions;
     }
 
-    public void setConfiguration(Map<String, String> configuration)
+    public void setConfigurationOptions(Map<String, String> configurationOptions)
     {
-        this.configuration = configuration;
+        this.configurationOptions = configurationOptions;
     }
 }
