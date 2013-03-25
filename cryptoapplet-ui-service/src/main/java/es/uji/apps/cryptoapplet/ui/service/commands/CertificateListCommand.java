@@ -1,6 +1,5 @@
 package es.uji.apps.cryptoapplet.ui.service.commands;
 
-import es.uji.apps.cryptoapplet.crypto.BrowserType;
 import es.uji.apps.cryptoapplet.keystore.KeyStoreManager;
 import es.uji.apps.cryptoapplet.ui.service.DataObject;
 

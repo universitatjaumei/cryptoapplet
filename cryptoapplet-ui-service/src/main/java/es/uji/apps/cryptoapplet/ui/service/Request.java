@@ -1,6 +1,5 @@
 package es.uji.apps.cryptoapplet.ui.service;
 
-import es.uji.apps.cryptoapplet.ui.service.commands.Command;
 import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 import java.io.*;
@@ -27,11 +26,6 @@ public class Request
     public String getCallBack() throws MalformedURLException
     {
         return url.getQuery().split("&")[0].split("=")[1];
-    }
-
-    public Command getCommand() throws MalformedURLException
-    {
-        return Command.valueOf(url.getPath().split("/")[2]);
     }
 
     public Map<String, String> getQueryParams() throws UnsupportedEncodingException
@@ -101,5 +95,10 @@ public class Request
         }
 
         return buffer.toString();
+    }
+
+    public String getPath()
+    {
+        return this.url.getPath();
     }
 }

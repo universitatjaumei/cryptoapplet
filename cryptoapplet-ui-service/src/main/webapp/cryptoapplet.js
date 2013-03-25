@@ -21,9 +21,9 @@ CryptoApplet.API = {
         this._callSignatureService(baseUrl + '/certificates?callback=?', {}, callback);
     },
 
-    signReference : function(serial, dn, inputUrl, callback) {
+    signReference : function(format, serial, dn, inputUrl, callback) {
         var baseUrl = this._getBaseUrl();
-        this._callSignatureService(baseUrl + '/signraw?callback=?', {
+        this._callSignatureService(baseUrl + '/sign/' + format + '?callback=?', {
             serial : serial,
             dn : dn,
             inputUrl : inputUrl
@@ -49,20 +49,21 @@ $(document).ready(function() {
             var certificate = data.certificate[i];
 
             output+= '<li>';
-            output+= '  <a href="javascript:void(0)" class="certificate" data-serial="' + certificate.serial + '" data-dn="' + certificate.dn + '">';
+            output+= '  <a href="javascript:void(0)" class="certificate" data-format="raw" data-serial="' + certificate.serial + '" data-dn="' + certificate.dn + '">raw</a> | ';
+            output+= '  <a href="javascript:void(0)" class="certificate" data-format="xades" data-serial="' + certificate.serial + '" data-dn="' + certificate.dn + '">xades</a> ';
             output+= certificate.dn;
-            output+= '  </a>';
             output+= '</li>';
         }
 
         $('#certificateList').html("<ul>" + output + "</ul>");
 
         $('.certificate').click(function(link) {
+            var format = $(this).attr('data-format');
             var serial = $(this).attr('data-serial');
             var dn = $(this).attr('data-dn');
             var inputUrl = $('#inputUrl').val();
 
-            CryptoApplet.API.signReference(serial, dn, inputUrl, function(data) {
+            CryptoApplet.API.signReference(format, serial, dn, inputUrl, function(data) {
                 console.log(data);
                 $('#signatureResult').val(data.signature);
             });

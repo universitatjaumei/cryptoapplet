@@ -14,13 +14,15 @@
     <orderEntry type="module" module-name="cryptoapplet-keystore" />
     <orderEntry type="module" module-name="cryptoapplet-core" />
     <orderEntry type="module" module-name="cryptoapplet-config" />
-    <orderEntry type="module" module-name="cryptoapplet-utils" />
+    <orderEntry type="library" name="Maven: es.uji.apps.cryptoapplet:cryptoapplet-utils:3.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: log4j:log4j:1.2.14" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk16:1.43" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bctsp-jdk16:1.43" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcmail-jdk16:1.43" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.2" level="project" />
     <orderEntry type="module" module-name="cryptoapplet-crypto-raw" />
+    <orderEntry type="module" module-name="cryptoapplet-crypto-xades" />
+    <orderEntry type="library" name="Maven: net.java.xades:jxades:0.0.8" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-all:1.9.0" level="project" />
   </component>
 </module>

@@ -2,30 +2,29 @@ package es.uji.apps.cryptoapplet.ui.service.commands;
 
 import es.uji.apps.cryptoapplet.config.ConfigManager;
 import es.uji.apps.cryptoapplet.config.model.Configuration;
-import es.uji.apps.cryptoapplet.crypto.Formatter;
-import es.uji.apps.cryptoapplet.crypto.SignatureOptions;
-import es.uji.apps.cryptoapplet.crypto.SignatureResult;
-import es.uji.apps.cryptoapplet.crypto.raw.RawFormatter;
+import es.uji.apps.cryptoapplet.crypto.signature.format.SignatureFormatter;
+import es.uji.apps.cryptoapplet.crypto.signature.format.SignatureOptions;
+import es.uji.apps.cryptoapplet.crypto.xades.XAdESSignatureFormatter;
 import es.uji.apps.cryptoapplet.keystore.KeyStoreManager;
 import es.uji.apps.cryptoapplet.ui.service.DataObject;
 import es.uji.apps.cryptoapplet.utils.Base64;
-import es.uji.apps.cryptoapplet.utils.StreamUtils;
 
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
-public class SignCommand implements ServiceCommand
+public class SignXadesCommand implements ServiceCommand
 {
     private byte[] dataToSign;
     private Map<String, String> params;
 
     private KeyStoreManager keyStoreManager;
 
-    public SignCommand(byte[] dataToSign, Map<String, String> params) throws Exception
+    public SignXadesCommand(byte[] dataToSign, Map<String, String> params) throws Exception
     {
         this.dataToSign = dataToSign;
         this.params = params;
@@ -44,14 +43,16 @@ public class SignCommand implements ServiceCommand
 
         Map.Entry<KeyStore.PrivateKeyEntry, Provider> privateKeyEntry = keyStoreManager.getPrivateKeyEntryByDn(dn);
         X509Certificate certificate = (X509Certificate) privateKeyEntry.getKey().getCertificate();
+        Provider provider = privateKeyEntry.getValue();
         PrivateKey privateKey = privateKeyEntry.getKey().getPrivateKey();
 
-        Formatter formatter = new RawFormatter(certificate, privateKey, privateKeyEntry.getValue());
-        SignatureResult signatureResult = formatter.format(signatureOptions);
-        byte[] signedData = StreamUtils.inputStreamToByteArray(signatureResult.getSignatureData());
+        Security.removeProvider(provider.getName());
+        Security.insertProviderAt(provider, 1);
+
+        SignatureFormatter signatureFormatter = new XAdESSignatureFormatter(certificate, privateKey, provider);
+        byte[] signedData = signatureFormatter.format(signatureOptions);
 
         DataObject data = new DataObject();
-        data.put("success", signatureResult.isValid());
         data.put("signature", Base64.encodeBytes(signedData));
 
         return data;

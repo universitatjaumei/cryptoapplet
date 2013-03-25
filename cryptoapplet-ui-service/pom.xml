@@ -25,6 +25,12 @@
     </dependency>
 
     <dependency>
+      <groupId>es.uji.apps.cryptoapplet</groupId>
+      <artifactId>cryptoapplet-crypto-xades</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
