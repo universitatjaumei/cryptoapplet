@@ -55,18 +55,11 @@
   </build>
 
   <modules>
-    <module>cryptoapplet-utils</module>
     <module>cryptoapplet-config</module>
     <module>cryptoapplet-core</module>
     <module>cryptoapplet-crypto-raw</module>
-    <module>cryptoapplet-crypto-cms</module>
-    <module>cryptoapplet-crypto-xmlsignature</module>
     <module>cryptoapplet-crypto-xades</module>
-    <module>cryptoapplet-format-pdf</module>
-    <module>cryptoapplet-format-odf</module>
-    <module>cryptoapplet-format-facturae</module>
     <module>cryptoapplet-keystore</module>
-    <module>cryptoapplet-ui-applet</module>
     <module>cryptoapplet-ui-service</module>
   </modules>
 
@@ -97,16 +90,16 @@
   </licenses>
 
   <developers>
-    <developer>
-      <name>Paul Santapau</name>
-      <email>santapau AT uji.es</email>
+   <developer>
+      <name>Ricardo Borillo</name>
+      <email>borillo AT uji.es</email>
       <roles>
         <role>commiter</role>
       </roles>
     </developer>
     <developer>
-      <name>Ricardo Borillo</name>
-      <email>borillo AT uji.es</email>
+      <name>Paul Santapau</name>
+      <email>santapau AT uji.es</email>
       <roles>
         <role>commiter</role>
       </roles>
