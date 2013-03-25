@@ -1,26 +1,28 @@
-package es.uji.apps.cryptoapplet.crypto;
+package es.uji.apps.cryptoapplet.crypto.signature.format;
+
+import es.uji.apps.cryptoapplet.crypto.exceptions.*;
 
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-public class BaseFormatter
+public abstract class AbstractSignatureFormatter
 {
     protected final Provider provider;
     protected final PrivateKey privateKey;
     protected final X509Certificate certificate;
     protected final X509Certificate[] caCertificates;
 
-    public BaseFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
+    public AbstractSignatureFormatter(X509Certificate certificate, PrivateKey privateKey, Provider provider)
             throws PrivateKeyNotFoundException, CertificateNotFoundException,
             CertificateExpiredException
     {
-        this(certificate, new X509Certificate[] {}, privateKey, provider);
+        this(certificate, new X509Certificate[]{}, privateKey, provider);
     }
 
-    public BaseFormatter(X509Certificate certificate, X509Certificate[] caCertificates,
-            PrivateKey privateKey, Provider provider) throws CertificateNotFoundException,
+    public AbstractSignatureFormatter(X509Certificate certificate, X509Certificate[] caCertificates,
+                                      PrivateKey privateKey, Provider provider) throws CertificateNotFoundException,
             CertificateExpiredException, PrivateKeyNotFoundException
     {
         if (certificate == null)

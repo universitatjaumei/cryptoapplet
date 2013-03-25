@@ -1,4 +1,4 @@
-package es.uji.apps.cryptoapplet.crypto;
+package es.uji.apps.cryptoapplet.crypto.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
