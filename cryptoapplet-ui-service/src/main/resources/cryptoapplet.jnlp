@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp spec="1.0+" href="cryptoapplet.jnlp">
+  <information>
+    <title>CryptoApplet Service</title>
+    <vendor>Universitat Jaume I</vendor>
+    <homepage href="https://universitatjaumei.jira.com/browse/CRYPTOAPPLET" />
+  </information>
+  <offline-allowed />
+  <security>
+     <all-permissions />
+  </security>
+  <resources>
+    <j2se version="1.7+" java-vm-args="-Xms512M -Xmx512M" />
+
+    <jar href="lib/cryptoapplet-ui-service-3.0.0-SNAPSHOT.jar" main="true" />
+    <jar href="lib/cryptoapplet-keystore-3.0.0-SNAPSHOT.jar" />
+    <jar href="lib/cryptoapplet-core-3.0.0-SNAPSHOT.jar" />
+    <jar href="lib/bcprov-jdk16-1.43.jar" />
+    <jar href="lib/bctsp-jdk16-1.43.jar" />
+    <jar href="lib/bcmail-jdk16-1.43.jar" />
+    <jar href="lib/cryptoapplet-crypto-raw-3.0.0-SNAPSHOT.jar" />
+    <jar href="lib/cryptoapplet-crypto-xades-3.0.0-SNAPSHOT.jar" />
+    <jar href="lib/cryptoapplet-config-3.0.0-SNAPSHOT.jar" />
+    <jar href="lib/cryptoapplet-utils-3.0.0-SNAPSHOT.jar" />
+    <jar href="lib/log4j-1.2.14.jar" />
+    <jar href="lib/jxades-0.0.8.jar" />
+  </resources>
+  <application-desc main-class="es.uji.apps.cryptoapplet.ui.service.HttpSignatureService" />
+  <update check="background" />
+</jnlp>
+
