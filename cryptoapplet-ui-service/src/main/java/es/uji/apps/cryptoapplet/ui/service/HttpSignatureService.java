@@ -12,15 +12,22 @@ public class HttpSignatureService implements Runnable
 
     private ServerSocket socket;
 
-    public HttpSignatureService() throws IOException
+    public HttpSignatureService()
     {
         initSocket();
     }
 
-    private void initSocket() throws IOException
+    private void initSocket()
     {
-        socket = new ServerSocket();
-        socket.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), PORT));
+        try
+        {
+            socket = new ServerSocket();
+            socket.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), PORT));
+        }
+        catch (IOException e)
+        {
+            System.exit(0);
+        }
     }
 
     public void run()
