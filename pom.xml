@@ -55,7 +55,6 @@
   </build>
 
   <modules>
-    <module>cryptoapplet-config</module>
     <module>cryptoapplet-core</module>
     <module>cryptoapplet-crypto-raw</module>
     <module>cryptoapplet-crypto-xades</module>

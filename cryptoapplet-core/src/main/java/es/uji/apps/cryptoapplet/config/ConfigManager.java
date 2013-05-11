@@ -32,7 +32,7 @@ public class ConfigManager
         try
         {
             loadRemoteConfigurationFile(url);
-            log.debug("Remote config.xml loaded successfully!!");
+            log.debug("Remote es.uji.apps.cryptoapplet.config.xml loaded successfully!!");
         }
         catch (Exception e)
         {

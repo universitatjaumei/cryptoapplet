@@ -20,7 +20,7 @@
     <jar href="lib/bcmail-jdk16-1.43.jar" />
     <jar href="lib/cryptoapplet-crypto-raw-3.0.0-SNAPSHOT.jar" />
     <jar href="lib/cryptoapplet-crypto-xades-3.0.0-SNAPSHOT.jar" />
-    <jar href="lib/cryptoapplet-config-3.0.0-SNAPSHOT.jar" />
+    <jar href="lib/cryptoapplet-es.uji.apps.cryptoapplet.config-3.0.0-SNAPSHOT.jar" />
     <jar href="lib/cryptoapplet-utils-3.0.0-SNAPSHOT.jar" />
     <jar href="lib/log4j-1.2.14.jar" />
     <jar href="lib/jxades-0.0.8.jar" />

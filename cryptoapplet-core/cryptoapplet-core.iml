@@ -12,9 +12,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="cryptoapplet-config" />
-    <orderEntry type="library" name="Maven: es.uji.apps.cryptoapplet:cryptoapplet-utils:3.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: log4j:log4j:1.2.14" level="project" />
+    <orderEntry type="library" name="Maven: es.uji.apps.cryptoapplet:cryptoapplet-config:3.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk16:1.43" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bctsp-jdk16:1.43" level="project" />
     <orderEntry type="library" name="Maven: org.bouncycastle:bcmail-jdk16:1.43" level="project" />
