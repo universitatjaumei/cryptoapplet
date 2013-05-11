@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.swing.*;
-import es.uji.apps.cryptoapplet.crypto.utils.StreamUtils;
+import es.uji.apps.cryptoapplet.utils.StreamUtils;
 import es.uji.apps.cryptoapplet.ui.service.ui.PasswordManagementWindow;
 
 public class HttpSignatureService implements Runnable

@@ -1,4 +1,4 @@
-package es.uji.apps.cryptoapplet.crypto.utils;
+package es.uji.apps.cryptoapplet.utils;
 
 /**
  * <p>
@@ -625,8 +625,8 @@ public class Base64
      * @param options
      *            Specified options
      * @return The Base64-encoded object
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#GZIP
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DO_BREAK_LINES
+     * @see es.uji.apps.cryptoapplet.utils.Base64#GZIP
+     * @see es.uji.apps.cryptoapplet.utils.Base64#DO_BREAK_LINES
      * @throws java.io.IOException
      *             if there is an error
      * @since 2.0
@@ -771,8 +771,8 @@ public class Base64
      * @param options
      *            Specified options
      * @return The Base64-encoded data as a String
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#GZIP
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DO_BREAK_LINES
+     * @see es.uji.apps.cryptoapplet.utils.Base64#GZIP
+     * @see es.uji.apps.cryptoapplet.utils.Base64#DO_BREAK_LINES
      * @throws java.io.IOException
      *             if there is an error
      * @throws NullPointerException
@@ -857,8 +857,8 @@ public class Base64
      * @param options
      *            Specified options
      * @return The Base64-encoded data as a String
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#GZIP
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DO_BREAK_LINES
+     * @see es.uji.apps.cryptoapplet.utils.Base64#GZIP
+     * @see es.uji.apps.cryptoapplet.utils.Base64#DO_BREAK_LINES
      * @throws java.io.IOException
      *             if there is an error
      * @throws NullPointerException
@@ -927,8 +927,8 @@ public class Base64
      * @param options
      *            Specified options
      * @return The Base64-encoded data as a String
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#GZIP
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DO_BREAK_LINES
+     * @see es.uji.apps.cryptoapplet.utils.Base64#GZIP
+     * @see es.uji.apps.cryptoapplet.utils.Base64#DO_BREAK_LINES
      * @throws java.io.IOException
      *             if there is an error
      * @throws NullPointerException
@@ -1852,10 +1852,10 @@ public class Base64
     /* ******** I N N E R C L A S S I N P U T S T R E A M ******** */
 
     /**
-     * A {@link es.uji.apps.cryptoapplet.crypto.utils.Base64.InputStream} will read data from another <tt>java.io.InputStream</tt>, given
+     * A {@link es.uji.apps.cryptoapplet.utils.Base64.InputStream} will read data from another <tt>java.io.InputStream</tt>, given
      * in the constructor, and encode/decode to/from Base64 notation on the fly.
      *
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64
+     * @see es.uji.apps.cryptoapplet.utils.Base64
      * @since 1.3
      */
     public static class InputStream extends java.io.FilterInputStream
@@ -1872,7 +1872,7 @@ public class Base64
         private byte[] decodabet; // Local copies to avoid extra method calls
 
         /**
-         * Constructs a {@link es.uji.apps.cryptoapplet.crypto.utils.Base64.InputStream} in DECODE mode.
+         * Constructs a {@link es.uji.apps.cryptoapplet.utils.Base64.InputStream} in DECODE mode.
          *
          * @param in
          *            the <tt>java.io.InputStream</tt> from which to read data.
@@ -1884,7 +1884,7 @@ public class Base64
         } // end constructor
 
         /**
-         * Constructs a {@link es.uji.apps.cryptoapplet.crypto.utils.Base64.InputStream} in either ENCODE or DECODE mode.
+         * Constructs a {@link es.uji.apps.cryptoapplet.utils.Base64.InputStream} in either ENCODE or DECODE mode.
          * <p>
          * Valid options:
          *
@@ -1901,9 +1901,9 @@ public class Base64
          *            the <tt>java.io.InputStream</tt> from which to read data.
          * @param options
          *            Specified options
-         * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#ENCODE
-         * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DECODE
-         * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DO_BREAK_LINES
+         * @see es.uji.apps.cryptoapplet.utils.Base64#ENCODE
+         * @see es.uji.apps.cryptoapplet.utils.Base64#DECODE
+         * @see es.uji.apps.cryptoapplet.utils.Base64#DO_BREAK_LINES
          * @since 2.0
          */
         public InputStream(java.io.InputStream in, int options)
@@ -2090,10 +2090,10 @@ public class Base64
     /* ******** I N N E R C L A S S O U T P U T S T R E A M ******** */
 
     /**
-     * A {@link es.uji.apps.cryptoapplet.crypto.utils.Base64.OutputStream} will write data to another <tt>java.io.OutputStream</tt>, given
+     * A {@link es.uji.apps.cryptoapplet.utils.Base64.OutputStream} will write data to another <tt>java.io.OutputStream</tt>, given
      * in the constructor, and encode/decode to/from Base64 notation on the fly.
      *
-     * @see es.uji.apps.cryptoapplet.crypto.utils.Base64
+     * @see es.uji.apps.cryptoapplet.utils.Base64
      * @since 1.3
      */
     public static class OutputStream extends java.io.FilterOutputStream
@@ -2111,7 +2111,7 @@ public class Base64
         private byte[] decodabet; // Local copies to avoid extra method calls
 
         /**
-         * Constructs a {@link es.uji.apps.cryptoapplet.crypto.utils.Base64.OutputStream} in ENCODE mode.
+         * Constructs a {@link es.uji.apps.cryptoapplet.utils.Base64.OutputStream} in ENCODE mode.
          *
          * @param out
          *            the <tt>java.io.OutputStream</tt> to which data will be written.
@@ -2123,7 +2123,7 @@ public class Base64
         } // end constructor
 
         /**
-         * Constructs a {@link es.uji.apps.cryptoapplet.crypto.utils.Base64.OutputStream} in either ENCODE or DECODE mode.
+         * Constructs a {@link es.uji.apps.cryptoapplet.utils.Base64.OutputStream} in either ENCODE or DECODE mode.
          * <p>
          * Valid options:
          *
@@ -2139,9 +2139,9 @@ public class Base64
          *            the <tt>java.io.OutputStream</tt> to which data will be written.
          * @param options
          *            Specified options.
-         * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#ENCODE
-         * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DECODE
-         * @see es.uji.apps.cryptoapplet.crypto.utils.Base64#DO_BREAK_LINES
+         * @see es.uji.apps.cryptoapplet.utils.Base64#ENCODE
+         * @see es.uji.apps.cryptoapplet.utils.Base64#DECODE
+         * @see es.uji.apps.cryptoapplet.utils.Base64#DO_BREAK_LINES
          * @since 1.3
          */
         public OutputStream(java.io.OutputStream out, int options)

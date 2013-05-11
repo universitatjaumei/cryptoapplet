@@ -14,12 +14,6 @@
   <dependencies>
     <dependency>
       <groupId>es.uji.apps.cryptoapplet</groupId>
-      <artifactId>cryptoapplet-config</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>es.uji.apps.cryptoapplet</groupId>
       <artifactId>cryptoapplet-core</artifactId>
       <version>${project.version}</version>
     </dependency>

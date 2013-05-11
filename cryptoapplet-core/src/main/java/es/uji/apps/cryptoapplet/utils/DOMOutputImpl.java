@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package es.uji.apps.cryptoapplet.crypto.utils;
+package es.uji.apps.cryptoapplet.utils;
 
 import org.w3c.dom.ls.LSOutput;
 

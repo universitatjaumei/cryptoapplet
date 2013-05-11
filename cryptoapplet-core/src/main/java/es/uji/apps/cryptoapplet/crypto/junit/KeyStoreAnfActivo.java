@@ -1,6 +1,6 @@
 package es.uji.apps.cryptoapplet.crypto.junit;
 
-import es.uji.apps.cryptoapplet.crypto.utils.Base64;
+import es.uji.apps.cryptoapplet.utils.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

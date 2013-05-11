@@ -1,4 +1,4 @@
-package es.uji.apps.cryptoapplet.crypto.utils;
+package es.uji.apps.cryptoapplet.utils;
 
 import java.io.InputStream;
 
