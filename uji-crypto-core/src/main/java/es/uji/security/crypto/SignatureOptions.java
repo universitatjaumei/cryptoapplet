@@ -22,6 +22,7 @@ public class SignatureOptions
     private boolean localFile = false;
     private boolean swapToFile = false;
     private boolean coSignEnabled = false;
+    private boolean detached = false;
     private boolean enveloped = true;
 
     // Document options
@@ -403,5 +404,15 @@ public class SignatureOptions
     public String getDocumentReferenceVerificationUrl()
     {
         return documentReferenceVerificationUrl;
+    }
+
+    public boolean isDetached()
+    {
+        return detached;
+    }
+
+    public void setDetached(boolean detached)
+    {
+        this.detached = detached;
     }
 }

@@ -330,6 +330,7 @@ public class SignatureThread extends Thread
 
  							sigOpt.setCoSignEnabled(_mw.getAppHandler().isCosign());
  							sigOpt.setEnveloped(_mw.getAppHandler().isEnveloped());
+                            sigOpt.setDetached(_mw.getAppHandler().isDetached());
  						}
  						
                         if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.CMS_HASH))

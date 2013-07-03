@@ -103,6 +103,7 @@ public class AppHandler
     
     private boolean cosign;
     private boolean enveloped;
+    private boolean detached;
 
     private String dniToCheckAgainsCertificate;    
     
@@ -1009,5 +1010,15 @@ public class AppHandler
     public void setDocumentReferenceVerificationUrl(String[] documentReferenceVerificationUrl)
     {
         this.documentReferenceVerificationUrl = documentReferenceVerificationUrl;
+    }
+
+    public boolean isDetached()
+    {
+        return detached;
+    }
+
+    public void setDetached(boolean detached)
+    {
+        this.detached = detached;
     }
 }

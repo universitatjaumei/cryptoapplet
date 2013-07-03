@@ -529,7 +529,19 @@ public class SignatureApplet extends JApplet
             }
         });
     }
-    
+
+    public void setDetached(final String detached)
+    {
+        AccessController.doPrivileged(new PrivilegedAction<Object>()
+        {
+            public Object run()
+            {
+                apph.setDetached(detached.toLowerCase().equals("true"));
+
+                return null;
+            }
+        });
+    }
 
     /* SIGNATURE COMPUTATION FUNCTIONS */
 

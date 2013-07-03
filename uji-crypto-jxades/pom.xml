@@ -28,7 +28,7 @@
     <dependency>
       <groupId>net.java.xades</groupId>
       <artifactId>jxades</artifactId>
-      <version>0.0.3</version>
+      <version>0.0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>es.uji.security</groupId>

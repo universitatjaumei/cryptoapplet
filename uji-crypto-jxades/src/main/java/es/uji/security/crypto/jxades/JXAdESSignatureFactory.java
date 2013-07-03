@@ -80,14 +80,24 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             return signatureResult;
         }
 
-        // Load XML data
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Element element = db.parse(originalData).getDocumentElement();
+        XAdES_EPES xades = null;
+        Element element = null;
 
-        // Create a XAdES-EPES profile
-        XAdES_EPES xades = (XAdES_EPES) XAdES.newInstance(XAdES.EPES, element);
+        if (signatureOptions.isDetached())
+        {
+            xades = (XAdES_EPES) XAdES.newInstance(XAdES.EPES);
+        }
+        else
+        {
+            // Load XML data
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            element = db.parse(originalData).getDocumentElement();
+
+            // Create a XAdES-EPES profile
+            xades = (XAdES_EPES) XAdES.newInstance(XAdES.EPES, element);
+        }
 
         // SigningCertificate. Check the certificate validity (local)
         try
@@ -138,40 +148,49 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
 
         try
         {
-            NodeList result = element.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
-                    "Signature");
-            int numSignature = result.getLength();
-
-            List<String> references = signatureOptions.getReferences();
-
-            // If no there are no references, add enveloped reference
-            if (signatureOptions.isEnveloped() || references.isEmpty())
+            // If detached
+            if (signatureOptions.isDetached())
             {
-                references.clear();
-                references.add("");
-            }
-
-            // If enveloped+cosig construct special transformation
-            if (signatureOptions.isEnveloped() && signatureOptions.isCoSignEnabled())
-            {
-                XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
-                DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(DigestMethod.SHA1,
-                        null);
-
-                Transform transform = xmlSignatureFactory.newTransform(Transform.XPATH,
-                        new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
-                                Collections.singletonMap("dsig", XMLSignature.XMLNS)));
-
-                Reference reference = xmlSignatureFactory.newReference("", digestMethod,
-                        Collections.singletonList(transform), null, null);
-
                 xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, Arrays
-                        .asList(new Object[] { reference }), "S" + numSignature, tsaUrl);
+                        .asList(new Object[] { new String(data) }), "S0");
             }
+            // If enveloped+cosig construct special transformation
             else
             {
-                xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, references,
-                        "S" + numSignature, tsaUrl);
+                NodeList result = element.getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#",
+                        "Signature");
+                int numSignature = result.getLength();
+
+                List<String> references = signatureOptions.getReferences();
+
+                // If no there are no references, add enveloped reference
+                if (signatureOptions.isEnveloped() || references.isEmpty())
+                {
+                    references.clear();
+                    references.add("");
+                }
+
+                if (signatureOptions.isEnveloped() && signatureOptions.isCoSignEnabled())
+                {
+                    XMLSignatureFactory xmlSignatureFactory = XMLSignatureFactory.getInstance("DOM");
+                    DigestMethod digestMethod = xmlSignatureFactory.newDigestMethod(DigestMethod.SHA1,
+                            null);
+
+                    Transform transform = xmlSignatureFactory.newTransform(Transform.XPATH,
+                            new XPathFilterParameterSpec("not(ancestor-or-self::dsig:Signature)",
+                                    Collections.singletonMap("dsig", XMLSignature.XMLNS)));
+
+                    Reference reference = xmlSignatureFactory.newReference("", digestMethod,
+                            Collections.singletonList(transform), null, null);
+
+                    xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, Arrays
+                            .asList(new Object[] { reference }), "S" + numSignature);
+                }
+                else
+                {
+                    xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, references,
+                            "S" + numSignature);
+                }
             }
         }
         catch (MarshalException me)
@@ -200,7 +219,15 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BufferedOutputStream bos = new BufferedOutputStream(out);
 
-        XMLUtils.writeXML(bos, xmlSignature.getBaseElement(), false);
+        if (signatureOptions.isDetached())
+        {
+            XMLUtils.writeXML(bos, xmlSignature.getBaseDocument(), false);
+        }
+        else
+        {
+            XMLUtils.writeXML(bos, xmlSignature.getBaseElement(), false);
+        }
+
         bos.flush();
 
         signatureResult.setValid(true);
