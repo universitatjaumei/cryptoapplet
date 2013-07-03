@@ -152,7 +152,7 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
             if (signatureOptions.isDetached())
             {
                 xmlSignature.sign(certificate, privateKey, SignatureMethod.RSA_SHA1, Arrays
-                        .asList(new Object[] { new String(data) }), "S0");
+                        .asList(new Object[] { signatureOptions.getReferences().get(0) }), "S0");
             }
             // If enveloped+cosig construct special transformation
             else
