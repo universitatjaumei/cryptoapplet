@@ -57,8 +57,8 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
         Provider provider = signatureOptions.getProvider();
         
         //TODO: KeyStore loaded in device init must store the reference 
-        Security.removeProvider(provider.getName());
-        Security.insertProviderAt(provider, 1);
+//        Security.removeProvider(provider.getName());
+//        Security.insertProviderAt(provider, 1);
 
         ByteArrayInputStream originalData = new ByteArrayInputStream(data);
 
