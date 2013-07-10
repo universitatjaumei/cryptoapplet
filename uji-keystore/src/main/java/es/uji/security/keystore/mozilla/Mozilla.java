@@ -153,7 +153,10 @@ public class Mozilla
     			{
     				for (String orig:libraries)
     				{
-    					OS.copyfile(res + "\\" + orig, strTmpDir +  "\\" + orig);
+    				    if (new File(res + "\\" + orig).exists())
+    				    {
+    				        OS.copyfile(res + "\\" + orig, strTmpDir +  "\\" + orig);
+    				    }
     				}
     				res= strTmpDir; 
     			}
