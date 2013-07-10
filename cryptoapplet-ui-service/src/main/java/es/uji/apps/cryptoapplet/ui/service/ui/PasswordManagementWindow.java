@@ -1,13 +1,11 @@
 package es.uji.apps.cryptoapplet.ui.service.ui;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import javax.swing.*;
 
 public class PasswordManagementWindow extends JFrame
 {
