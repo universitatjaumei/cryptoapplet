@@ -1,12 +1,17 @@
 package es.uji.apps.cryptoapplet.crypto.signature.format;
 
 import java.io.InputStream;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.cert.X509Certificate;
 
 import es.uji.apps.cryptoapplet.config.model.Configuration;
 
 public class SignatureOptions
 {
-    // General options
+    private X509Certificate certificate;
+    private Provider provider;
+    private PrivateKey privateKey;
 
     private InputStream dataToSign;
 
@@ -91,5 +96,35 @@ public class SignatureOptions
     public void setEnveloped(boolean enveloped)
     {
         this.enveloped = enveloped;
+    }
+
+    public X509Certificate getCertificate()
+    {
+        return certificate;
+    }
+
+    public void setCertificate(X509Certificate certificate)
+    {
+        this.certificate = certificate;
+    }
+
+    public Provider getProvider()
+    {
+        return provider;
+    }
+
+    public void setProvider(Provider provider)
+    {
+        this.provider = provider;
+    }
+
+    public PrivateKey getPrivateKey()
+    {
+        return privateKey;
+    }
+
+    public void setPrivateKey(PrivateKey privateKey)
+    {
+        this.privateKey = privateKey;
     }
 }
