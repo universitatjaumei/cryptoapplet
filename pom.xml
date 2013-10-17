@@ -16,6 +16,16 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <modules>
+    <module>cryptoapplet-core</module>
+    <module>cryptoapplet-crypto-raw</module>
+    <module>cryptoapplet-crypto-xades</module>
+    <module>cryptoapplet-keystore</module>
+    <module>cryptoapplet-ui-auth</module>
+    <module>cryptoapplet-ui-service</module>
+    <module>cryptoapplet-ui-webapp</module>
+  </modules>
+
   <organization>
     <name>Universitat Jaume I</name>
     <url>http://www.uji.es/</url>
@@ -53,14 +63,6 @@
       </plugin>
     </plugins>
   </build>
-
-  <modules>
-    <module>cryptoapplet-core</module>
-    <module>cryptoapplet-crypto-raw</module>
-    <module>cryptoapplet-crypto-xades</module>
-    <module>cryptoapplet-keystore</module>
-    <module>cryptoapplet-ui-service</module>
-  </modules>
 
   <issueManagement>
     <system>CryptoApplet Issue Tracking</system>
