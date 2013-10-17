@@ -9,25 +9,25 @@ import es.uji.apps.cryptoapplet.crypto.raw.RawSignatureFormatter;
 import es.uji.apps.cryptoapplet.crypto.signature.format.SignatureFormatter;
 import es.uji.apps.cryptoapplet.crypto.signature.format.SignatureOptions;
 import es.uji.apps.cryptoapplet.crypto.xades.XAdESSignatureFormatter;
+import es.uji.apps.cryptoapplet.keystore.KeyStoreManager;
 import es.uji.apps.cryptoapplet.ui.service.model.Base64Data;
-import es.uji.apps.cryptoapplet.utils.Base64;
+import es.uji.apps.cryptoapplet.ui.service.model.RemoteContentManager;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import java.io.IOException;
-import java.security.*;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
 @Path("sign")
-public class SignResource extends AbstractBaseResource
+public class SignResource
 {
-    public SignResource() throws GeneralSecurityException, IOException
-    {
-        super();
-    }
+    private SignatureOptions signatureOptions;
 
     @GET
     @Path("raw")
@@ -35,22 +35,12 @@ public class SignResource extends AbstractBaseResource
     public JSONWithPadding raw(@QueryParam("callback") String callback,
                                @QueryParam("inputUrl") String inputUrl,
                                @QueryParam("dn") String dn)
-            throws ConfigurationLoadException, IOException, SignatureException
+            throws ConfigurationLoadException, IOException, SignatureException, GeneralSecurityException
     {
-        Configuration configuration = new ConfigManager().getConfiguration();
+        initCryptoEnvironment(inputUrl, dn);
 
-        SignatureOptions signatureOptions = new SignatureOptions(configuration);
-        signatureOptions.setDataToSign(super.getData(inputUrl));
-
-        Map.Entry<KeyStore.PrivateKeyEntry, Provider> privateKeyEntry = keyStoreManager.getPrivateKeyEntryByDn(dn);
-        X509Certificate certificate = (X509Certificate) privateKeyEntry.getKey().getCertificate();
-        Provider provider = privateKeyEntry.getValue();
-        PrivateKey privateKey = privateKeyEntry.getKey().getPrivateKey();
-
-        Security.removeProvider(provider.getName());
-        Security.insertProviderAt(provider, 1);
-
-        SignatureFormatter signatureFormatter = new RawSignatureFormatter(certificate, privateKey, provider);
+        SignatureFormatter signatureFormatter = new RawSignatureFormatter(signatureOptions.getCertificate(),
+                signatureOptions.getPrivateKey(), signatureOptions.getProvider());
         byte[] signedData = signatureFormatter.format(signatureOptions);
 
         return new JSONWithPadding(new Base64Data(signedData), callback);
@@ -62,24 +52,30 @@ public class SignResource extends AbstractBaseResource
     public JSONWithPadding xades(@QueryParam("callback") String callback,
                                  @QueryParam("inputUrl") String inputUrl,
                                  @QueryParam("dn") String dn)
-            throws ConfigurationLoadException, IOException, SignatureException
+            throws ConfigurationLoadException, IOException, SignatureException, GeneralSecurityException
     {
-        Configuration configuration = new ConfigManager().getConfiguration();
+        initCryptoEnvironment(inputUrl, dn);
 
-        SignatureOptions signatureOptions = new SignatureOptions(configuration);
-        signatureOptions.setDataToSign(super.getData(inputUrl));
-
-        Map.Entry<KeyStore.PrivateKeyEntry, Provider> privateKeyEntry = keyStoreManager.getPrivateKeyEntryByDn(dn);
-        X509Certificate certificate = (X509Certificate) privateKeyEntry.getKey().getCertificate();
-        Provider provider = privateKeyEntry.getValue();
-        PrivateKey privateKey = privateKeyEntry.getKey().getPrivateKey();
-
-        Security.removeProvider(provider.getName());
-        Security.insertProviderAt(provider, 1);
-
-        SignatureFormatter signatureFormatter = new XAdESSignatureFormatter(certificate, privateKey, provider);
+        SignatureFormatter signatureFormatter = new XAdESSignatureFormatter(signatureOptions.getCertificate(),
+                signatureOptions.getPrivateKey(), signatureOptions.getProvider());
         byte[] signedData = signatureFormatter.format(signatureOptions);
 
         return new JSONWithPadding(new Base64Data(signedData), callback);
+    }
+
+    private void initCryptoEnvironment(String inputUrl, String dn) throws ConfigurationLoadException, IOException, GeneralSecurityException
+    {
+        Configuration configuration = new ConfigManager().getConfiguration();
+
+        KeyStoreManager keyStoreManager = new KeyStoreManager();
+        Map.Entry<KeyStore.PrivateKeyEntry, Provider> privateKeyEntry = keyStoreManager.getPrivateKeyEntryByDn(dn);
+
+        RemoteContentManager contentManager = new RemoteContentManager();
+
+        signatureOptions = new SignatureOptions(configuration);
+        signatureOptions.setDataToSign(contentManager.getData(inputUrl));
+        signatureOptions.setCertificate((X509Certificate) privateKeyEntry.getKey().getCertificate());
+        signatureOptions.setProvider(privateKeyEntry.getValue());
+        signatureOptions.setPrivateKey(privateKeyEntry.getKey().getPrivateKey());
     }
 }

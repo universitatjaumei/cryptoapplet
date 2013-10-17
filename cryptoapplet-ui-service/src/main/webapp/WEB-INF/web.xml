@@ -12,6 +12,16 @@
     <param-value>cryptoapplet-ui-service.root</param-value>
   </context-param>
 
+  <filter>
+    <filter-name>authorization-filter</filter-name>
+    <filter-class>es.uji.apps.cryptoapplet.ui.service.auth.AuthFilter</filter-class>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>authorization-filter</filter-name>
+    <url-pattern>/services/*</url-pattern>
+  </filter-mapping>
+
   <servlet>
     <servlet-name>rest-api</servlet-name>
     <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
