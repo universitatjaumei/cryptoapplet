@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>es.uji.security</groupId>
+  <artifactId>uji-keystore</artifactId>
+  <name>uji-keystore</name>
+
+  <parent>
+    <groupId>es.uji.security</groupId>
+    <artifactId>CryptoApplet</artifactId>
+    <version>2.1.6</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <keystore>${uji.keytool.keystore}</keystore>
+          <alias>${uji.keytool.alias}</alias>
+          <storepass>${uji.keytool.password}</storepass>
+          <signedjar>target/${project.build.finalName}-signed.jar</signedjar>
+          <verify>true</verify>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

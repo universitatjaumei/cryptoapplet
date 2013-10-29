@@ -1,0 +1,90 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>es.uji.security</groupId>
+  <artifactId>uji-tests</artifactId>
+  <name>uji-tests</name>
+
+  <parent>
+    <groupId>es.uji.security</groupId>
+    <artifactId>CryptoApplet</artifactId>
+    <version>2.1.6</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-keystore</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-raw</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-cms</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-openxades</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-jxades</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-xmldsign</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-mityc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-format-pdf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-format-odf</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-format-facturae</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- jUnit -->
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.7</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>es.uji.security</groupId>
+  <version>2.1.6</version>
+  <artifactId>CryptoApplet</artifactId>
+  <packaging>pom</packaging>
+  <name>CryptoApplet</name>
+  <url>http://proyectostic.uji.es/cryptoapplet/</url>
+
+  <organization>
+    <name>Universitat Jaume I</name>
+    <url>http://www.uji.es/</url>
+  </organization>
+
+  <repositories>
+    <repository>
+      <id>proyectostic</id>
+      <url>http://maven.forja.uji.es/</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <modules>
+    <module>xmlsec-backport-jdk6</module>
+    <module>uji-config</module>
+    <module>uji-utils</module>
+    <module>uji-crypto-core</module>
+    <module>uji-crypto-raw</module>
+    <module>uji-crypto-cms</module>
+    <module>uji-crypto-xmldsign</module>
+    <module>uji-crypto-openxades</module>
+    <module>uji-crypto-jxades</module>
+    <module>uji-crypto-mityc</module>
+    <module>uji-format-pdf</module>
+    <module>uji-format-odf</module>
+    <module>uji-format-facturae</module>
+    <module>uji-keystore</module>
+    <module>uji-ui-applet</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>es.uji.security</groupId>
+        <artifactId>uji-utils</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>es.uji.security</groupId>
+        <artifactId>uji-crypto</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>es.uji.security</groupId>
+        <artifactId>uji-ui-applet</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <licenses>
+    <license>
+      <name>XXX</name>
+      <url>LICENSE.txt</url>
+      <distribution>XXX</distribution>
+      <comments>XXX</comments>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <system>CryptoApplet Issue Tracking</system>
+    <url>http://forja.uji.es/tracker/?group_id=24</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>CryptoApplet</name>
+      <subscribe>http://proyectostic.uji.es/</subscribe>
+      <unsubscribe> http://proyectostic.uji.es/</unsubscribe>
+      <post>cryptoapplet AT llistes.uji.es</post>
+      <archive>http://proyectostic.uji.es/</archive>
+    </mailingList>
+  </mailingLists>
+
+  <developers>
+    <developer>
+      <name>Paul Santapau</name>
+      <email>santapau AT uji.es</email>
+      <roles>
+        <role>commiter</role>
+      </roles>
+    </developer>
+    <developer>
+      <name>Ricardo Borillo</name>
+      <email>borillo AT uji.es</email>
+      <roles>
+        <role>commiter</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:svn:https://forja.uji.es/svn/cryptoapplet</connection>
+    <developerConnection>scm:svn:https://forja.uji.es/svn/cryptoapplet</developerConnection>
+    <url>http://forja.uji.es/plugins/scmsvn/viewcvs.php/?root=cryptoapplet</url>
+  </scm>
+
+</project>
