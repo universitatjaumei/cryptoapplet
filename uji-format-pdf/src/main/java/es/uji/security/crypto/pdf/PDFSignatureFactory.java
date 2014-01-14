@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -20,10 +23,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
 
+import javax.xml.crypto.dsig.DigestMethod;
+
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.util.encoders.Hex;
 
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -75,7 +81,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
     }
 
     protected byte[] genPKCS7Signature(InputStream data, String tsaUrl, PrivateKey pk,
-            Provider provider, Certificate[] chain) throws Exception
+                                       Provider provider, Certificate[] chain) throws Exception
     {
         PdfPKCS7TSA sgn = new PdfPKCS7TSA(pk, chain, null, "SHA1", provider, true);
 
@@ -157,7 +163,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
     }
 
     private void createVisibleSignature(PdfSignatureAppearance sap, int numSignatures,
-            String pattern, Map<String, String> bindValues) throws MalformedURLException,
+                                        String pattern, Map<String, String> bindValues) throws MalformedURLException,
             IOException, DocumentException
     {
         float x1 = confAdapter.getVisibleAreaX();
@@ -204,6 +210,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         String signatureType = confAdapter.getVisibleSignatureType();
         log.debug("VisibleSignatureType: " + signatureType);
+        log.debug("VisibleSignatureText: " + signatureText);
 
         if (signatureType.equals("GRAPHIC_AND_DESCRIPTION"))
         {
@@ -223,7 +230,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
     }
 
     private void updateLayerGraphiAndDescription(PdfSignatureAppearance pdfSignatureAppearance,
-            Rectangle rectangle, String signatureText) throws DocumentException, IOException
+                                                 Rectangle rectangle, String signatureText) throws DocumentException, IOException
     {
         // Retrieve image
 
@@ -373,24 +380,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 String pattern = confAdapter.getVisibleAreaTextPattern();
                 log.debug("VisibleAreaTextPattern: " + pattern);
 
-                Map<String, String> bindValues = signatureOptions
-                        .getVisibleSignatureTextBindValues();
-
-                if (bindValues != null)
-                {
-                    final X509Principal principal = PrincipalUtil
-                            .getSubjectX509Principal(certificate);
-                    final Vector<?> values = principal.getValues(X509Name.CN);
-
-                    String certificateCN = (String) values.get(0);
-                    bindValues.put("%s", certificateCN);
-                    log.debug("Bind value %s: " + certificateCN);
-
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                    String currentDate = simpleDateFormat.format(new Date());
-                    bindValues.put("%t", currentDate);
-                    log.debug("Bind value %t: " + currentDate);
-                }
+                Map<String, String> bindValues = generateBindValues(signatureOptions);
 
                 createVisibleSignature(pdfSignatureAppareance, numSignatures, pattern, bindValues);
             }
@@ -408,5 +398,51 @@ public class PDFSignatureFactory implements ISignFormatProvider
         }
 
         return null;
+    }
+
+    private Map<String, String> generateBindValues(SignatureOptions signatureOptions)
+            throws CertificateEncodingException, NoSuchAlgorithmException
+    {
+        Map<String, String> bindValues = signatureOptions.getVisibleSignatureTextBindValues();
+        X509Certificate certificate = signatureOptions.getCertificate();
+
+        if (bindValues != null)
+        {
+            final X509Principal principal = PrincipalUtil.getSubjectX509Principal(certificate);
+            final Vector<?> values = principal.getValues(X509Name.CN);
+
+            String certificateCN = (String) values.get(0);
+            bindValues.put("%s", certificateCN);
+            log.debug("Bind value %s: " + certificateCN);
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            String currentDate = simpleDateFormat.format(new Date());
+            bindValues.put("%t", currentDate);
+            log.debug("Bind value %t: " + currentDate);
+
+            String pdfReason = this.confAdapter.getReason();
+            bindValues.put("%reason", pdfReason);
+            log.debug("Bind value %reason: " + pdfReason);
+
+            String pdfLocation = this.confAdapter.getLocation();
+            bindValues.put("%location", pdfLocation);
+            log.debug("Bind value %location: " + pdfLocation);
+
+            String pdfContact = this.confAdapter.getContact();
+            bindValues.put("%contact", pdfContact);
+            log.debug("Bind value %contact: " + pdfContact);
+
+            MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+            sha1.update(certificate.getEncoded());
+            byte[] sha1Digest = sha1.digest();
+
+            String certificateHash = new String(Hex.encode(sha1Digest));
+            String certificateHashWithColons = certificateHash.replaceAll("(?<=..)(..)", ":$1");
+
+            bindValues.put("%certificateHash", certificateHashWithColons);
+            log.debug("Bind value %contact: " + pdfContact);
+        }
+
+        return bindValues;
     }
 }
