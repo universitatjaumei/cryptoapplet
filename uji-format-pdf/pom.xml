@@ -81,6 +81,22 @@
           <storepass>${uji.keytool.password}</storepass>
           <signedjar>target/${project.build.finalName}-signed.jar</signedjar>
           <verify>true</verify>
+          <archive>
+            <index>true</index>
+            <manifestEntries>
+              <Implementation-Title>${project.groupId}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Specification-Vendor>Universitat Jaume I</Specification-Vendor>
+              <Application-Name>CryptoApplet</Application-Name>
+              <Caller-Allowable-Codebase>*</Caller-Allowable-Codebase>
+              <Implementation-Vendor>Universitat Jaume I</Implementation-Vendor>
+              <Application-Library-Allowable-Codebase>*</Application-Library-Allowable-Codebase>
+              <Permissions>all-permissions</Permissions>
+              <Specification-Title>${project.name}</Specification-Title>
+              <Specification-Version>${project.version}</Specification-Version>
+              <Codebase>*</Codebase>
+            </manifestEntries>
+          </archive>
         </configuration>
       </plugin>      
     </plugins>
