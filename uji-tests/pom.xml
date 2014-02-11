@@ -78,8 +78,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- jUnit -->
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
