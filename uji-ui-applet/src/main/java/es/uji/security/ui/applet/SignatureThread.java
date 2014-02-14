@@ -171,7 +171,7 @@ public class SignatureThread extends Thread
 
             _mw.getGlobalProgressBar().setValue(_ini_percent + inc);
 
-            InputParams inputParams = (InputParams) _mw._aph.getInput();
+            InputParams inputParams = (InputParams) _mw.getAppHandler().getInputParams();
 
             _mw.getGlobalProgressBar().setValue(_ini_percent + 2 * inc);
 
