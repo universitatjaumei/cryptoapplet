@@ -51,7 +51,7 @@ public class SignatureOptions
     private Integer visibleAreaY;
     private Integer visibleAreaX2;
     private Integer visibleAreaY2;
-    private Integer visibleAreaPage;
+    private String visibleAreaPage;
     private Integer visibleAreaTextSize;
     private String visibleAreaImgFile;
     private String visibleAreaRepeatAxis;
@@ -316,12 +316,12 @@ public class SignatureOptions
         this.visibleAreaY2 = visibleAreaY2;
     }
 
-    public Integer getVisibleAreaPage()
+    public String getVisibleAreaPage()
     {
         return visibleAreaPage;
     }
 
-    public void setVisibleAreaPage(Integer visibleAreaPage)
+    public void setVisibleAreaPage(String visibleAreaPage)
     {
         this.visibleAreaPage = visibleAreaPage;
     }

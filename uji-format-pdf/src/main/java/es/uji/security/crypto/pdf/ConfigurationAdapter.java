@@ -148,7 +148,7 @@ public class ConfigurationAdapter
         }
     }
 
-    public int getVisibleAreaPage()
+    public String getVisibleAreaPage()
     {
         if (signatureOptions.getVisibleAreaPage() != null)
         {
@@ -156,7 +156,7 @@ public class ConfigurationAdapter
         }
         else
         {
-            return conf.getIntProperty("PDFSIG_VISIBLE_AREA_PAGE", 1);
+            return conf.getProperty("PDFSIG_VISIBLE_AREA_PAGE", "ALL");
         }
     }
 
