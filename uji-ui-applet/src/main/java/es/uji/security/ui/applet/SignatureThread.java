@@ -419,7 +419,7 @@ public class SignatureThread extends Thread
                             
                             if (hasValue(_mw._aph.getVisibleAreaPage()))
                             {
-                                sigOpt.setVisibleAreaPage(new Integer(getValue(_mw._aph.getVisibleAreaPage())));
+                                sigOpt.setVisibleAreaPage(getValue(_mw._aph.getVisibleAreaPage()));
                                 log.debug("VisibleAreaPage: " + getValue(_mw._aph.getVisibleAreaPage()));
                             }
                             
