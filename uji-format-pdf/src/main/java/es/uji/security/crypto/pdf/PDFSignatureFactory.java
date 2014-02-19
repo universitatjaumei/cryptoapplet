@@ -286,7 +286,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             Rectangle rectangle = computeSignatureRectangle(numSignatures);
 
             datos = addFootMessage(datos, reference, validationUrl, reader, numSignatures);
-            datos = addSignaturePlaceholders(datos, signatureOptions.getVisibleAreaPage(), numSignatures, rectangle);
+            datos = addSignaturePlaceholders(datos, confAdapter.getVisibleAreaPage(), numSignatures, rectangle);
 
             Certificate[] chain = new Certificate[] { caCertificate, certificate };
             datos = addVisibleSignature(signatureOptions, datos, numSignatures, rectangle, chain);
@@ -410,10 +410,14 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         // Attached the blank signature field to the existing document
 
+
         if (visibleAreaPage == null || "ALL".equals(visibleAreaPage))
         {
+            log.debug("Final visible page value: " + visibleAreaPage + ".");
+
             for (int pageNumber = 1 ; pageNumber<=reader.getNumberOfPages() ; pageNumber++)
             {
+                log.debug("Generating annotation for page " + pageNumber);
                 pdfStamper.addAnnotation(sig1, pageNumber);
             }
         }
@@ -430,6 +434,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 targetPage = Integer.valueOf(visibleAreaPage);
             }
 
+            log.debug("Generating annotation for page " + targetPage);
             pdfStamper.addAnnotation(sig1, targetPage);
         }
 
@@ -481,24 +486,19 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             String certificateCN = (String) values.get(0);
             bindValues.put("%s", certificateCN);
-            log.debug("Bind value %s: " + certificateCN);
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             String currentDate = simpleDateFormat.format(new Date());
             bindValues.put("%t", currentDate);
-            log.debug("Bind value %t: " + currentDate);
 
             String pdfReason = this.confAdapter.getReason();
             bindValues.put("%reason", pdfReason);
-            log.debug("Bind value %reason: " + pdfReason);
 
             String pdfLocation = this.confAdapter.getLocation();
             bindValues.put("%location", pdfLocation);
-            log.debug("Bind value %location: " + pdfLocation);
 
             String pdfContact = this.confAdapter.getContact();
             bindValues.put("%contact", pdfContact);
-            log.debug("Bind value %contact: " + pdfContact);
 
             MessageDigest sha1 = MessageDigest.getInstance("SHA1");
             sha1.update(certificate.getEncoded());
@@ -508,7 +508,11 @@ public class PDFSignatureFactory implements ISignFormatProvider
             String certificateHashWithColons = certificateHash.replaceAll("(?<=..)(..)", ":$1");
 
             bindValues.put("%certificateHash", certificateHashWithColons);
-            log.debug("Bind value %certificateHash: " + certificateHashWithColons);
+        }
+
+        for (Map.Entry<String, String> bindValue : bindValues.entrySet())
+        {
+            log.debug("Bind value " + bindValue.getKey() + ": " + bindValue.getValue());
         }
 
         return bindValues;
