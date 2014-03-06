@@ -164,12 +164,36 @@ public class PDFSignatureFactory implements ISignFormatProvider
     }
 
     private void createVisibleSignature(PdfSignatureAppearance sap, int numSignatures,
-                                        String pattern, Map<String, String> bindValues, Rectangle rectangle) throws MalformedURLException,
+                                        String pattern, Map<String, String> bindValues) throws MalformedURLException,
             IOException, DocumentException
     {
+        float x1 = confAdapter.getVisibleAreaX();
+        float y1 = confAdapter.getVisibleAreaY();
+        float x2 = confAdapter.getVisibleAreaX2();
+        float y2 = confAdapter.getVisibleAreaY2();
+
+        float offsetX = ((x2 - x1) * numSignatures) + 10;
+        float offsetY = ((y2 - y1) * numSignatures) + 10;
+
+        log.debug("VisibleArea: " + x1 + "," + y1 + "," + x2 + "," + y2 + " offsetX:" + offsetX
+                + ", offsetY:" + offsetY);
+
+        // Position of the visible signature
+
+        Rectangle rectangle = null;
+
+        if (confAdapter.getVisibleAreaRepeatAxis().equals("Y"))
+        {
+            rectangle = new Rectangle(x1, y1 + offsetY, x2, y2 + offsetY);
+        }
+        else
+        {
+            rectangle = new Rectangle(x1 + offsetX, y1, x2 + offsetX, y2);
+        }
+
         log.debug("VisibleAreaPage: " + confAdapter.getVisibleAreaPage());
 
-        //sap.setVisibleSignature(rectangle, confAdapter.getVisibleAreaPage(), null);
+        //sap.setVisibleSignature(rectangle, Integer.parseInt(confAdapter.getVisibleAreaPage()), null);
         sap.setVisibleSignature("CryptoAppletSignatureReference" + numSignatures);
         sap.setAcro6Layers(true);
         sap.setLayer2Font(font);
@@ -188,7 +212,6 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         String signatureType = confAdapter.getVisibleSignatureType();
         log.debug("VisibleSignatureType: " + signatureType);
-        log.debug("VisibleSignatureText: " + signatureText);
 
         if (signatureType.equals("GRAPHIC_AND_DESCRIPTION"))
         {
@@ -244,68 +267,9 @@ public class PDFSignatureFactory implements ISignFormatProvider
         }
     }
 
-    public SignatureResult formatSignature(SignatureOptions signatureOptions)
-            throws KeyStoreException, Exception
-    {
-        log.debug("Init PDF signature configuration");
-
-        this.confAdapter = new ConfigurationAdapter(signatureOptions);
-
-        initFontDefinition();
-
-        try
-        {
-            byte[] datos = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
-            X509Certificate certificate = signatureOptions.getCertificate();
-            this.privateKey = signatureOptions.getPrivateKey();
-            this.provider = signatureOptions.getProvider();
-            String reference = signatureOptions.getDocumentReference();
-            String validationUrl = signatureOptions.getDocumentReferenceVerificationUrl();
-
-            if (Security.getProvider(this.provider.getName()) == null && this.provider != null)
-            {
-                Security.addProvider(this.provider);
-            }
-
-
-            Certificate caCertificate = findCACertificateFor(certificate);
-
-            if (caCertificate == null)
-            {
-                SignatureResult signatureResult = new SignatureResult();
-                signatureResult.setValid(false);
-                signatureResult.addError(LabelManager.get("ERROR_CERTIFICATE_NOT_ALLOWED"));
-
-                return signatureResult;
-            }
-
-            PdfReader reader = new PdfReader(datos);
-
-            int numSignatures = reader.getAcroFields().getSignatureNames().size();
-
-            Rectangle rectangle = computeSignatureRectangle(numSignatures);
-
-            datos = addFootMessage(datos, reference, validationUrl, reader, numSignatures);
-            datos = addSignaturePlaceholders(datos, confAdapter.getVisibleAreaPage(), numSignatures, rectangle);
-
-            Certificate[] chain = new Certificate[] { caCertificate, certificate };
-            datos = addVisibleSignature(signatureOptions, datos, numSignatures, rectangle, chain);
-
-            SignatureResult signatureResult = new SignatureResult();
-            signatureResult.setValid(true);
-            signatureResult.setSignatureData(new ByteArrayInputStream(datos));
-
-            return signatureResult;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private Certificate findCACertificateFor(Certificate cert) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException
+    private Certificate findCACertificateFor(Certificate cert)
+            throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException,
+            InvalidKeyException, NoSuchProviderException
     {
         Integer n = new Integer(conf.getProperty("DIGIDOC_CA_CERTS"));
         Certificate CACert = null;
@@ -326,49 +290,66 @@ public class PDFSignatureFactory implements ISignFormatProvider
                 CACert = null;
             }
         }
+
         return CACert;
     }
 
-    private byte[] addFootMessage(byte[] datos, String reference, String validationUrl, PdfReader reader, int numSignatures)
-            throws DocumentException, IOException
+    public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
     {
-        if (numSignatures == 0 && reference != null)
+        log.debug("Init PDF signature configuration");
+
+        this.confAdapter = new ConfigurationAdapter(signatureOptions);
+
+        initFontDefinition();
+
+        byte[] datos = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        X509Certificate certificate = signatureOptions.getCertificate();
+        this.privateKey = signatureOptions.getPrivateKey();
+        this.provider = signatureOptions.getProvider();
+        String reference = signatureOptions.getDocumentReference();
+        String validationUrl = signatureOptions.getDocumentReferenceVerificationUrl();
+
+        if (Security.getProvider(this.provider.getName()) == null && this.provider != null)
         {
-            String footerMessage = "";
-
-            if (validationUrl != null)
-            {
-                footerMessage = MessageFormat.format(
-                        "Puede validar este documento en {1} introduciendo la referencia {0}",
-                        reference, validationUrl);
-
-            }
-            else
-            {
-                footerMessage = MessageFormat.format("La referencia de este documento es {0}",
-                        reference, validationUrl);
-            }
-
-            ByteArrayOutputStream sout = new ByteArrayOutputStream();
-            PdfStamper stamper = new PdfStamper(reader, sout);
-            PdfContentByte canvas = stamper.getOverContent(1);
-
-            Font font = new Font(BaseFont.createFont(BaseFont.TIMES_ROMAN, "Cp1252", false));
-            font.setSize(9);
-
-            ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT, new Phrase(footerMessage,
-                    font), 20, 20, 0);
-            stamper.close();
-
-            datos = sout.toByteArray();
+            Security.addProvider(this.provider);
         }
 
-        return datos;
+        Certificate caCertificate = findCACertificateFor(certificate);
+
+        if (caCertificate == null)
+        {
+            SignatureResult signatureResult = new SignatureResult();
+            signatureResult.setValid(false);
+            signatureResult.addError(LabelManager.get("ERROR_CERTIFICATE_NOT_ALLOWED"));
+
+            return signatureResult;
+        }
+
+        PdfReader reader = new PdfReader(datos);
+        ByteArrayOutputStream sout = new ByteArrayOutputStream();
+
+        int numSignatures = reader.getAcroFields().getSignatureNames().size();
+
+        if (numSignatures == 0 && reference != null)
+        {
+            datos = addFooterMessage(reference, validationUrl, reader, sout);
+        }
+
+        datos = addSignaturePlaceholders(datos, numSignatures);
+
+        sout = addVisibleSignatureAndSign(signatureOptions, datos, certificate, caCertificate, numSignatures);
+
+        SignatureResult signatureResult = new SignatureResult();
+        signatureResult.setValid(true);
+        signatureResult.setSignatureData(new ByteArrayInputStream(sout.toByteArray()));
+
+        return signatureResult;
     }
 
-    private byte[] addVisibleSignature(SignatureOptions signatureOptions, byte[] datos, int numSignatures, Rectangle rectangle, Certificate[] chain) throws Exception
+    private ByteArrayOutputStream addVisibleSignatureAndSign(SignatureOptions signatureOptions, byte[] datos, X509Certificate certificate, Certificate caCertificate, int numSignatures) throws Exception
     {
-        PdfReader reader;ByteArrayOutputStream sout;
+        PdfReader reader;
+        ByteArrayOutputStream sout;
         reader = new PdfReader(datos);
         sout = new ByteArrayOutputStream();
 
@@ -384,62 +365,96 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
             Map<String, String> bindValues = generateBindValues(signatureOptions);
 
-            createVisibleSignature(pdfSignatureAppareance, numSignatures, pattern, bindValues, rectangle);
+            createVisibleSignature(pdfSignatureAppareance, numSignatures, pattern, bindValues);
         }
 
-        sign(pdfStamper, pdfSignatureAppareance, chain);
-
-        datos = sout.toByteArray();
-        return datos;
+        sign(pdfStamper, pdfSignatureAppareance, new Certificate[] { caCertificate, certificate });
+        return sout;
     }
 
-    private byte[] addSignaturePlaceholders(byte[] datos, String visibleAreaPage, int numSignatures, Rectangle rectangle) throws IOException, DocumentException
+    private byte[] addSignaturePlaceholders(byte[] datos, int numSignatures) throws IOException, DocumentException
     {
-        PdfReader reader;ByteArrayOutputStream sout;
+        PdfReader reader;ByteArrayOutputStream sout;Rectangle rectangle = computeSignatureRectangle(numSignatures);
+
         reader = new PdfReader(datos);
         sout = new ByteArrayOutputStream();
 
         PdfStamper pdfStamper = new PdfStamper(reader, sout, '\0', true);
 
         PdfFormField sig1 = PdfFormField.createSignature(pdfStamper.getWriter());
-        sig1.setWidget(rectangle, null);
-        sig1.setFlags(PdfAnnotation.FLAGS_PRINT);
-        sig1.put(PdfName.DA, new PdfString("/Helv 0 Tf 0 g"));
-        sig1.setFieldName("CryptoAppletSignatureReference" + numSignatures);
-        sig1.setPage(1);
 
-        // Attached the blank signature field to the existing document
-
-
-        if (visibleAreaPage == null || "ALL".equals(visibleAreaPage))
+        if (confAdapter.isVisibleSignature())
         {
-            log.debug("Final visible page value: " + visibleAreaPage + ".");
+            sig1.setWidget(rectangle, null);
+            sig1.setFlags(PdfAnnotation.FLAGS_PRINT);
+            sig1.put(PdfName.DA, new PdfString("/Helv 0 Tf 0 g"));
+            sig1.setFieldName("CryptoAppletSignatureReference" + numSignatures);
+            sig1.setPage(1);
 
-            for (int pageNumber = 1 ; pageNumber<=reader.getNumberOfPages() ; pageNumber++)
-            {
-                log.debug("Generating annotation for page " + pageNumber);
-                pdfStamper.addAnnotation(sig1, pageNumber);
-            }
-        }
-        else
-        {
-            int targetPage = 1;
+            String visibleAreaPage = confAdapter.getVisibleAreaPage();
 
-            if ("LAST".equals(visibleAreaPage))
+            if (visibleAreaPage == null || "ALL".equals(visibleAreaPage))
             {
-                targetPage = reader.getNumberOfPages();
+                log.debug("Final visible page value: " + visibleAreaPage + ".");
+
+                for (int pageNumber = 1; pageNumber <= reader.getNumberOfPages(); pageNumber++)
+                {
+                    log.debug("Generating annotation for page " + pageNumber);
+                    pdfStamper.addAnnotation(sig1, pageNumber);
+                }
             }
             else
             {
-                targetPage = Integer.valueOf(visibleAreaPage);
-            }
+                int targetPage = 1;
 
-            log.debug("Generating annotation for page " + targetPage);
-            pdfStamper.addAnnotation(sig1, targetPage);
+                if ("LAST".equals(visibleAreaPage))
+                {
+                    targetPage = reader.getNumberOfPages();
+                }
+                else
+                {
+                    targetPage = Integer.valueOf(visibleAreaPage);
+                }
+
+                log.debug("Generating annotation for page " + targetPage);
+                pdfStamper.addAnnotation(sig1, targetPage);
+            }
         }
 
         pdfStamper.close();
         sout.close();
+
+        datos = sout.toByteArray();
+        return datos;
+    }
+
+    private byte[] addFooterMessage(String reference, String validationUrl, PdfReader reader, ByteArrayOutputStream sout) throws DocumentException, IOException
+    {
+        byte[] datos;
+        String footerMessage = "";
+
+        if (validationUrl != null)
+        {
+            footerMessage = MessageFormat.format(
+                    "Puede validar este documento en {1} introduciendo la referencia {0}",
+                    reference, validationUrl);
+
+        }
+        else
+        {
+            footerMessage = MessageFormat.format("La referencia de este documento es {0}",
+                    reference, validationUrl);
+        }
+
+        PdfStamper stamper = new PdfStamper(reader, sout);
+        PdfContentByte canvas = stamper.getOverContent(1);
+
+        Font font = new Font(BaseFont.createFont(BaseFont.TIMES_ROMAN, "Cp1252", false));
+        font.setSize(9);
+
+        ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT, new Phrase(footerMessage,
+                font), 20, 20, 0);
+        stamper.close();
 
         datos = sout.toByteArray();
         return datos;
