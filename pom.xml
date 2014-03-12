@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.uji.security</groupId>
-  <version>2.1.7</version>
+  <version>2.1.7-SNAPSHOT</version>
   <artifactId>CryptoApplet</artifactId>
   <packaging>pom</packaging>
   <name>CryptoApplet</name>
-  <url>http://proyectostic.uji.es/cryptoapplet/</url>
+  <url>https://github.com/universitatjaumei/cryptoapplet</url>
 
   <organization>
     <name>Universitat Jaume I</name>
@@ -18,25 +18,12 @@
 
   <repositories>
     <repository>
-      <id>proyectostic</id>
-      <url>http://maven.forja.uji.es/</url>
+      <id>uji</id>
+      <url>http://devel.uji.es/nexus/content/groups/public/</url>
     </repository>
   </repositories>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
   <modules>
-    <module>xmlsec-backport-jdk6</module>
     <module>uji-config</module>
     <module>uji-utils</module>
     <module>uji-crypto-core</module>
@@ -53,58 +40,33 @@
     <module>uji-ui-applet</module>
   </modules>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>es.uji.security</groupId>
-        <artifactId>uji-utils</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>es.uji.security</groupId>
-        <artifactId>uji-crypto</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>es.uji.security</groupId>
-        <artifactId>uji-ui-applet</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <licenses>
     <license>
-      <name>XXX</name>
-      <url>LICENSE.txt</url>
-      <distribution>XXX</distribution>
-      <comments>XXX</comments>
+      <name>GPL-v3.0</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+    </license>
+    <license>
+      <name>EUPL-v1.1</name>
+      <url>http://joinup.ec.europa.eu/system/files/ES/EUPL%20v.1.1%20-%20Licencia.pdf</url>
     </license>
   </licenses>
 
   <issueManagement>
     <system>CryptoApplet Issue Tracking</system>
-    <url>http://forja.uji.es/tracker/?group_id=24</url>
+    <url>http://jira.uji.es/browse/CRYPTOAPPLET</url>
   </issueManagement>
 
   <mailingLists>
     <mailingList>
       <name>CryptoApplet</name>
-      <subscribe>http://proyectostic.uji.es/</subscribe>
-      <unsubscribe> http://proyectostic.uji.es/</unsubscribe>
+      <subscribe>https://groups.google.com/a/uji.es/forum/#!forum/cryptoapplet</subscribe>
+      <unsubscribe>https://groups.google.com/a/uji.es/forum/#!forum/cryptoapplet</unsubscribe>
       <post>cryptoapplet AT llistes.uji.es</post>
-      <archive>http://proyectostic.uji.es/</archive>
+      <archive>https://groups.google.com/a/uji.es/forum/#!forum/cryptoapplet</archive>
     </mailingList>
   </mailingLists>
 
   <developers>
-    <developer>
-      <name>Paul Santapau</name>
-      <email>santapau AT uji.es</email>
-      <roles>
-        <role>commiter</role>
-      </roles>
-    </developer>
     <developer>
       <name>Ricardo Borillo</name>
       <email>borillo AT uji.es</email>
@@ -112,12 +74,56 @@
         <role>commiter</role>
       </roles>
     </developer>
+    <developer>
+      <name>Paul Santapau</name>
+      <email>santapau AT uji.es</email>
+      <roles>
+        <role>commiter</role>
+      </roles>
+    </developer>
   </developers>
 
   <scm>
-    <connection>scm:svn:https://forja.uji.es/svn/cryptoapplet</connection>
-    <developerConnection>scm:svn:https://forja.uji.es/svn/cryptoapplet</developerConnection>
-    <url>http://forja.uji.es/plugins/scmsvn/viewcvs.php/?root=cryptoapplet</url>
+    <connection>scm:svn:http://jira.uji.es/repos/uji/CRYPTOAPPLET/trunk</connection>
+    <url>http://jira.uji.es/repos/uji/CRYPTOAPPLET/trunk</url>
   </scm>
 
+  <distributionManagement>
+    <repository>
+      <id>nexus</id>
+      <url>http://devel01.uji.es:8080/nexus/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>nexus</id>
+      <url>http://devel01.uji.es:8080/nexus/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <uji.keytool.keystore>../uji.keystore</uji.keytool.keystore>
+        <uji.keytool.alias>uji</uji.keytool.alias>
+        <uji.keytool.password>cryptoapplet</uji.keytool.password>
+      </properties>
+    </profile>
+  </profiles>
 </project>
