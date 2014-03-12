@@ -20,7 +20,7 @@ public class PDFTest extends BaseCryptoAppletTest
     @Before
     public void init() throws IOException
     {
-        data = OS.inputStreamToByteArray(new FileInputStream(baseDir + "in-pdf.pdf"));
+        data = OS.inputStreamToByteArray(new FileInputStream("src/test/resources/in-pdf.pdf"));
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
         
         Map<String, String> bindValues = new HashMap<String, String>();
@@ -40,19 +40,19 @@ public class PDFTest extends BaseCryptoAppletTest
         ISignFormatProvider signFormatProvider = new PDFSignatureFactory();
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-        showErrors(signatureResult, baseDir + "out-pdf.pdf");
+        showErrors(signatureResult, "target/out-pdf.pdf");
 
-        data = OS.inputStreamToByteArray(new FileInputStream(baseDir + "out-pdf.pdf"));
+        data = OS.inputStreamToByteArray(new FileInputStream("target/out-pdf.pdf"));
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
         
         signFormatProvider = new PDFSignatureFactory();
         signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-        showErrors(signatureResult, baseDir + "out-pdf2.pdf");        
+        showErrors(signatureResult, "target/out-pdf2.pdf");
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir + "out-pdf2.pdf"));
+        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("target/out-pdf2.pdf"));
 
         PDFSignatureVerifier signatureVerifier = new PDFSignatureVerifier();
         VerificationResult verificationResult = signatureVerifier.verify(signedData);

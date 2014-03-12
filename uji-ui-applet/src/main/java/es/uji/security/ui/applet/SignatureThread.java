@@ -27,7 +27,7 @@ import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.SupportedDataEncoding;
 import es.uji.security.crypto.SupportedSignatureFormat;
 import es.uji.security.crypto.config.OS;
-import java.openxades.OpenXAdESSignatureFactory;
+import es.uji.security.crypto.openxades.OpenXAdESSignatureFactory;
 import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.X509CertificateHandler;
 import es.uji.security.ui.applet.io.InputParams;

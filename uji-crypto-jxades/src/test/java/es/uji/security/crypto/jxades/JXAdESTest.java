@@ -30,12 +30,11 @@ public class JXAdESTest extends BaseCryptoAppletTest
         ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-        showErrors(signatureResult, baseDir + "out-jxades-enveloped.xml");
+        showErrors(signatureResult, "target/out-jxades-enveloped.xml");
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir
-                + "out-jxades.xml"));
+        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("target/out-jxades-enveloped.xml"));
 
         JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
         VerificationResult verificationResult = signatureVerifier.verify(signedData);
@@ -53,12 +52,11 @@ public class JXAdESTest extends BaseCryptoAppletTest
         ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-        showErrors(signatureResult, baseDir + "out-jxades-enveloped-cosign.xml");
+        showErrors(signatureResult, "target/out-jxades-enveloped-cosign.xml");
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir
-                + "out-jxades.xml"));
+        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("target/out-jxades-enveloped-cosign.xml"));
 
         JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
         VerificationResult verificationResult = signatureVerifier.verify(signedData);
@@ -71,7 +69,7 @@ public class JXAdESTest extends BaseCryptoAppletTest
     {
         // CoSign
 
-        byte[] data = "<?xml version=\"1.0\"?><root><d id=\"D0\">a</d><d id=\"D1\">b</d></root>"
+        byte[] data = "<?xml version=\"1.0\"?><root><d Id=\"D0\">a</d><d Id=\"D1\">b</d></root>"
                 .getBytes();
 
         signatureOptions.setEnveloped(false);
@@ -85,16 +83,14 @@ public class JXAdESTest extends BaseCryptoAppletTest
             ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
             SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-            showErrors(signatureResult, baseDir + "out-jxades-detached-cosign.xml");
+            showErrors(signatureResult, "target/out-jxades-detached-cosign.xml");
 
-            data = OS.inputStreamToByteArray(new FileInputStream(baseDir
-                    + "out-jxades-detached-cosign.xml"));
+            data = OS.inputStreamToByteArray(new FileInputStream("target/out-jxades-detached-cosign.xml"));
         }
 
         // Verify
 
-        data = OS.inputStreamToByteArray(new FileInputStream(baseDir
-                + "out-jxades-detached-cosign.xml"));
+        data = OS.inputStreamToByteArray(new FileInputStream("target/out-jxades-detached-cosign.xml"));
 
         JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
         VerificationResult verificationResult = signatureVerifier.verify(data);

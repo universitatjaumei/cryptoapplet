@@ -19,7 +19,7 @@ public class MultipleSignatureTest extends BaseCryptoAppletTest
     @Before
     public void init() throws IOException
     {
-        data = OS.inputStreamToByteArray(new FileInputStream(baseDir + "in-pdf.pdf"));
+        data = OS.inputStreamToByteArray(new FileInputStream("src/test/resources/in-pdf.pdf"));
         signatureOptions.setDataToSign(new ByteArrayInputStream(data));
     }
 
