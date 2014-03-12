@@ -1,16 +1,17 @@
 package es.uji.security.crypto.jxades;
 
-import es.uji.security.crypto.BaseCryptoAppletTest;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.config.OS;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import es.uji.security.crypto.test.BaseCryptoAppletTest;
 
 public class JXAdESDetachedTest extends BaseCryptoAppletTest
 {

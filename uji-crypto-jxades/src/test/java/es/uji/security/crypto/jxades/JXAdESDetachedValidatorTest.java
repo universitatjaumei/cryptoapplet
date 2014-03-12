@@ -1,11 +1,12 @@
 package es.uji.security.crypto.jxades;
 
-import es.uji.security.crypto.BaseCryptoAppletTest;
-import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.OS;
+import java.io.FileInputStream;
+
 import org.junit.Test;
 
-import java.io.FileInputStream;
+import es.uji.security.crypto.VerificationResult;
+import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.test.BaseCryptoAppletTest;
 
 public class JXAdESDetachedValidatorTest extends BaseCryptoAppletTest
 {

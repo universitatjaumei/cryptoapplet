@@ -430,7 +430,7 @@ public class AppEnvironmentTester extends Thread
         int _width = toolkit.getScreenSize().width;
 
         _jta.setEditable(false);
-        _jta.append("Resultados de los tests:\n");
+        _jta.append("Resultados de los test:\n");
 
         _jsp.setBounds(new Rectangle(9, 28, 558, 173));
         _jsp.setViewportView(_jta);
@@ -474,7 +474,7 @@ public class AppEnvironmentTester extends Thread
         	e.printStackTrace();
         }
         
-        // Lets go with the tests
+        // Lets go with the test
         testJavaVersion();
         testAppletTag();
         testInputOutput();

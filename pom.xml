@@ -37,7 +37,6 @@
     <module>uji-format-facturae</module>
     <module>uji-keystore</module>
     <module>uji-ui-applet</module>
-    <module>uji-tests</module>
   </modules>
 
   <licenses>

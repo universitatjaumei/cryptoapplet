@@ -29,7 +29,7 @@ public enum SupportedSignatureFormat
     }, 
     XADES {
         public String toString() {
-            return "es.uji.security.crypto.openxades.OpenXAdESSignatureFactory"; 
+            return "java.openxades.OpenXAdESSignatureFactory";
         }
     }, 
     PDF {

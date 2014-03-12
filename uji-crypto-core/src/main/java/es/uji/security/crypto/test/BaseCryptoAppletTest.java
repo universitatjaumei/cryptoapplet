@@ -1,4 +1,4 @@
-package es.uji.security.crypto;
+package es.uji.security.crypto.test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,12 +10,13 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Assert;
 
 import es.uji.security.crypto.SignatureOptions;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.config.OS;
+
+import static org.junit.Assert.assertTrue;
 
 public class BaseCryptoAppletTest
 {
@@ -27,15 +28,15 @@ public class BaseCryptoAppletTest
     protected byte[] data = "<root />".getBytes();
 
     protected SignatureOptions signatureOptions;
-    
-    public static String baseDir = "uji-crypto-jxades/src/main/resources/";
+
+    public static String baseDir = "src/main/resources/";
 
     public BaseCryptoAppletTest()
     {
-        String keyStoreFile = "/opt/devel/workspaces/cryptoapplet/branches/CryptoApplet_2.1.4-detached/uji.keystore";
+        String keyStoreFile = "../uji.keystore";
         String keyStoreType = KeyStore.getDefaultType();
         String keyStorePassword = "cryptoapplet";
-        String keyPassword = "cryptoapplet";        
+        String keyPassword = "cryptoapplet";
 
         if (System.getProperty("uji.keystore.file") != null)
         {
@@ -69,21 +70,21 @@ public class BaseCryptoAppletTest
             // Keystore almacenamiento certificados
             keystore = KeyStore.getInstance(keyStoreType);
             keystore.load(new FileInputStream(keyStoreFile), keyStorePassword.toCharArray());
-    
+
             // Alias del certificado de firma
             String alias = (String) keystore.aliases().nextElement();
-    
+
             if (System.getProperty("uji.keystore.alias") != null)
             {
                 alias = System.getProperty("uji.keystore.alias");
             }
-    
+
             // Certificado de firma
             certificate = (X509Certificate) keystore.getCertificate(alias);
-    
+
             // Clave privada para firmar
             privateKey = (PrivateKey) keystore.getKey(alias, keyPassword.toCharArray());
-    
+
             signatureOptions = new SignatureOptions();
             signatureOptions.setCertificate(certificate);
             signatureOptions.setPrivateKey(privateKey);
@@ -94,14 +95,15 @@ public class BaseCryptoAppletTest
             throw new RuntimeException(e);
         }
     }
-    
+
     protected void showErrors(SignatureResult signatureResult, String dumpFile) throws IOException
     {
-    	if (signatureResult.getSignatureData() != null){
-    		OS.dumpToFile(new File(dumpFile), signatureResult
-    				.getSignatureData());
-    	}
-    	
+        if (signatureResult.getSignatureData() != null)
+        {
+            OS.dumpToFile(new File(dumpFile), signatureResult
+                    .getSignatureData());
+        }
+
         if (!signatureResult.isValid())
         {
             for (String error : signatureResult.getErrors())
@@ -109,9 +111,9 @@ public class BaseCryptoAppletTest
                 System.out.println(error);
             }
         }
-        
-        Assert.assertTrue(signatureResult.isValid());
-    }    
+
+        assertTrue(signatureResult.isValid());
+    }
 
     protected void showErrors(VerificationResult verificationResult)
     {
@@ -122,10 +124,10 @@ public class BaseCryptoAppletTest
                 System.out.println(error);
             }
         }
-        
-        Assert.assertTrue(verificationResult.isValid());
-    }    
-    
+
+        assertTrue(verificationResult.isValid());
+    }
+
     public void setData(byte[] data)
     {
         this.data = data;

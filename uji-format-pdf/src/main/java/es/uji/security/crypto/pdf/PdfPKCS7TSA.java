@@ -972,7 +972,7 @@ public class PdfPKCS7TSA {
      * may be provided.                                                                     
      * @param secondDigest the digest in the authenticatedAttributes                        
      * @param signingTime the signing time in the authenticatedAttributes                   
-     * @param tsaClient TSAClient - null or an optional time stamp authority client         
+     * @param tsaUrl TSAClient - null or an optional time stamp authority client
      * @return byte[] the bytes for the PKCS7SignedData object                              
      * @since   2.1.6                                                                       
      */                                                                                     

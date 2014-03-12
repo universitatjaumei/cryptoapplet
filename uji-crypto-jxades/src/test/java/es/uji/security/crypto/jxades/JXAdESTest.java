@@ -1,10 +1,11 @@
 package es.uji.security.crypto.jxades;
 
-import es.uji.security.crypto.BaseCryptoAppletTest;
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureResult;
 import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.test.BaseCryptoAppletTest;
+
 import org.junit.Before;
 import org.junit.Test;
 
