@@ -33,12 +33,11 @@ public class JXAdESDetachedTest extends BaseCryptoAppletTest
         ISignFormatProvider signFormatProvider = new JXAdESSignatureFactory();
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-        showErrors(signatureResult, baseDir + "out-jxades-detached.xml");
+        showErrors(signatureResult, "target/out-jxades-detached.xml");
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream(baseDir
-                + "out-jxades-detached.xml"));
+        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("target/out-jxades-detached.xml"));
 
         JXAdESSignatureVerifier signatureVerifier = new JXAdESSignatureVerifier();
         VerificationResult verificationResult = signatureVerifier.verify(signedData);
