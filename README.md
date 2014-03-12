@@ -16,4 +16,4 @@ Certificate management is done transparently for the user through direct access 
 
 The applet can also be executed in the operating systems Microsoft Windows XP and GNU/Linux, the only requirement being having Sun's Java Virtual Machine (version 1.6 o higher) installed.
 
-More information in the public list at [Google Groups](https://groups.google.com/a/uji.es/group/cryptoapplet?lnk=)
+You can find more information in the [official documentation](http://jira.uji.es/confluence/display/CRYPTOAPPLET/) or posting your questions in our [public mailing list at Google Groups](https://groups.google.com/a/uji.es/group/cryptoapplet?lnk=)
