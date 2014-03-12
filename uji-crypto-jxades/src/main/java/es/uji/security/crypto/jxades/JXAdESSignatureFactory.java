@@ -45,8 +45,6 @@ import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.util.i18n.LabelManager;
 
-import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
-
 public class JXAdESSignatureFactory implements ISignFormatProvider
 {
     public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception

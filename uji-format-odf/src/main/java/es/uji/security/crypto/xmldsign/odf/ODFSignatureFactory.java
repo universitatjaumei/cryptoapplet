@@ -9,9 +9,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.security.AccessController;
 import java.security.MessageDigest;
-import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,28 +66,6 @@ public class ODFSignatureFactory implements ISignFormatProvider
 {
     private static String OPENOFFICE = "urn:oasis:names:tc:opendocument:xmlns:digitalsignature:1.0";
 
-    static
-    {
-        AccessController.doPrivileged(new java.security.PrivilegedAction<Void>()
-        {
-            public Void run()
-            {
-                if (System.getProperty("java.version").startsWith("1.5"))
-                {
-                    try
-                    {
-                        Security.addProvider(new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
-                    }
-                    catch (Throwable e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                return null;
-            }
-        });
-    }
-
     public SignatureResult formatSignature(SignatureOptions signatureOptions) throws Exception
     {
         try
@@ -141,8 +117,8 @@ public class ODFSignatureFactory implements ISignFormatProvider
                 // Solo procesamos los ficheros
                 if (!fullPath.endsWith("/") && !fullPath.equals("META-INF/documentsignatures.xml"))
                 {
-                    if (fullPath.equals("content.xml") || fullPath.equals("meta.xml") || 
-                         fullPath.equals("styles.xml") || fullPath.equals("settings.xml"))
+                    if (fullPath.equals("content.xml") || fullPath.equals("meta.xml") ||
+                            fullPath.equals("styles.xml") || fullPath.equals("settings.xml"))
                     {
                         // Obtenemos el fichero, canonizamos y calculamos el digest
                         InputStream xmlFile = new ByteArrayInputStream(odt.getEntry(fullPath));

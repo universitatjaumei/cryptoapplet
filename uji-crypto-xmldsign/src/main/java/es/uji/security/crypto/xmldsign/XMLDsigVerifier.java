@@ -2,8 +2,6 @@ package es.uji.security.crypto.xmldsign;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.AccessController;
-import java.security.Security;
 
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.Reference;
@@ -22,28 +20,6 @@ import es.uji.security.crypto.VerificationResult;
 
 public class XMLDsigVerifier
 {
-    static
-    {
-        AccessController.doPrivileged(new java.security.PrivilegedAction<Void>()
-        {
-            public Void run()
-            {
-                if (System.getProperty("java.version").startsWith("1.5"))
-                {
-                    try
-                    {
-                        Security.addProvider(new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
-                    }
-                    catch (Throwable e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                return null;
-            }
-        });
-    }
-    
     public VerificationResult verify(byte[] signedData) throws SAXException, IOException, ParserConfigurationException, MarshalException, XMLSignatureException
     {
         XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
@@ -65,40 +41,40 @@ public class XMLDsigVerifier
         // and document context.
 
         VerificationResult result = new VerificationResult();
-        
-        for (int i=0 ; i<nl.getLength() ; i++)
+
+        for (int i = 0; i < nl.getLength(); i++)
         {
             DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(i));
-    
+
             // Unmarshal the XMLSignature.
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
-    
+
             // Validate the XMLSignature.
             boolean coreValidity = signature.validate(valContext);
             result.setValid(coreValidity);
-            
+
             // Check core validation status.
             if (coreValidity == false)
             {
                 boolean sv = signature.getSignatureValue().validate(valContext);
                 result.addError("signature validation status: " + sv);
-                
+
                 if (sv == false)
                 {
                     // Check the validation status of each Reference.
                     for (Object o : signature.getSignedInfo().getReferences())
                     {
                         Reference r = (Reference) o;
-                        
+
                         boolean refValid = r.validate(valContext);
                         result.addError("ref[" + r.getURI() + "] validity status: " + refValid);
                     }
                 }
-                
+
                 break;
             }
         }
-        
+
         return result;
     }
 }

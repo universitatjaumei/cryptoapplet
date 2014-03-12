@@ -3,9 +3,7 @@ package es.uji.security.crypto.xmldsign.odf;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AccessController;
 import java.security.Provider;
-import java.security.Security;
 
 import javax.xml.crypto.Data;
 import javax.xml.crypto.MarshalException;
@@ -36,66 +34,45 @@ import es.uji.security.crypto.VerificationResult;
 
 public class ODFSignatureVerifier
 {
-    static
-    {
-        AccessController.doPrivileged(new java.security.PrivilegedAction<Void>()
-        {
-            public Void run()
-            {
-                if (System.getProperty("java.version").startsWith("1.5"))
-                {
-                    try
-                    {
-                        Security.addProvider(new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
-                    }
-                    catch (Throwable e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-                return null;
-            }
-        });
-    }
-    
     public VerificationResult verify(InputStream data, Provider provider) throws IOException, ParserConfigurationException, SAXException, MarshalException, XMLSignatureException
-    {   
+    {
         // Acceso a los ficheros contenidos en el ODF
         final ODFDocument odt = new ODFDocument(data);
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);        
+        dbf.setNamespaceAware(true);
         DocumentBuilder db = dbf.newDocumentBuilder();
-        
+
         // Documento de firmas
-        byte[] documentData = odt.getEntry("META-INF/documentsignatures.xml");        
+        byte[] documentData = odt.getEntry("META-INF/documentsignatures.xml");
         final Document d = db.parse(new ByteArrayInputStream(documentData));
-        
+
         // Recuperamos el nodo Signature
         NodeList nl = d.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 
         VerificationResult verificationResult = new VerificationResult();
-                
+
         // Establecemos el contexto de validacion
-        for (int i=0 ; i<nl.getLength() ; i++)
+        for (int i = 0; i < nl.getLength(); i++)
         {
             DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(i));
-            valContext.setURIDereferencer(new URIDereferencer() {
-    
+            valContext.setURIDereferencer(new URIDereferencer()
+            {
+
                 public Data dereference(URIReference uriReference, XMLCryptoContext context) throws URIReferenceException
-                {                
+                {
                     Data result = null;
-                    
+
                     // El elemento es una referencia interna dentro del documento
                     if (uriReference.getURI().startsWith("#"))
                     {
                         Document document = d;
                         Node node;
-                        
+
                         try
                         {
                             node = XPathAPI.selectSingleNode(document.getDocumentElement(), "//*[@Id='" + uriReference.getURI().substring(1) + "']");
-                            result = new DOMSubTreeData(node, true); 
+                            result = new DOMSubTreeData(node, true);
                         }
                         catch (TransformerException e)
                         {
@@ -104,7 +81,7 @@ public class ODFSignatureVerifier
                     }
                     // El elemento es un fichero del ODF
                     else
-                    {                    
+                    {
                         try
                         {
                             byte[] resourceData = odt.getEntry(uriReference.getURI());
@@ -115,15 +92,15 @@ public class ODFSignatureVerifier
                             throw new URIReferenceException(e.getMessage(), e);
                         }
                     }
-    
-                    return result; 
-                }            
+
+                    return result;
+                }
             });
-        
+
             // Validamos la firma
             XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
-            
+
             if (signature.validate(valContext))
             {
                 verificationResult.setValid(true);
@@ -131,22 +108,22 @@ public class ODFSignatureVerifier
             else
             {
                 verificationResult.setValid(false);
-                
+
                 boolean sv = signature.getSignatureValue().validate(valContext);
-    
-                if (sv == false) 
+
+                if (sv == false)
                 {
-                    for (Object o : signature.getSignedInfo().getReferences()) 
+                    for (Object o : signature.getSignedInfo().getReferences())
                     {
-                        Reference reference  = (Reference) o;
-                        
+                        Reference reference = (Reference) o;
+
                         boolean refValid = reference.validate(valContext);
                         verificationResult.addError(reference.getURI() + " - validity status: " + refValid);
                     }
                 }
             }
         }
-            
+
         return verificationResult;
     }
 }
