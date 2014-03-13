@@ -14,6 +14,6 @@ The signature representation formats supported by CryptoApplet are the following
 
 Certificate management is done transparently for the user through direct access to CryptoAPI, if we are using Microsoft Internet Explorer, or to PKCS#11 if we are using Firefox (either in Windows or GNU/Linux). Stored certificates can also be used if the client system has the Clauer software installed.
 
-The applet can also be executed in the operating systems Microsoft Windows XP and GNU/Linux, the only requirement being having Sun's Java Virtual Machine (version 1.6 o higher) installed.
+The applet can also be executed in Windows, GNU/Linux or MacOSX, the only requirement is to have a Sun's Java Virtual Machine (version 1.6 o higher) installed.
 
 You can find more information in the [official documentation](http://jira.uji.es/confluence/display/CRYPTOAPPLET/) or posting your questions in our [public mailing list at Google Groups](https://groups.google.com/a/uji.es/group/cryptoapplet?lnk=)

@@ -368,7 +368,7 @@ public class PDFSignatureFactory implements ISignFormatProvider
             createVisibleSignature(pdfSignatureAppareance, numSignatures, pattern, bindValues);
         }
 
-        sign(pdfStamper, pdfSignatureAppareance, new Certificate[] { caCertificate, certificate });
+        sign(pdfStamper, pdfSignatureAppareance, new Certificate[] { certificate, caCertificate });
         return sout;
     }
 
