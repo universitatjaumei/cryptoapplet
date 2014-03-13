@@ -29,8 +29,8 @@ public class MultipleSignatureTest extends BaseCryptoAppletTest
         // Sign
 
         signatureOptions.setDocumentReference(UUID.randomUUID().toString());
-//        signatureOptions.setDocumentReferenceVerificationUrl("http://www.uji.es");
-        
+        signatureOptions.setDocumentReferenceVerificationUrl("http://www.uji.es");
+
         ISignFormatProvider signFormatProvider = new PDFSignatureFactory();
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 

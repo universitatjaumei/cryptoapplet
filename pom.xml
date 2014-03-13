@@ -81,8 +81,8 @@
   </developers>
 
   <scm>
-    <connection>scm:svn:http://jira.uji.es/repos/uji/CRYPTOAPPLET/tags/CryptoApplet-2.1.7</connection>
-    <url>http://jira.uji.es/repos/uji/CRYPTOAPPLET/tags/CryptoApplet-2.1.7</url>
+    <connection>scm:svn:http://jira.uji.es/repos/uji/CRYPTOAPPLET/trunk</connection>
+    <url>http://jira.uji.es/repos/uji/CRYPTOAPPLET/trunk</url>
   </scm>
 
   <distributionManagement>
