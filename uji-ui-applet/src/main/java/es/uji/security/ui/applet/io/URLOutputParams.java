@@ -1,5 +1,7 @@
 package es.uji.security.ui.applet.io;
 
+import netscape.javascript.JSObject;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -8,8 +10,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.StringTokenizer;
-
-import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
@@ -49,11 +49,11 @@ public class URLOutputParams extends AbstractData implements OutputParams
     public void setSignData(InputStream is) throws IOException
     {
         String cookies = "";
-        
+
         // Try to obtain and configure Cookies
         try
         {
-            log.debug("Recover JavaScript member: document");              
+            log.debug("Recover JavaScript member: document");
             JSObject document = (JSObject) JSCommands.getWindow().getMember("document");
 
             cookies = (String) document.getMember("cookie");
@@ -61,15 +61,16 @@ public class URLOutputParams extends AbstractData implements OutputParams
         }
         catch (Exception e)
         {
-            log.debug("Cookies can not be obtained", e);            
+            log.debug("Cookies can not be obtained", e);
         }
-        
+
         String currentURL = this.urls[current];
-        String urlWithoutParams = currentURL.substring(0, currentURL.indexOf('?'));
-        String urlParams = currentURL.substring(currentURL.indexOf('?')+1);
+
+        String urlWithoutParams = getBaseUrlWithoutParams(currentURL);
+        String urlParams = getParamsFromUrl(currentURL);
 
         log.debug("Posting data to " + currentURL + ", with post parameter variable " + postVariable);
-        
+
         URL url = new URL(urlWithoutParams);
 
         HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
@@ -85,32 +86,32 @@ public class URLOutputParams extends AbstractData implements OutputParams
         urlConn.setDoInput(true);
 
         DataOutputStream out = new DataOutputStream(urlConn.getOutputStream());
-        
+
         byte[] buffer = new byte[2048];
         int length = 0;
-        
+
         out.writeBytes(postVariable + "=");
-        
+
         while ((length = is.read(buffer)) >= 0)
         {
-            out.writeBytes(URLEncoder.encode(new String(buffer,0,length), "ISO-8859-1"));  
+            out.writeBytes(URLEncoder.encode(new String(buffer, 0, length), "ISO-8859-1"));
         }
-        
+
         out.writeBytes("&item=" + URLEncoder.encode("" + _count, "ISO-8859-1"));
 
         StringTokenizer strTok = new StringTokenizer(urlParams, "&");
-        
+
         while (strTok.hasMoreTokens())
         {
             String strAux = strTok.nextToken();
             log.debug("PROCESANDO TOKEN: " + strAux);
-            
+
             if (strAux.indexOf("=") > -1)
             {
                 String var = strAux.substring(0, strAux.indexOf("="));
                 String value = strAux.substring(strAux.indexOf("=") + 1);
                 log.debug("ENVIANDO EN EL POST : " + var + "=" + value);
-                
+
                 out.writeBytes("&" + var + "=" + URLEncoder.encode(new String(value), "ISO-8859-1"));
             }
         }
@@ -120,21 +121,46 @@ public class URLOutputParams extends AbstractData implements OutputParams
 
         if (urlConn.getResponseCode() >= 400)
         {
-            log.error("Error en el post: " + urlConn.getResponseCode());            
+            log.error("Error en el post: " + urlConn.getResponseCode());
             throw new IOException("Error en el post: " + urlConn.getResponseCode());
         }
 
         _count++;
         current++;
-        
+
         try
         {
-        	is.close();
-        	new File(OS.getSystemTmpDir() + "/signature.xsig").delete();
+            is.close();
+            new File(OS.getSystemTmpDir() + "/signature.xsig").delete();
         }
-        catch(Exception e)
-        {        
+        catch (Exception e)
+        {
         }
+    }
+
+    private String getParamsFromUrl(String currentURL)
+    {
+        if (hasQueryParams(currentURL))
+        {
+            return currentURL.substring(currentURL.indexOf('?') + 1);
+        }
+
+        return "";
+    }
+
+    private boolean hasQueryParams(String currentURL)
+    {
+        return currentURL.indexOf('?') > 0;
+    }
+
+    private String getBaseUrlWithoutParams(String currentURL)
+    {
+        if (hasQueryParams(currentURL))
+        {
+            return currentURL.substring(0, currentURL.indexOf('?'));
+        }
+
+        return currentURL;
     }
 
     public void setSignFormat(SignatureApplet base, byte[] signFormat)
@@ -149,8 +175,8 @@ public class URLOutputParams extends AbstractData implements OutputParams
     {
         if (!signOkInvoked)
         {
-            log.debug("Call JavaScript method: onSignOk");            
-            JSCommands.getWindow().call("onSignOk", new String[] { "" });
+            log.debug("Call JavaScript method: onSignOk");
+            JSCommands.getWindow().call("onSignOk", new String[]{""});
         }
     }
 
