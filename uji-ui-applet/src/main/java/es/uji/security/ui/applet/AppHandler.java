@@ -1,5 +1,7 @@
 package es.uji.security.ui.applet;
 
+import netscape.javascript.JSObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,8 +19,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-import netscape.javascript.JSObject;
 
 import org.apache.log4j.Logger;
 
@@ -67,7 +67,7 @@ public class AppHandler
     private SupportedBrowser navigator = SupportedBrowser.MOZILLA;
 
     // Input/Output Data handling
-    private InputParams input;    
+    private InputParams input;
     private OutputParams output;
 
     // XAdES signer role customization
@@ -82,7 +82,7 @@ public class AppHandler
     private String downloadURL;
 
     // PDF options
-    
+
     private Map<String, String[]> bindValues;
     private String[] reason;
     private String[] location;
@@ -99,34 +99,34 @@ public class AppHandler
     private String[] visibleAreaTextSize;
     private String[] visibleAreaImgFile;
     private String[] visibleAreaRepeatAxis;
-    private String[] visibleAreaTextPattern;   
-    
+    private String[] visibleAreaTextPattern;
+
     private boolean cosign;
     private boolean enveloped;
     private boolean detached;
 
-    private String dniToCheckAgainsCertificate;    
-    
+    private String dniToCheckAgainsCertificate;
+
     private String[] documentReference;
     private String[] documentReferenceVerificationUrl;
-    
+
     public AppHandler() throws SignatureAppletException
     {
         this(null);
-        
+
         this.cosign = false;
         this.enveloped = true;
-        
+
         log.debug("Running in desktop application mode");
     }
 
     /**
      * Base constructor, instantiates an AppHandler object, setting up the target navigator and
      * creating an available keystore mapping.
-     * 
+     * <p/>
      * That class should be used as a Sigleton so you must use getInstance in order to get this
      * class object.
-     **/
+     */
 
     public AppHandler(String downloadURL) throws SignatureAppletException
     {
@@ -146,13 +146,12 @@ public class AppHandler
                 userAgent = userAgent.toLowerCase();
 
                 log.debug("Detected user agent " + userAgent);
-                log.debug("Is IE? " + userAgent.indexOf("explorer"));
-                log.debug("Is IE? " + userAgent.indexOf("msie"));
+                log.debug("Is IE? " + SupportedBrowser.isIE(userAgent));
                 log.debug("Is Win? " + OS.isWindowsUpperEqualToNT());
-                log.debug("Is Chrome? " + userAgent.indexOf("chrome/"));
+                log.debug("Is Chrome? " + SupportedBrowser.isChrome(userAgent));
+                log.debug("Is Mozilla? " + SupportedBrowser.isMozilla(userAgent));
 
-                if ((userAgent.indexOf("explorer") > -1 || userAgent.indexOf("msie") > -1) || 
-                    (OS.isWindowsUpperEqualToNT() && userAgent.indexOf("chrome/") > -1))
+                if (SupportedBrowser.isIE(userAgent) || SupportedBrowser.isChromeWindows(userAgent))
                 {
                     this.navigator = SupportedBrowser.IEXPLORER;
 
@@ -165,9 +164,7 @@ public class AppHandler
                         log.error("Error installing or loading the DLL file", e);
                     }
                 }
-                else if (userAgent.indexOf("firefox") > -1 || userAgent.indexOf("iceweasel") > -1
-                        || userAgent.indexOf("seamonkey") > -1 || userAgent.indexOf("gecko") > -1
-                        || userAgent.indexOf("netscape") > -1)
+                else if (SupportedBrowser.isMozilla(userAgent))
                 {
                     this.navigator = SupportedBrowser.MOZILLA;
                 }
@@ -185,14 +182,8 @@ public class AppHandler
     }
 
     /**
-     * 
      * That method instantiates this Singleton class or returns the Object.
-     * 
-     * @param parent
-     *            the main applet object
-     * 
-     * @return AppHandler The application handler object.
-     **/
+     */
     public static AppHandler getInstance(String downloadURL) throws SignatureAppletException
     {
         if (singleton == null)
@@ -204,11 +195,10 @@ public class AppHandler
     }
 
     /**
-     * 
      * That method returns the appHandler object, the object must be previously instantiated.
-     * 
+     *
      * @return AppHandler The application handler object.
-     **/
+     */
     public static AppHandler getInstance() throws SignatureAppletException
     {
         if (singleton == null)
@@ -221,9 +211,9 @@ public class AppHandler
 
     /**
      * Returns the Application invoker's main window for deal with him.
-     * 
+     *
      * @return MainWindow The MainWindow application object
-     **/
+     */
     public MainWindow getMainWindow()
     {
         return _mw;
@@ -231,9 +221,9 @@ public class AppHandler
 
     /**
      * A method to obtain the selected inputParams depending on the input way (JS exported method)
-     * 
+     *
      * @return InputParams The inputParam class representing the input method.
-     **/
+     */
     public InputParams getInputParams()
     {
         return input;
@@ -241,9 +231,9 @@ public class AppHandler
 
     /**
      * A method to obtain the selected outputParams depending on the output way (JS exported method)
-     * 
+     *
      * @return OutputParams The outputparam class representing the input method.
-     **/
+     */
     public OutputParams getOutputParams()
     {
         return output;
@@ -251,9 +241,9 @@ public class AppHandler
 
     /**
      * A method for getting the selected signer role from setSignerRole JS function.
-     * 
+     *
      * @return signerRole The selected signerrole for XAdES output format
-     **/
+     */
     public String[] getSignerRole()
     {
         return signerRole;
@@ -261,9 +251,9 @@ public class AppHandler
 
     /**
      * A method for getting the selected file name from setXadesFileName JS function.
-     * 
+     *
      * @return xadesFileName The selected file name for XAdES output format
-     **/
+     */
     public String getXadesFileName()
     {
         return this.xadesFilename;
@@ -271,9 +261,9 @@ public class AppHandler
 
     /**
      * A method for getting the selected file Mime Type from setXadesFileName JS function.
-     * 
+     *
      * @return xadesFileName The selected file Mime Type for XAdES output format
-     **/
+     */
     public String getXadesFileMimeType()
     {
         return this.xadesFileMimeType;
@@ -281,9 +271,9 @@ public class AppHandler
 
     /**
      * Returns a string representing the host browser over the applet is running
-     * 
+     *
      * @return string representing the browser
-     **/
+     */
     public SupportedBrowser getNavigator()
     {
         return this.navigator;
@@ -291,9 +281,8 @@ public class AppHandler
 
     /**
      * A method for setting the signer role, that method is called from setSignerRole JS function.
-     * 
-     *@param signerrole
-     *            The signer role to be set for XAdES output format
+     *
+     * @param signerrole The signer role to be set for XAdES output format
      */
     public void setSignerRole(String[] signerrole)
     {
@@ -302,9 +291,8 @@ public class AppHandler
 
     /**
      * A method for setting the filename, that method is called from setXadesFileName JS function.
-     * 
-     *@param filename
-     *            The file name to be set for XAdES output format
+     *
+     * @param filename The file name to be set for XAdES output format
      */
     public void setXadesFileName(String filename)
     {
@@ -313,10 +301,7 @@ public class AppHandler
 
     /**
      * A method for setting the selected file Mime Type from setXadesFileName JS function.
-     * 
-     * @param xadesFileName
-     *            The selected file Mime Type for XAdES output format
-     **/
+     */
     public void setXadesFileMimeType(String xadesFileMimeType)
     {
         this.xadesFileMimeType = xadesFileMimeType;
@@ -324,9 +309,8 @@ public class AppHandler
 
     /**
      * This method sets a reference to the MainWindow's object.
-     * 
-     * @param mw
-     *            MainWindow application object
+     *
+     * @param mw MainWindow application object
      */
     public void setMainWindow(MainWindow mw)
     {
@@ -335,11 +319,9 @@ public class AppHandler
 
     /**
      * Help method for install(), it downloads the dll and writes it down to the filesystem
-     * 
-     * @param input
-     *            URL where get the data from.
-     * @param output
-     *            Destination path of the dll.
+     *
+     * @param input  URL where get the data from.
+     * @param output Destination path of the dll.
      */
     private void dumpFile(String input, String output) throws IOException
     {
@@ -356,9 +338,8 @@ public class AppHandler
 
     /**
      * Installs the applet on the client, basically downloads and loads MicrosoftCryptoApi dll
-     * 
-     * @throws SignatureAppletException
-     *             with the message
+     *
+     * @throws SignatureAppletException with the message
      * @throws
      */
     public void installDLL(String downloadUrl, String completeDllPath)
@@ -378,9 +359,8 @@ public class AppHandler
 
     /**
      * Installs the applet on the client, basically downloads and loads MicrosoftCryptoApi dll
-     * 
-     * @throws SignatureAppletException
-     *             with the message
+     *
+     * @throws SignatureAppletException with the message
      * @throws
      */
     public void install() throws SignatureAppletException
@@ -402,9 +382,9 @@ public class AppHandler
 
             try
             {
-                byte[] originalDLLHash = { 0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
+                byte[] originalDLLHash = {0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
                         (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35, 0x71,
-                        (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90 };
+                        (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90};
 
                 FileInputStream dllFileStream = new FileInputStream(dllFile);
 
@@ -452,11 +432,9 @@ public class AppHandler
 
     /**
      * Calls the javascript function indicated as func with params arguments
-     * 
-     * @param func
-     *            The function that must be invoked
-     * @param params
-     *            The parameters that must be passed to that function
+     *
+     * @param func   The function that must be invoked
+     * @param params The parameters that must be passed to that function
      */
     public void callJavaScriptCallbackFunction(String func, String[] params)
     {
@@ -466,16 +444,13 @@ public class AppHandler
 
     /**
      * Select the functions that must be called on signature ok, error and cancel
-     * 
-     * @param onSignOk
-     *            The name of the function to be called on signature ok
-     * @param onSignCancel
-     *            The name of the function to be called on signature cancel
-     * @param onSignError
-     *            The name of the function to be called on signature Error
+     *
+     * @param onSignOk     The name of the function to be called on signature ok
+     * @param onSignCancel The name of the function to be called on signature cancel
+     * @param onSignError  The name of the function to be called on signature Error
      */
     public void setJavaScriptCallbackFunctions(String onSignOk, String onSignError,
-            String onSignCancel, String onWindowShow)
+                                               String onSignCancel, String onWindowShow)
     {
         jsSignOk = onSignOk;
         jsSignError = onSignError;
@@ -485,7 +460,7 @@ public class AppHandler
 
     /**
      * Get method for the customized SignCancel method call
-     * 
+     *
      * @return jsSignCancel The name of the function to be called at DOM
      */
     public String getJsSignCancel()
@@ -495,9 +470,8 @@ public class AppHandler
 
     /**
      * Method that allows to set the signCancel function
-     * 
-     * @param jsSignCancel
-     *            the name of the function to be called on cancel at DOM
+     *
+     * @param jsSignCancel the name of the function to be called on cancel at DOM
      */
     public void setJsSignCancel(String jsSignCancel)
     {
@@ -511,7 +485,7 @@ public class AppHandler
 
     /**
      * Get the selected name for signature error function at DOM
-     * 
+     *
      * @return jsSignError The name of the function
      */
     public String getJsSignError()
@@ -521,9 +495,8 @@ public class AppHandler
 
     /**
      * Set the name of the function to be called on signature error
-     * 
-     * @param jsSignError
-     *            The name of the error function
+     *
+     * @param jsSignError The name of the error function
      */
     public void setJsSignError(String jsSignError)
     {
@@ -537,7 +510,7 @@ public class AppHandler
 
     /**
      * Get the selected name for signature ok function at DOM
-     * 
+     *
      * @return jsSignOk The name of the function
      */
     public String getJsSignOk()
@@ -547,7 +520,7 @@ public class AppHandler
 
     /**
      * Get the selected name for signature ok function at DOM
-     * 
+     *
      * @return jsSignOk The name of the function
      */
     public String getJsWindowShow()
@@ -557,9 +530,8 @@ public class AppHandler
 
     /**
      * Set the Sign ok javascript method to be called on signature ok.
-     * 
-     * @param jsSignOk
-     *            The name of the function
+     *
+     * @param jsSignOk The name of the function
      */
     public void setJsSignOk(String jsSignOk)
     {
@@ -573,7 +545,7 @@ public class AppHandler
 
     /**
      * Get the output format of the signature
-     * 
+     *
      * @return signatureOutputFormat The name of the output format
      */
     public SupportedSignatureFormat getSignatureFormat()
@@ -583,9 +555,6 @@ public class AppHandler
 
     /**
      * Sets the output signature format.
-     * 
-     * @param signOutputFormat
-     *            The signature output format description
      */
     public void setSignatureOutputFormat(SupportedSignatureFormat signatureFormat)
     {
@@ -596,7 +565,7 @@ public class AppHandler
 
     /**
      * It returns the selected input data encoding
-     * 
+     *
      * @return inputDataEncoding the selected input data encoding
      */
     public SupportedDataEncoding getInputDataEncoding()
@@ -606,7 +575,7 @@ public class AppHandler
 
     /**
      * It returns the selected output data encoding
-     * 
+     *
      * @return outputDataEncoding the selected input data encoding
      */
     public SupportedDataEncoding getOutputDataEncoding()
@@ -616,7 +585,7 @@ public class AppHandler
 
     /**
      * A method for get the InputParams class
-     * 
+     *
      * @return input the InputParams implementation class
      */
     public InputParams getInput()
@@ -626,7 +595,7 @@ public class AppHandler
 
     /**
      * A method for get the isBigFile attribute.
-     * 
+     *
      * @return boolean indicating if it is bigFile or not.
      */
     public boolean getIsBigFile()
@@ -636,9 +605,8 @@ public class AppHandler
 
     /**
      * A method for setting the encoding type of the input data
-     * 
-     * @param inputDataEncoding
-     *            the encoding name
+     *
+     * @param inputDataEncoding the encoding name
      */
     public void setInputDataEncoding(SupportedDataEncoding inputDataEncoding)
     {
@@ -649,9 +617,8 @@ public class AppHandler
 
     /**
      * A method for setting the encoding type for the output data
-     * 
-     * @param outputDataEncoding
-     *            the encoding name
+     *
+     * @param outputDataEncoding the encoding name
      */
     public void setOutputDataEncoding(SupportedDataEncoding outputDataEncoding)
     {
@@ -662,9 +629,8 @@ public class AppHandler
 
     /**
      * Sets the InputParams for this signature
-     * 
-     * @param input
-     *            the InputParams implementation class
+     *
+     * @param input the InputParams implementation class
      */
     public void setInput(InputParams input)
     {
@@ -673,9 +639,8 @@ public class AppHandler
 
     /**
      * Sets the OutputParams for this signature
-     * 
-     * @param output
-     *            the OutputParams implementation class
+     *
+     * @param output the OutputParams implementation class
      */
     public void setOutput(OutputParams output)
     {
@@ -684,7 +649,6 @@ public class AppHandler
 
     /**
      * This method computes the signature, that should be done by a thread
-     * 
      */
     public void doSign()
     {
@@ -699,11 +663,8 @@ public class AppHandler
     }
 
     /**
-     * 
      * This method allow the user to disable the SSL server certificate validation when connecting
      * throughout an https connection
-     * 
-     * @param b
      */
     public void setSSLCertificateVerfication(boolean validate)
     {
@@ -714,7 +675,7 @@ public class AppHandler
         else
         {
             // Create a trust manager that does not validate certificate chains
-            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager()
+            TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager()
             {
                 public java.security.cert.X509Certificate[] getAcceptedIssuers()
                 {
@@ -722,15 +683,15 @@ public class AppHandler
                 }
 
                 public void checkClientTrusted(java.security.cert.X509Certificate[] certs,
-                        String authType)
+                                               String authType)
                 {
                 }
 
                 public void checkServerTrusted(java.security.cert.X509Certificate[] certs,
-                        String authType)
+                                               String authType)
                 {
                 }
-            } };
+            }};
 
             // Install the all-trusting trust manager
             try
@@ -765,7 +726,7 @@ public class AppHandler
     public static void initConfig(String downloadURL)
     {
         log.debug("Trying to retrieve ujiCrypto.conf from server ...");
-        
+
         try
         {
             // Retrieve ujiCrypto.conf file
@@ -778,7 +739,7 @@ public class AppHandler
 
             // Load remote properties
             ConfigManager.getInstance(properties);
-            
+
             log.debug("Remote ujiCrypto.conf loaded successfully!!");
         }
         catch (Exception e)
@@ -986,7 +947,7 @@ public class AppHandler
     {
         this.dniToCheckAgainsCertificate = dni;
     }
-    
+
     public String getDniToCheckAgainsCertificate()
     {
         return this.dniToCheckAgainsCertificate;
