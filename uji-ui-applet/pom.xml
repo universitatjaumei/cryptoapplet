@@ -20,6 +20,12 @@
 
     <dependency>
       <groupId>es.uji.security</groupId>
+      <artifactId>uji-crypto-raw</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
       <artifactId>uji-crypto-openxades</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -35,6 +41,13 @@
       <artifactId>plugin</artifactId>
       <version>1.6</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
