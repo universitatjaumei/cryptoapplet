@@ -13,69 +13,51 @@ import es.uji.security.ui.applet.SignatureApplet;
 public class URLInputParams extends AbstractData implements InputParams
 {
     private Logger log = Logger.getLogger(URLInputParams.class);
-    
+
     boolean initialized = false;
-    int count = 0, current = 0;
     String[] inputs;
     int timeout = 10000;
 
     public URLInputParams(String[] sources)
     {
         inputs = sources;
-        count = sources.length;
         initialized = true;
     }
 
     public int getInputCount() throws Exception
     {
         if (!initialized)
+        {
             throw new IOException("Uninitialized Input method");
+        }
 
-        return count;
+        return inputs.length;
     }
 
-    public InputStream getSignData() throws Exception
-    {
-        log.debug("Retrieving data from " + inputs[current]);
-        
-        URL url = new URL(inputs[current]);
-        URLConnection uc = url.openConnection();
-
-        uc.setConnectTimeout(timeout);
-        uc.setReadTimeout(timeout);
-
-        uc.connect();
-        
-        log.debug("Retrieved " + uc.getHeaderField("Content-Length") + " bytes");
-        
-        InputStream in = uc.getInputStream();
-
-        current++;
-
-        return in;
-    }
-
-    public InputStream getSignData(int item) throws Exception
+    public InputStream getSignData(int currentIndex) throws Exception
     {
         if (!initialized)
         {
             throw new IOException("Uninitialized Input method");
         }
 
-        if (item >= count)
+        if (currentIndex >= inputs.length)
         {
             throw new IOException("Item count length exceeded");
         }
 
-        log.debug("Retrieving data from " + inputs[current]);
+        log.debug("Retrieving data from " + inputs[currentIndex]);
 
-        URL url = new URL(inputs[item]);
+        URL url = new URL(inputs[currentIndex]);
         URLConnection uc = url.openConnection();
 
         uc.setConnectTimeout(timeout);
         uc.setReadTimeout(timeout);
 
         uc.connect();
+
+        log.debug("Retrieved " + uc.getHeaderField("Content-Length") + " bytes");
+
         InputStream in = uc.getInputStream();
 
         if (mustHash)
@@ -93,6 +75,5 @@ public class URLInputParams extends AbstractData implements InputParams
 
     public void flush()
     {
-        current = 0;
     }
 }

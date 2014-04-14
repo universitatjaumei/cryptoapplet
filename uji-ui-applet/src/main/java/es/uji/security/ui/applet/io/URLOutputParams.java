@@ -22,10 +22,8 @@ public class URLOutputParams extends AbstractData implements OutputParams
     private Logger log = Logger.getLogger(URLOutputParams.class);
 
     private String[] urls = null;
-    private int current = 0;
     private boolean signOkInvoked = false;
-    private int _count = 1;
-    private int outputcount = 0;
+
     private int conn_timeout = 10000;
     private int read_timeout = 60000;
     private String postVariable = "content";
@@ -43,10 +41,9 @@ public class URLOutputParams extends AbstractData implements OutputParams
 
     public void setOutputCount(int oCount)
     {
-        this.outputcount = oCount;
     }
 
-    public void setSignData(InputStream is) throws IOException
+    public void setSignData(InputStream is, int currentIndex) throws IOException
     {
         String cookies = "";
 
@@ -64,7 +61,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
             log.debug("Cookies can not be obtained", e);
         }
 
-        String currentURL = this.urls[current];
+        String currentURL = this.urls[currentIndex];
 
         String urlWithoutParams = getBaseUrlWithoutParams(currentURL);
         String urlParams = getParamsFromUrl(currentURL);
@@ -97,7 +94,7 @@ public class URLOutputParams extends AbstractData implements OutputParams
             out.writeBytes(URLEncoder.encode(new String(buffer, 0, length), "ISO-8859-1"));
         }
 
-        out.writeBytes("&item=" + URLEncoder.encode("" + _count, "ISO-8859-1"));
+        out.writeBytes("&item=" + URLEncoder.encode("" + currentIndex, "ISO-8859-1"));
 
         StringTokenizer strTok = new StringTokenizer(urlParams, "&");
 
@@ -124,9 +121,6 @@ public class URLOutputParams extends AbstractData implements OutputParams
             log.error("Error en el post: " + urlConn.getResponseCode());
             throw new IOException("Error en el post: " + urlConn.getResponseCode());
         }
-
-        _count++;
-        current++;
 
         try
         {
@@ -182,7 +176,5 @@ public class URLOutputParams extends AbstractData implements OutputParams
 
     public void flush()
     {
-        _count = 1;
-        current = 0;
     }
 }

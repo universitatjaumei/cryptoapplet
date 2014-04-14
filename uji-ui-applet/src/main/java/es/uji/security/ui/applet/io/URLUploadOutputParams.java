@@ -25,10 +25,7 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
    private static final String PREFIX = "--";
 
    private String[] urls = null;
-   private int current = 0;
    private boolean signOkInvoked = false;
-   private int _count = 1;
-   private int outputcount = 0;
    private int conn_timeout = 10000;
    private int read_timeout = 60000;
    private String postVariable = "content";
@@ -49,10 +46,9 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
 
    public void setOutputCount(int oCount)
    {
-       this.outputcount = oCount;
    }
 
-   public void setSignData(InputStream is) throws IOException
+   public void setSignData(InputStream is, int currentIndex) throws IOException
    {
        String cookies = "";
 
@@ -71,15 +67,15 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
            log.debug("Cookies can not be obtained", e);
        }
 
-       String urlOk = this.urls[current];
+       String urlOk = this.urls[currentIndex];
 
-       if (this.urls[current].indexOf('?') > -1)
+       if (this.urls[currentIndex].indexOf('?') > -1)
        {
-           urlOk = this.urls[current].substring(0, this.urls[current].indexOf('?'));
+           urlOk = this.urls[currentIndex].substring(0, this.urls[currentIndex].indexOf('?'));
        }
        else
        {
-           urlOk = this.urls[current];
+           urlOk = this.urls[currentIndex];
        }
 
        log.debug("Uploading data to " + urlOk + ", with post parameter variable " + postVariable);
@@ -109,11 +105,11 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
        DataOutputStream out = new DataOutputStream(urlConn.getOutputStream());
 
        String str = PREFIX + Boundary + NEWLINE + "Content-Disposition:form-data;name=\"item\"" + 
-                    NEWLINE + NEWLINE + URLEncoder.encode("" + _count, "ISO-8859-1") + NEWLINE;
+                    NEWLINE + NEWLINE + URLEncoder.encode("" + currentIndex, "ISO-8859-1") + NEWLINE;
 
        out.writeBytes(str);
 
-       StringTokenizer strTok = new StringTokenizer(this.urls[current].substring(this.urls[current].indexOf('?') + 1), "&");
+       StringTokenizer strTok = new StringTokenizer(this.urls[currentIndex].substring(this.urls[currentIndex].indexOf('?') + 1), "&");
 
        while (strTok.hasMoreTokens())
        {
@@ -170,9 +166,6 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
 
            throw new IOException("Error en el upload: " + urlConn.getResponseCode());
        }
-
-       _count++;
-       current++;
    }
 
    public void setSignFormat(SignatureApplet base, byte[] signFormat)
@@ -194,7 +187,5 @@ public class URLUploadOutputParams extends AbstractData implements OutputParams
 
    public void flush()
    {
-       _count = 1;
-       current = 0;
    }
 }

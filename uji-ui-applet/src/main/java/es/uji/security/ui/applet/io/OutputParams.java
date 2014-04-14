@@ -7,7 +7,7 @@ public interface OutputParams
 {
     public void setSignFormat(byte[] signFormat) throws IOException;
 
-    public void setSignData(InputStream data) throws IOException;
+    public void setSignData(InputStream data, int currentIndex) throws IOException;
 
     public void signOk();
 

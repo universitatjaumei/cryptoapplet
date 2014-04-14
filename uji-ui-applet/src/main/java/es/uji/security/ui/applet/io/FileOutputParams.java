@@ -15,7 +15,7 @@ public class FileOutputParams implements OutputParams
 {
     private Logger log = Logger.getLogger(FileOutputParams.class);
     
-    public void setSignData(InputStream is) throws IOException
+    public void setSignData(InputStream is, int currentIndex) throws IOException
     {
         JFileChooser chooser = new JFileChooser();
         FileOutputStream fos = null;

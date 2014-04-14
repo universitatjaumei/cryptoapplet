@@ -573,7 +573,6 @@ public class SignatureApplet extends JApplet
                 ParamInputData input = new ParamInputData(arr);
                                 
                 FuncOutputParams output = new FuncOutputParams(sa, funcOut);
-                output.setCount(arr.length);
 
                 apph.setInput(input);
                 apph.setOutput(output);
@@ -611,7 +610,6 @@ public class SignatureApplet extends JApplet
 
                 ParamInputData input = new ParamInputData(arr);
                 FuncOutputParams output = new FuncOutputParams(sa, funcOut);
-                output.setCount(arr.length);
 
                 apph.setInput(input);
                 apph.setOutput(output);

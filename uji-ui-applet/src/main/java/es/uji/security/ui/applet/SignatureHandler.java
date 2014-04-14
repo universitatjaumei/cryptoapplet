@@ -1,9 +1,13 @@
 package es.uji.security.ui.applet;
 
+import org.apache.log4j.Logger;
+
 import es.uji.security.util.i18n.LabelManager;
 
 public class SignatureHandler
 {
+    private static Logger log = Logger.getLogger(SignatureHandler.class);
+
     static AppHandler aph = null;
     static int signatureCount = 0;
     static int start = 0;
@@ -26,7 +30,7 @@ public class SignatureHandler
         }
     }
 
-    public static void stop()
+    public void stop()
     {
         start = 0;
 
@@ -37,66 +41,59 @@ public class SignatureHandler
         }
 
         mustStop = true;
+
+        log.info("Stop has been pressed");
     }
 
-    public static void doSign()
+    public void doSign()
     {
         int aux_start, aux_end;
-        try
+
+        log.info("Performing signature " + start + "/" + signatureCount);
+
+        SignatureThread sth = new SignatureThread("thread-sig", start);
+        sth.setMainWindow(aph.getMainWindow());
+
+        if (signatureCount != 1)
         {
-
-            SignatureThread sth = new SignatureThread("thread-sig-" + start);
-            sth.setMainWindow(aph.getMainWindow());
-
-            if (signatureCount != 1)
-            {
-                aux_start = (start) * (100 / signatureCount);
-                aux_end = (start + 1) * (100 / signatureCount);
-                start = start + 1;
-            }
-            else
-            {
-                aux_start = 0;
-                aux_end = 100;
-                start = 1;
-            }
-
-            sth.setPercentRange(aux_start, aux_end, start - 1);
-            sth.setCallbackMethod(SignatureHandler.class.getMethod("callback"));
-
-            System.out.println("START: " + start + "SIGNATURECOUNT: " + signatureCount);
-
-            if (start == signatureCount || signatureCount == 1)
-            {
-                sth.setHideWindowOnEnd(true);
-                sth.setShowSignatureOk(true);
-            }
-
-            if (start > signatureCount)
-            {
-                start = 0;
-                aph.getInput().flush();
-                aph.getOutputParams().flush();
-                return;
-            }
-
-            sth.start();
+            aux_start = (start) * (100 / signatureCount);
+            aux_end = (start + 1) * (100 / signatureCount);
+            start = start + 1;
         }
-        catch (Exception e)
+        else
+        {
+            aux_start = 0;
+            aux_end = 100;
+            start = 1;
+        }
+
+        sth.setPercentRange(aux_start, aux_end, start - 1);
+        sth.setCallbackMethod(this);
+
+        if (start == signatureCount || signatureCount == 1)
+        {
+            sth.setHideWindowOnEnd(true);
+            sth.setShowSignatureOk(true);
+        }
+
+        if (start > signatureCount)
         {
             start = 0;
-            e.printStackTrace();
+            aph.getInput().flush();
+            aph.getOutputParams().flush();
+            return;
         }
+
+        sth.start();
     }
 
-    /*
-     * That function is the one invoked by the signature thread once the signature process has
-     * finalized, if there are more signatures on the inputParams stack, the signature thread is
-     * instantiated again
-     */
-    public static void callback()
+    public void callback(String error)
     {
-        System.out.println("\n\n\n\nSTART: " + start + " SIGNATURECOUNT: " + signatureCount);
+        if (error != null)
+        {
+            log.error(error);
+        }
+
         if ((!mustStop) && (start != signatureCount))
         {
             doSign();

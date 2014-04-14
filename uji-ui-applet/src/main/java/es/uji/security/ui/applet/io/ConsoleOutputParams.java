@@ -11,9 +11,10 @@ public class ConsoleOutputParams implements OutputParams
 {
     private Logger log = Logger.getLogger(ConsoleOutputParams.class);
     
-    public void setSignData(InputStream is) throws IOException
+    public void setSignData(InputStream is, int currentIndex) throws IOException
     {
     	byte[] data= OS.inputStreamToByteArray(is);
+        System.out.println("Index " + currentIndex);
         System.out.println(new String(data));
     }
 
