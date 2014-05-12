@@ -52,17 +52,11 @@ public class ConfigManager
     {
         Properties prop = new Properties();
 
-        prop.put("DIGIDOC_NOTARY_IMPL",
-                "java.openxades.digidoc.factory.BouncyCastleNotaryFactory");
-        prop.put("DIGIDOC_FACTORY_IMPL",
-                "java.openxades.digidoc.factory.SAXDigiDocFactory");
-        prop
-                .put("DIGIDOC_TIMESTAMP_IMPL",
-                        "java.openxades.digidoc.factory.BouncyCastleSignatureTimestampFactory");
-        prop.put("CANONICALIZATION_FACTORY_IMPL",
-                "java.openxades.digidoc.factory.DOMCanonicalizationFactory");
-        prop.put("CRL_FACTORY_IMPL",
-                "java.openxades.digidoc.factory.CRLCheckerFactory");
+        prop.put("DIGIDOC_NOTARY_IMPL", "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleNotaryFactory");
+        prop.put("DIGIDOC_FACTORY_IMPL", "es.uji.security.crypto.openxades.digidoc.factory.SAXDigiDocFactory");
+        prop.put("DIGIDOC_TIMESTAMP_IMPL", "es.uji.security.crypto.openxades.digidoc.factory.BouncyCastleSignatureTimestampFactory");
+        prop.put("CANONICALIZATION_FACTORY_IMPL", "es.uji.security.crypto.openxades.digidoc.factory.DOMCanonicalizationFactory");
+        prop.put("CRL_FACTORY_IMPL", "es.uji.security.crypto.openxades.digidoc.factory.CRLCheckerFactory");
         prop.put("DIGIDOC_SECURITY_PROVIDER", "org.bouncycastle.jce.provider.BouncyCastleProvider");
         prop.put("DIGIDOC_SECURITY_PROVIDER_NAME", "BC");
         prop.put("DIGIDOC_VERIFY_ALGORITHM", "RSA//");
