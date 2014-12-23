@@ -223,6 +223,11 @@ public class OS
         return (getOS().indexOf("windows 7") > -1);
     }
 
+    public static boolean isWindows8()
+    {
+        return (getOS().indexOf("windows 8") > -1);
+    }
+
     public static boolean isWindowsNT()
     {
         return (getOS().indexOf("nt") > -1);
@@ -245,7 +250,8 @@ public class OS
                 isWindowsXP()|| 
                 isWindows2003() ||
                 isWindowsVista() ||
-                isWindows7());
+                isWindows7() ||
+                isWindows8());
     }
     
     public static boolean isJavaUpperEqualTo6(){
