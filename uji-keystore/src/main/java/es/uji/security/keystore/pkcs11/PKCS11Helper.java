@@ -284,13 +284,7 @@ public class PKCS11Helper
 			_pk11LibPath = _fpk11LibPath.getCanonicalPath();
 
 			String version = System.getProperty("java.version");
-			if (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1)
-			{
-				// JRE 1.6 , JRE 1.7
-				p11 = (PKCS11) p11Getinstance.invoke(null, new Object[] { _pk11LibPath,
-						"C_GetFunctionList", cia, false });
-			}
-			else if (version.indexOf("1.5") > -1)
+			if (version.indexOf("1.5") > -1)
 			{
 				// JRE 1.5
 				p11 = (PKCS11) p11Getinstance.invoke(null,
@@ -298,8 +292,8 @@ public class PKCS11Helper
 			}
 			else
 			{
-				System.err.println("Unsupported version of VM");
-				return null;// System.exit(-1);
+				p11 = (PKCS11) p11Getinstance.invoke(null, new Object[] { _pk11LibPath,
+						"C_GetFunctionList", cia, false });
 			}
 		}
 		catch (Exception e)
