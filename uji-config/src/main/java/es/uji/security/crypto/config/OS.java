@@ -263,7 +263,7 @@ public class OS
     public static boolean isJavaUpperEqualTo6(){
     	
     	 String version = System.getProperty("java.version");
-         return (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1);
+         return (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1 || version.indexOf("1.8") > -1);
     }
  
     /*public static void main(String[] args){
