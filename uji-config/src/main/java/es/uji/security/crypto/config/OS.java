@@ -213,6 +213,11 @@ public class OS
         return (getOS().indexOf("windows 2003") > -1);
     }
 
+    public static boolean isWindows2008()
+    {
+        return (getOS().indexOf("windows 2008") > -1);
+    }
+
     public static boolean isWindowsVista()
     {
         return (getOS().indexOf("vista") > -1);
@@ -246,9 +251,10 @@ public class OS
     public static boolean isWindowsUpperEqualToNT()
     {
         return (isWindowsNT() ||
-                isWindows2000() || 
-                isWindowsXP()|| 
+                isWindows2000() ||
+                isWindowsXP()||
                 isWindows2003() ||
+                isWindows2008() ||
                 isWindowsVista() ||
                 isWindows7() ||
                 isWindows8());
