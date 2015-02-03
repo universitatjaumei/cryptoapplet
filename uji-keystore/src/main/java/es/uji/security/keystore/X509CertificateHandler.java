@@ -4,9 +4,13 @@ import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateParsingException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Iterator;
 
+import com.sun.deploy.util.ArrayUtil;
+import com.sun.deploy.util.StringUtils;
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.IKeyStore;
 
@@ -43,7 +47,6 @@ public class X509CertificateHandler
     {
         _iksh = iksh;
         initialize(xcer, alias, _iksh.getProvider(), _iksh.getName(), _iksh.getTokenName());
-
     }
 
     public X509CertificateHandler(X509Certificate xcer, String alias, Provider provider,
@@ -51,15 +54,11 @@ public class X509CertificateHandler
     {
         _iksh = null;
         initialize(xcer, alias, provider, storeName, tokenName);
-
     }
 
     public void initialize(X509Certificate xcer, String alias, Provider provider, SupportedKeystore storeName,
             String tokenName) throws CertificateParsingException
     {
-        String auxStr;
-        int auxIdx;
-
         _SubjectDN = xcer.getSubjectDN().getName();
         _IssuerDN = xcer.getIssuerDN().getName();
         _keyUsage = xcer.getKeyUsage();
@@ -70,56 +69,48 @@ public class X509CertificateHandler
         _xcer = xcer;
         _tokenName = tokenName;
 
-        // Get issuer Organization.
-        auxStr = "Unknown";
+        extractIssuerOrganizationFromDN();
+        extractSubjectFromDN();
+    }
 
-        auxIdx = _IssuerDN.indexOf("O=");
+    private void extractSubjectFromDN()
+    {
+        _SubjectCN = extractDNField("CN", _SubjectDN);
 
-        if (auxIdx != -1)
+        if (_SubjectCN.isEmpty())
         {
-            auxStr = _IssuerDN.substring(auxIdx);
-            auxStr = auxStr.replaceFirst("O=", "");
+            _SubjectCN = extractDNField("OU", _SubjectDN);
         }
-        else
+    }
+
+    private void extractIssuerOrganizationFromDN()
+    {
+        _IssuerOrganization = extractDNField("O", _SubjectDN);
+
+        if (_IssuerOrganization.isEmpty())
         {
-            auxIdx = _IssuerDN.indexOf("O =");
-            if (auxIdx != -1)
+            _IssuerOrganization = "Unknown";
+        }
+    }
+
+    private String extractDNField(String fieldToExtract, String dn)
+    {
+        if (fieldToExtract == null || dn == null) return "";
+
+        List<String> values = new ArrayList<String>();
+
+        for (String field : dn.split(","))
+        {
+            String fieldType = field.trim().split("=")[0];
+            String fieldValue = field.trim().split("=")[1];
+
+            if (fieldToExtract.equalsIgnoreCase(fieldType))
             {
-                auxStr = _IssuerDN.substring(auxIdx);
-                auxStr = auxStr.replaceFirst("O =", "");
+                values.add(fieldValue);
             }
         }
 
-        if (auxStr.indexOf("=") > -1)
-        {
-            auxStr = auxStr.substring(0, auxStr.indexOf(","));
-        }
-
-        auxStr = auxStr.replace('\"', ' ');
-        auxStr = auxStr.trim();
-
-        _IssuerOrganization = auxStr;
-
-        // Get Subject Common Name
-        auxStr = _SubjectDN.substring(_SubjectDN.indexOf("CN="));
-        auxStr = auxStr.replaceFirst("CN=", "");
-
-        if (auxStr.indexOf("=") > -1)
-        {
-            auxStr = auxStr.substring(0, auxStr.indexOf("=") - 3);
-        }
-
-        auxStr = auxStr.replace('\"', ' ');
-        auxStr = auxStr.trim();
-
-        auxStr = auxStr.trim();
-        if (auxStr.charAt(auxStr.length() - 1) == ',')
-        {
-            auxStr = auxStr.substring(0, auxStr.length() - 2);
-        }
-
-        _SubjectCN = auxStr;
-
+        return StringUtils.join(values, " - ");
     }
 
     public X509Certificate getCertificate()
