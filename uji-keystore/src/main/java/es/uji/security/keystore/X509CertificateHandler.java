@@ -73,9 +73,26 @@ public class X509CertificateHandler
 
     private void extractSubjectFromDN()
     {
-        _SubjectCN = extractDNField("CN", _SubjectDN);
+        String auxStr = _SubjectDN.substring(_SubjectDN.indexOf("CN="));
+        auxStr = auxStr.replaceFirst("CN=", "");
 
-        if (_SubjectCN.isEmpty())
+        if (auxStr.indexOf("=") > -1)
+        {
+            auxStr = auxStr.substring(0, auxStr.indexOf("=") - 3);
+        }
+
+        auxStr = auxStr.replace('\"', ' ');
+        auxStr = auxStr.trim();
+
+        auxStr = auxStr.trim();
+        if (auxStr.charAt(auxStr.length() - 1) == ',')
+        {
+            auxStr = auxStr.substring(0, auxStr.length() - 2);
+        }
+
+        _SubjectCN = auxStr;
+
+        if (_SubjectCN == null ||_SubjectCN.isEmpty())
         {
             _SubjectCN = extractDNField("OU", _SubjectDN);
         }
@@ -83,12 +100,34 @@ public class X509CertificateHandler
 
     private void extractIssuerOrganizationFromDN()
     {
-        _IssuerOrganization = extractDNField("O", _SubjectDN);
+        String auxStr = "Unknown";
+        int auxIdx = _IssuerDN.indexOf("O=");
 
-        if (_IssuerOrganization.isEmpty())
+        if (auxIdx != -1)
         {
-            _IssuerOrganization = "Unknown";
+            auxStr = _IssuerDN.substring(auxIdx);
+            auxStr = auxStr.replaceFirst("O=", "");
         }
+        else
+        {
+            auxIdx = _IssuerDN.indexOf("O =");
+
+            if (auxIdx != -1)
+            {
+                auxStr = _IssuerDN.substring(auxIdx);
+                auxStr = auxStr.replaceFirst("O =", "");
+            }
+        }
+
+        if (auxStr.indexOf("=") > -1)
+        {
+            auxStr = auxStr.substring(0, auxStr.indexOf(","));
+        }
+
+        auxStr = auxStr.replace('\"', ' ');
+        auxStr = auxStr.trim();
+
+        _IssuerOrganization = auxStr;
     }
 
     private String join(java.util.Collection collection, String separator) {
