@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Iterator;
 
-import com.sun.deploy.util.ArrayUtil;
-import com.sun.deploy.util.StringUtils;
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.keystore.IKeyStore;
 
@@ -93,6 +91,52 @@ public class X509CertificateHandler
         }
     }
 
+    private String join(java.util.Collection collection, String separator) {
+        if (collection == null) return "";
+
+        Iterator iterator = collection.iterator();
+
+        if (iterator == null)
+        {
+            return null;
+        }
+
+        if (!iterator.hasNext())
+        {
+            return "";
+        }
+
+        Object first = iterator.next();
+
+        if (!iterator.hasNext())
+        {
+            return (first == null) ? "" : first.toString();
+        }
+
+        StringBuffer buf = new StringBuffer(256);
+
+        if (first != null)
+        {
+            buf.append(first);
+        }
+
+        while (iterator.hasNext())
+        {
+            if (separator != null)
+            {
+                buf.append(separator);
+            }
+
+            Object obj = iterator.next();
+
+            if (obj != null) {
+                buf.append(obj);
+            }
+        }
+
+        return buf.toString();
+    }
+
     private String extractDNField(String fieldToExtract, String dn)
     {
         if (fieldToExtract == null || dn == null) return "";
@@ -110,7 +154,7 @@ public class X509CertificateHandler
             }
         }
 
-        return StringUtils.join(values, " - ");
+        return join(values, " - ");
     }
 
     public X509Certificate getCertificate()
