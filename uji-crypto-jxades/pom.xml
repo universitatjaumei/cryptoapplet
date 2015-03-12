@@ -88,6 +88,7 @@
               <Specification-Title>${project.name}</Specification-Title>
               <Specification-Version>${project.version}</Specification-Version>
               <Codebase>*</Codebase>
+              <Trusted-Library>true</Trusted-Library>
             </manifestEntries>
           </archive>
         </configuration>
