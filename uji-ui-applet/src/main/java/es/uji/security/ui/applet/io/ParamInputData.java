@@ -39,14 +39,17 @@ public class ParamInputData extends AbstractData implements InputParams
 
     public InputStream getSignData(int item) throws Exception
     {
-        // TODO Auto-generated method stub
-        return null;
+        byte[] ret = this.str_in[item].getBytes();
+
+        if (mustHash)
+            ret = AbstractData.getMessageDigest(ret);
+ 
+        return new ByteArrayInputStream(ret);
     }
 
     public String getSignFormat(SignatureApplet base)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return base.getParameter("signFormat");
     }
 
     public void initialize(Hashtable<String, Object> props)
