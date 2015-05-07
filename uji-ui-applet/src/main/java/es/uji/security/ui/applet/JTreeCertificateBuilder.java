@@ -77,6 +77,12 @@ public class JTreeCertificateBuilder
                                     	
                                     		log.debug("Replaced with PKCS11 certificate " + certHandle);
                                     	}
+                                    	else if (certHandle.isDigitalSignatureCertificate() || certHandle.isNonRepudiationCertificate())
+                                    	{
+                                    	    ((DefaultMutableTreeNode) caNode.getChildAt(childIndex)).setUserObject(certHandleNode.getUserObject());
+                                    	    
+                                    	    log.debug("Replaced with Signature certificate " + certHandle);
+                                    	}
                                     }
                                     else
                                     {
