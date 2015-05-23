@@ -6,9 +6,7 @@ import java.net.URLConnection;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import javax.swing.JApplet;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import netscape.javascript.JSException;
@@ -231,52 +229,62 @@ public class SignatureApplet extends JApplet
 
     private void initializeWindow()
     {
-        log.debug("Init window");
+        /*
+         From "Java Concurrency In Practice", 9.1.2. Thread Confinement in Swing: "The Swing single thread rule: Swing components and models should be created, modified, and queried only from the event dispatching thread.".
+         Not calling the following code from the EDT produces problems with IcedTea-Web when calling the JS method 'onWindowShow', https://github.com/hablutzel1/cryptoapplet/issues/1.
+         Not calling the following code from the EDT produces that the "CryptoApplet Signer" frame is not being shown on top of the browser on Google Chrome 44 and Internet Explorer 11 on Windows 8, although it works as expected in Firefox 38 (other SO and browser versions could be affected too), note that there is a call to 'java.awt.JFrame.toFront' enqueued to the EDT in 'es.uji.security.ui.applet.MainWindow.MainWindow', and it seems that that call requires the previous 'java.awt.JFrame.setVisible' method to be called in the EDT, and that method call ('toFront') seems to require to be enqueued in the EDT for expecting all the previous UI events to be processed before it gets executes, including the 'setVisible' call TODO this requires more research, maybe by reproducing this problem in the mentioned browsers and getting the root cause.
+         */
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                log.debug("Init window");
 
-        try
-        {
-            if (window == null)
-            {
-                window = new MainWindow(this.keyStoreManager, this.apph);
+                try
+                {
+                    if (window == null)
+                    {
+                        window = new MainWindow(keyStoreManager, apph);
+                    }
+                    else
+                    {
+                        window.getPasswordTextField().setText("");
+                        window.getGlobalProgressBar().setValue(0);
+                        window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
+
+                        initKeystores(apph.getNavigator());
+
+                        window.reloadCertificateJTree();
+                        window.getMainFrame().setVisible(true);
+                        window.getShowSignatureCheckBox().setVisible(true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.error(ex);
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+
+                    try
+                    {
+                        log.debug("Call JavaScript method: " + apph.getJsSignError());
+                        JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
+                    }
+                    catch (JSException e)
+                    {
+                        log.error("Error calling " + apph.getJsSignError(), e);
+                    }
+                }
+
+                try
+                {
+                    log.debug("Call JavaScript method: " + apph.getJsWindowShow());
+                    JSCommands.getWindow().call(apph.getJsWindowShow(), new String[] { "" });
+                }
+                catch (JSException e)
+                {
+                    log.error("Error calling " + apph.getJsWindowShow(), e);
+                }
             }
-            else
-            {
-                window.getPasswordTextField().setText("");
-                window.getGlobalProgressBar().setValue(0);
-                window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
-
-                this.initKeystores(this.apph.getNavigator());
-
-                window.reloadCertificateJTree();
-                window.getMainFrame().setVisible(true);
-                window.getShowSignatureCheckBox().setVisible(true);
-            }
-        }
-        catch (Exception ex)
-        {
-            log.error(ex);
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-
-            try
-            {
-                log.debug("Call JavaScript method: " + apph.getJsSignError());
-                JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
-            }
-            catch (JSException e)
-            {
-                log.error("Error calling " + apph.getJsSignError(), e);
-            }
-        }
-
-        try
-        {
-            log.debug("Call JavaScript method: " + apph.getJsWindowShow());
-            JSCommands.getWindow().call(apph.getJsWindowShow(), new String[] { "" });
-        }
-        catch (JSException e)
-        {
-            log.error("Error calling " + apph.getJsWindowShow(), e);
-        }
+        });
     }
 
     /**
