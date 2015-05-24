@@ -2,12 +2,15 @@ package es.uji.security.keystore.pkcs11;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.security.Security;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Vector;
 
+import sun.security.pkcs11.SunPKCS11;
 import sun.security.pkcs11.wrapper.CK_ATTRIBUTE;
 import sun.security.pkcs11.wrapper.CK_C_INITIALIZE_ARGS;
 import sun.security.pkcs11.wrapper.CK_TOKEN_INFO;
@@ -262,6 +265,28 @@ public class PKCS11Helper
 	}
 	
 	public PKCS11 getP11Instance() throws PKCS11HelperException{
+
+		try {
+			// OpenJDK 1.7 on Linux Mint has been found to be using NSS as a "java.security" registered provider (looks like the same thing is being done in other distros, see https://bugzilla.redhat.com/show_bug.cgi?id=1167153#c4) and this produces NSS to be initialized as a pure cryptography provider without database files, then the current method tries to initialize NSS again and this initialization is ignored and NSS is still in noDb mode, so no certificate can be retrieved.
+			String providerName = "SunPKCS11-NSS";
+			SunPKCS11 pkcs11NSSProvider = (SunPKCS11) Security.getProvider(providerName);
+			if (pkcs11NSSProvider != null) {
+				// removing it as it won't be usable anymore, TODO confirm if it is really not operative anymore
+				Security.removeProvider(providerName);
+				// TODO look for a cleaner way (API) to do it, without reflection if possible
+				Class<? extends SunPKCS11> nssPkcs11Class = pkcs11NSSProvider.getClass();
+				Method getTokenMethod = nssPkcs11Class.getDeclaredMethod("getToken");
+				getTokenMethod.setAccessible(true);
+				Object token = getTokenMethod.invoke(pkcs11NSSProvider);
+				Class<?> tokenClass = Class.forName("sun.security.pkcs11.Token");
+				Field p11Field = tokenClass.getDeclaredField("p11");
+				p11Field.setAccessible(true);
+				PKCS11 p11 = (PKCS11) p11Field.get(token);
+				p11.C_Finalize(PKCS11Constants.NULL_PTR);
+			}
+		} catch (Exception e) {
+			// not expected, ignore anyway
+		}
 
 		Method[] methods = PKCS11.class.getMethods();
 		Method p11Getinstance = null;
