@@ -1,10 +1,16 @@
 package es.uji.security.ui.applet;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.CookieHandler;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -128,6 +134,19 @@ public class SignatureApplet extends JApplet
         {
             log.error("Nimbus Look&Feel is not present. Using default Look&Feel");
         }
+
+        // disabling cookies completely from now on (note that it doesn't apply for applet JARs downloaded previously) as they are error prone in the context of an applet, see https://github.com/hablutzel1/cryptoapplet/issues/3
+        CookieHandler.setDefault(new CookieHandler() {
+            @Override
+            public Map<String, List<String>> get(URI uri, Map<String, List<String>> requestHeaders) throws IOException {
+                return Collections.emptyMap(); // not including cookies in any request
+            }
+
+            @Override
+            public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
+                // nothing to do, we do not process received cookies at all
+            }
+        });
 
         try
         {
@@ -631,8 +650,7 @@ public class SignatureApplet extends JApplet
 
     /**
      * Computes the signature with the given toSign input data, if everything is correct, the applet
-     * make a POST to the outputURL with the resulting signature object in the "content" variable,
-     * it also send to that URL the cookies for the current website.
+     * make a POST to the outputURL with the resulting signature object in the "content" variable.
      * 
      * @param toSign
      *            the data to be signed
@@ -660,8 +678,7 @@ public class SignatureApplet extends JApplet
 
     /**
      * Computes the signature with the given toSign input data, if everything is correct, the applet
-     * make a POST to the outputURL with the resulting signature object in the postVariableName, it
-     * also send to that URL the cookies for the current website.
+     * make a POST to the outputURL with the resulting signature object in the postVariableName.
      * 
      * @param toSign
      *            the data to be signed
