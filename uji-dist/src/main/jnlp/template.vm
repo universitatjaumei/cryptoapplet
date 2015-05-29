@@ -1,0 +1,1 @@
+Dummy file, 'webstart-maven-plugin' is only being used to update attributes in JAR's MANIFEST.MF files and to finally sign the JARs.
