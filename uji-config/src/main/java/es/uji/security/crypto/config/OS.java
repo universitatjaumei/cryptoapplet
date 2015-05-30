@@ -272,6 +272,11 @@ public class OS
         return numericJavaSpecVersion >= 18;
     }
 
+    // TODO check if there is already another way to detect x86_64 platforms in this project
+    public static boolean is64BitJava() {
+        return System.getProperty("os.arch").contains("64");
+    }
+
     /*public static void main(String[] args){
     	String[] all= OS.getAllSystemLibDirectories();
     	for (String i: all){

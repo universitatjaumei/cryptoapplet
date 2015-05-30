@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -200,8 +201,10 @@ public class ConfigManager
                         {
                             try
                             {
-                                Provider provider = new sun.security.pkcs11.SunPKCS11(
-                                        new ByteArrayInputStream(newDevice.toString().getBytes()));
+                                // loading 'sun.security.pkcs11.SunPKCS11' reflectively as it is not available (as of June 2015) in the still current, Oracle's 64-bit JRE 1.7.0_79 on Windows, see http://docs.oracle.com/javase/7/docs/technotes/guides/security/p11guide.html#Requirements
+                                Class<?> sunPkcs11Class = Class.forName("sun.security.pkcs11.SunPKCS11");
+                                Constructor sunPkcs11ClassConstructor = sunPkcs11Class.getConstructor(InputStream.class);
+                                Provider provider = (Provider) sunPkcs11ClassConstructor.newInstance(new ByteArrayInputStream(newDevice.toString().getBytes()));
                                 Security.addProvider(provider);
 
                                 KeyStore.getInstance("PKCS11", provider);
