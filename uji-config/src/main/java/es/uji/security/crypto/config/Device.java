@@ -57,6 +57,11 @@ public class Device
     @Override
     public String toString()
     {
-        return ("name = " + name + "\r" + "library = " + library + "\r\nslot = " + slot + "\r\n");
+        String library = this.library.replace("\\", "/");
+        if (OS.isJavaUpperEqualTo8()) { // see es.uji.security.keystore.mozilla.Mozilla.getPkcs11ConfigInputStream()
+            library = "\"" +  library + "\"";
+        }
+        // including slot id only if explicitly specified, otherwise it will default to the first slot returned by 'C_GetSlotList', see http://docs.oracle.com/javase/8/docs/technotes/guides/security/p11guide.html#Config
+        return ("name = " + name + "\r" + "library = " + library + "\r\n" + (slot != null ? "slot = " + slot + "\r\n" : ""));
     }
 }
