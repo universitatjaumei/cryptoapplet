@@ -20,10 +20,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -314,9 +311,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
             Security.addProvider(this.provider);
         }
 
-        Certificate caCertificate = findCACertificateFor(certificate);
-
-        if (caCertificate == null)
+        Certificate caCertificate = null;
+        if (!Boolean.valueOf(conf.getProperty("PDFSIG_ALLOW_ANY_CA", "false")) &&  null == (caCertificate =  findCACertificateFor(certificate)))
         {
             SignatureResult signatureResult = new SignatureResult();
             signatureResult.setValid(false);
@@ -368,7 +364,12 @@ public class PDFSignatureFactory implements ISignFormatProvider
             createVisibleSignature(pdfSignatureAppareance, numSignatures, pattern, bindValues);
         }
 
-        sign(pdfStamper, pdfSignatureAppareance, new Certificate[] { certificate, caCertificate });
+        ArrayList<Certificate> chain = new ArrayList<Certificate>();
+        chain.add(certificate);
+        if (caCertificate != null ) {
+            chain.add(caCertificate);
+        }
+        sign(pdfStamper, pdfSignatureAppareance, chain.toArray(new Certificate[chain.size()]));
         return sout;
     }
 
