@@ -1,16 +1,16 @@
 package es.uji.security.keystore;
 
-import java.security.Provider;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateParsingException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Iterator;
-
 import es.uji.security.crypto.SupportedKeystore;
-import es.uji.security.keystore.IKeyStore;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.jce.PrincipalUtil;
+import org.bouncycastle.jce.X509Principal;
+
+import java.security.Provider;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * _keyUsage is a boolean array where positions are:
@@ -71,30 +71,19 @@ public class X509CertificateHandler
         extractSubjectFromDN();
     }
 
-    private void extractSubjectFromDN()
-    {
-        String auxStr = _SubjectDN.substring(_SubjectDN.indexOf("CN="));
-        auxStr = auxStr.replaceFirst("CN=", "");
-
-        if (auxStr.indexOf("=") > -1)
-        {
-            auxStr = auxStr.substring(0, auxStr.indexOf("=") - 3);
+    private void extractSubjectFromDN() {
+        X509Principal subjectPrincipal;
+        try {
+            subjectPrincipal = PrincipalUtil.getSubjectX509Principal(_xcer);
+        } catch (CertificateEncodingException e) {
+            throw new RuntimeException(e);
         }
-
-        auxStr = auxStr.replace('\"', ' ');
-        auxStr = auxStr.trim();
-
-        auxStr = auxStr.trim();
-        if (auxStr.charAt(auxStr.length() - 1) == ',')
-        {
-            auxStr = auxStr.substring(0, auxStr.length() - 2);
-        }
-
-        _SubjectCN = auxStr;
-
-        if (_SubjectCN == null ||_SubjectCN.isEmpty())
-        {
-            _SubjectCN = extractDNField("OU", _SubjectDN);
+        Vector cnAttributes = subjectPrincipal.getValues(X509Name.CN);
+        if (cnAttributes.size() > 0) {
+            _SubjectCN = (String) cnAttributes.get(0);
+        } else {
+            // defaults to full DN
+            _SubjectCN = _SubjectDN;
         }
     }
 
@@ -128,72 +117,6 @@ public class X509CertificateHandler
         auxStr = auxStr.trim();
 
         _IssuerOrganization = auxStr;
-    }
-
-    private String join(java.util.Collection collection, String separator) {
-        if (collection == null) return "";
-
-        Iterator iterator = collection.iterator();
-
-        if (iterator == null)
-        {
-            return null;
-        }
-
-        if (!iterator.hasNext())
-        {
-            return "";
-        }
-
-        Object first = iterator.next();
-
-        if (!iterator.hasNext())
-        {
-            return (first == null) ? "" : first.toString();
-        }
-
-        StringBuffer buf = new StringBuffer(256);
-
-        if (first != null)
-        {
-            buf.append(first);
-        }
-
-        while (iterator.hasNext())
-        {
-            if (separator != null)
-            {
-                buf.append(separator);
-            }
-
-            Object obj = iterator.next();
-
-            if (obj != null) {
-                buf.append(obj);
-            }
-        }
-
-        return buf.toString();
-    }
-
-    private String extractDNField(String fieldToExtract, String dn)
-    {
-        if (fieldToExtract == null || dn == null) return "";
-
-        List<String> values = new ArrayList<String>();
-
-        for (String field : dn.split(","))
-        {
-            String fieldType = field.trim().split("=")[0];
-            String fieldValue = field.trim().split("=")[1];
-
-            if (fieldToExtract.equalsIgnoreCase(fieldType))
-            {
-                values.add(fieldValue);
-            }
-        }
-
-        return join(values, " - ");
     }
 
     public X509Certificate getCertificate()

@@ -497,11 +497,16 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         if (bindValues != null)
         {
-            final X509Principal principal = PrincipalUtil.getSubjectX509Principal(certificate);
-            final Vector<?> values = principal.getValues(X509Name.CN);
-
-            String certificateCN = (String) values.get(0);
-            bindValues.put("%s", certificateCN);
+            final X509Principal subjectPrincipal = PrincipalUtil.getSubjectX509Principal(certificate);
+            final Vector<?> cnAttributes = subjectPrincipal.getValues(X509Name.CN);
+            String subjectName;
+            if (cnAttributes.size() > 0) {
+                subjectName = (String) cnAttributes.get(0);
+            } else {
+                // defaults to full DN
+                subjectName = subjectPrincipal.getName();
+            }
+            bindValues.put("%s", subjectName);
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             String currentDate = simpleDateFormat.format(new Date());
