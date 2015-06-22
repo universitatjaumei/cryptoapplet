@@ -279,7 +279,8 @@ public class SignatureThread extends Thread
         {
             sigOpt.setHash(true);
         }
-        else if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.PDF))
+        else if (_mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.PDF) ||
+                _mw.getAppHandler().getSignatureFormat().equals(SupportedSignatureFormat.PADES))
         {
             definePDFSignatureOptions(sigOpt);
         }

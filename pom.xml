@@ -31,6 +31,7 @@
     <module>uji-crypto-jxades</module>
     <module>uji-crypto-mityc</module>
     <module>uji-format-pdf</module>
+    <module>uji-format-pades</module>
     <module>uji-format-odf</module>
     <module>uji-format-facturae</module>
     <module>uji-keystore</module>

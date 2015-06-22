@@ -36,7 +36,12 @@ public enum SupportedSignatureFormat
         public String toString() {
             return "es.uji.security.crypto.pdf.PDFSignatureFactory"; 
         }
-    }, 
+    },
+    PADES {
+        public String toString() {
+            return "es.uji.security.crypto.pades.PAdESSignatureFactory";
+        }
+    },
     ODF {
         public String toString() {
             return "es.uji.security.crypto.xmldsign.odf.ODFSignatureFactory"; 
