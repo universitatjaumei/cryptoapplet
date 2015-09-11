@@ -105,6 +105,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         // is executed
         
         byte[] data = OS.inputStreamToByteArray(signatureOptions.getDataToSign());
+        int lengthDocs = 0;
         
         try
         {
@@ -114,9 +115,10 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
         	Document current = documentBuilder.parse(new ByteArrayInputStream(data));
         	
         	NodeList docs = current.getElementsByTagNameNS("http://www.sk.ee/DigiDoc/v1.3.0#", "SignedDoc");
-        	
+
+            lengthDocs = docs.getLength();
         	if (docs.getLength() == 1)
-        	{        	
+        	{
         		DigiDocFactory digFac = FactoryManager.getDigiDocFactory();
         		signedDoc = digFac.readSignedDoc(new ByteArrayInputStream(data));
         	}
@@ -129,19 +131,21 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
        // catch (Exception dde)
         catch (Exception dde)
         {
-            signedDoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
-            
-            // Add a new reference in Bas64 and establish body data        
-            DataFile df = signedDoc.addDataFile(ftoSign, this.xadesFileMimeType, DataFile.CONTENT_EMBEDDED_BASE64);
-            
-            signedDoc.getDataFile(0).setFileName(xadesFileName);
-            signedDoc.getDataFile(0).setMimeType(xadesFileMimeType);
-            
-            if (!signatureOptions.getSwapToFile())
-            {
-                df.setBody(data);
-                df.setSize(data.length);
-            }            
+            if (lengthDocs == 0) {
+                signedDoc = new SignedDoc(SignedDoc.FORMAT_DIGIDOC_XML, SignedDoc.VERSION_1_3);
+
+                // Add a new reference in Bas64 and establish body data
+                DataFile df = signedDoc.addDataFile(ftoSign, this.xadesFileMimeType, DataFile.CONTENT_EMBEDDED_BASE64);
+
+                signedDoc.getDataFile(0).setFileName(xadesFileName);
+                signedDoc.getDataFile(0).setMimeType(xadesFileMimeType);
+
+                if (!signatureOptions.getSwapToFile()) {
+                    df.setBody(data);
+                    df.setSize(data.length);
+                }
+            } else
+                throw dde;
         }
         
         // Prepare the signature        
