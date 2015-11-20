@@ -1,10 +1,8 @@
 package es.uji.security.keystore.mozilla;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -250,8 +248,8 @@ public class Mozilla
             for (int i=libDirs.length; i < libDirs.length + dirs.length; i++){
             	allDirs[i]= dirs[i-libDirs.length];
             }
-            
-            
+
+
             for (int i = 0; i < allDirs.length; i++)
             {
                 File f = new File(allDirs[i]);
@@ -305,7 +303,11 @@ public class Mozilla
 
         if (OS.isWindowsUpperEqualToNT())
         {
-            bais = new ByteArrayInputStream(("name = NSS\r" + "library = " + _pkcs11file + "\r"
+            String library = _pkcs11file.replace("\\", "/");
+            if (OS.isJavaUpperEqualTo8()) { // double quoting to allow any character in the path, e.g. "(", but it is only supported from Java 8 onwards (actually supported in Java 1.7.0_80 but we are trying to keep things simpler, but TODO evaluate to support >= 1.7.0_80, although this is supposed to be the last Java 7 Oracle releases to the public, http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html, but maybe not the same in the OpenJDK? research if needed. Evaluate to quote for Linux too)
+                library = "\"" +  library + "\"";
+            }
+            bais = new ByteArrayInputStream(("name = NSS\r" + "library = " + library + "\r"
                     + "attributes= compatibility" + "\r" + "slot=2\r" + "nssArgs=\""
                     + "configdir='" + _currentprofile.replace("\\", "/") + "' " + "certPrefix='' "
                     + "keyPrefix='' " + "secmod=' secmod.db' " + "flags=readOnly\"\r").getBytes());
@@ -330,32 +332,7 @@ public class Mozilla
         return "configdir='" + getCurrentProfiledir().replace("\\", "/")
                 + "' certPrefix='' keyPrefix='' secmod='secmod.db' flags=";
     }
-    
-    public boolean isInitialized()
-    {
-        try
-        {
-            MozillaKeyStore mks = new MozillaKeyStore();
-            mks.load("".toCharArray());
-            mks.cleanUp();
-            return true;
-        }
-        catch (Exception e)
-        {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(os);
-            e.printStackTrace(ps);
-            String stk = new String(os.toByteArray());
-            
-            if (stk.indexOf("CKR_USER_TYPE_INVALID") > -1)
-            {
-                return false;
-            }
-            
-            return true;
-        }
-    }    
-    
+
     public static void main(String[] args){
     	Mozilla m= new Mozilla();
     	m.getPkcs11FilePath();

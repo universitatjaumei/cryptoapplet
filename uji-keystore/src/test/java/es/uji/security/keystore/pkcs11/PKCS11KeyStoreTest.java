@@ -7,6 +7,9 @@ import es.uji.security.keystore.IKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 
+/**
+ * Requires to be executed with Firefox installation directory as CWD, e.g. "C:\Program Files (x86)\Mozilla Firefox"
+ */
 public class PKCS11KeyStoreTest
 {
 
@@ -18,9 +21,8 @@ public class PKCS11KeyStoreTest
         {
             Mozilla mozilla = new Mozilla();
 
-            if (mozilla.isInitialized())
-            {
-                IKeyStore p11mozillaks = (IKeyStore) new PKCS11KeyStore(mozilla
+
+                IKeyStore p11mozillaks = new PKCS11KeyStore(mozilla
                         .getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(), mozilla
                         .getPkcs11InitArgsString());
                 p11mozillaks.load(null);
@@ -29,7 +31,6 @@ public class PKCS11KeyStoreTest
                 {
                     System.out.println(((X509Certificate) cert).getSubjectDN());
                 }
-            }
         }
         catch (Exception e)
         {

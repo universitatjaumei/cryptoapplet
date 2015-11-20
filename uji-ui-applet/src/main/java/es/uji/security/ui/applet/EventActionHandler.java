@@ -14,12 +14,12 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import es.uji.security.crypto.config.OS;
 import org.apache.log4j.Logger;
 
 import es.uji.security.crypto.config.Device;
 import es.uji.security.keystore.KeyStoreManager;
 import es.uji.security.keystore.X509CertificateHandler;
-import es.uji.security.keystore.pkcs11.PKCS11KeyStore;
 import es.uji.security.keystore.pkcs12.PKCS12KeyStore;
 import es.uji.security.util.i18n.LabelManager;
 
@@ -292,6 +292,10 @@ public class EventActionHandler
             {
                 try
                 {
+                    if (OS.isWindowsUpperEqualToNT() && OS.is64BitJava() && !OS.isJavaUpperEqualTo8()) {
+                        JOptionPane.showMessageDialog(mw.getMainFrame(), LabelManager.get("ERROR_PKCS11_UNSUPPORTED_IN_JAVA_7_64_BIT_ON_WIN"));
+                        return;
+                    }
                     JFileChooser chooser = new JFileChooser();
                     int returnVal = chooser.showOpenDialog(mw.getMainFrame());
 
@@ -301,7 +305,7 @@ public class EventActionHandler
                                 + chooser.getSelectedFile().getAbsolutePath());
 
                         File pkFile = chooser.getSelectedFile().getAbsoluteFile();
-                        
+
                         if (!pkFile.exists())
                         {
                             JOptionPane.showMessageDialog(mw.getMainFrame(),
@@ -319,8 +323,8 @@ public class EventActionHandler
                                     Device device = new Device();
                                     device.setName("CustomPKCS11");
                                     device.setLibrary(pkFile.getAbsolutePath());
-                                    device.setSlot("1");
-                                    
+                                    // TODO research: by not setting a specific slot id, we are currently relying in the first slot returned by Cryptoki function 'C_GetSlotList' with 'tokenPresent' parameter set to false in the SunPKCS11 implementation (saw in jdk7u79-b02), so that slot could potentially have the token absent. But there seems to be an alternative, take a look at SunPKCS11 provider 'showInfo' configuration parameter in the source to activate the 'C_GetSlotList' 'tokenPresent' parameter to true, although it looks like a bug in the implementation, and that would make it a fragile solution
+                                    // TODO allow to select the desired slot when there is more than one active token slot
                                     keyStoreManager.initPKCS11Device(device, pass);
                                     mw.reloadCertificateJTree();
                                 }

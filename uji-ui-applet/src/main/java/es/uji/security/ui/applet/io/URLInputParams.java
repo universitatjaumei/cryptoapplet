@@ -1,14 +1,13 @@
 package es.uji.security.ui.applet.io;
 
+import es.uji.security.ui.applet.SignatureApplet;
+import org.apache.log4j.Logger;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.apache.log4j.Logger;
-
-import es.uji.security.ui.applet.SignatureApplet;
 
 public class URLInputParams extends AbstractData implements InputParams
 {

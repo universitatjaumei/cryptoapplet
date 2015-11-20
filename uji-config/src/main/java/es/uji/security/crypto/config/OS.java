@@ -265,7 +265,18 @@ public class OS
     	 String version = System.getProperty("java.version");
          return (version.indexOf("1.6") > -1 || version.indexOf("1.7") > -1 || version.indexOf("1.8") > -1);
     }
- 
+
+    public static boolean isJavaUpperEqualTo8() {
+        String javaSpecVersion = System.getProperty("java.specification.version"); // expected 1.7, 1.8, etc
+        int numericJavaSpecVersion = Integer.parseInt(javaSpecVersion.replace(".", ""));
+        return numericJavaSpecVersion >= 18;
+    }
+
+    // TODO check if there is already another way to detect x86_64 platforms in this project
+    public static boolean is64BitJava() {
+        return System.getProperty("os.arch").contains("64");
+    }
+
     /*public static void main(String[] args){
     	String[] all= OS.getAllSystemLibDirectories();
     	for (String i: all){

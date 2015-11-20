@@ -1,14 +1,18 @@
 package es.uji.security.ui.applet;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.CookieHandler;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import javax.swing.JApplet;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import netscape.javascript.JSException;
@@ -131,6 +135,19 @@ public class SignatureApplet extends JApplet
             log.error("Nimbus Look&Feel is not present. Using default Look&Feel");
         }
 
+        // disabling cookies completely from now on (note that it doesn't apply for applet JARs downloaded previously) as they are error prone in the context of an applet, see https://github.com/hablutzel1/cryptoapplet/issues/3
+        CookieHandler.setDefault(new CookieHandler() {
+            @Override
+            public Map<String, List<String>> get(URI uri, Map<String, List<String>> requestHeaders) throws IOException {
+                return Collections.emptyMap(); // not including cookies in any request
+            }
+
+            @Override
+            public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
+                // nothing to do, we do not process received cookies at all
+            }
+        });
+
         try
         {
             String downloadURL = "";
@@ -231,52 +248,62 @@ public class SignatureApplet extends JApplet
 
     private void initializeWindow()
     {
-        log.debug("Init window");
+        /*
+         From "Java Concurrency In Practice", 9.1.2. Thread Confinement in Swing: "The Swing single thread rule: Swing components and models should be created, modified, and queried only from the event dispatching thread.".
+         Not calling the following code from the EDT produces problems with IcedTea-Web when calling the JS method 'onWindowShow', https://github.com/hablutzel1/cryptoapplet/issues/1.
+         Not calling the following code from the EDT produces that the "CryptoApplet Signer" frame is not being shown on top of the browser on Google Chrome 44 and Internet Explorer 11 on Windows 8, although it works as expected in Firefox 38 (other SO and browser versions could be affected too), note that there is a call to 'java.awt.JFrame.toFront' enqueued to the EDT in 'es.uji.security.ui.applet.MainWindow.MainWindow', and it seems that that call requires the previous 'java.awt.JFrame.setVisible' method to be called in the EDT, and that method call ('toFront') seems to require to be enqueued in the EDT for expecting all the previous UI events to be processed before it gets executes, including the 'setVisible' call TODO this requires more research, maybe by reproducing this problem in the mentioned browsers and getting the root cause.
+         */
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                log.debug("Init window");
 
-        try
-        {
-            if (window == null)
-            {
-                window = new MainWindow(this.keyStoreManager, this.apph);
+                try
+                {
+                    if (window == null)
+                    {
+                        window = new MainWindow(keyStoreManager, apph);
+                    }
+                    else
+                    {
+                        window.getPasswordTextField().setText("");
+                        window.getGlobalProgressBar().setValue(0);
+                        window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
+
+                        initKeystores(apph.getNavigator());
+
+                        window.reloadCertificateJTree();
+                        window.getMainFrame().setVisible(true);
+                        window.getShowSignatureCheckBox().setVisible(true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.error(ex);
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+
+                    try
+                    {
+                        log.debug("Call JavaScript method: " + apph.getJsSignError());
+                        JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
+                    }
+                    catch (JSException e)
+                    {
+                        log.error("Error calling " + apph.getJsSignError(), e);
+                    }
+                }
+
+                try
+                {
+                    log.debug("Call JavaScript method: " + apph.getJsWindowShow());
+                    JSCommands.getWindow().call(apph.getJsWindowShow(), new String[] { "" });
+                }
+                catch (JSException e)
+                {
+                    log.error("Error calling " + apph.getJsWindowShow(), e);
+                }
             }
-            else
-            {
-                window.getPasswordTextField().setText("");
-                window.getGlobalProgressBar().setValue(0);
-                window.getInformationLabelField().setText(LabelManager.get("SELECT_A_CERTIFICATE"));
-
-                this.initKeystores(this.apph.getNavigator());
-
-                window.reloadCertificateJTree();
-                window.getMainFrame().setVisible(true);
-                window.getShowSignatureCheckBox().setVisible(true);
-            }
-        }
-        catch (Exception ex)
-        {
-            log.error(ex);
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "", JOptionPane.ERROR_MESSAGE);
-
-            try
-            {
-                log.debug("Call JavaScript method: " + apph.getJsSignError());
-                JSCommands.getWindow().call(apph.getJsSignError(), new String[] { "" });
-            }
-            catch (JSException e)
-            {
-                log.error("Error calling " + apph.getJsSignError(), e);
-            }
-        }
-
-        try
-        {
-            log.debug("Call JavaScript method: " + apph.getJsWindowShow());
-            JSCommands.getWindow().call(apph.getJsWindowShow(), new String[] { "" });
-        }
-        catch (JSException e)
-        {
-            log.error("Error calling " + apph.getJsWindowShow(), e);
-        }
+        });
     }
 
     /**
@@ -623,8 +650,7 @@ public class SignatureApplet extends JApplet
 
     /**
      * Computes the signature with the given toSign input data, if everything is correct, the applet
-     * make a POST to the outputURL with the resulting signature object in the "content" variable,
-     * it also send to that URL the cookies for the current website.
+     * make a POST to the outputURL with the resulting signature object in the "content" variable.
      * 
      * @param toSign
      *            the data to be signed
@@ -652,8 +678,7 @@ public class SignatureApplet extends JApplet
 
     /**
      * Computes the signature with the given toSign input data, if everything is correct, the applet
-     * make a POST to the outputURL with the resulting signature object in the postVariableName, it
-     * also send to that URL the cookies for the current website.
+     * make a POST to the outputURL with the resulting signature object in the postVariableName.
      * 
      * @param toSign
      *            the data to be signed

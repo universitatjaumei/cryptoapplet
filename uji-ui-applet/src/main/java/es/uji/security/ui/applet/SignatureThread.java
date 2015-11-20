@@ -364,10 +364,14 @@ public class SignatureThread extends Thread
         System.out.println("Certificate Alias: " + iksh.getAliasFromCertificate(selectedNode.getCertificate()));
     }
 
-    private void processError(JLabel infoLabelField, String keyError, Exception e)
+    private void processError(JLabel infoLabelField, String keyOrMessage, Exception e)
     {
         e.printStackTrace();
-        infoLabelField.setText(LabelManager.get(keyError) + ": " + e.getMessage());
+        String message = LabelManager.get(keyOrMessage);
+        if (null == message){ // if key is not found the key defaults to be the message
+            message = keyOrMessage;
+        }
+        infoLabelField.setText(message);
         signatureHandler.callback(e.getMessage());
 
         try

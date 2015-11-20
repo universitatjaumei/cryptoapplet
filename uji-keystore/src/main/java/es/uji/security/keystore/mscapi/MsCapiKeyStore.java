@@ -58,7 +58,7 @@ public class MsCapiKeyStore implements IKeyStore
         log.debug("Loading aliases from keystore");
         
         String strAux = "";
-        byte[][] rs = null;
+        byte[][][] rs = null;
 
         try
         { 
@@ -82,7 +82,7 @@ public class MsCapiKeyStore implements IKeyStore
         {
             try
             {
-                ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i]);
+                ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i][0]);
 
                 javax.security.cert.X509Certificate c = javax.security.cert.X509Certificate.getInstance(bIn);
                 strAux = getAliasFromCertificate(c);
@@ -106,7 +106,7 @@ public class MsCapiKeyStore implements IKeyStore
         
         String strAux = "";
 
-        byte[][] rs = _mscapi.getCertificatesInSystemStore("My");
+        byte[][][] rs = _mscapi.getCertificatesInSystemStore("My");
 
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         X509Certificate cert = null;
@@ -120,7 +120,7 @@ public class MsCapiKeyStore implements IKeyStore
         {
             try
             {
-                ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i]);
+                ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i][0]);
 
                 javax.security.cert.X509Certificate c = javax.security.cert.X509Certificate
                         .getInstance(bIn);
@@ -129,7 +129,7 @@ public class MsCapiKeyStore implements IKeyStore
 
                 if (strAux.equals(alias))
                 {
-                    ByteArrayInputStream certIs = new ByteArrayInputStream(rs[i]);
+                    ByteArrayInputStream certIs = new ByteArrayInputStream(rs[i][0]);
                     cert = (X509Certificate) cf.generateCertificate(certIs);
                     // System.out.println("Obtenido certificate cert= " + cert);
                 }
@@ -183,7 +183,7 @@ public class MsCapiKeyStore implements IKeyStore
     {
         String strAux = "";
 
-        byte[][] rs = _mscapi.getCertificatesInSystemStore("My");
+        byte[][][] rs = _mscapi.getCertificatesInSystemStore("My");
 
         if (rs == null)
         {
@@ -194,7 +194,7 @@ public class MsCapiKeyStore implements IKeyStore
         {
             try
             {
-                ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i]);
+                ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i][0]);
 
                 javax.security.cert.X509Certificate c = javax.security.cert.X509Certificate
                         .getInstance(bIn);
@@ -203,7 +203,7 @@ public class MsCapiKeyStore implements IKeyStore
 
                 if (strAux.equals(alias))
                 {
-                    return _mscapi.signMessage(toSign, rs[i]);
+                    return _mscapi.signMessage(toSign, rs[i][0], "sha1");
                 }
             }
             catch (Exception e)
@@ -212,41 +212,6 @@ public class MsCapiKeyStore implements IKeyStore
                 return null;
             }
         }
-        return null;
-    }
-
-    public byte[] signHash(byte[] toSign, String alias) throws NoSuchAlgorithmException, Exception
-    {
-        String strAux = "";
-
-        byte[][] rs = _mscapi.getCertificatesInSystemStore("My");
-
-        if (rs == null)
-        {
-            return null;
-        }
-
-        for (int i = 0; i < rs.length; i++)
-        {
-            try
-            {
-                ByteArrayInputStream bIn = new ByteArrayInputStream(rs[i]);
-                javax.security.cert.X509Certificate c = javax.security.cert.X509Certificate
-                        .getInstance(bIn);
-
-                strAux = getAliasFromCertificate(c);
-
-                if (strAux.equals(alias))
-                {
-                    return _mscapi.signHash(toSign, rs[i]);
-                }
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
-
         return null;
     }
 

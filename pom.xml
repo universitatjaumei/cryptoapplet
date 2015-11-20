@@ -36,6 +36,7 @@
     <module>uji-format-facturae</module>
     <module>uji-keystore</module>
     <module>uji-ui-applet</module>
+    <module>uji-dist</module>
   </modules>
 
   <licenses>
@@ -111,17 +112,4 @@
     </plugins>
   </build>
 
-  <profiles>
-    <profile>
-      <id>default</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <uji.keytool.keystore>../uji.keystore</uji.keytool.keystore>
-        <uji.keytool.alias>uji</uji.keytool.alias>
-        <uji.keytool.password>cryptoapplet</uji.keytool.password>
-      </properties>
-    </profile>
-  </profiles>
 </project>

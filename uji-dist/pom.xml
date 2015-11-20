@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>es.uji.security</groupId>
+  <artifactId>uji-dist</artifactId>
+  <name>uji-dist</name>
+  <packaging>pom</packaging>
+
+  <parent>
+    <groupId>es.uji.security</groupId>
+    <artifactId>CryptoApplet</artifactId>
+    <version>2.1.8-SNAPSHOT</version>
+  </parent>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>es.uji.security</groupId>
+      <artifactId>uji-ui-applet</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+      <!-- currently hardcoding the dependency on 'uji-format-pdf' module, TODO allow to configure this module with Maven profiles to generate distributions for PDF signature, CMS signature, etc. or a mixture of them. and ensure to generate distribution packages with the minimum JARs required, for example, for PDF signature it has been observed that these JARs are enough: 'uji-ui-applet-2.1.8-SNAPSHOT.jar, log4j-1.2.14.jar, uji-keystore-2.1.8-SNAPSHOT.jar, uji-crypto-core-2.1.8-SNAPSHOT.jar, uji-config-2.1.8-SNAPSHOT.jar, uji-utils-2.1.8-SNAPSHOT.jar, bcprov-jdk15-1.43.jar,uji-format-pdf-2.1.8-SNAPSHOT.jar,itext-2.1.5.jar', but the distribution included more than these JARs -->
+      <dependency>
+        <groupId>es.uji.security</groupId>
+        <artifactId>uji-format-pdf</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>webstart-maven-plugin</artifactId>
+        <version>1.0-beta-6</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jnlp-inline</goal>
+            </goals>
+            <configuration>
+
+              <jnlp>
+                <!-- Because we are not producing an application, we are just using 'webstart-maven-plugin' to sign JARs, not setting this to 'component' would require to set the 'mainClass' attribute and it would be confusing as we don't have any -->
+                <type>component</type>
+              </jnlp>
+
+              <sign>
+                <keystore>${uji.keytool.keystore}</keystore>
+                <storepass>${uji.keytool.password}</storepass>
+                <alias>${uji.keytool.alias}</alias>
+                <tsaLocation>http://tsa.starfieldtech.com</tsaLocation>
+                <!-- TODO check: really needed? -->
+                <verify>true</verify>
+              </sign>
+
+              <unsignAlreadySignedJars>true</unsignAlreadySignedJars>
+              <makeArchive>false</makeArchive>
+
+              <!-- to update these attributes in all JARs, including external dependencies (e.g. itext-2.1.5.jar) -->
+              <updateManifestEntries>
+                <!-- TODO study these three security related attributes thoroughly (the same for the security related attributes set in 'uji-ui-applet'), and evaluate to include them on a JAR by JAR basis  -->
+                <Trusted-Library>true</Trusted-Library>
+                <Codebase>*</Codebase>
+                <Application-Library-Allowable-Codebase>*</Application-Library-Allowable-Codebase>
+
+                <!-- hacky fix to void all 'Class-Path' attributes in dependency JARs, e.g. 'itext-2.1.5.jar' contains 'Class-Path: iText-toolbox.jar iText-toolbox-2.1.5.jar bcmail-jdk14-138.jar bcprov-jdk14-138.jar' in MANIFEST.MF, which is producing the Java plugin to try to download these JARs, by indicating a dependency on the main applet itself no additional HTTP call is made to the server TODO instead try to remove the 'Class-Path' attribute in all MANIFEST.MF files for all signed JARs, note that declaring this attribute empty here won't help at least with the current 'webstart-maven-plugin' version, 1.0-beta-6.  -->
+                <Class-Path>uji-ui-applet-${project.version}.jar</Class-Path>
+              </updateManifestEntries>
+
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <properties>
+    <uji.keytool.keystore>${project.basedir}/../uji.keystore</uji.keytool.keystore>
+    <uji.keytool.alias>uji</uji.keytool.alias>
+    <uji.keytool.password>cryptoapplet</uji.keytool.password>
+    <jnlp.workDirectory>${project.build.directory}/signed-applet</jnlp.workDirectory>
+  </properties>
+
+</project>

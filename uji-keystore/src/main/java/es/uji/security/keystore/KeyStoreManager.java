@@ -102,15 +102,11 @@ public class KeyStoreManager
             try
             {
                 Mozilla mozilla = new Mozilla();
-
-                if (mozilla.isInitialized())
-                {
-                    IKeyStore p11mozillaks = (IKeyStore) new PKCS11KeyStore(mozilla
+                IKeyStore p11mozillaks = new PKCS11KeyStore(mozilla
                             .getPkcs11ConfigInputStream(), mozilla.getPkcs11FilePath(), mozilla
                             .getPkcs11InitArgsString());
-                    p11mozillaks.load(null);
-                    keystores.put(SupportedKeystore.MOZILLA, p11mozillaks);
-                }
+                p11mozillaks.load(null);
+                keystores.put(SupportedKeystore.MOZILLA, p11mozillaks);
                 // We have to look here for spanish dnie and ask for the password.
 
             }

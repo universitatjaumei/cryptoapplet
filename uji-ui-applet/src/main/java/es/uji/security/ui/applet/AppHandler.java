@@ -342,13 +342,13 @@ public class AppHandler
      * @throws SignatureAppletException with the message
      * @throws
      */
-    public void installDLL(String downloadUrl, String completeDllPath)
+    public void installDLL(String dllDownloadUrl, String completeDllPath)
             throws SignatureAppletException
     {
         try
         {
-            log.debug("Downloading " + downloadUrl + ". Complete DLL path is " + completeDllPath);
-            dumpFile(downloadUrl + "MicrosoftCryptoApi_0_3.dll", completeDllPath);
+            log.debug("Downloading " + dllDownloadUrl + ". Complete DLL path is " + completeDllPath);
+            dumpFile(dllDownloadUrl, completeDllPath);
         }
         catch (Throwable e)
         {
@@ -367,25 +367,35 @@ public class AppHandler
     {
         String destAbsolutePath = System.getenv("TEMP");
 
-        String completeDLLPath = destAbsolutePath + File.separator + "MicrosoftCryptoApi_0_3.dll";
+        String microsoftCryptoApiDllName;
+        byte[] originalDLLHash;
+        if (OS.is64BitJava()) {
+            microsoftCryptoApiDllName = "MicrosoftCryptoApi_x64_0_5.dll";
+            originalDLLHash = new byte[]{(byte) 0xb5, 0x16, (byte) 0xde, (byte) 0xaf, (byte) 0xfa, (byte) 0xc4,
+                    (byte) 0x2f, 0x0e, (byte) 0x01, 0x3f, (byte) 0x76, (byte) 0x35, (byte) 0x84, (byte) 0xdd, (byte) 0xdb,
+                    (byte) 0xdd, (byte) 0x34, (byte) 0x35, (byte) 0xb1, (byte) 0x3b};
+        } else {
+            microsoftCryptoApiDllName = "MicrosoftCryptoApi_0_5.dll";
+            originalDLLHash = new byte[]{(byte) 0xc5, 0x62, (byte) 0x98, (byte) 0xc8, (byte) 0x80, (byte) 0xeb,
+                    (byte) 0x66, 0x02, (byte) 0xb9, 0x54, (byte) 0xeb, (byte) 0xae, (byte) 0xcb, (byte) 0xc2, (byte) 0xbf,
+                    (byte) 0x52, (byte) 0x90, (byte) 0xed, (byte) 0x0b, (byte) 0xd7};
+        }
+        String completeDLLPath = destAbsolutePath + File.separator + microsoftCryptoApiDllName;
         File dllFile = new File(completeDLLPath);
-
+        String dllDownloadUrl = this.downloadURL + microsoftCryptoApiDllName;
         if (!dllFile.exists())
         {
-            log.info("MicrosoftCryptoApi_0_3.dll not found. Downloading DLL file");
 
-            installDLL(this.downloadURL, completeDLLPath);
+            log.info(microsoftCryptoApiDllName + " not found. Downloading DLL file");
+            // FIXME hash is not being verified if the file doesn't exist already, this code is downloading and trusting immediately
+            installDLL(dllDownloadUrl, completeDLLPath);
         }
         else
         {
-            log.info("MicrosoftCryptoApi_0_3.dll already exists. Verifying existing DLL file");
+            log.info( microsoftCryptoApiDllName + " already exists. Verifying existing DLL file");
 
             try
             {
-                byte[] originalDLLHash = {0x0e, 0x15, (byte) 0x8d, (byte) 0x9f, 0x6a, (byte) 0xc5,
-                        (byte) 0x8b, 0x31, 0x67, 0x30, (byte) 0xbe, (byte) 0x8f, 0x4d, 0x35, 0x71,
-                        (byte) 0xab, (byte) 0xd4, (byte) 0xc9, (byte) 0xf9, (byte) 0x90};
-
                 FileInputStream dllFileStream = new FileInputStream(dllFile);
 
                 MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
@@ -407,7 +417,7 @@ public class AppHandler
                     {
                         log.info("DLL not valid. Downloading orginal DLL file");
 
-                        installDLL(this.downloadURL, completeDLLPath);
+                        installDLL(dllDownloadUrl, completeDLLPath);
                         break;
                     }
                 }
@@ -730,7 +740,7 @@ public class AppHandler
         try
         {
             // Retrieve ujiCrypto.conf file
-            URL url = new URL(downloadURL + "/ujiCrypto.conf");
+            URL url = new URL(downloadURL + "ujiCrypto.conf");
             URLConnection uc = url.openConnection();
             uc.connect();
 

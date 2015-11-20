@@ -45,22 +45,6 @@ public class URLOutputParams extends AbstractData implements OutputParams
 
     public void setSignData(InputStream is, int currentIndex) throws IOException
     {
-        String cookies = "";
-
-        // Try to obtain and configure Cookies
-        try
-        {
-            log.debug("Recover JavaScript member: document");
-            JSObject document = (JSObject) JSCommands.getWindow().getMember("document");
-
-            cookies = (String) document.getMember("cookie");
-            log.debug("Cookies: " + cookies);
-        }
-        catch (Exception e)
-        {
-            log.debug("Cookies can not be obtained", e);
-        }
-
         String currentURL = this.urls[currentIndex];
 
         String urlWithoutParams = getBaseUrlWithoutParams(currentURL);
@@ -77,7 +61,6 @@ public class URLOutputParams extends AbstractData implements OutputParams
 
         urlConn.setRequestMethod("POST");
         urlConn.setRequestProperty("Content-type", "application/x-www-form-urlencoded");
-        urlConn.setRequestProperty("Cookie", "");
 
         urlConn.setDoOutput(true);
         urlConn.setDoInput(true);
