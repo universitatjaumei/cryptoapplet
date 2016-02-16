@@ -57,6 +57,8 @@ public class Device
     @Override
     public String toString()
     {
-        return ("name = " + name + "\r" + "library = " + library + "\r\nslot = " + slot + "\r\n");
+        String libraryPath = library.replaceAll("\\\\", "\\\\\\\\");
+
+        return ("name = " + name + "\r" + "library = \"" + libraryPath + "\"\r\nslot = " + slot + "\r\n");
     }
 }
