@@ -73,7 +73,13 @@ public class X509CertificateHandler
 
     private void extractSubjectFromDN()
     {
-        String auxStr = _SubjectDN.substring(_SubjectDN.indexOf("CN="));
+        int auxIdx = _SubjectDN.indexOf("CN=");
+        if (auxIdx <= -1) {
+            _SubjectCN = "";
+            return;
+        }
+
+        String auxStr = _SubjectDN.substring(auxIdx);
         auxStr = auxStr.replaceFirst("CN=", "");
 
         if (auxStr.indexOf("=") > -1)
