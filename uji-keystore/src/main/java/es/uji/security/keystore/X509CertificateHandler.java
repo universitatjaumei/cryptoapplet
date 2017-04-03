@@ -73,7 +73,13 @@ public class X509CertificateHandler
 
     private void extractSubjectFromDN()
     {
-        String auxStr = _SubjectDN.substring(_SubjectDN.indexOf("CN="));
+        int auxIdx = _SubjectDN.indexOf("CN=");
+        if (auxIdx <= -1) {
+            _SubjectCN = "";
+            return;
+        }
+
+        String auxStr = _SubjectDN.substring(auxIdx);
         auxStr = auxStr.replaceFirst("CN=", "");
 
         if (auxStr.indexOf("=") > -1)
@@ -278,12 +284,15 @@ public class X509CertificateHandler
         {
             for (String u : _extKeyUsage)
             {
-                if (u.equals("1.3.6.1.5.5.7.3.2"))
+                if (u.equals("1.3.6.1.5.5.7.3.4"))
                 {
                     _emailProtection = true;
                 }
             }
         }
+
+        if (_keyUsage[2])   // keyEncipherment
+            _emailProtection = true;
 
         return auxStr;
     }
