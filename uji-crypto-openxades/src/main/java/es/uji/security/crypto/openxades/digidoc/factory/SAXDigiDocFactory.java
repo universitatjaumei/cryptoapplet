@@ -117,17 +117,17 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     }
 
     /**
-     * Helper method to update sha1 digest with some data
+     * Helper method to update sha256 digest with some data
      * 
      * @param data
      */
-    private void updateDigest(byte[] data)
+    private void updateDigest(byte[] data, String digestAlgorithm)
     {
         try
         {
             // if not inited yet then initialize digest
             if (m_digest == null)
-                m_digest = MessageDigest.getInstance("SHA-1");
+                m_digest = MessageDigest.getInstance(digestAlgorithm);
             m_digest.update(data);
         }
         catch (Exception ex)
@@ -139,7 +139,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
     /**
      * Helper method to calculate the digest result and reset digest
      * 
-     * @return sha-1 digest value
+     * @return sha-256 digest value
      */
     private byte[] getDigest()
     {
@@ -791,7 +791,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 strCan = canonicalizeXml(strCan);
                 strCan = strCan.substring(0, strCan.length() - 11);
                 // System.out.println("Canonicalized: " + strCan);
-                updateDigest(strCan.getBytes());
+                updateDigest(strCan.getBytes(), getSignedDoc().getDigestAlgorithm());
                 // clear the collected data since this is not counted as body
                 m_sbCollectChars.delete(0, m_sbCollectChars.length());
             }
@@ -1142,7 +1142,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
             // <SignedDoc>
             if (qName.equals("SignedDoc"))
             {
-                String format = null, version = null;
+                String format = null, version = null, digestAlgorithm = "SHA-1";
                 for (int i = 0; i < attrs.getLength(); i++)
                 {
                     String key = attrs.getQName(i);
@@ -1150,10 +1150,12 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                         format = attrs.getValue(i);
                     if (key.equals("version"))
                         version = attrs.getValue(i);
+                    if (key.equals("digestAlgorithm"))
+                        digestAlgorithm = attrs.getValue(i);
                 }
                 try
                 {
-                    m_doc = new SignedDoc(format, version);
+                    m_doc = new SignedDoc(format, version, digestAlgorithm);
                 }
                 catch (DigiDocException ex)
                 {
@@ -1231,7 +1233,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
      * 
      * @param namespaceURI
      *            namespace URI
-     * @param lName
+     * @param sName
      *            local name
      * @param qName
      *            qualified name
@@ -1291,7 +1293,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                         {
                             str2 = str1.substring(0, idx1);
                             // System.out.println("prefix: \"" + str2 + "\"");
-                            updateDigest(str2.getBytes());
+                            updateDigest(str2.getBytes(), getSignedDoc().getDigestAlgorithm());
                             str2 = null;
                             str1 = str1.substring(idx1);
                         }
@@ -1313,15 +1315,15 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                             str3 = canonicalizeXml(str1);
                         else
                             str3 = str1;
-                        updateDigest(str3.getBytes());
+                        updateDigest(str3.getBytes(), getSignedDoc().getDigestAlgorithm());
 
                         if (str2 != null)
                         {
-                            updateDigest(str2.getBytes());
+                            updateDigest(str2.getBytes(), getSignedDoc().getDigestAlgorithm());
                             str2 = null;
                         }
                         // calc digest over end tag
-                        updateDigest("</DataFile>".getBytes());
+                        updateDigest("</DataFile>".getBytes(), getSignedDoc().getDigestAlgorithm());
                         // System.out.println("Set digest: " + df.getId());
                         df.setDigest(getDigest());
                         m_sbCollectChars = null; // stop collecting
@@ -1336,7 +1338,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     try
                     {
                     	// calc digest over end tag
-                        updateDigest("</DataFile>".getBytes());
+                        updateDigest("</DataFile>".getBytes(), getSignedDoc().getDigestAlgorithm());
                         // System.out.println("Set digest: " + df.getId());
                         df.setDigest(getDigest());
                         // System.out.println("Set body: " + df.getId());
@@ -1370,7 +1372,14 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 CanonicalizationFactory canFac = FactoryManager.getCanonicalizationFactory();
                 byte[] bCanSI = canFac.canonicalize(ConvertUtils.str2data(m_sbCollectChars
                         .toString(), "UTF-8"), SignedDoc.CANONICALIZATION_METHOD_20010315);
-                si.setOrigDigest(SignedDoc.digest(bCanSI));
+
+                String digestAlgorithm = "SHA-1";
+
+                if (sig.getSignedDoc().getDigestAlgorithm() != null) {
+                    digestAlgorithm = sig.getSignedDoc().getDigestAlgorithm();
+                }
+
+                si.setOrigDigest(SignedDoc.digest(bCanSI, digestAlgorithm));
                 m_sbCollectChars = null; // stop collecting
                 // debugWriteFile("SigInfo2.xml", si.toString());
             }
@@ -1401,7 +1410,13 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                         SignedDoc.CANONICALIZATION_METHOD_20010315);
                 // debugWriteFile("SigProp2.xml", new String(bCanProp));
 
-                sp.setOrigDigest(SignedDoc.digest(bCanProp));
+                String digestAlgorithm = "SHA-1";
+
+                if (sig.getSignedDoc().getDigestAlgorithm() != null) {
+                    digestAlgorithm = sig.getSignedDoc().getDigestAlgorithm();
+                }
+
+                sp.setOrigDigest(SignedDoc.digest(bCanProp, digestAlgorithm));
                 // System.out.println("Digest: " + Base64Util.encode(SignedDoc.digest(bCanProp)));
                 // System.out.println("SigProp2: " + sp.toString());
                 m_sbCollectChars = null; // stop collecting
@@ -1474,7 +1489,14 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     CanonicalizationFactory canFac = FactoryManager.getCanonicalizationFactory();
                     byte[] bCanXml = canFac.canonicalize(ConvertUtils.str2data(m_strSigValTs,
                             "UTF-8"), SignedDoc.CANONICALIZATION_METHOD_20010315);
-                    byte[] hash = SignedDoc.digest(bCanXml);
+
+                    String digestAlgorithm = "SHA-1";
+
+                    if (sig.getSignedDoc().getDigestAlgorithm() != null) {
+                        digestAlgorithm = sig.getSignedDoc().getDigestAlgorithm();
+                    }
+
+                    byte[] hash = SignedDoc.digest(bCanXml, digestAlgorithm);
                     // System.out.println("\n\n\nSigValTS hash: " + Base64Util.encode(hash));
                     // debugWriteFile("SigProp2.xml", new String(bCanProp));
                     ts.setHash(hash);
@@ -1517,8 +1539,15 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
         			System.arraycopy(canCompleteCertificateRefs, 0, refsOnlyData, 0,
         					canCompleteCertificateRefs.length);
         			System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
-        					canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);	
-        			byte[] hash = SignedDoc.digest(refsOnlyData);
+        					canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
+
+                    String digestAlgorithm = "SHA-1";
+
+                    if (sig.getSignedDoc().getDigestAlgorithm() != null) {
+                        digestAlgorithm = sig.getSignedDoc().getDigestAlgorithm();
+                    }
+
+                    byte[] hash = SignedDoc.digest(refsOnlyData, digestAlgorithm);
         			ts.setHash(hash);
 
         		}
@@ -1550,7 +1579,14 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                     canXml = canXml.substring(3, canXml.length() - 4);
                     // System.out.println("canonical \n---\n" + canXml + "\n---\n");
                     // debugWriteFile("SigProp2.xml", new String(bCanProp));
-                    byte[] hash = SignedDoc.digest(ConvertUtils.str2data(canXml, "UTF-8"));
+
+                    String digestAlgorithm = "SHA-1";
+
+                    if (sig.getSignedDoc().getDigestAlgorithm() != null) {
+                        digestAlgorithm = sig.getSignedDoc().getDigestAlgorithm();
+                    }
+
+                    byte[] hash = SignedDoc.digest(ConvertUtils.str2data(canXml, "UTF-8"), digestAlgorithm);
                     // System.out.println("SigAndRefsTS hash: " + Base64Util.encode(hash));
                     ts.setHash(hash);
                 }
@@ -1873,7 +1909,14 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
                 if (m_doc.getVersion().equals(SignedDoc.VERSION_1_1))
                 {
                     CompleteRevocationRefs rrefs = up.getCompleteRevocationRefs();
-                    rrefs.setDigestValue(SignedDoc.digest(not.getOcspResponseData()));
+
+                    String digestAlgorithm = "SHA-1";
+
+                    if (sig.getSignedDoc().getDigestAlgorithm() != null) {
+                        digestAlgorithm = sig.getSignedDoc().getDigestAlgorithm();
+                    }
+
+                    rrefs.setDigestValue(SignedDoc.digest(not.getOcspResponseData(), digestAlgorithm));
                 }
                 m_sbCollectItem = null; // stop collecting
             }
@@ -1911,7 +1954,7 @@ public class SAXDigiDocFactory extends DefaultHandler implements DigiDocFactory
             if (m_sbCollectSignature != null)
                 m_sbCollectSignature.append(s);
             if (m_digest != null && m_bCollectDigest)
-                updateDigest(s.getBytes());
+                updateDigest(s.getBytes(), getSignedDoc().getDigestAlgorithm());
         }
     }
 

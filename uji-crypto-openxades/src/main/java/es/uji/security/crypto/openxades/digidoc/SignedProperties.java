@@ -147,10 +147,10 @@ public class SignedProperties implements Serializable
         setTarget("#" + sig.getId());
         setSigningTime(new Date());
         setCertId(sig.getId() + "-CERTINFO");
-        setCertDigestAlgorithm(SignedDoc.SHA1_DIGEST_ALGORITHM);
+        setCertDigestAlgorithm(SignedDoc.SHA256_DIGEST_ALGORITHM);
         try
         {
-            setCertDigestValue(SignedDoc.digest(cert.getEncoded()));
+            setCertDigestValue(SignedDoc.digest(cert.getEncoded(), m_sig.getSignedDoc().getDigestAlgorithm()));
         }
         catch (Exception ex)
         {
@@ -206,7 +206,7 @@ public class SignedProperties implements Serializable
     /**
      * Mutator for origDigest attribute
      * 
-     * @param str
+     * @param data
      *            new value for origDigest attribute
      */
     public void setOrigDigest(byte[] data)
@@ -330,7 +330,7 @@ public class SignedProperties implements Serializable
     /**
      * Mutator for signatureProductionPlace attribute
      * 
-     * @param str
+     * @param adr
      *            new value for signatureProductionPlace attribute
      */
     public void setSignatureProductionPlace(SignatureProductionPlace adr) throws DigiDocException
@@ -351,7 +351,7 @@ public class SignedProperties implements Serializable
     /**
      * Mutator for signingTime attribute
      * 
-     * @param str
+     * @param d
      *            new value for signingTime attribute
      * @throws DigiDocException
      *             for validation errors
@@ -367,7 +367,7 @@ public class SignedProperties implements Serializable
     /**
      * Helper method to validate a signingTime
      * 
-     * @param str
+     * @param d
      *            input data
      * @return exception or null for ok
      */
@@ -416,9 +416,9 @@ public class SignedProperties implements Serializable
     private DigiDocException validateCertDigestAlgorithm(String str)
     {
         DigiDocException ex = null;
-        if (str == null || !str.equals(SignedDoc.SHA1_DIGEST_ALGORITHM))
+        if (str == null || (!str.equals(SignedDoc.SHA256_DIGEST_ALGORITHM) && !str.equals(SignedDoc.SHA1_DIGEST_ALGORITHM)))
             ex = new DigiDocException(DigiDocException.ERR_CERT_DIGEST_ALGORITHM,
-                    "Currently supports only SHA1 digest algorithm", null);
+                    "Currently supports only SHA256 digest algorithm", null);
         return ex;
     }
 
@@ -458,9 +458,10 @@ public class SignedProperties implements Serializable
     private DigiDocException validateCertDigestValue(byte[] data)
     {
         DigiDocException ex = null;
-        if (data == null || data.length != SignedDoc.SHA1_DIGEST_LENGTH)
+        if (data == null || (m_certDigestAlgorithm != null && m_certDigestAlgorithm.equals(SignedDoc.SHA256_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA256_DIGEST_LENGTH
+                || (m_certDigestAlgorithm != null && m_certDigestAlgorithm.equals(SignedDoc.SHA1_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA1_DIGEST_LENGTH)))
             ex = new DigiDocException(DigiDocException.ERR_DIGEST_LENGTH,
-                    "SHA1 digest data is allways 20 bytes of length", null);
+                    "SHA1 digest data is always 20 bytes of length and SHA256 digest data is always 32 bytes of length", null);
         return ex;
     }
 
@@ -477,7 +478,7 @@ public class SignedProperties implements Serializable
     /**
      * Mutator for certSerial attribute
      * 
-     * @param str
+     * @param i
      *            new value for certSerial attribute
      * @throws DigiDocException
      *             for validation errors
@@ -493,7 +494,7 @@ public class SignedProperties implements Serializable
     /**
      * Helper method to validate a certSerial
      * 
-     * @param str
+     * @param i
      *            input data
      * @return exception or null for ok
      */
@@ -519,7 +520,7 @@ public class SignedProperties implements Serializable
     /**
      * Adds a new reference object
      * 
-     * @param ref
+     * @param role
      *            Reference object to add
      */
     public void addClaimedRole(String role)
@@ -600,7 +601,7 @@ public class SignedProperties implements Serializable
             // debugWriteFile("SigProp2.xml", tmp);
             // System.out.println("SigProp2: " + tmp.length
             // + " digest" + Base64Util.encode(SignedDoc.digest(tmp), 0));
-            return SignedDoc.digest(tmp);
+            return SignedDoc.digest(tmp, m_sig.getSignedDoc().getDigestAlgorithm());
         }
         else
             return m_origDigest;

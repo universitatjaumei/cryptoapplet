@@ -176,7 +176,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             return signatureResult;
         }
 
-        java.security.Signature rsa = java.security.Signature.getInstance("SHA1withRSA", provider);
+        java.security.Signature rsa = java.security.Signature.getInstance("SHA256withRSA", provider);
         rsa.initSign(privateKey);
         rsa.update(sidigest);
 
@@ -207,7 +207,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             
             byte[] signatureValue = signature.getSignatureValue().toString().getBytes();
 
-            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true);
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true,
+                    signature.getSignedDoc().getDigestAlgorithm());
 
             X509Certificate xcaCert = ConfigManager.readCertificate(tsa1_ca);
             TSResponseToken responseToken = new TSResponseToken(response);
@@ -305,7 +306,8 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
                     canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
 
             X509Certificate xcaCert = ConfigManager.readCertificate(tsa1_ca);
-            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true);
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true,
+                    signature.getSignedDoc().getDigestAlgorithm());
             TSResponseToken responseToken = new TSResponseToken(response);            
 
             if (! responseToken.verify(xcaCert, refsOnlyData))

@@ -29,7 +29,8 @@ public class SignatureThreadTest
     public void sign() throws Exception
     {
         PKCS12KeyStore keystore = new PKCS12KeyStore();
-        keystore.load(new FileInputStream("/home/borillo/borillo@gmail.com/x509/accv-borillo-2016.p12"), "komun14".toCharArray());
+        keystore.load(new FileInputStream(System.getProperty("uji.keystore.file")),
+                System.getProperty("uji.keystore.keypassword").toCharArray());
 
         Hashtable<SupportedKeystore, IKeyStore> keyStoreTable = new Hashtable<SupportedKeystore, IKeyStore>();
         keyStoreTable.put(SupportedKeystore.PKCS12, keystore);

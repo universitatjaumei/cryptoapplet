@@ -1,17 +1,15 @@
 package es.uji.security.crypto.pades;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-
+import es.uji.security.crypto.ISignFormatProvider;
+import es.uji.security.crypto.SignatureResult;
+import es.uji.security.crypto.config.OS;
+import es.uji.security.crypto.test.BaseCryptoAppletTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import es.uji.security.crypto.test.BaseCryptoAppletTest;
-import es.uji.security.crypto.ISignFormatProvider;
-import es.uji.security.crypto.SignatureResult;
-import es.uji.security.crypto.VerificationResult;
-import es.uji.security.crypto.config.OS;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class PadesTest extends BaseCryptoAppletTest
 {

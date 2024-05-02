@@ -90,7 +90,7 @@ public class DataFile implements Serializable
     public static final String CONTENT_EMBEDDED = "EMBEDDED";
     public static final String CONTENT_EMBEDDED_BASE64 = "EMBEDDED_BASE64";
     /** the only allowed value for digest type */
-    public static final String DIGEST_TYPE_SHA1 = "sha1";
+    public static final String DIGEST_TYPE_SHA256 = "sha256";
     private static int block_size = 2048;
     /** log4j logger */
     private Logger m_logger = null;
@@ -495,9 +495,9 @@ public class DataFile implements Serializable
     private DigiDocException validateDigestType(String str)
     {
         DigiDocException ex = null;
-        if (str != null && !str.equals(DIGEST_TYPE_SHA1))
+        if (str != null && !str.equals(DIGEST_TYPE_SHA256))
             ex = new DigiDocException(DigiDocException.ERR_DATA_FILE_DIGEST_TYPE,
-                    "The only supported digest type is sha1", null);
+                    "The only supported digest type is sha256", null);
         return ex;
     }
 
@@ -565,9 +565,10 @@ public class DataFile implements Serializable
     private DigiDocException validateDigestValue(byte[] data)
     {
         DigiDocException ex = null;
-        if (data != null && data.length != SignedDoc.SHA1_DIGEST_LENGTH)
+        if (data == null || (m_digestType != null && m_digestType.equals(SignedDoc.SHA256_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA256_DIGEST_LENGTH
+                || (m_digestType != null && m_digestType.equals(SignedDoc.SHA1_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA1_DIGEST_LENGTH)))
             ex = new DigiDocException(DigiDocException.ERR_DATA_FILE_DIGEST_VALUE,
-                    "SHA1 digest value must be 20 bytes", null);
+                    "SHA256 digest value must be 32 bytes", null);
         return ex;
     }
 
@@ -672,7 +673,7 @@ public class DataFile implements Serializable
      * CanonicalizationFactory canFac = ConfigManager. instance().getCanonicalizationFactory(); tmp
      * = canFac.canonicalize(sbDig.toByteArray(), SignedDoc.CANONICALIZATION_METHOD_20010315);
      * //debugWriteFile(getId() + "-body2.xml", new String(tmp)); MessageDigest sha =
-     * MessageDigest.getInstance("SHA-1"); sha.update(tmp); byte[] digest = sha.digest();
+     * MessageDigest.getInstance("SHA-256"); sha.update(tmp); byte[] digest = sha.digest();
      * setDigest(digest); //System.out.println("DataFile: \'" + getId() + "\' length: " + //
      * tmp.length + " digest: " + Base64Util.encode(digest)); } catch(Exception ex) {
      * DigiDocException.handleException(ex, DigiDocException.ERR_READ_FILE); } }
@@ -707,7 +708,7 @@ public class DataFile implements Serializable
      * @param os
      *            output stream to write data
      * @param digest
-     *            existing sha1 digest to be updated
+     *            existing sha256 digest to be updated
      * @param b64leftover
      *            leftover base64 data from previous block
      * @param b64left
@@ -816,7 +817,7 @@ public class DataFile implements Serializable
             // else calculate again
             if (m_contentType.equals(CONTENT_DETATCHED) && m_digestValue == null)
             {
-                setDigestType(DIGEST_TYPE_SHA1);
+                setDigestType(DIGEST_TYPE_SHA256);
                 setDigestValue(calculateDetatchedFileDigest());
             }
             FileInputStream is = null;
@@ -829,7 +830,7 @@ public class DataFile implements Serializable
             }
             String longFileName = m_fileName;
             m_fileName = new File(m_fileName).getName();
-            MessageDigest sha = MessageDigest.getInstance("SHA-1");
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
             ByteArrayOutputStream sbDig = new ByteArrayOutputStream();
             sbDig.write(xmlHeader());
             // add trailer and canonicalize
@@ -984,7 +985,7 @@ public class DataFile implements Serializable
             // System.out.println("calculateDetatchedFileDigest(" + getId() + ")");
             FileInputStream is = new FileInputStream(m_fileName);
             setSize(is.available());
-            MessageDigest sha = MessageDigest.getInstance("SHA-1");
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
             byte[] buf = new byte[block_size]; // use 2KB bytes to avoid base64 problems
             int fRead = 0;
             while ((fRead = is.read(buf)) == block_size)

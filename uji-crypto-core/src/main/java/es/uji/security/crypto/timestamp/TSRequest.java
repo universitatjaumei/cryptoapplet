@@ -49,17 +49,22 @@ import sun.security.util.ObjectIdentifier;
 public class TSRequest {
 
     private static final ObjectIdentifier SHA1_OID;
+    private static final ObjectIdentifier SHA256_OID;
     private static final ObjectIdentifier MD5_OID;
+
     static {
 	ObjectIdentifier sha1 = null;
+    ObjectIdentifier sha256 = null;
 	ObjectIdentifier md5 = null;
         try {
             sha1 = new ObjectIdentifier("1.3.14.3.2.26");
+            sha256 = new ObjectIdentifier("2.16.840.1.101.3.4.2.1");
             md5 = new ObjectIdentifier("1.2.840.113549.2.5");
         } catch (IOException ioe) {
             // should not happen
         }
         SHA1_OID = sha1;
+        SHA256_OID = sha256;
         MD5_OID = md5;
     }
 
@@ -98,8 +103,14 @@ public class TSRequest {
 	    // Check that the hash value matches the hash algorithm
 	    assert hashValue.length == 20;
 
-	} 
-	// Clone the hash value
+	} else if ("SHA-256".equalsIgnoreCase(hashAlgorithm) ||
+            "SHA256".equalsIgnoreCase(hashAlgorithm)) {
+        hashAlgorithmId = SHA256_OID;
+        // Check that the hash value matches the hash algorithm
+        assert hashValue.length == 32;
+
+    }
+        // Clone the hash value
 	this.hashValue = new byte[hashValue.length];
 	System.arraycopy(hashValue, 0, this.hashValue, 0, hashValue.length);
     }
@@ -116,7 +127,7 @@ public class TSRequest {
     /**
      * Sets an object identifier for the Time-Stamp Protocol policy.
      *
-     * @param version The policy object identifier.
+     * @param policyId The policy object identifier.
      */
     public void setPolicyId(String policyId) {
 	this.policyId = policyId;

@@ -354,7 +354,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         {
             String notId = sig.getId().replace('S', 'N');
             // calculate the nonce
-            byte[] nonce = SignedDoc.digest(sig.getSignatureValue().getValue());
+            byte[] nonce = SignedDoc.digest(sig.getSignatureValue().getValue(), sig.getSignedDoc().getDigestAlgorithm());
             X509Certificate notaryCert = null;
             if (sig.getUnsignedProperties() != null)
                 notaryCert = sig.getUnsignedProperties().getRespondersCertificate();
@@ -399,7 +399,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             throws DigiDocException
     {
         String notId = sig.getId().replace('S', 'N');
-        byte[] nonce = SignedDoc.digest(sig.getSignatureValue().getValue());
+        byte[] nonce = SignedDoc.digest(sig.getSignatureValue().getValue(), sig.getSignedDoc().getDigestAlgorithm());
         return getConfirmation(nonce, signersCert, getCACert(SignedDoc.getCommonName(signersCert
                 .getIssuerDN().getName())), null,
         // ((sig.getUnsignedProperties() != null) ?
@@ -440,7 +440,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                     m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
                 }
                 String strTime = new java.util.Date().toString();
-                byte[] nonce1 = SignedDoc.digest(strTime.getBytes());
+                byte[] nonce1 = SignedDoc.digest(strTime.getBytes(), "SHA-1");
                 OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests);
                 // debugWriteFile("req1.der", req.getEncoded());
                 if (m_logger.isDebugEnabled())
@@ -530,7 +530,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                     m_logger.debug("Check CA cert: " + caCert.getSubjectDN().getName());
                 }
                 String strTime = new java.util.Date().toString();
-                byte[] nonce1 = SignedDoc.digest(strTime.getBytes());
+                byte[] nonce1 = SignedDoc.digest(strTime.getBytes(), "SHA-1");
                 OCSPReq req = createOCSPRequest(nonce1, cert, caCert, m_bSignRequests);
                 // debugWriteFile("req1.der", req.getEncoded());
                 if (m_logger.isDebugEnabled())
@@ -601,8 +601,6 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
      *            OCSP response
      * @param nonce1
      *            nonve value used for request
-     * @param notaryCert
-     *            notarys own cert
      * @returns Notary object
      */
     private Notary parseAndVerifyResponse(Signature sig, OCSPResp resp, byte[] nonce1)
@@ -738,7 +736,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
      * Verifies that the OCSP response is about our signers cert and the response status is
      * successfull
      * 
-     * @param sig
+     * @param cert
      *            Signature object
      * @param basResp
      *            OCSP Basic response
@@ -893,7 +891,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             // only one response and the whole response was successfull
             // but we should verify that the nonce hasn't changed
             // calculate the nonce
-            byte[] nonce1 = SignedDoc.digest(sig.getSignatureValue().getValue());
+            byte[] nonce1 = SignedDoc.digest(sig.getSignatureValue().getValue(), sig.getSignedDoc().getDigestAlgorithm());
             if (m_useNonce)
             {
                 byte[] nonce2 = getNonce(basResp);
@@ -1030,7 +1028,6 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
      * 
      * @param signersCert
      * @param caCert
-     * @param provider
      * @return
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException

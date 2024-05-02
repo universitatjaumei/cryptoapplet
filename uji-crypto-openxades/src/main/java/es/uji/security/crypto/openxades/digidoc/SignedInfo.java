@@ -161,9 +161,9 @@ public class SignedInfo implements Serializable
     private DigiDocException validateSignatureMethod(String str)
     {
         DigiDocException ex = null;
-        if (str == null || !str.equals(SignedDoc.RSA_SHA1_SIGNATURE_METHOD))
+        if (str == null || (!str.equals(SignedDoc.RSA_SHA1_SIGNATURE_METHOD) && !str.equals(SignedDoc.RSA_SHA256_SIGNATURE_METHOD)))
             ex = new DigiDocException(DigiDocException.ERR_SIGNATURE_METHOD,
-                    "Currently supports only RSA-SHA1 signatures", null);
+                    "Currently supports only RSA-SHA256 signatures", null);
         return ex;
     }
 
@@ -357,7 +357,11 @@ public class SignedInfo implements Serializable
         {
             CanonicalizationFactory canFac = FactoryManager.getCanonicalizationFactory();
             byte[] tmp = canFac.canonicalize(toXML(), SignedDoc.CANONICALIZATION_METHOD_20010315);
-            return SignedDoc.digest(tmp);
+
+            if (m_signatureMethod.contains("rsa-sha1"))
+                return SignedDoc.digest(tmp, "SHA-1");
+            else
+                return SignedDoc.digest(tmp, "SHA-256");
         }
         else
             return m_origDigest;

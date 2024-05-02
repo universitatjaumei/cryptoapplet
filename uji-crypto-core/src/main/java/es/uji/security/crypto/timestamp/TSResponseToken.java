@@ -18,6 +18,7 @@ import java.util.SimpleTimeZone;
 import javax.crypto.Cipher;
 
 import es.uji.security.util.asn1.DERObjectIdentifier;
+import sun.security.x509.AlgorithmId;
 
 public class TSResponseToken
 {
@@ -26,6 +27,7 @@ public class TSResponseToken
     public TSResponseToken(TSResponse response)
     {
         this.response = response;
+
     }
 
     public byte[] getMessageImprint() throws IOException, ASN1ParseException
@@ -178,18 +180,17 @@ public class TSResponseToken
     public boolean verify(X509Certificate cert) throws IOException, TokenVerifyException,
             ASN1ParseException
     {
-        return verify(cert, null, false, "SHA-1");
+        return verify(cert, null, false);
     }
 
     public boolean verify(X509Certificate cert, byte[] origData) throws IOException,
             TokenVerifyException, ASN1ParseException
     {
-        return verify(cert, origData, true, "SHA-1");
+        return verify(cert, origData, true);
     }
 
-    public boolean verify(X509Certificate cert, byte[] origData, boolean verifyData,
-            String signatureDigestAlgorithm) throws IOException, TokenVerifyException,
-            ASN1ParseException
+    public boolean verify(X509Certificate cert, byte[] origData, boolean verifyData)
+            throws IOException, TokenVerifyException, ASN1ParseException
     {
         byte[] pk9enc = response.getToken().getSignerInfos()[0].getAuthenticatedAttributes()
                 .getDerEncoding();
@@ -207,7 +208,14 @@ public class TSResponseToken
 
             deciphdig = ciph.doFinal(ciphdig);
 
-            messageDigest = MessageDigest.getInstance(signatureDigestAlgorithm);
+            String messageDigestAlgorithm = "SHA-1";
+            AlgorithmId[] digestAlgorithmIds = this.response.getToken().getDigestAlgorithmIds();
+
+            if (digestAlgorithmIds != null && digestAlgorithmIds.length > 0) {
+                messageDigestAlgorithm = digestAlgorithmIds[0].getName();
+            }
+
+            messageDigest = MessageDigest.getInstance(messageDigestAlgorithm);
             digest = messageDigest.digest(pk9enc);
         }
         catch (Exception e)
@@ -299,14 +307,14 @@ public class TSResponseToken
 
         // get user password and file input stream
         char[] password = "cryptoapplet".toCharArray();
-        FileInputStream fis = new FileInputStream("../uji.keystore");
+        FileInputStream fis = new FileInputStream("/opt/devel/workspaces/cryptoapplet-github/uji.keystore");
         ks.load(fis, password);
         fis.close();
 
         X509Certificate cert = (X509Certificate) ks.getCertificate("TSA1_ACCV");
         
         TSResponse r = TimeStampFactory.getTimeStampResponse(tsaURL, "test"
-                .getBytes(), true);
+                .getBytes(), true, "SHA-256");
 
         TSResponseToken tsResponseToken = new TSResponseToken(r);
 
@@ -325,6 +333,6 @@ public class TSResponseToken
         }
 
         System.out.print("No original data check verification: ");
-        System.out.println(" " + tsResponseToken.verify(cert, null, false, "SHA-1"));
+        System.out.println(" " + tsResponseToken.verify(cert, null, false));
     }
 }

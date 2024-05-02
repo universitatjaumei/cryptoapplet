@@ -51,36 +51,23 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 
-public class TimeStampFactory
-{
-	public static TSResponse getTimeStampResponse(String strUrl, byte[] data, boolean calculateDigest) throws NoSuchAlgorithmException, IOException, SignatureException
-    {
-		return getTimeStampResponse(strUrl, data, calculateDigest, "SHA-1");
-    }
-	public static TSResponse getTimeStampResponse(String strUrl, byte[] data, boolean calculateDigest, String digestAlgorithm) throws NoSuchAlgorithmException, IOException, SignatureException
-    {
+public class TimeStampFactory {
+    public static TSResponse getTimeStampResponse(String strUrl, byte[] data, boolean calculateDigest, String digestAlgorithm) throws NoSuchAlgorithmException, IOException, SignatureException {
         HttpTimestamper httpTimestamper = new HttpTimestamper(strUrl);
-        
+
         byte[] digest = data;
-      
-        if (calculateDigest)
-        {
+
+        if (calculateDigest) {
             MessageDigest messageDigest = MessageDigest.getInstance(digestAlgorithm);
-            digest = messageDigest.digest(data);  
+            digest = messageDigest.digest(data);
         }
-        
-        
-        TSRequest request = new TSRequest(digest, digestAlgorithm );
+
+
+        TSRequest request = new TSRequest(digest, digestAlgorithm);
         request.requestCertificate(true);
-        
-        TSResponse response = httpTimestamper.generateTimestamp(request); 
-        
+
+        TSResponse response = httpTimestamper.generateTimestamp(request);
+
         return response;
-    }
-    
-    public static byte[] getTimeStamp(String tsaURL, byte[] data, boolean calculateDigest) throws NoSuchAlgorithmException, IOException, SignatureException
-    {
-        TSResponse response = getTimeStampResponse(tsaURL, data, calculateDigest);
-        return response.getEncodedToken();
     }
 }

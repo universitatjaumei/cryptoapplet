@@ -104,7 +104,7 @@ public class Reference implements Serializable
     {
         m_sigInfo = sigInfo;
         setUri("#" + df.getId());
-        setDigestAlgorithm(SignedDoc.SHA1_DIGEST_ALGORITHM);
+        setDigestAlgorithm(SignedDoc.SHA256_DIGEST_ALGORITHM);
         setDigestValue(df.getDigest());
         setTransformAlgorithm(df.getContentType().equals(DataFile.CONTENT_DETATCHED) ? SignedDoc.DIGIDOC_DETATCHED_TRANSFORM
                 : null);
@@ -145,7 +145,7 @@ public class Reference implements Serializable
     {
         m_sigInfo = sigInfo;
         setUri(sp.getTarget() + "-SignedProperties");
-        setDigestAlgorithm(SignedDoc.SHA1_DIGEST_ALGORITHM);
+        setDigestAlgorithm(SignedDoc.SHA256_DIGEST_ALGORITHM);
         setDigestValue(sp.calculateDigest());
         setTransformAlgorithm(null);
     }
@@ -228,9 +228,9 @@ public class Reference implements Serializable
     private DigiDocException validateDigestAlgorithm(String str)
     {
         DigiDocException ex = null;
-        if (str == null || !str.equals(SignedDoc.SHA1_DIGEST_ALGORITHM))
+        if (str == null || (!str.equals(SignedDoc.SHA256_DIGEST_ALGORITHM) && !str.equals(SignedDoc.SHA1_DIGEST_ALGORITHM)))
             ex = new DigiDocException(DigiDocException.ERR_DIGEST_ALGORITHM,
-                    "Currently supports only SHA1 digest algorithm", null);
+                    "Currently supports only SHA256 digest algorithm", null);
         return ex;
     }
 
@@ -270,9 +270,10 @@ public class Reference implements Serializable
     private DigiDocException validateDigestValue(byte[] data)
     {
         DigiDocException ex = null;
-        if (data == null || data.length != SignedDoc.SHA1_DIGEST_LENGTH)
+        if (data == null || (m_digestAlgorithm.equals(SignedDoc.SHA256_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA256_DIGEST_LENGTH
+                || (m_digestAlgorithm.equals(SignedDoc.SHA1_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA1_DIGEST_LENGTH)))
             ex = new DigiDocException(DigiDocException.ERR_DIGEST_LENGTH,
-                    "SHA1 digest data is allways 20 bytes of length", null);
+                    "SHA1 digest data is always 20 bytes of length and SHA256 digest data is always 32 bytes of length", null);
         return ex;
     }
 

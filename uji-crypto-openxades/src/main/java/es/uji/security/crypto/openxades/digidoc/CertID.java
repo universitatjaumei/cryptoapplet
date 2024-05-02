@@ -118,11 +118,11 @@ public class CertID implements Serializable
     public CertID(Signature sig, X509Certificate cert, int type) throws DigiDocException
     {
         setId(sig.getId() + "-RESPONDER_CERTINFO");
-        setDigestAlgorithm(SignedDoc.SHA1_DIGEST_ALGORITHM);
+        setDigestAlgorithm(SignedDoc.SHA256_DIGEST_ALGORITHM);
         byte[] digest = null;
         try
         {
-            digest = SignedDoc.digest(cert.getEncoded());
+            digest = SignedDoc.digest(cert.getEncoded(), "SHA-256");
         }
         catch (Exception ex)
         {
@@ -239,9 +239,9 @@ public class CertID implements Serializable
     private DigiDocException validateDigestAlgorithm(String str)
     {
         DigiDocException ex = null;
-        if (str == null || !str.equals(SignedDoc.SHA1_DIGEST_ALGORITHM))
+        if (str == null || (!str.equals(SignedDoc.SHA256_DIGEST_ALGORITHM) && !str.equals(SignedDoc.SHA1_DIGEST_ALGORITHM)))
             ex = new DigiDocException(DigiDocException.ERR_CERT_DIGEST_ALGORITHM,
-                    "Currently supports only SHA1 digest algorithm", null);
+                    "Currently supports only SHA256 digest algorithm", null);
         return ex;
     }
 
@@ -281,9 +281,10 @@ public class CertID implements Serializable
     private DigiDocException validateDigestValue(byte[] data)
     {
         DigiDocException ex = null;
-        if (data == null || data.length != SignedDoc.SHA1_DIGEST_LENGTH)
+        if (data == null || (m_digestAlgorithm.equals(SignedDoc.SHA256_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA256_DIGEST_LENGTH
+                || (m_digestAlgorithm.equals(SignedDoc.SHA1_DIGEST_ALGORITHM) && data.length != SignedDoc.SHA1_DIGEST_LENGTH)))
             ex = new DigiDocException(DigiDocException.ERR_DIGEST_LENGTH,
-                    "SHA1 digest data is allways 20 bytes of length", null);
+                    "SHA1 digest data is always 20 bytes of length and SHA256 digest data is always 32 bytes of length", null);
         return ex;
     }
 

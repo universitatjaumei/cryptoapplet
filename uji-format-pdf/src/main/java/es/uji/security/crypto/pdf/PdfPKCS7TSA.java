@@ -1060,7 +1060,7 @@ public class PdfPKCS7TSA {
             if (tsaUrl != null) {                                                                                           
                 byte[] tsImprint = MessageDigest.getInstance("SHA-1").digest(digest);    
                 
-                TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, tsImprint, false);
+                TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, tsImprint, false, "SHA-1");
                 byte[] tsToken = response.getEncodedToken();   
                 
                 //Strip the status code out of the response, the adobe validator requieres it. 

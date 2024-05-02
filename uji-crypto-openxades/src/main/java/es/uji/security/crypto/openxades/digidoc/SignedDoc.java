@@ -66,36 +66,52 @@ public class SignedDoc implements Serializable
     /** the only supported formats are SK-XML and DIGIDOC-XML */
     public static final String FORMAT_SK_XML = "SK-XML";
     public static final String FORMAT_DIGIDOC_XML = "DIGIDOC-XML";
+
     /** supported versions are 1.0 and 1.1 */
     public static final String VERSION_1_0 = "1.0";
     public static final String VERSION_1_1 = "1.1";
     public static final String VERSION_1_2 = "1.2";
     public static final String VERSION_1_3 = "1.3";
     public static final String VERSION_1_4 = "1.4";
-    /** the only supported algorithm is SHA1 */
+
+    /** the only supported algorithms are SHA1 and SHA256 */
     public static final String SHA1_DIGEST_ALGORITHM = "http://www.w3.org/2000/09/xmldsig#sha1";
-    /** SHA1 digest data is allways 20 bytes */
+    public static final String SHA256_DIGEST_ALGORITHM = "http://www.w3.org/2000/09/xmldsig#sha256";
+
+    /** SHA digest data */
     public static final int SHA1_DIGEST_LENGTH = 20;
+    public static final int SHA256_DIGEST_LENGTH = 32;
+
     /** the only supported canonicalization method is 20010315 */
     public static final String CANONICALIZATION_METHOD_20010315 = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
-    /** the only supported signature method is RSA-SHA1 */
+
+    /** the only supported signature methods are is RSA-1 and RSA-SHA256 */
     public static final String RSA_SHA1_SIGNATURE_METHOD = "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+    public static final String RSA_SHA256_SIGNATURE_METHOD = "http://www.w3.org/2000/09/xmldsig#rsa-sha256";
+
     /** the only supported transform is digidoc detatched transform */
     public static final String DIGIDOC_DETATCHED_TRANSFORM = "http://www.sk.ee/2002/10/digidoc#detatched-document-signature";
+
     /** XML-DSIG namespace */
     public static String xmlns_xmldsig = "http://www.w3.org/2000/09/xmldsig#";
+
     /** ETSI namespace */
     public static String xmlns_etsi = "http://uri.etsi.org/01903/v1.1.1#";
+
     /** DigiDoc namespace */
     public static String xmlns_digidoc = "http://www.sk.ee/DigiDoc/v1.3.0#";
+
     /** program & library name */
     public static final String LIB_NAME = "JDigiDoc";
+
     /** program & library version */
     public static final String LIB_VERSION = "2.3.7";
 
     private static Logger log = Logger.getLogger(SignedDoc.class);
 
     private static ConfigManager conf = ConfigManager.getInstance();
+
+    private String m_digestAlgorithm = "SHA-256";
     
     /**
      * Creates new SignedDoc Initializes everything to null
@@ -108,22 +124,33 @@ public class SignedDoc implements Serializable
         m_signatures = null;
     }
 
-    /**
-     * Creates new SignedDoc
-     * 
-     * @param format
-     *            file format name
-     * @param version
-     *            file version number
-     * @throws DigiDocException
-     *             for validation errors
-     */
     public SignedDoc(String format, String version) throws DigiDocException
     {
         setFormat(format);
         setVersion(version);
+
         m_dataFiles = null;
         m_signatures = null;
+    }
+
+    /**
+         * Creates new SignedDoc
+         *
+         * @param format
+         *            file format name
+         * @param version
+         *            file version number
+         * @throws DigiDocException
+         *             for validation errors
+         */
+    public SignedDoc(String format, String version, String digestAlgorithm) throws DigiDocException
+    {
+        setFormat(format);
+        setVersion(version);
+
+        m_dataFiles = null;
+        m_signatures = null;
+        m_digestAlgorithm = digestAlgorithm;
     }
 
     /**
@@ -219,7 +246,7 @@ public class SignedDoc implements Serializable
                         .equals(VERSION_1_4))
                         && m_format != null && !m_format.equals(FORMAT_DIGIDOC_XML)))
             ex = new DigiDocException(DigiDocException.ERR_DIGIDOC_VERSION,
-                    "Currently supports only versions 1.0, 1.1, 1.2, 1.3 and 1.4", null);
+                    "Currently supports only versions 1.0, 1.1, 1.2, 1.3, 1.4 and 1.5", null);
         return ex;
     }
 
@@ -317,7 +344,7 @@ public class SignedDoc implements Serializable
      * Writes the SignedDoc to an output file and automatically calculates DataFile sizes and
      * digests
      * 
-     * @param outputFile
+     * @param os
      *            output file name
      * @throws DigiDocException
      *             for all errors
@@ -356,7 +383,7 @@ public class SignedDoc implements Serializable
     /**
      * Adds a new DataFile object
      * 
-     * @param attr
+     * @param df
      *            DataFile object to add
      */
     public void addDataFile(DataFile df) throws DigiDocException
@@ -463,7 +490,7 @@ public class SignedDoc implements Serializable
         Signature sig = new Signature(this);
         sig.setId(getNewSignatureId());
         // create SignedInfo block
-        SignedInfo si = new SignedInfo(sig, RSA_SHA1_SIGNATURE_METHOD,
+        SignedInfo si = new SignedInfo(sig, RSA_SHA256_SIGNATURE_METHOD,
                 CANONICALIZATION_METHOD_20010315);
         // add DataFile references
         for (int i = 0; i < countDataFiles(); i++)
@@ -495,7 +522,7 @@ public class SignedDoc implements Serializable
     /**
      * Adds a new Signature object
      * 
-     * @param attr
+     * @param sig
      *            Signature object to add
      */
     public void addSignature(Signature sig)
@@ -646,6 +673,8 @@ public class SignedDoc implements Serializable
         StringBuffer sb = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         sb.append("<SignedDoc format=\"");
         sb.append(m_format);
+        sb.append("\" digestAlgorithm=\"");
+        sb.append(m_digestAlgorithm);
         sb.append("\" version=\"");
         sb.append(m_version);
         sb.append("\"");
@@ -722,18 +751,18 @@ public class SignedDoc implements Serializable
     }
 
     /**
-     * Computes an SHA1 digest
+     * Computes an SHA256 digest
      * 
      * @param data
      *            input data
-     * @return SHA1 digest
+     * @return SHA256 digest
      */
-    public static byte[] digest(byte[] data) throws DigiDocException
+    public static byte[] digest(byte[] data, String digestAlgorithm) throws DigiDocException
     {
         byte[] dig = null;
         try
         {
-            MessageDigest sha = MessageDigest.getInstance("SHA-1");
+            MessageDigest sha = MessageDigest.getInstance(digestAlgorithm);
             sha.update(data);
             dig = sha.digest();
         }
@@ -743,6 +772,7 @@ public class SignedDoc implements Serializable
         }
         return dig;
     }
+
 
     /**
      * Verifies the siganture
@@ -767,7 +797,7 @@ public class SignedDoc implements Serializable
             // " signature: " + Base64Util.encode(signature, 0));
             /*
              * // check keystore... java.security.Signature sig =
-             * java.security.Signature.getInstance("SHA1withRSA");
+             * java.security.Signature.getInstance("SHA256withRSA");
              * sig.initVerify((java.security.interfaces.RSAPublicKey)cert.getPublicKey());
              * sig.update(digest); rc = sig.verify(signature);
              */
@@ -900,7 +930,7 @@ public class SignedDoc implements Serializable
      * @param data
      *            input data in Base64 form
      * @return X509Certificate object
-     * @throws EFormException
+     * @throws DigiDocException
      *             for all errors
      */
     public static X509Certificate readCertificate(byte[] data) throws DigiDocException
@@ -1036,5 +1066,9 @@ public class SignedDoc implements Serializable
                 sb.append(str.substring(str.length() - 2));
         }
         return sb.toString();
+    }
+
+    public String getDigestAlgorithm() {
+        return m_digestAlgorithm;
     }
 }

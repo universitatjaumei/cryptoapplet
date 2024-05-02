@@ -167,8 +167,7 @@ public class FactoryManager
 
         try
         {
-            digFac = (DigiDocFactory) Class.forName(conf.getProperty("DIGIDOC_FACTORY_IMPL"))
-                    .newInstance();
+            digFac = (DigiDocFactory) Class.forName(conf.getProperty("DIGIDOC_FACTORY_IMPL")).newInstance();
             digFac.init();
         }
         catch (DigiDocException ex)

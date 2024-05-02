@@ -89,8 +89,7 @@ public class TimestampInfo
     /**
      * Mutator for Signature attribute
      * 
-     * @param uprops
-     *            value of Signature attribute
+     * @param sig value of Signature attribute
      */
     public void setSignature(Signature sig)
     {

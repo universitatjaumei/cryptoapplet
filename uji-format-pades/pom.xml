@@ -16,12 +16,6 @@
       <groupId>es.uji.security</groupId>
       <artifactId>uji-crypto-core</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk15</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>

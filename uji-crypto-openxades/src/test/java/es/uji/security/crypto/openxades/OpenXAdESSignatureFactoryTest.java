@@ -6,6 +6,7 @@ import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.test.BaseCryptoAppletTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -21,22 +22,29 @@ public class OpenXAdESSignatureFactoryTest extends BaseCryptoAppletTest
     }
 
     @Test
-    public void jxadesEnvelopedWithoutCosign() throws Exception
+    public void signAndVerifyOpenXAdESDocuments() throws Exception
     {
-        // Sign
-
         ISignFormatProvider signFormatProvider = new OpenXAdESSignatureFactory();
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
+        showErrors(signatureResult, "target/openxades-document.xml");
 
-        showErrors(signatureResult, "target/out-openxades.xml");
-
-        // Verify
-
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("target/out-openxades.xml"));
-
+        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("target/openxades-document.xml"));
         OpenXAdESSignatureVerifier signatureVerifier = new OpenXAdESSignatureVerifier();
         VerificationResult verificationResult = signatureVerifier.verify(signedData);
-
         showErrors(verificationResult);
+    }
+
+    @Test
+    public void verifyDigestOpenXAdESDocuments() throws Exception
+    {
+        for (String digestAlgorithm: new String[] {"sha1", "sha256"}) {
+            byte[] signedData = OS.inputStreamToByteArray(
+                    new FileInputStream("src/test/resources/openxades-" + digestAlgorithm + "-digest.xml"));
+
+            OpenXAdESSignatureVerifier signatureVerifier = new OpenXAdESSignatureVerifier();
+            VerificationResult verificationResult = signatureVerifier.verify(signedData);
+
+            showErrors(verificationResult);
+        }
     }
 }

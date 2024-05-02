@@ -167,7 +167,7 @@ public class AppEnvironmentTester extends Thread
 
             String tsaUrl = conf.getProperty("DIGIDOC_TSA1_URL");
 
-            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, tst.getBytes(), true);
+            TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, tst.getBytes(), true, "SHA-1");
         }
         catch (Exception e)
         {

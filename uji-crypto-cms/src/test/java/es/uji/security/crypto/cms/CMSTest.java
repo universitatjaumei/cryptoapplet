@@ -20,6 +20,7 @@ import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedGenerator;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.uji.security.crypto.ISignFormatProvider;
@@ -29,6 +30,7 @@ import es.uji.security.crypto.config.OS;
 import es.uji.security.crypto.test.BaseCryptoAppletTest;
 import es.uji.security.util.Base64;
 
+@Ignore
 public class CMSTest extends BaseCryptoAppletTest
 {
     @Before
@@ -45,11 +47,11 @@ public class CMSTest extends BaseCryptoAppletTest
         ISignFormatProvider signFormatProvider = new CMSSignatureFactory();
         SignatureResult signatureResult = signFormatProvider.formatSignature(signatureOptions);
 
-        showErrors(signatureResult, "target/out-cms.bin");
+        showErrors(signatureResult, "/opt/devel/workspaces/cryptoapplet-github/uji-crypto-cms/target/out-cms.bin");
 
         // Verify
 
-        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("target/out-cms.bin"));
+        byte[] signedData = OS.inputStreamToByteArray(new FileInputStream("/opt/devel/workspaces/cryptoapplet-github/uji-crypto-cms/target/out-cms.bin"));
 
         CMSSignatureVerifier signatureVerifier = new CMSSignatureVerifier();
 

@@ -110,7 +110,7 @@ public class UnsignedProperties implements Serializable
     /**
      * Mutator for completeCertificateRefs attribute
      * 
-     * @param str
+     * @param crefs
      *            new value for completeCertificateRefs attribute
      * @throws DigiDocException
      *             for validation errors
@@ -136,7 +136,7 @@ public class UnsignedProperties implements Serializable
     /**
      * Mutator for completeRevocationRefs attribute
      * 
-     * @param str
+     * @param refs
      *            new value for completeRevocationRefs attribute
      * @throws DigiDocException
      *             for validation errors
@@ -218,7 +218,7 @@ public class UnsignedProperties implements Serializable
     /**
      * Mutator for notary attribute
      * 
-     * @param str
+     * @param not
      *            new value for notary attribute
      * @throws DigiDocException
      *             for validation errors
@@ -261,7 +261,7 @@ public class UnsignedProperties implements Serializable
         // verify notary certs digest using CompleteCertificateRefs
         try
         {
-            byte[] digest = SignedDoc.digest(cert.getEncoded());
+            byte[] digest = SignedDoc.digest(cert.getEncoded(), m_signature.getSignedDoc().getDigestAlgorithm());
             if (!SignedDoc.compareDigests(digest, m_certRefs.getCertDigestValue()))
                 errs.add(new DigiDocException(DigiDocException.ERR_RESPONDERS_CERT,
                         "Notary certificates digest doesn't match!", null));
@@ -280,7 +280,7 @@ public class UnsignedProperties implements Serializable
         {
             byte[] ocspData = m_notary.getOcspResponseData();
             // System.out.println("OCSP data len: " + ocspData.length);
-            byte[] digest1 = SignedDoc.digest(ocspData);
+            byte[] digest1 = SignedDoc.digest(ocspData, m_signature.getSignedDoc().getDigestAlgorithm());
             // System.out.println("Calculated digest: " + Base64Util.encode(digest1, 0));
             byte[] digest2 = m_revRefs.getDigestValue();
             // System.out.println("Real digest: " + Base64Util.encode(digest2, 0));
