@@ -1,19 +1,11 @@
-# CryptoApplet #
+# CryptoApplet
 
-CryptoApplet is a Java applet for advanced digital signature creation developed by the [Universitat Jaume I](http://www.uji.es). The procedure is very simple: given a data input and a configuration determined by the server, the web client will create a digital signature of the data. The representation of the signature is obtained in the format specified in the configuration.
-
-![Screenshot](https://github.com/universitatjaumei/cryptoapplet/raw/master/logo.png)
+CryptoApplet is a set of Java libraries for advanced digital signature creation developed by the [Universitat Jaume I](http://www.uji.es).
 
 The signature representation formats supported by CryptoApplet are the following:
 
 * Raw signature.
 * CMS/PKCS#7.
-* XML: from XML Signature to XAdES-X-L.
+* XML: from XML Signature to XAdES-XL.
 * PDF: PAdES signature with timestamp.
 * ODT: XML Signature.
-
-Certificate management is done transparently for the user through direct access to CryptoAPI, if we are using Microsoft Internet Explorer, or to PKCS#11 if we are using Firefox (either in Windows or GNU/Linux). Stored certificates can also be used if the client system has the Clauer software installed.
-
-The applet can also be executed in Windows, GNU/Linux or MacOSX, the only requirement is to have a Sun's Java Virtual Machine (version 1.6 o higher) installed.
-
-You can find more information in the [official documentation](http://jira.uji.es/confluence/display/CRYPTOAPPLET/) or posting your questions in our [public mailing list at Google Groups](https://groups.google.com/a/uji.es/group/cryptoapplet?lnk=)
