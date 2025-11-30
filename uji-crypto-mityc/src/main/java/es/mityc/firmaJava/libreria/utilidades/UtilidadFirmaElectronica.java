@@ -158,7 +158,7 @@ public class UtilidadFirmaElectronica implements ConstantesXADES{
     					asn1IS = new ASN1InputStream(ext.getOctets());
     					ASN1Sequence seq = (ASN1Sequence)asn1IS.readObject();
     					// Solo hay una PolicyInformation para el DNIe
-    					PolicyInformation pi = new PolicyInformation((ASN1Sequence)seq.getObjectAt(0));
+    					PolicyInformation pi = PolicyInformation.getInstance(seq.getObjectAt(0));
     					if (UtilidadDNIe.POLICY_OID_CERTIFICADO_AUTENTICACION_DNIE.equals(pi.getPolicyIdentifier().getId()))
     						continue;
     				}

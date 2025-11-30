@@ -34,8 +34,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -82,7 +82,7 @@ public final class UtilidadesX509 implements ConstantesProveedores {
 		return cert;
 	}
 
-	public static DERObject convertToDERObject(byte[] data) throws IOException
+	public static ASN1Primitive convertToDERObject(byte[] data) throws IOException
 	{
 	    ByteArrayInputStream inStream = new ByteArrayInputStream(data);
 	    ASN1InputStream derInputStream = new ASN1InputStream(inStream);
@@ -100,10 +100,10 @@ public final class UtilidadesX509 implements ConstantesProveedores {
 		
 		// Busca el hash de la issuer public key
 		// Busca el hash de la public key info de la CA expendedora en el certificado
-		DERObject derObject = convertToDERObject(cert.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId()));
-		if (derObject instanceof DEROctetString)
+		ASN1Primitive derObject = convertToDERObject(cert.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId()));
+		if (derObject instanceof ASN1OctetString)
 	    {
-			DEROctetString derOctetString = (DEROctetString)derObject;
+			ASN1OctetString derOctetString = (ASN1OctetString)derObject;
 			derObject = convertToDERObject(derOctetString.getOctets());
 	    }
 		ASN1Sequence aIs = ASN1Sequence.getInstance(derObject);
@@ -137,7 +137,7 @@ public final class UtilidadesX509 implements ConstantesProveedores {
 	public static ASN1OctetString getSubjectKeyHash(X509Certificate cert) throws IOException {
 		PublicKey pk = cert.getPublicKey();
 		byte[] pkCertBytes = pk.getEncoded();
-		DERObject der = convertToDERObject(pkCertBytes);
+		ASN1Primitive der = convertToDERObject(pkCertBytes);
 		ASN1Sequence seq = ASN1Sequence.getInstance(der);
 		SubjectPublicKeyInfo spki = new SubjectPublicKeyInfo(seq);
 		

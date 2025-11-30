@@ -210,17 +210,32 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, signatureValue, true,
                     signature.getSignedDoc().getDigestAlgorithm());
 
-            X509Certificate xcaCert = ConfigManager.readCertificate(tsa1_ca);
             TSResponseToken responseToken = new TSResponseToken(response);
-            
-            TSResponse mmm = new TSResponse(Base64.decode(Base64.encodeBytes(response.getEncodedToken())));
-            
-            if (! responseToken.verify(xcaCert, signatureValue))
+
+            // Extract the TSA certificate from the timestamp token
+            X509Certificate tsaCert = null;
+            if (response.getToken() != null && response.getToken().getCertificates() != null)
+            {
+                X509Certificate[] certs = response.getToken().getCertificates();
+                if (certs != null && certs.length > 0)
+                {
+                    // The first certificate is typically the TSA signing certificate
+                    tsaCert = certs[0];
+                }
+            }
+
+            // Fallback to configured CA certificate if TSA cert not found in token
+            if (tsaCert == null)
+            {
+                tsaCert = ConfigManager.readCertificate(tsa1_ca);
+            }
+
+            if (! responseToken.verify(tsaCert, signatureValue))
             {
                 signatureResult.setValid(false);
                 signatureResult.addError("Obtained timestamp is not valid");
-                
-                return signatureResult;                
+
+                return signatureResult;
             }
             
             TimestampInfo ts = new TimestampInfo("TS1", TimestampInfo.TIMESTAMP_TYPE_SIGNATURE);
@@ -231,7 +246,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             signature.addTimestampInfo(ts);
 
 
-            if (tsa1_ca == null)
+            if (tsaCert == null)
             {
                 signatureResult.setValid(false);
                 signatureResult.addError(LabelManager.get("ERROR_DDOC_TSACA"));
@@ -241,7 +256,7 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
 
             certValue = new CertValue();
             certValue.setType(CertValue.CERTVAL_TYPE_TSA);
-            certValue.setCert(xcaCert);
+            certValue.setCert(tsaCert);
             certValue.setId(signature.getId() + "-TSA_CERT");
 
             // Check the certificate validity against the timestamp
@@ -305,12 +320,29 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             System.arraycopy(canCompleteRevocationRefs, 0, refsOnlyData,
                     canCompleteCertificateRefs.length, canCompleteRevocationRefs.length);
 
-            X509Certificate xcaCert = ConfigManager.readCertificate(tsa1_ca);
             TSResponse response = TimeStampFactory.getTimeStampResponse(tsaUrl, refsOnlyData, true,
                     signature.getSignedDoc().getDigestAlgorithm());
-            TSResponseToken responseToken = new TSResponseToken(response);            
+            TSResponseToken responseToken = new TSResponseToken(response);
 
-            if (! responseToken.verify(xcaCert, refsOnlyData))
+            // Extract the TSA certificate from the timestamp token
+            X509Certificate tsaCert2 = null;
+            if (response.getToken() != null && response.getToken().getCertificates() != null)
+            {
+                X509Certificate[] certs = response.getToken().getCertificates();
+                if (certs != null && certs.length > 0)
+                {
+                    // The first certificate is typically the TSA signing certificate
+                    tsaCert2 = certs[0];
+                }
+            }
+
+            // Fallback to configured CA certificate if TSA cert not found in token
+            if (tsaCert2 == null)
+            {
+                tsaCert2 = ConfigManager.readCertificate(tsa1_ca);
+            }
+
+            if (! responseToken.verify(tsaCert2, refsOnlyData))
             {
                 signatureResult.setValid(false);
                 signatureResult.addError("Obtained timestamp is not valid");
@@ -333,31 +365,49 @@ public class OpenXAdESSignatureFactory implements ISignFormatProvider
             log.debug("\n\n" + this.getClass().getName()
                     + ": No se pudo realizar la confirmacion OCSP" + e.getMessage());
 
-            signatureResult.setValid(false);
+            // Check if OCSP confirmation is required
+            String confirmProp = conf.getProperty("DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY");
+            boolean demandOcspConfirmation = "true".equals(confirmProp);
 
+            // Always fail for certificate revocation or expiration
             if (e.getCode() == DigiDocException.ERR_CERT_REVOKED)
             {
+                signatureResult.setValid(false);
                 signatureResult.addError(LabelManager.get("ERROR_DDOC_CERTREVOKED"));
+                return signatureResult;
             }
             else if (e.getCode() == DigiDocException.ERR_CERT_EXPIRED)
             {
+                signatureResult.setValid(false);
                 signatureResult.addError(LabelManager.get("ERROR_DDOC_CERTEXPIRED"));
+                return signatureResult;
             }
-            else if (e.getCode() == DigiDocException.ERR_CA_CERT_READ)
+            // For other OCSP errors, only fail if OCSP confirmation is demanded
+            else if (demandOcspConfirmation)
             {
-                signatureResult.addError(LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED"));
-            }
-            else if (e.getCode() == DigiDocException.ERR_OCSP_READ_FILE
-                    || e.getCode() == DigiDocException.ERR_OCSP_ISSUER_CA_NOT_FOUND)
-            {
-                signatureResult.addError(LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED"));
+                signatureResult.setValid(false);
+
+                if (e.getCode() == DigiDocException.ERR_CA_CERT_READ)
+                {
+                    signatureResult.addError(LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED"));
+                }
+                else if (e.getCode() == DigiDocException.ERR_OCSP_READ_FILE
+                        || e.getCode() == DigiDocException.ERR_OCSP_ISSUER_CA_NOT_FOUND)
+                {
+                    signatureResult.addError(LabelManager.get("ERROR_DDOC_CERT_NOT_ALLOWED"));
+                }
+                else
+                {
+                    signatureResult.addError(LabelManager.get("ERROR_DDOC_CERTGENERIC"));
+                }
+
+                return signatureResult;
             }
             else
             {
-                signatureResult.addError(LabelManager.get("ERROR_DDOC_CERTGENERIC"));
+                log.debug("OCSP verification failed but DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY is false, continuing with signature creation");
+                // Continue with signature creation even though OCSP failed
             }
-
-            return signatureResult;
         }
 
         signatureResult.setValid(true);

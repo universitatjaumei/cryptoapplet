@@ -1,11 +1,12 @@
 package es.uji.security.crypto.cms.bc;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.BERSet;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.x509.CertificateList;
@@ -72,7 +73,7 @@ class CMSUtils
                 X509Certificate c = (X509Certificate)it.next();
 
                 certs.add(X509CertificateStructure.getInstance(
-                                                       ASN1Object.fromByteArray(c.getEncoded())));
+                                                       ASN1Primitive.fromByteArray(c.getEncoded())));
             }
 
             return certs;
@@ -102,7 +103,7 @@ class CMSUtils
             {
                 X509CRL c = (X509CRL)it.next();
 
-                crls.add(CertificateList.getInstance(ASN1Object.fromByteArray(c.getEncoded())));
+                crls.add(CertificateList.getInstance(ASN1Primitive.fromByteArray(c.getEncoded())));
             }
 
             return crls;
@@ -127,7 +128,7 @@ class CMSUtils
 
         for (Iterator it = derObjects.iterator(); it.hasNext();)
         {
-            v.add((DEREncodable)it.next());
+            v.add((ASN1Encodable)it.next());
         }
 
         return new BERSet(v);
@@ -139,7 +140,7 @@ class CMSUtils
 
         for (Iterator it = derObjects.iterator(); it.hasNext();)
         {
-            v.add((DEREncodable)it.next());
+            v.add((ASN1Encodable)it.next());
         }
 
         return new DERSet(v);

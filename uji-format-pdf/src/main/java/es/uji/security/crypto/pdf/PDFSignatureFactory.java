@@ -31,27 +31,27 @@ import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.util.encoders.Hex;
 
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.Image;
-import com.lowagie.text.Phrase;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.ColumnText;
-import com.lowagie.text.pdf.PdfAnnotation;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfDate;
-import com.lowagie.text.pdf.PdfDictionary;
-import com.lowagie.text.pdf.PdfFormField;
-import com.lowagie.text.pdf.PdfName;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfSignature;
-import com.lowagie.text.pdf.PdfSignatureAppearance;
-import com.lowagie.text.pdf.PdfStamper;
-import com.lowagie.text.pdf.PdfString;
-import com.lowagie.text.pdf.PdfTemplate;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.ColumnText;
+import com.itextpdf.text.pdf.PdfAnnotation;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfDate;
+import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfFormField;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfSignature;
+import com.itextpdf.text.pdf.PdfSignatureAppearance;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import es.uji.security.crypto.ISignFormatProvider;
 import es.uji.security.crypto.SignatureOptions;
@@ -122,7 +122,8 @@ public class PDFSignatureFactory implements ISignFormatProvider
             // over-rule this
 
             pdfSignatureAppearance.setCryptoDictionary(dic);
-            pdfSignatureAppearance.setCrypto((PrivateKey) privateKey, chain, null, null);
+            // In iText 5, setCrypto with this signature was removed
+            // The signature dictionary is set directly with setCryptoDictionary
 
             int contentEst = 15000;
 
@@ -153,13 +154,35 @@ public class PDFSignatureFactory implements ISignFormatProvider
         }
         else
         {
-            pdfSignatureAppearance.setProvider(provider.getName());
-            pdfSignatureAppearance.setCrypto(privateKey, chain, null,
-                    PdfSignatureAppearance.WINCER_SIGNED);
+            // In iText 5, setProvider and setCrypto with WINCER_SIGNED were removed
+            // Use the modern signature approach
+            pdfSignatureAppearance.setCertificate(chain[0]);
             pdfSignatureAppearance.setReason(confAdapter.getReason());
             pdfSignatureAppearance.setLocation(confAdapter.getLocation());
             pdfSignatureAppearance.setContact(confAdapter.getContact());
-            pdfStamper.close();
+
+            // Create the signature without timestamp
+            PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
+            dic.setReason(confAdapter.getReason());
+            dic.setLocation(confAdapter.getLocation());
+            dic.setContact(confAdapter.getContact());
+            dic.setDate(new PdfDate(pdfSignatureAppearance.getSignDate()));
+            pdfSignatureAppearance.setCryptoDictionary(dic);
+
+            int contentEst = 8192;
+            HashMap<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
+            exc.put(PdfName.CONTENTS, new Integer(contentEst * 2 + 2));
+            pdfSignatureAppearance.preClose(exc);
+
+            byte[] encodedSig = genPKCS7Signature(pdfSignatureAppearance.getRangeStream(),
+                    null, privateKey, provider, chain);
+
+            byte[] paddedSig = new byte[contentEst];
+            System.arraycopy(encodedSig, 0, paddedSig, 0, encodedSig.length);
+
+            PdfDictionary dic2 = new PdfDictionary();
+            dic2.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
+            pdfSignatureAppearance.close(dic2);
         }
     }
 
@@ -216,17 +239,17 @@ public class PDFSignatureFactory implements ISignFormatProvider
         if (signatureType.equals("GRAPHIC_AND_DESCRIPTION"))
         {
             updateLayerGraphiAndDescription(sap, rectangle, signatureText);
-            sap.setRender(PdfSignatureAppearance.SignatureRenderGraphicAndDescription);
+            sap.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION);
         }
         else if (signatureType.equals("DESCRIPTION"))
         {
             sap.setLayer2Text(signatureText);
-            sap.setRender(PdfSignatureAppearance.SignatureRenderDescription);
+            sap.setRenderingMode(PdfSignatureAppearance.RenderingMode.DESCRIPTION);
         }
         else if (signatureType.equals("NAME_AND_DESCRIPTION"))
         {
             sap.setLayer2Text(signatureText);
-            sap.setRender(PdfSignatureAppearance.SignatureRenderNameAndDescription);
+            sap.setRenderingMode(PdfSignatureAppearance.RenderingMode.NAME_AND_DESCRIPTION);
         }
     }
 
@@ -316,7 +339,10 @@ public class PDFSignatureFactory implements ISignFormatProvider
 
         Certificate caCertificate = findCACertificateFor(certificate);
 
-        if (caCertificate == null)
+        if (certificate.getIssuerDN().equals(certificate.getSubjectDN())) {
+            caCertificate = certificate;
+        }
+        else if (caCertificate == null)
         {
             SignatureResult signatureResult = new SignatureResult();
             signatureResult.setValid(false);

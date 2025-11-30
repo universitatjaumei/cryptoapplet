@@ -6,6 +6,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -196,18 +197,13 @@ public class TSResponseToken
                 .getDerEncoding();
         byte[] ciphdig = response.getToken().getSignerInfos()[0].getEncryptedDigest();
 
-        Cipher ciph = null;
         byte[] deciphdig = null;
         MessageDigest messageDigest = null;
         byte[] digest = null;
 
         try
         {
-            ciph = Cipher.getInstance("RSA");
-            ciph.init(Cipher.DECRYPT_MODE, cert);
-
-            deciphdig = ciph.doFinal(ciphdig);
-
+            // Determine the message digest algorithm
             String messageDigestAlgorithm = "SHA-1";
             AlgorithmId[] digestAlgorithmIds = this.response.getToken().getDigestAlgorithmIds();
 
@@ -215,87 +211,60 @@ public class TSResponseToken
                 messageDigestAlgorithm = digestAlgorithmIds[0].getName();
             }
 
-            messageDigest = MessageDigest.getInstance(messageDigestAlgorithm);
-            digest = messageDigest.digest(pk9enc);
+            // Map digest algorithm to signature algorithm
+            String signatureAlgorithm;
+            if (messageDigestAlgorithm.equals("SHA-256") || messageDigestAlgorithm.equals("SHA256")) {
+                signatureAlgorithm = "SHA256withRSA";
+            } else if (messageDigestAlgorithm.equals("SHA-384") || messageDigestAlgorithm.equals("SHA384")) {
+                signatureAlgorithm = "SHA384withRSA";
+            } else if (messageDigestAlgorithm.equals("SHA-512") || messageDigestAlgorithm.equals("SHA512")) {
+                signatureAlgorithm = "SHA512withRSA";
+            } else {
+                signatureAlgorithm = "SHA1withRSA";
+            }
+
+            // Verify signature using proper Signature API
+            Signature sig = Signature.getInstance(signatureAlgorithm);
+            sig.initVerify(cert.getPublicKey());
+            sig.update(pk9enc);
+
+            if (!sig.verify(ciphdig)) {
+                throw new TokenVerifyException("Signature verification failed");
+            }
+
+            // Signature is valid. Now check the message imprint if requested.
+            if (verifyData && origData != null)
+            {
+                messageDigest = MessageDigest.getInstance(messageDigestAlgorithm);
+                byte[] oddig = messageDigest.digest(origData);
+                byte[] msgImp = getMessageImprint();
+                if (oddig.length != msgImp.length)
+                {
+                    throw new TokenVerifyException(
+                            "The length between the calculated and signed hash does not match!");
+                }
+
+                for (int j = 0; j < oddig.length; j++)
+                {
+                    if (oddig[j] != msgImp[j])
+                    {
+                        throw new TokenVerifyException("Calculated and message imprint hashes are different!");
+                    }
+                }
+            }
+
+            // Signature verified successfully
+            return true;
+        }
+        catch (TokenVerifyException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
-            throw new TokenVerifyException("Unable to decipher pkcs#9 encoded attributes");
+            e.printStackTrace();
+            throw new TokenVerifyException("Unable to verify timestamp signature: " + e.getMessage(), e);
         }
-
-        // Parse asn1 deciphered structure:
-        /*
-         * 0 33: SEQUENCE { 2 9: SEQUENCE { 4 5: OBJECT IDENTIFIER sha1 (1 3 14 3 2 26) 11 0: NULL :
-         * } 13 20: OCTET STRING : B2 89 51 1E 57 C3 ED B9 2A EF 91 86 DE E8 FA A7 : C4 9D EE 3A : }
-         */
-        // 4 bytes two sequences
-        int i = 4;
-        if (deciphdig[i] != 0x06)
-        { // OID
-            throw new ASN1ParseException("Must be an OID at position " + i);
-        }
-        String oid = DERObjectIdentifier.getOIDasString(deciphdig, i + 2, deciphdig[i + 1]);
-        String hashAlg = DERObjectIdentifier.getHashAlgorithFromOID(oid);
-
-        if (!hashAlg.equals("SHA1") && !hashAlg.equals("SHA256") && !hashAlg.equals("SHA384")
-                && !hashAlg.equals("SHA512"))
-        {
-            // Invalid algorithm (not supported)
-            throw new ASN1ParseException("Signature hash algorithm not supported");
-        }
-        i += deciphdig[i + 1] + 2;
-
-        if (deciphdig[i] != 0x04)
-        {
-            // Could be a NULL tag
-            i += deciphdig[i + 1] + 2;
-            // Now we must point to the hash
-            if (deciphdig[i] != 0x04)
-            {
-                throw new ASN1ParseException("Must be a hash value at position " + i);
-            }
-        }
-
-        // The length must be the same:
-        if (digest.length != deciphdig[i + 1])
-        {
-            throw new ASN1ParseException(
-                    "The lenght between the plain and signed hash does not match!");
-        }
-        i += 2;
-
-        // We are pointing at the hash now, so we can compare it:
-        for (int j = 0; j < digest.length; j++)
-        {
-            if (digest[j] != deciphdig[i + j])
-            {
-                throw new TokenVerifyException("Plain and signed hash are different!");
-            }
-        }
-
-        // Here we have checked the signature is correct.
-        // Now check the message imprint.
-        if (verifyData)
-        {
-            messageDigest.reset();
-            byte[] oddig = messageDigest.digest(origData);
-            byte[] msgImp = getMessageImprint();
-            if (oddig.length != msgImp.length)
-            {
-                throw new TokenVerifyException(
-                        "The lenght between the calculated and signed hash does not match!");
-            }
-
-            for (int j = 0; j < oddig.length; j++)
-            {
-                if (oddig[j] != msgImp[j])
-                {
-                    throw new TokenVerifyException("Plain and signed hash are different!");
-                }
-            }
-        }
-
-        return true;
     }
 
     public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException,

@@ -44,7 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.GenTimeAccuracy;
@@ -211,10 +211,10 @@ public class TSCliente implements ConstantesTSA{
                         //AppPerfect: Falso positivo
                         ASN1InputStream is = new ASN1InputStream(cuerpoRespuesta);
                         ASN1Sequence seq = ASN1Sequence.getInstance(is.readObject());
-                        DEREncodable enc = seq.getObjectAt(1);
+                        ASN1Encodable enc = seq.getObjectAt(1);
                         if (enc == null)
                         	return null;
-                        return enc.getDERObject().getEncoded();
+                        return enc.toASN1Primitive().getEncoded();
                         //Fin Para solucionar bug en libreria bouncycastle
                     } 
                     catch (TSPException e)
@@ -301,8 +301,8 @@ public class TSCliente implements ConstantesTSA{
         
         tsv.setTst(tst);
         TimeStampTokenInfo tokenInfo = tst.getTimeStampInfo();
-        
-        MessageDigest resumen = TSPAlgoritmos.getDigest(tokenInfo.getMessageImprintAlgOID());
+
+        MessageDigest resumen = TSPAlgoritmos.getDigest(tokenInfo.getMessageImprintAlgOID().getId());
         if (resumen == null) {
         	tsv.setRespuesta(false);
         	return tsv;
@@ -329,8 +329,8 @@ public class TSCliente implements ConstantesTSA{
 	        tsv.setSello(tokenInfo.getSerialNumber());
 	        tsv.setFirmaDigest(new String(Base64Coder.encode(tokenInfo.getMessageImprintDigest())));
 	        tsv.setRespuesta(true);
-	        tsv.setSelloAlg(tokenInfo.getMessageImprintAlgOID());
-	        tsv.setEmisor(tst.getSID().getIssuer());
+	        tsv.setSelloAlg(tokenInfo.getMessageImprintAlgOID().getId());
+	        tsv.setEmisor(new javax.security.auth.x500.X500Principal(tst.getSID().getIssuer().getEncoded()));
 		} else {
 			tsv.setRespuesta(false);
 		}

@@ -3,14 +3,18 @@ package es.uji.security.crypto.pdf;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.lowagie.text.pdf.AcroFields;
-import com.lowagie.text.pdf.PdfPKCS7;
-import com.lowagie.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.AcroFields;
+import com.itextpdf.text.pdf.security.PdfPKCS7;
+import com.itextpdf.text.pdf.security.CertificateVerification;
+import com.itextpdf.text.pdf.security.VerificationException;
+import com.itextpdf.text.pdf.PdfReader;
 
 import es.uji.security.crypto.VerificationResult;
 import es.uji.security.crypto.config.ConfigManager;
@@ -28,7 +32,7 @@ public class PDFSignatureVerifier
 
         log.debug("Loading default CA certificates");
 
-        KeyStore kall = PdfPKCS7.loadCacertsKeyStore();
+        KeyStore kall = PdfPKCS7TSA.loadCacertsKeyStore();
 
         // Add all configured certificates to the main keystore
 
@@ -68,6 +72,8 @@ public class PDFSignatureVerifier
             }
         }
 
+
+
         PdfReader reader = null;
 
         try
@@ -97,23 +103,27 @@ public class PDFSignatureVerifier
             Calendar cal = pdfPKCS7.getSignDate();
             Certificate pkc[] = pdfPKCS7.getCertificates();
 
-            Object fails[] = PdfPKCS7.verifyCertificates(pkc, kall, null, cal);
+            if (!isSelfSigned((X509Certificate) pkc[0])) {
+                List<VerificationException> errors = CertificateVerification.verifyCertificates(pkc, kall, cal);
 
-            if (fails != null)
-            {
-                verificationResult.setValid(false);
+                if (errors != null && !errors.isEmpty()) {
+                    verificationResult.setValid(false);
 
-                for (Object error : fails)
-                {
-                    verificationResult.addError((String) error);
+                    for (VerificationException error : errors) {
+                        verificationResult.addError(error.getMessage());
+                    }
+
+                    return verificationResult;
                 }
-
-                return verificationResult;
             }
         }
 
         verificationResult.setValid(true);
 
         return verificationResult;
+    }
+
+    public boolean isSelfSigned(X509Certificate certificate) {
+        return certificate.getIssuerDN().equals(certificate.getSubjectDN());
     }
 }

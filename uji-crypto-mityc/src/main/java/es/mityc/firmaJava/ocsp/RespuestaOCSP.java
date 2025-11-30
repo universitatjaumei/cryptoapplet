@@ -187,12 +187,12 @@ public class RespuestaOCSP
 
 
 	public void setResponder(ResponderID responder) {
-        ASN1TaggedObject tagged = (ASN1TaggedObject)responder.toASN1Object();
+        ASN1TaggedObject tagged = (ASN1TaggedObject)responder.toASN1Primitive();
 		switch (tagged.getTagNo()) {
 			case 1:
 				valorResponder = X509Name.getInstance(tagged.getObject()).toString();
 				X509Principal certX509Principal = new X509Principal(valorResponder);
-				X500Principal cerX500Principal = new X500Principal(certX509Principal.getDEREncoded());
+				X500Principal cerX500Principal = new X500Principal(certX509Principal.getEncoded());
 				valorResponder = cerX500Principal.getName();
 				tipoResponder = TIPOS_RESPONDER.BY_NAME;
 				break;

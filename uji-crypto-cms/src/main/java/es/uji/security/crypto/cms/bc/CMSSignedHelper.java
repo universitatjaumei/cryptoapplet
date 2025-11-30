@@ -1,11 +1,11 @@
 package es.uji.security.crypto.cms.bc;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.asn1.nist.NISTObjectIdentifiers;
@@ -47,7 +47,7 @@ class CMSSignedHelper
     private static final Map     digestAlgs = new HashMap();
     private static final Map     digestAliases = new HashMap();
 
-    private static void addEntries(DERObjectIdentifier alias, String digest, String encryption)
+    private static void addEntries(ASN1ObjectIdentifier alias, String digest, String encryption)
     {
         digestAlgs.put(alias.getId(), digest);
         encryptionAlgs.put(alias.getId(), encryption);
@@ -244,7 +244,7 @@ class CMSSignedHelper
             {
                 try
                 {
-                    DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                    ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                     if (obj instanceof ASN1TaggedObject)
                     {
@@ -389,7 +389,7 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                 if (obj instanceof ASN1Sequence)
                 {
@@ -436,7 +436,7 @@ class CMSSignedHelper
         {
             try
             {
-                DERObject obj = ((DEREncodable)e.nextElement()).getDERObject();
+                ASN1Primitive obj = ((ASN1Encodable)e.nextElement()).toASN1Primitive();
 
                 crls.add(cf.generateCRL(
                     new ByteArrayInputStream(obj.getEncoded())));

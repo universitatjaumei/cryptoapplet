@@ -69,20 +69,20 @@ public class TSPAlgoritmos implements ConstantesTSA{
 	public static String getOID(String algoritmo) {
 
 		Set permitidos = new HashSet(Arrays.asList(getValoresPermitidos()));
-		
+
 		if (permitidos.contains(algoritmo)) {
 			if (SHA1.equals(algoritmo))
-				return TSPAlgorithms.SHA1;
+				return TSPAlgorithms.SHA1.getId();
 			else if (SHA2.equals(algoritmo))
-				return TSPAlgorithms.SHA256;
+				return TSPAlgorithms.SHA256.getId();
 			else if (SHA224.equals(algoritmo))
-				return TSPAlgorithms.SHA224;
+				return TSPAlgorithms.SHA224.getId();
 			else if (SHA256.equals(algoritmo))
-				return TSPAlgorithms.SHA256;
+				return TSPAlgorithms.SHA256.getId();
 			else if (SHA384.equals(algoritmo))
-				return TSPAlgorithms.SHA384;
+				return TSPAlgorithms.SHA384.getId();
 			else if (SHA512.equals(algoritmo))
-				return TSPAlgorithms.SHA512;
+				return TSPAlgorithms.SHA512.getId();
 		}
 		return null;
 	}
@@ -90,14 +90,14 @@ public class TSPAlgoritmos implements ConstantesTSA{
 	public static HashMap<String, String> algoritmosVSoids = null;
 	static {
 		algoritmosVSoids = new HashMap<String, String>();
-		
-		algoritmosVSoids.put(TSPAlgorithms.SHA1, SHA1); // SHA-1
-		algoritmosVSoids.put(TSPAlgorithms.SHA224,SHA224);
-		algoritmosVSoids.put(TSPAlgorithms.SHA256,SHA256); // SHA-256
-		algoritmosVSoids.put(TSPAlgorithms.SHA384,SHA384);
-		algoritmosVSoids.put(TSPAlgorithms.SHA512,SHA512);
-		algoritmosVSoids.put(TSPAlgorithms.MD5,MD5); //md5
-		
+
+		algoritmosVSoids.put(TSPAlgorithms.SHA1.getId(), SHA1); // SHA-1
+		algoritmosVSoids.put(TSPAlgorithms.SHA224.getId(),SHA224);
+		algoritmosVSoids.put(TSPAlgorithms.SHA256.getId(),SHA256); // SHA-256
+		algoritmosVSoids.put(TSPAlgorithms.SHA384.getId(),SHA384);
+		algoritmosVSoids.put(TSPAlgorithms.SHA512.getId(),SHA512);
+		algoritmosVSoids.put(TSPAlgorithms.MD5.getId(),MD5); //md5
+
 	}
 	
 	/**

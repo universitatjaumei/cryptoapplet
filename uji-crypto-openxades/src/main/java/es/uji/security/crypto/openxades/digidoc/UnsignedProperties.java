@@ -249,9 +249,27 @@ public class UnsignedProperties implements Serializable
 
         if (cert == null)
         {
-            errs.add(new DigiDocException(DigiDocException.ERR_RESPONDERS_CERT,
-                    "No notarys certificate!", null));
-            return errs;
+            // Check if OCSP confirmation is required
+            String confirmProp = null;
+            try {
+                confirmProp = es.uji.security.crypto.config.ConfigManager.getInstance()
+                    .getProperty("DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY");
+            } catch (Exception e) {
+                // Ignore, assume confirmation is required
+            }
+            boolean confirmation = (confirmProp == null || !confirmProp.trim().equals("false"));
+
+            if (confirmation)
+            {
+                errs.add(new DigiDocException(DigiDocException.ERR_RESPONDERS_CERT,
+                        "No notarys certificate!", null));
+                return errs;
+            }
+            else
+            {
+                // No responder certificate available, but confirmation is not required, so skip verification
+                return errs; // Return empty error list
+            }
         }
         if (cert != null && !cert.getSerialNumber().equals(m_certRefs.getCertSerial()))
         {

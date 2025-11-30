@@ -721,7 +721,7 @@ public class Signature implements Serializable
         CertValue cval = new CertValue();
         cval.setType(CertValue.CERTVAL_TYPE_RESPONDER);
         cval.setCert(rcert);
-        cval.setId(m_id + "-RESPONDER_CERT");
+            cval.setId(m_id + "-RESPONDER_CERT");
         addCertValue(cval);
         CertID cid = new CertID(this, rcert, CertID.CERTID_TYPE_RESPONDER);
         addCertID(cid);

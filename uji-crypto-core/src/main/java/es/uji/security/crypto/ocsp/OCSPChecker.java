@@ -18,19 +18,16 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 import org.bouncycastle.asn1.ocsp.OCSPResponse;
+import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.ocsp.*;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.BasicOCSPResp;
-import org.bouncycastle.ocsp.CertificateID;
-import org.bouncycastle.ocsp.OCSPException;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPReqGenerator;
-import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.OCSPRespStatus;
-import org.bouncycastle.ocsp.RevokedStatus;
-import org.bouncycastle.ocsp.SingleResp;
-import org.bouncycastle.ocsp.UnknownStatus;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import sun.misc.BASE64Encoder;
 import sun.security.x509.AccessDescription;
@@ -42,6 +39,8 @@ import es.uji.security.crypto.OCSPResponseDetails;
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.config.OS;
 import es.uji.security.util.Base64;
+
+import static org.bouncycastle.cert.ocsp.CertificateID.HASH_SHA1;
 
 public class OCSPChecker
 {
@@ -66,9 +65,27 @@ public class OCSPChecker
 
         try
         {
-            certificateID = new CertificateID(CertificateID.HASH_SHA1, caCertificate, certificate.getSerialNumber());
+            DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder()
+                .setProvider(provider)
+                .build()
+                .get(HASH_SHA1);
+
+            X509CertificateHolder certHolder = new X509CertificateHolder(caCertificate.getEncoded());
+            certificateID = new CertificateID(digestCalculator, certHolder, certificate.getSerialNumber());
         }
         catch (OCSPException e)
+        {
+            throw new CryptoCoreOCSPException("Can not generate a valid certificate ID. CA certificate encoding is not valid", e);
+		}
+        catch (OperatorCreationException e)
+        {
+            throw new CryptoCoreOCSPException("Can not generate a valid certificate ID. CA certificate encoding is not valid", e);
+		}
+        catch (IOException e)
+        {
+            throw new CryptoCoreOCSPException("Can not generate a valid certificate ID. CA certificate encoding is not valid", e);
+		}
+        catch (CertificateEncodingException e)
         {
             throw new CryptoCoreOCSPException("Can not generate a valid certificate ID. CA certificate encoding is not valid", e);
 		}
@@ -81,13 +98,13 @@ public class OCSPChecker
     {
         try
         {
-	        OCSPReqGenerator ocspRequest = new OCSPReqGenerator();
+	        OCSPReqBuilder ocspRequest = new OCSPReqBuilder();
 	        ocspRequest.addRequest(certificateID);
 	
 	        GeneralName name = new GeneralName(PrincipalUtil.getSubjectX509Principal(certificate));
 	        ocspRequest.setRequestorName(name);
 	
-	        OCSPReq req = ocspRequest.generate();
+	        OCSPReq req = ocspRequest.build();
 	
 	        return sendOCSPRequest(req, ocspURL);
         }
@@ -163,11 +180,12 @@ public class OCSPChecker
 
             byte[] resp64 = OS.inputStreamToByteArray(con.getInputStream());
             byte[] bresp = Base64.decode(resp64);
-            
-            if (bresp.length==0)
-            	ocspResp = new OCSPResp(new OCSPResponse(null));
-            else
+
+            if (bresp.length > 0)
+            {
             	ocspResp = new OCSPResp(bresp);
+            }
+            // Si bresp está vacío, ocspResp permanece null
         }
         catch (CertificateEncodingException cee)
         {
@@ -302,25 +320,25 @@ public class OCSPChecker
         }
 
 
-        if (resp.getStatus() != OCSPRespStatus.SUCCESSFUL)
+        if (resp.getStatus() != OCSPResponseStatus.SUCCESSFUL)
         {
             responseDetails.setValid(false);
 
             switch (resp.getStatus())
             {
-            case OCSPRespStatus.INTERNAL_ERROR:
+            case OCSPResponseStatus.INTERNAL_ERROR:
                 responseDetails.addError("An internal error occured in the OCSP Server");
                 break;
-            case OCSPRespStatus.MALFORMED_REQUEST:
+            case OCSPResponseStatus.MALFORMED_REQUEST:
                 responseDetails.addError("Your request did not fit the RFC 2560 syntax");
                 break;
-            case OCSPRespStatus.SIGREQUIRED:
+            case OCSPResponseStatus.SIG_REQUIRED:
                 responseDetails.addError("Your request was not signed");
                 break;
-            case OCSPRespStatus.TRY_LATER:
+            case OCSPResponseStatus.TRY_LATER:
                 responseDetails.addError("The server was too busy to answer you");
                 break;
-            case OCSPRespStatus.UNAUTHORIZED:
+            case OCSPResponseStatus.UNAUTHORIZED:
                 responseDetails.addError("The server could not authenticate you");
                 break;
             default:
@@ -346,18 +364,20 @@ public class OCSPChecker
 
         try
         {
-            if (!basicOCSPResp.verify(ocspCertificate.getPublicKey(), provider.getName()))
+            if (!basicOCSPResp.isSignatureValid(new JcaContentVerifierProviderBuilder()
+                    .setProvider(provider)
+                    .build(ocspCertificate)))
             {
                 responseDetails.setValid(false);
                 responseDetails.addError("OCSP Signature verification error");
-                
+
                 return responseDetails;
             }
         }
-        catch (NoSuchProviderException nspe)
+        catch (OperatorCreationException oce)
         {
             responseDetails.setValid(false);
-            responseDetails.addError("OCSP response verification error. Provider not available");
+            responseDetails.addError("OCSP response verification error. Cannot create verifier");
             return responseDetails;
         }
         catch (OCSPException oe)
@@ -367,7 +387,7 @@ public class OCSPChecker
             return responseDetails;
         }
 
-        SingleResp[] sresp = basicOCSPResp.getResponseData().getResponses();
+        SingleResp[] sresp = basicOCSPResp.getResponses();
 
         boolean validationOk = false;
         for (int i = 0; i < sresp.length; i++)

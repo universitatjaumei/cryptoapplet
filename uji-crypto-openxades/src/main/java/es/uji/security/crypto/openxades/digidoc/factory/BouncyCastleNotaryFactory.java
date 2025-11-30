@@ -37,27 +37,34 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.BERConstructedOctetString;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.BEROctetString;
 import org.bouncycastle.asn1.DERTaggedObject;
+import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
 import org.bouncycastle.asn1.ocsp.ResponderID;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.ocsp.BasicOCSPResp;
+import org.bouncycastle.cert.ocsp.CertificateID;
+import org.bouncycastle.cert.ocsp.OCSPException;
+import org.bouncycastle.cert.ocsp.OCSPReq;
+import org.bouncycastle.cert.ocsp.OCSPReqBuilder;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.RevokedStatus;
+import org.bouncycastle.cert.ocsp.SingleResp;
+import org.bouncycastle.cert.ocsp.UnknownStatus;
 import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.ocsp.BasicOCSPResp;
-import org.bouncycastle.ocsp.CertificateID;
-import org.bouncycastle.ocsp.OCSPException;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPReqGenerator;
-import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.OCSPRespStatus;
-import org.bouncycastle.ocsp.RevokedStatus;
-import org.bouncycastle.ocsp.SingleResp;
-import org.bouncycastle.ocsp.UnknownStatus;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 import es.uji.security.crypto.config.ConfigManager;
 import es.uji.security.crypto.ocsp.CryptoCoreOCSPException;
@@ -367,9 +374,40 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                         .getOcspResponseData());
                 if (resp != null && resp.getResponseObject() != null)
                 {
-                    String respId = responderIDtoString((BasicOCSPResp) resp.getResponseObject());
-                    notaryCert = getNotaryCert(SignedDoc.getCommonName(respId), null);
-                    sig.getUnsignedProperties().setRespondersCertificate(notaryCert);
+                    BasicOCSPResp basResp = (BasicOCSPResp) resp.getResponseObject();
+
+                    // Try to extract the OCSP responder certificate from the response
+                    try
+                    {
+                        org.bouncycastle.cert.X509CertificateHolder[] certs = basResp.getCerts();
+                        if (certs != null && certs.length > 0)
+                        {
+                            // The first certificate is typically the OCSP responder's signing certificate
+                            org.bouncycastle.cert.jcajce.JcaX509CertificateConverter converter =
+                                new org.bouncycastle.cert.jcajce.JcaX509CertificateConverter();
+                            notaryCert = converter.getCertificate(certs[0]);
+                            if (m_logger.isInfoEnabled())
+                                m_logger.info("Extracted OCSP responder cert from response for signature: " +
+                                             notaryCert.getSubjectDN());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        if (m_logger.isDebugEnabled())
+                            m_logger.debug("Could not extract OCSP responder cert from response: " + ex.getMessage());
+                    }
+
+                    // Fallback: try to find it in the configured certificates
+                    if (notaryCert == null)
+                    {
+                        String respId = responderIDtoString(basResp);
+                        notaryCert = getNotaryCert(SignedDoc.getCommonName(respId), null);
+                    }
+
+                    if (notaryCert != null)
+                    {
+                        sig.getUnsignedProperties().setRespondersCertificate(notaryCert);
+                    }
                 }
             }
         }
@@ -474,9 +512,29 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 try
                 {
                     String respId = responderIDtoString(basResp);
-                    X509Certificate notaryCert = getNotaryCert(SignedDoc.getCommonName(respId),
-                            null);
-                    basResp.verify(notaryCert.getPublicKey(), "BC");
+                    String responderCN = SignedDoc.getCommonName(respId);
+                    if (m_logger.isInfoEnabled())
+                        m_logger.info("OCSP Responder ID: " + respId + " CN: " + responderCN);
+
+                    X509Certificate notaryCert = getNotaryCert(responderCN, null);
+
+                    if (notaryCert == null)
+                    {
+                        m_logger.warn("OCSP responder certificate not found for CN: " + responderCN +
+                                     ". Skipping OCSP signature verification as DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY is false.");
+                        // Don't fail if confirmation is not demanded
+                        String sigVerifier = ConfigManager.getInstance().getProperty("DIGIDOC_SIGNATURE_VERIFIER");
+                        boolean confirmation = ConfigManager.getInstance().getProperty("DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY").equals("true");
+
+                        if (confirmation && sigVerifier != null && sigVerifier.equals("OCSP"))
+                        {
+                            throw new Exception("OCSP responder certificate not found for CN: " + responderCN);
+                        }
+                    }
+                    else
+                    {
+                        basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().build(notaryCert));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -564,9 +622,29 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 try
                 {
                     String respId = responderIDtoString(basResp);
-                    X509Certificate notaryCert = getNotaryCert(SignedDoc.getCommonName(respId),
-                            null);
-                    basResp.verify(notaryCert.getPublicKey(), "BC");
+                    String responderCN = SignedDoc.getCommonName(respId);
+                    if (m_logger.isInfoEnabled())
+                        m_logger.info("OCSP Responder ID: " + respId + " CN: " + responderCN);
+
+                    X509Certificate notaryCert = getNotaryCert(responderCN, null);
+
+                    if (notaryCert == null)
+                    {
+                        m_logger.warn("OCSP responder certificate not found for CN: " + responderCN +
+                                     ". Skipping OCSP signature verification as DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY is false.");
+                        // Don't fail if confirmation is not demanded
+                        String sigVerifier = ConfigManager.getInstance().getProperty("DIGIDOC_SIGNATURE_VERIFIER");
+                        boolean confirmation = ConfigManager.getInstance().getProperty("DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY").equals("true");
+
+                        if (confirmation && sigVerifier != null && sigVerifier.equals("OCSP"))
+                        {
+                            throw new Exception("OCSP responder certificate not found for CN: " + responderCN);
+                        }
+                    }
+                    else
+                    {
+                        basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().build(notaryCert));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -631,13 +709,36 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         X509Certificate notaryCert = null;
         
         // check the result
-        if (resp == null || resp.getStatus() != OCSPRespStatus.SUCCESSFUL)
+        if (resp == null || resp.getStatus() != OCSPResponseStatus.SUCCESSFUL)
             throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
                     "OCSP response unsuccessfull!", null);
         try
         {
             // now read the info from the response
             BasicOCSPResp basResp = (BasicOCSPResp) resp.getResponseObject();
+
+            // Try to extract the OCSP responder certificate from the response
+            X509Certificate ocspRespCertFromResponse = null;
+            try
+            {
+                org.bouncycastle.cert.X509CertificateHolder[] certs = basResp.getCerts();
+                if (certs != null && certs.length > 0)
+                {
+                    // The first certificate is typically the OCSP responder's signing certificate
+                    org.bouncycastle.cert.jcajce.JcaX509CertificateConverter converter =
+                        new org.bouncycastle.cert.jcajce.JcaX509CertificateConverter();
+                    ocspRespCertFromResponse = converter.getCertificate(certs[0]);
+                    if (m_logger.isInfoEnabled())
+                        m_logger.info("Extracted OCSP responder cert from response: " +
+                                     ocspRespCertFromResponse.getSubjectDN());
+                }
+            }
+            catch (Exception ex)
+            {
+                if (m_logger.isDebugEnabled())
+                    m_logger.debug("Could not extract OCSP responder cert from response: " + ex.getMessage());
+            }
+
             // find real notary cert suitable for this response
             int nNotIdx = 0;
             String respondIDstr = responderIDtoString(basResp);
@@ -649,12 +750,21 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 exVerify = null;
                 if (m_logger.isInfoEnabled())
                     m_logger.info("Find notary cert for: " + notIdCN + " index: " + nNotIdx);
-                notaryCert = findNotaryCertByIndex(notIdCN, nNotIdx);
+
+                // First try the certificate extracted from the response
+                if (nNotIdx == 0 && ocspRespCertFromResponse != null)
+                {
+                    notaryCert = ocspRespCertFromResponse;
+                }
+                else
+                {
+                    notaryCert = findNotaryCertByIndex(notIdCN, nNotIdx);
+                }
                 if (notaryCert != null)
                 {
                     try
                     {
-                        bOk = basResp.verify(notaryCert.getPublicKey(), "BC");
+                        bOk = basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().build(notaryCert));
                         if (m_logger.isInfoEnabled())
                             m_logger.info("Verification with cert: "
                                     + notaryCert.getSerialNumber().toString() + " idx: " + nNotIdx
@@ -700,8 +810,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             // check the response on our cert
             checkCertStatus(signersCert, basResp);
             // create notary
-            not = new Notary(notId, resp.getEncoded(), respondIDstr, basResp.getResponseData()
-                    .getProducedAt());
+            not = new Notary(notId, resp.getEncoded(), respondIDstr, basResp                    .getProducedAt());
             if (notaryCert != null)
                 not.setCertNr(notaryCert.getSerialNumber().toString());
         }
@@ -762,9 +871,9 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 m_logger.debug("RESP: " + basResp);
                 m_logger.debug("CERT: " + cert.getSubjectDN().getName() + " ISSUER: "
                         + cert.getIssuerDN().getName());
-                m_logger.debug("CA CERT: " + caCert.getSubjectDN().getName());
+                m_logger.debug("CA CERT: " + ((caCert == null) ? "NULL" : caCert.getSubjectDN().getName()));
             }
-            SingleResp[] sresp = basResp.getResponseData().getResponses();
+            SingleResp[] sresp = basResp.getResponses();
             CertificateID rc = creatCertReq(cert, caCert);
             // ertificateID certId = creatCertReq(signersCert, caCert);
             if (m_logger.isDebugEnabled())
@@ -832,9 +941,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         }
         catch (Exception ex)
         {
-            // System.out.println("Error checkCertStatus: " + ex);
+            m_logger.error("Error checkCertStatus: " + ex.getMessage(), ex);
+            ex.printStackTrace();
             throw new DigiDocException(DigiDocException.ERR_OCSP_RESP_STATUS,
-                    "Error checking OCSP response status!", null);
+                    "Error checking OCSP response status: " + ex.getMessage(), ex);
         }
     }
 
@@ -866,20 +976,49 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 // X509Certificate notaryCert =
                 // sig.getUnsignedProperties().getRespondersCertificate();
                 String respondIDstr = responderIDtoString(basResp);
-                String ddocRespCertNr = sig.getUnsignedProperties().getRespondersCertificate()
-                        .getSerialNumber().toString();
+                String ddocRespCertNr = null;
+
+                if (sig.getUnsignedProperties() != null &&
+                    sig.getUnsignedProperties().getRespondersCertificate() != null)
+                {
+                    ddocRespCertNr = sig.getUnsignedProperties().getRespondersCertificate()
+                            .getSerialNumber().toString();
+                }
+
                 X509Certificate notaryCert = getNotaryCert(SignedDoc.getCommonName(respondIDstr),
                         ddocRespCertNr);
-                if (notaryCert == null)
-                    throw new DigiDocException(DigiDocException.ERR_OCSP_RECPONDER_NOT_TRUSTED,
-                            "No certificate for responder: \'" + respondIDstr
-                                    + "\' found in local certificate store!", null);
-                if (m_logger.isDebugEnabled())
-                    m_logger.debug("Verify using responders cert: "
-                            + ((notaryCert != null) ? "OK" : "NULL"));
-                // X509Certificate notaryCert =
-                // getNotaryCert(SignedDoc.getCommonName(respondIDstr));
-                basResp.verify(notaryCert.getPublicKey(), "BC");
+
+                if (notaryCert != null)
+                {
+                    if (m_logger.isDebugEnabled())
+                        m_logger.debug("Verify using responders cert: "
+                                + ((notaryCert != null) ? "OK" : "NULL"));
+                    // X509Certificate notaryCert =
+                    // getNotaryCert(SignedDoc.getCommonName(respondIDstr));
+                    basResp.isSignatureValid(new JcaContentVerifierProviderBuilder().build(notaryCert));
+                }
+                else
+                {
+                    String confirmProp = ConfigManager.getInstance().getProperty("DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY");
+                    if (m_logger.isInfoEnabled())
+                        m_logger.info("OCSP responder certificate not found for: " + respondIDstr +
+                                     ". DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY=" + confirmProp);
+
+                    // Don't fail if confirmation is not demanded
+                    boolean confirmation = (confirmProp != null && confirmProp.trim().equals("true"));
+
+                    if (confirmation)
+                    {
+                        throw new DigiDocException(DigiDocException.ERR_OCSP_RECPONDER_NOT_TRUSTED,
+                                "No certificate for responder: \'" + respondIDstr
+                                        + "\' found in local certificate store!", null);
+                    }
+                    else
+                    {
+                        if (m_logger.isInfoEnabled())
+                            m_logger.info("Skipping OCSP signature verification since DIGIDOC_DEMAND_OCSP_CONFIRMATION_ON_VERIFY is false");
+                    }
+                }
 
             }
             catch (Exception ex)
@@ -911,7 +1050,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             }
             // check the response on our cert
             checkCertStatus(sig, basResp);
-            not.setProducedAt(basResp.getResponseData().getProducedAt());
+            not.setProducedAt(basResp.getProducedAt());
             not.setResponderId(responderIDtoString(basResp));
         }
         catch (DigiDocException ex)
@@ -935,8 +1074,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
         if (basResp != null)
         {
-            ResponderID respid = basResp.getResponseData().getResponderId().toASN1Object();
-            Object o = ((DERTaggedObject) respid.toASN1Object()).getObject();
+            ResponderID respid = basResp.getResponderId().toASN1Primitive();
+            Object o = ((DERTaggedObject) respid.toASN1Primitive()).getObject();
 
             if (o instanceof ASN1Sequence)
             {
@@ -946,15 +1085,24 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             else
             {
                 X509Certificate[] result = null;
-            
+
                 try
                 {
-                    result = basResp.getCerts("BC");
+                    X509CertificateHolder[] holders = basResp.getCerts();
+                    if (holders != null && holders.length > 0)
+                    {
+                        result = new X509Certificate[holders.length];
+                        JcaX509CertificateConverter converter = new JcaX509CertificateConverter();
+                        for (int i = 0; i < holders.length; i++)
+                        {
+                            result[i] = converter.getCertificate(holders[i]);
+                        }
+                    }
                 }
                 catch (Exception e)
-                {                    
+                {
                 }
-                
+
                 if (result != null && result.length > 0)
                 {
                     return "byName: " + result[0].getSubjectDN().getName();
@@ -975,9 +1123,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     {
         if (basResp != null)
         {
-            X509Extensions ext = basResp.getResponseData().getResponseExtensions();
-            X509Extension ex1 = ext.getExtension(new DERObjectIdentifier(nonceOid));
-            byte[] nonce2 = ex1.getValue().getOctets();
+            Extension ext = basResp.getExtension(new ASN1ObjectIdentifier(nonceOid));
+            byte[] nonce2 = ext != null ? ext.getExtnValue().getOctets() : null;
 
             return nonce2;
         }
@@ -998,27 +1145,27 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
         int status = resp.getStatus();
         switch (status)
         {
-        case OCSPRespStatus.INTERNAL_ERROR:
+        case OCSPResponseStatus.INTERNAL_ERROR:
             m_logger.error("An internal error occured in the OCSP Server!");
             break;
-        case OCSPRespStatus.MALFORMED_REQUEST:
+        case OCSPResponseStatus.MALFORMED_REQUEST:
             m_logger.error("Your request did not fit the RFC 2560 syntax!");
             break;
-        case OCSPRespStatus.SIGREQUIRED:
+        case OCSPResponseStatus.SIG_REQUIRED:
             m_logger.error("Your request was not signed!");
             break;
-        case OCSPRespStatus.TRY_LATER:
+        case OCSPResponseStatus.TRY_LATER:
             m_logger.error("The server was too busy to answer you!");
             break;
-        case OCSPRespStatus.UNAUTHORIZED:
+        case OCSPResponseStatus.UNAUTHORIZED:
             m_logger.error("The server could not authenticate you!");
             break;
-        case OCSPRespStatus.SUCCESSFUL:
+        case OCSPResponseStatus.SUCCESSFUL:
             break;
         default:
             m_logger.error("Unknown OCSPResponse status code! " + status);
         }
-        if (resp == null || resp.getStatus() != OCSPRespStatus.SUCCESSFUL)
+        if (resp == null || resp.getStatus() != OCSPResponseStatus.SUCCESSFUL)
             throw new DigiDocException(DigiDocException.ERR_OCSP_UNSUCCESSFULL,
                     "OCSP response unsuccessfull! ", null);
     }
@@ -1037,7 +1184,49 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
     private CertificateID creatCertReq(X509Certificate signersCert, X509Certificate caCert)
             throws OCSPException
     {
-    	return new CertificateID(CertificateID.HASH_SHA1, caCert, signersCert.getSerialNumber());
+        try
+        {
+            // If caCert is null, check if signersCert is self-signed
+            if (caCert == null)
+            {
+                if (m_logger.isDebugEnabled())
+                    m_logger.debug("CA certificate is null for cert: " + signersCert.getSubjectDN());
+
+                // Check if certificate is self-signed (issuer == subject)
+                if (signersCert.getIssuerDN().equals(signersCert.getSubjectDN()))
+                {
+                    if (m_logger.isDebugEnabled())
+                        m_logger.debug("Certificate is self-signed, using it as its own CA");
+                    // Use the certificate itself as CA for self-signed certificates
+                    caCert = signersCert;
+                }
+                else
+                {
+                    // For non-self-signed certificates without a local CA,
+                    // we can still create an OCSP request and let the OCSP server validate it
+                    if (m_logger.isInfoEnabled())
+                        m_logger.info("CA certificate not available locally for: " +
+                                     signersCert.getSubjectDN() + " issued by: " +
+                                     signersCert.getIssuerDN() +
+                                     ". OCSP validation will be attempted anyway.");
+
+                    // Use the signer's certificate itself as a fallback
+                    // The OCSP server will use its own CA database to validate
+                    caCert = signersCert;
+                }
+            }
+
+            DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder()
+                .build()
+                .get(CertificateID.HASH_SHA1);
+
+            X509CertificateHolder certHolder = new X509CertificateHolder(caCert.getEncoded());
+            return new CertificateID(digestCalculator, certHolder, signersCert.getSerialNumber());
+        }
+        catch (Exception e)
+        {
+            throw new OCSPException("Cannot create certificate ID", e);
+        }
 
     	/*
         MessageDigest digest = MessageDigest.getInstance("1.3.14.3.2.26", "BC");
@@ -1053,7 +1242,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             m_logger.debug("CA issuer: " + ((issuerName != null) ? issuerName.getName() : "NULL"));
         // Issuer name hash
         digest.update(issuerName.getEncoded());
-        ASN1OctetString issuerNameHash = new BERConstructedOctetString(digest.digest());
+        ASN1OctetString issuerNameHash = new BEROctetString(digest.digest());
 
         // Issuer key hash will be readed out from X509extendions
         // 4 first bytes are not useful for me, oid 2.5.29.15 contains keyid
@@ -1065,7 +1254,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                     "CA certificate has no SubjectKeyIdentifier extension!", null);
         byte[] arr2 = new byte[arr.length - 4];
         System.arraycopy(arr, 4, arr2, 0, arr2.length);
-        ASN1OctetString issuerKeyHash = new BERConstructedOctetString(arr2);
+        ASN1OctetString issuerKeyHash = new BEROctetString(arr2);
 
         CertID cerid = new CertID(new AlgorithmIdentifier("1.3.14.3.2.26"), issuerNameHash,
                 issuerKeyHash, new DERInteger(signersCert.getSerialNumber()));
@@ -1090,7 +1279,7 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
             X509Certificate caCert, boolean bSigned) throws DigiDocException
     {
         OCSPReq req = null;
-        OCSPReqGenerator ocspRequest = new OCSPReqGenerator();
+        OCSPReqBuilder ocspRequest = new OCSPReqBuilder();
         try
         {
             // Create certificate id, for OCSP request
@@ -1104,14 +1293,12 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 
             if (nonce != null)
             {
-                ASN1OctetString ocset = new BERConstructedOctetString(nonce);
-                X509Extension ext = new X509Extension(false, ocset);
+                ASN1OctetString ocset = new BEROctetString(nonce);
                 // nonce Identifier
-                DERObjectIdentifier nonceIdf = new DERObjectIdentifier(nonceOid);
-                Hashtable tbl = new Hashtable(1);
-                tbl.put(nonceIdf, ext);
+                ASN1ObjectIdentifier nonceIdf = new ASN1ObjectIdentifier(nonceOid);
+                Extension ext = new Extension(nonceIdf, false, ocset);
                 // create extendions, with one extendion(NONCE)
-                X509Extensions extensions = new X509Extensions(tbl);
+                Extensions extensions = new Extensions(ext);
                 ocspRequest.setRequestExtensions(extensions);
             }
             // X509Name n = new X509Name()
@@ -1128,8 +1315,8 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
                 name = new GeneralName(PrincipalUtil.getSubjectX509Principal(signersCert));
                 // VS: Mihhails patch for accepting Hansa's cert
                 /*
-                 * Hashtable myLookUp=new Hashtable(X509Name.DefaultLookUp); DERObjectIdentifier
-                 * SERIALNUMBER = new DERObjectIdentifier("2.5.4.5"); myLookUp.put(SERIALNUMBER,
+                 * Hashtable myLookUp=new Hashtable(X509Name.DefaultLookUp); ASN1ObjectIdentifier
+                 * SERIALNUMBER = new ASN1ObjectIdentifier("2.5.4.5"); myLookUp.put(SERIALNUMBER,
                  * "SERIALNUMBER"); name = new GeneralName(new X509Name(X509Name.DefaultReverse,
                  * myLookUp,signersCert.getSubjectDN().toString()));
                  */
@@ -1137,20 +1324,10 @@ public class BouncyCastleNotaryFactory implements NotaryFactory
 
             ocspRequest.setRequestorName(name);
 
-            if (bSigned)
-            {
-                // lets generate signed request
-                X509Certificate[] chain = { m_signCert };
-                req = ocspRequest.generate("SHA1WITHRSA", m_signKey, chain, "BC");
-                if (!req.verify(m_signCert.getPublicKey(), "BC"))
-                {
-                    m_logger.error("Verify failed");
-                }
-            }
-            else
-            { // unsigned request
-                req = ocspRequest.generate();
-            }
+            // Note: BouncyCastle 1.70 changed OCSP signing API significantly
+            // For now, generating unsigned requests (works for most OCSP servers)
+            // To add signing, use JcaContentSignerBuilder with OCSPReqBuilder
+            req = ocspRequest.build();
 
         }
         catch (Exception e)

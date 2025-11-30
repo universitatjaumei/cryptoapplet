@@ -65,7 +65,7 @@ import org.apache.xml.security.keys.keyresolver.KeyResolverException;
 import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.signature.XMLSignatureException;
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.ResponderID;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -2254,12 +2254,12 @@ public class ValidarFirmaXML implements ConstantesXADES
 						// Si existe el nodo number (opcional), se saca el número de CRL contenido en la URI
 						if (numeroNodo != null) {
 							BigInteger numeroRecuperado = null;
-							DERInteger derInt = null;
+							ASN1Integer derInt = null;
 							// AppPerfect: Falso positivo
 							ASN1InputStream ais = new ASN1InputStream(x509CRL.getExtensionValue(CRL_NUMBER_OID));
 							try {
 								ais = new ASN1InputStream(((DEROctetString)ais.readObject()).getOctets());
-								derInt = (DERInteger)ais.readObject();
+								derInt = ASN1Integer.getInstance(ais.readObject());
 							} catch (IOException e) {
 								esValido = false;
 								resultado.setLog(I18n.getResource(LIBRERIAXADES_VALIDARFIRMA_ERROR47));
