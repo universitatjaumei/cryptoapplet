@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import es.uji.security.crypto.SupportedBrowser;
 import es.uji.security.crypto.SupportedKeystore;
 import es.uji.security.crypto.config.Device;
-import es.uji.security.keystore.clauer.ClauerKeyStore;
 import es.uji.security.keystore.mozilla.Mozilla;
 import es.uji.security.keystore.mscapi.MSCAPIProvider;
 import es.uji.security.keystore.mscapi.MsCapiKeyStore;
@@ -125,42 +124,11 @@ public class KeyStoreManager
         }
     }
     
-    public void initClauer()
-    {
-        try
-        {
-            IKeyStore p11clauerks = (IKeyStore) new ClauerKeyStore();
-            
-            try
-            {
-                p11clauerks.load(null);
-                keystores.put(SupportedKeystore.CLAUER, p11clauerks);
-            }
-            catch (KeyStoreException kex)
-            {
-                // Here do nothing because that mean
-                // that there is no clauer plugged on
-                // the system.
-            }
-            catch (ConnectException cex)
-            {
-                // Nothing to do also, clauer is not
-                // installed,go ahead!
-            }
-        }
-        catch (Exception ex)
-        {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), LabelManager
-                    .get("ERR_CL_KEYSTORE_LOAD"), JOptionPane.WARNING_MESSAGE);
-            // throw new SignatureAppletException(LabelManager.get("ERR_CL_KEYSTORE_LOAD"));
-        }
-    }
-
     /**
      * Returns the IKeyStoreHelper object that represents the store
      * 
      * @param ksName
-     *            posible input values are: explorer,mozilla,clauer
+     *            posible input values are: explorer,mozilla
      * @return the IkeyStoreHelper object
      */
 
@@ -173,7 +141,7 @@ public class KeyStoreManager
      * Returns the IKeyStoreHelper object that represents the store
      * 
      * @param ksName
-     *            posible input values are: explorer,mozilla,clauer
+     *            posible input values are: explorer,mozilla
      * @return the IkeyStoreHelper object
      */
 
