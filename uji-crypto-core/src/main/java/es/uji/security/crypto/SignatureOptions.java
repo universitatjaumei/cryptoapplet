@@ -34,6 +34,8 @@ public class SignatureOptions
 
     private String policyIdentifier;
     private String policyDescription;
+    private String policyHash;
+    private String policyHashAlgorithm;
     private List<String> references;
     private String signerRole;
 
@@ -161,6 +163,34 @@ public class SignatureOptions
     public void setPolicyDescription(String policyDescription)
     {
         this.policyDescription = policyDescription;
+    }
+
+    public String getPolicyHash()
+    {
+        return policyHash;
+    }
+
+    /**
+     * Base64 digest of the signature policy document. When set, signature formats must use it
+     * instead of downloading the policy document from its identifier URL.
+     */
+    public void setPolicyHash(String policyHash)
+    {
+        this.policyHash = policyHash;
+    }
+
+    public String getPolicyHashAlgorithm()
+    {
+        return policyHashAlgorithm;
+    }
+
+    /**
+     * XML-DSig digest algorithm URI used to compute the policy hash
+     * (e.g. http://www.w3.org/2000/09/xmldsig#sha1).
+     */
+    public void setPolicyHashAlgorithm(String policyHashAlgorithm)
+    {
+        this.policyHashAlgorithm = policyHashAlgorithm;
     }
 
     public Map<String, String> getVisibleSignatureTextBindValues()

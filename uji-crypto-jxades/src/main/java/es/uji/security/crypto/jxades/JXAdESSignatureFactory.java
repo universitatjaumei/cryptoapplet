@@ -117,7 +117,21 @@ public class JXAdESSignatureFactory implements ISignFormatProvider
         if (signatureOptions.getPolicyIdentifier() != null)
         {
             spi = new SignaturePolicyIdentifierImpl(false);
-            spi.setIdentifier(signatureOptions.getPolicyIdentifier());
+
+            if (signatureOptions.getPolicyHash() != null)
+            {
+                // Use the provided policy digest. Do not download the policy document.
+                String policyHashAlgorithm = signatureOptions.getPolicyHashAlgorithm();
+
+                spi.setIdentifier(signatureOptions.getPolicyIdentifier(),
+                        signatureOptions.getPolicyHash(),
+                        policyHashAlgorithm != null ? policyHashAlgorithm : DigestMethod.SHA1);
+            }
+            else
+            {
+                spi.setIdentifier(signatureOptions.getPolicyIdentifier());
+            }
+
             spi.setDescription(signatureOptions.getPolicyDescription());
             xades.setSignaturePolicyIdentifier(spi);
         }
