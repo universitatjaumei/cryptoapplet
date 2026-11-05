@@ -33,10 +33,10 @@ public class BaseCryptoAppletTest
 
     public BaseCryptoAppletTest()
     {
-        String keyStoreFile = "/etc/uji/eujier.p12";
-        String keyStoreType = "PKCS12";
-        String keyStorePassword = "axJSyXkY";
-        String keyPassword = "axJSyXkY";
+        String keyStoreFile = "../uji.keystore";
+        String keyStoreType = KeyStore.getDefaultType();
+        String keyStorePassword = "cryptoapplet";
+        String keyPassword = "cryptoapplet";
 
         if (System.getProperty("uji.keystore.file") != null)
         {
